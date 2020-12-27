@@ -6,6 +6,7 @@ Visit our [wiki](https://gitlab.com/spolit/mattack/-/wikis/home), there you can 
 
 * Openmpi (with slurm support)
 * John The Ripper (with MPI support)
+* Hashcat (NOT SUPPORTED YET)
 
 
 ### Installation
@@ -16,4 +17,4 @@ Visit our [wiki](https://gitlab.com/spolit/mattack/-/wikis/home), there you can 
 ```
 
 ### Usage
-Visit our [wiki](https://gitlab.com/spolit/mattack/-/wikis/home), there you can find a full guide of `mattack`.  
+Visit our [wiki](https://gitlab.com/spolit/mattack/-/wikis/home), there you can find a full documentation of `mattack`.  
