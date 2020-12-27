@@ -3,10 +3,10 @@
 
 ### Dependences
 Visit our [wiki](https://gitlab.com/spolit/mattack/-/wikis/home), there you can find guides to install properly `Openmpi` and `Jhon The Ripper`
-```bash
-    * Openmpi (with slurm support)
-    * John The Ripper (with MPI support)
-```
+
+* Openmpi (with slurm support)
+* John The Ripper (with MPI support)
+
 
 ### Installation
 ```bash
