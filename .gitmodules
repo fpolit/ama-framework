@@ -1,0 +1,3 @@
+[submodule "docs/mattack.wiki"]
+	path = docs/mattack.wiki
+	url = git@gitlab.com:spolit/mattack.wiki.git

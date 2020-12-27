@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from setuptools import setup, find_packages
-from mattack.core.version import get_version
+from mattack.version import get_version
 
 VERSION = get_version()
 
@@ -16,10 +16,10 @@ setup(
     long_description_content_type='text/markdown',
     author='glozanoa',
     author_email='glozanoa@uni.pe',
-    url='https://github.com/shpolit/mattack',
+    url='https://gitlab.com/spolit/mattack.git',
     license='unlicensed',
     packages=find_packages(exclude=['ez_setup', 'tests*']),
-    package_data={'mattack': ['templates/*']},
+    #package_data={'mattack': ['templates/*']},
     include_package_data=True,
     entry_points="""
         [console_scripts]
