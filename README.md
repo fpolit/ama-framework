@@ -1,10 +1,12 @@
-## mattack - mask attack
-Here you can find script that integrate `PPACK` and a `pasword cracker` to perform a `mask attack`.
+# mattack
+`mattack` is an integrator of [PPACK](https://gitlab.com/spolit/ppack) and a `pasword cracker`(hashcat or john the ripper) to perform `mask attacks` against an hash.
 
-### Instllation(COMPLETE)
+### Installation
 ```
-    git clone https://github.com/shpolit/mattack.git
+    git clone https://gitlab.com/spolit/mattack.git
+    cd mattack
+    make install
 ```
 
 ### Usage
-PUT HERE MANUAL FOR `mattack`, `hsearch` and `status`.
+Visit our [wiki](https://gitlab.com/spolit/mattack/-/wikis/home), there you can find a full guide of `mattack`.
