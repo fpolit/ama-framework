@@ -1,12 +1,19 @@
 # mattack
 `mattack` is an integrator of [PPACK](https://gitlab.com/spolit/ppack) and a `pasword cracker`(hashcat or john the ripper) to perform `mask attacks` against an hash.
 
-### Installation
+### Dependences
+Visit our [wiki](https://gitlab.com/spolit/mattack/-/wikis/home), there you can find guides to install properly `Openmpi` and `Jhon The Ripper`
+```bash
+    * Openmpi (with slurm support)
+    * John The Ripper (with MPI support)
 ```
+
+### Installation
+```bash
     git clone https://gitlab.com/spolit/mattack.git
     cd mattack
     make install
 ```
 
 ### Usage
-Visit our [wiki](https://gitlab.com/spolit/mattack/-/wikis/home), there you can find a full guide of `mattack`.
+Visit our [wiki](https://gitlab.com/spolit/mattack/-/wikis/home), there you can find a full guide of `mattack`.  
