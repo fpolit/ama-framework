@@ -23,6 +23,9 @@ def main():
     hpc_parser = parser.add_argument_group('HPC Slurm',
                                         'Options to submit a parallel task in slurm')
     
+    hpc_parser.add_argument('-g', '--gpu', type=int, default=0,
+                        help='Number of GPU nodes')
+
     hpc_parser.add_argument('-N', '--nodes', type=int, default=1,
                         help='Number of nodes')
 
@@ -79,6 +82,7 @@ def main():
     mattack = MaskAttack(masksFile, hashType, hashFile)
 
     # parameters to perform a parallel mask attack
+    gpus        = args.gpu
     nodes       = args.nodes
     ntasks      = args.ntasks
     partition   = args.partition
@@ -91,5 +95,5 @@ def main():
     time        = args.time
 
     # performing a parallel mask attack
-    mattack.run(nodes, ntasks, partition, cpusPerTask, memPerCpu,
+    mattack.run(gpus, nodes, ntasks, partition, cpusPerTask, memPerCpu,
                 jobName, output, error, slurmScript, time)
