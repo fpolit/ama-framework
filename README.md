@@ -10,6 +10,12 @@ Visit our [wiki](https://gitlab.com/spolit/mattack/-/wikis/home), there you can 
 
 
 ### Installation
+* From `Pypi`
+```bash
+    python3 -m pip install mattack
+```
+
+* From `gitlab` source code
 ```bash
     git clone https://gitlab.com/spolit/mattack.git
     cd mattack

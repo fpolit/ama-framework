@@ -65,7 +65,7 @@ class MaskAttack:
             while hash := hashes.readline():
                 hash = hash.rsplit()[0]
                 hash = hash.split(":")
-                if(len(hash) > 0):
+                if(len(hash) > 1):
                     hash = hash[1]
                 else:
                     hash = hash[0]
@@ -75,7 +75,7 @@ class MaskAttack:
 
 
     def debug(self, gpus=None, nodes=None, ntasks=None, partition=None, cpusPerTask=1, memPerCpu=None,
-        jobName="mattack", output=None, error=None, slurmScript="mattack.slurm", time=None):
+        jobName="maskattack", output=None, error=None, slurmScript="maskattack.slurm", time=None):
         print(f"""
         masksFile   = {self.masksFile}
         hashType    = {self.hashType}
@@ -94,7 +94,7 @@ class MaskAttack:
         """)
 
     def run(self, gpus=None, nodes=None, ntasks=None, partition=None, cpusPerTask=1, memPerCpu=None,
-        jobName="mattack", output=None, error=None, slurmScript="mattack.slurm", time=None):
+        jobName="maskattack", output=None, error=None, slurmScript="maskattack.slurm", time=None):
         """
             Submit a slurm task
         """
@@ -169,7 +169,7 @@ class MaskAttack:
                     # generating python attack (pscript)
 
                     pscript =   "#!/usr/bin/env python3" +\
-                                "\n\nfrom mattack import MaskAttack" +\
+                                "\n\nfrom mattack.core import MaskAttack" +\
                                 "\nfrom sbash.core import Bash" +\
                                 "\nfrom fineprint.status import print_failure, print_status, print_successful" +\
                                 f"\n\n#Description of submmited mask attack"  +\
@@ -191,17 +191,17 @@ class MaskAttack:
                                 f"\nif __name__=='__main__':" +\
                                 f"\n\twith open('{self.masksFile}', 'r') as masks:" +\
                                 f"\n\t\twhile mask := masks.readline():" +\
-                                f"\n\t\t\tmask = mask.rstrip()[0]" +\
+                                f"\n\t\t\tmask = mask.rstrip()" +\
                                 f"\n\t\t\tif not MaskAttack.status('{self.hashFile}'):"
                     
                     mask = "{mask}"
                     if cpusPerTask>1 and ntasks==1 and nodes==1: #omp work in only 1 node(OpenMP isn't scalable)
                         pscript += f"\n\t\t\t\tprint_status(f'Mask Attack: srun john --mask={mask} --format={self.hashType} {self.hashFile}')"
-                        #pscript += f"\n\t\t\t\t#Bash.exec(f'srun john --mask={mask} --format={self.hashType} {self.hashFile}')"
+                        pscript += f"\n\t\t\t\tBash.exec(f'srun john --mask={mask} --format={self.hashType} {self.hashFile}')"
 
                     if cpusPerTask==1 and ntasks>1 and nodes>=1: #mpi work(parallel scalable task)
                         pscript += f"\n\t\t\t\tprint_status(f'Mask Attack: srun mpirun john --mask={mask} --format={self.hashType} {self.hashFile}')"
-                        #pscript += f"\n\t\t\t\t#Bash.exec(f'srun mpirun john --mask={mask} --format={self.hashType} {self.hashFile}')"
+                        pscript += f"\n\t\t\t\tBash.exec(f'srun mpirun john --mask={mask} --format={self.hashType} {self.hashFile}')"
 
                     pscript += f"\n\tprint_failure('Failed parallel mask attack against {self.hashFile} hash file')"
                     pscript += f"\n\tprint_failure('Refine you mask with PPACK to successfully crack {self.hashFile} hashes')"

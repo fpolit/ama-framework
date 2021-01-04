@@ -41,7 +41,7 @@ def main():
     hpc_parser.add_argument('--memPerCpu', type=str, default="4GB",
                 help='Memory per CPU(node)')
 
-    hpc_parser.add_argument('-j', '--jobname', type=str, default="mattack",
+    hpc_parser.add_argument('-j', '--jobname', type=str, default="maskattack",
                         help='Slurm Job Name')
 
     hpc_parser.add_argument('-o', '--output', type=str, default=None,

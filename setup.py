@@ -20,6 +20,11 @@ setup(
     license='unlicensed',
     packages=find_packages(exclude=['ez_setup', 'tests*']),
     #package_data={'mattack': ['templates/*']},
+    install_requires=[
+        "cement",
+        "sbash",
+        "fineprint",
+    ],
     include_package_data=True,
     entry_points="""
         [console_scripts]
