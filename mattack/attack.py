@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
-from .mattack import MaskAttack
+from .core import MaskAttack
 
 
 def main():
