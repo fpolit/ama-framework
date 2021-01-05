@@ -1,50 +1,53 @@
 #!/usr/bin/env python3
 
-from cement import Controller, ex
-from cement.utils.version import get_version_banner
-from ..core.version import get_version
-import re
-
-from fineprint.status import print_status, print_successful, print_failure
-
-
+import argparse
 import os
+from .core import MaskAttack
 
-class Status(Controller):
-    class Meta:
-        label='status'
-    
-    @ex(
-        help="Check if a hash was cracked",
-        arguments=[
-            (['-s','--hash'],
-            {'help':'hash to check status',
-             'action':'store'}
-            ),
-            (['-f','--hashFile'],
-            {'help':'hash file to check status',
-             'action':'store'})
-        ]
-    )
-    def status(self):
-        """
-            Check status of the hash (it is cracked or no)
-            It hash is cracked when it is in the ~/.john/john.pot file
-            otherwise it isn't cracked
-        """
-        if self.app.pargs.hash:
-            hash = self.app.pargs.hash
-            crackedPattern = re.compile(rf"(\w|\W|\s)*{hash}(\w|\W|\s)*")
-            homeUser = os.path.expanduser("~")
-            johnPotPath = os.path.join(homeUser, ".john/john.pot")
-            with open(johnPotPath, 'r') as johnPotFile:
-                while   crackedHash := johnPotFile.readline().rstrip():
-                    if(crackedPattern.fullmatch(crackedHash)):
-                        print_successful(f"{hash} hash was cracked")
-                        break
-            print_failure(f"{hash} hash wans't cracked")
-        
-        elif self.app.pargs.hashFile:
-            pass #write me
+from fineprint.status import print_successful, print_failure, print_status
+
+
+def status(hash):
+    """
+        Check the status of a hash in the potfile of the supported crackers(jtr and hc) of mattack
+
+        return: status of tha hash (False: uncracked, True: cracked) and the cracker that crack the hash otherwise return None
+    """
+    crackers = MaskAttack.crackers
+    # staus of hash(False: no cracked)
+    for cracker in crackers:
+        if MaskAttack.statusHash(hash, cracker):
+            return [True, cracker]
+    return [False, None]
+
+def main():
+    parser = argparse.ArgumentParser(description="Check hash status - mattack utility", prog='mstatus')
+
+    # check subparse
+    parser.add_argument('hash', help='Hash (or hash file) to check status')
+    # if --file is true, then the hash is a hash file (name of the file) otherwise is a simple hash
+    parser.add_argument('--file', action='store_true', help='Allow supplied a hash file (check the status of all the hashes in the file)')
+
+    pargs = parser.parse_args()
+
+    if pargs.file and os.path.isfile(pargs.hash): # an hash file was supplied
+        with open(pargs.hash, 'r') as hashfile:
+            print_status("Status\tHash")
+            while hash := hashfile.readline().rstrip():
+                hashStatus, cracker = status(hash)
+                if hashStatus:
+                    print_successful(f"cracked ({cracker})\t{hash}")
+                else:
+                    print_failure(f"uncracked\t{hash}")
+
+    else:   # pargs.hash is simply an hash
+        hash = pargs.hash
+        hashStatus, cracker = status(hash)
+        if hashStatus:
+            print_successful(f"cracked ({cracker})\t{hash}")
         else:
-            print_failure("No hash supplied to check status.")
+            print_failure(f"uncracked\t{hash}") 
+
+    
+
+    

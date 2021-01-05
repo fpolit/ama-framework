@@ -26,8 +26,11 @@ setup(
         "fineprint",
     ],
     include_package_data=True,
-    entry_points="""
-        [console_scripts]
-        mattack = mattack.attack:main
-    """,
+    entry_points={
+        'console_scripts':[
+            'mattack = mattack.attack:main',
+            'msearch = mattack.search:main',
+            'mstatus = mattack.status:main'
+            ]
+    },
 )

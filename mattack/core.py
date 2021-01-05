@@ -18,6 +18,7 @@ class MaskAttack:
     """
     jtr_hashes = jtrhashes
     hc_hashes = hchashes
+    crackers = ["jtr", "hc"]
 
     def __init__(self, masksFile, hashType, hashFile):
         self.masksFile = masksFile
@@ -25,53 +26,68 @@ class MaskAttack:
         self.hashFile = hashFile
 
     @staticmethod
-    def search(search=None, *, sensitive=False):
+    def search(search=None, *, sensitive=False, jtrFormats=False, hcFormats=False):
         if search:
             if not sensitive:
                 hashPattern = re.compile(rf"\w*{search}\w*", re.IGNORECASE)
             else:
                 hashPattern = re.compile(rf"\w*{search}\w*")
 
-            print_status(f"Posible hashes(*{search}*):")
-            for hashFormat in MaskAttack.jtr_hashes:
-                if hashPattern.search(hashFormat):
-                    print_successful(hashFormat)
-
+            if jtrFormats: # search by a jtr hash format
+                print_status(f"John the Ripper posible hash formats(*{search}*):")
+                #print_status("id")
+                for hashFormat in MaskAttack.jtr_hashes:
+                    if hashPattern.search(hashFormat):
+                        print_successful(hashFormat)
+            if hcFormats: # search by an hashcat hash format
+                print_status(f"Hashcat posible hash formats(*{search}*):")
+                print_status("id\tname")
+                for hash_id, hashFormat in MaskAttack.hc_hashes.items():
+                    if hashPattern.search(hashFormat['Name']):
+                        print_successful(f"{hash_id}\t{hashFormat['Name']}")
         else:
             print_failure("No pattern given.")
 
     @staticmethod
-    def statusHash(hash):
+    def statusHash(hash, cracker):
         """
             Check status of the hash (it is cracked or no)
             It hash is cracked when it is in the ~/.john/john.pot file
             otherwise it isn't cracked
         """
         #import pdb; pdb.set_trace()
-        crackedPattern = re.compile(rf"(\w|\W|\s)*{hash}(\w|\W|\s)*")
         homeUser = os.path.expanduser("~")
-        johnPotPath = os.path.join(homeUser, ".john/john.pot")
-        with open(johnPotPath, 'r') as johnPotFile:
-            while   crackedHash := johnPotFile.readline().rstrip():
+        if cracker == "jtr":
+            crackedPattern = re.compile(rf"\$(\W*|\w*)\$({hash})(\$(\W*|\w*)\$)?:(\W*|\w*|\@*)")
+            potfilePath = os.path.join(homeUser, ".john/john.pot")
+        elif cracker == "hc":
+            crackedPattern = re.compile(rf"({hash}):(\W*|\w*)")
+            potfilePath = os.path.join(homeUser, ".hashcat/hashcat.potfile")
+
+        with open(potfilePath, 'r') as potfile:
+            while   crackedHash := potfile.readline().rstrip():
                 if(crackedPattern.fullmatch(crackedHash)):
                     return True
         return False
     
     @staticmethod
-    def status(hashFile):
+    def statusHashFile(hashFile, cracker=None):
+        # potfile: is a file where a paswrod cracker save the cracked hashes
         # check if all the hashes in a hashFile are broken
         #import pdb; pdb.set_trace()
-        with open(hashFile, 'r') as hashes:
-            while hash := hashes.readline():
-                hash = hash.rsplit()[0]
-                hash = hash.split(":")
-                if(len(hash) > 1):
-                    hash = hash[1]
-                else:
-                    hash = hash[0]
-                if not MaskAttack.statusHash(hash):
-                    return False
-        return True
+        if cracker in MaskAttack.crackers:
+            with open(hashFile, 'r') as hashes:
+                while hash := hashes.readline():
+                    hash = hash.rsplit()[0]
+                    hash = hash.split(":")
+                    if(len(hash) > 1):
+                        hash = hash[1]
+                    else:
+                        hash = hash[0]
+                    if not MaskAttack.statusHash(hash, cracker):
+                        return False
+            return True
+        return False
 
 
     def debug(self, gpus=None, nodes=None, ntasks=None, partition=None, cpusPerTask=1, memPerCpu=None,
@@ -122,8 +138,11 @@ class MaskAttack:
                             mask = mask.rstrip()
                             attack_cmd = f"hashcat -a 3 -m {self.hashType} {self.hashFile} {mask}"
                             print()
-                            print_status(f"Running {attack_cmd}")
+                            print_status(f"Running: {attack_cmd}")
                             Bash.exec(attack_cmd)
+                            if MaskAttack.statusHashFile(self.hashFile, cracker='hc'):
+                                print_successful(f"Hash File {self.hashFile} cracked sucefully.")
+                                break
 
                 elif cpusPerTask>1 and ntasks==1: #omp work
                     #Bash.exec(f"export OMP_NUM_THREADS={cpusPerTask}")
@@ -139,8 +158,11 @@ class MaskAttack:
                             mask = mask.rstrip()
                             attack_cmd = f"john --mask={mask} --format={self.hashType} {self.hashFile}"
                             print()
-                            print_status(f"Running {attack_cmd}")
+                            print_status(f"Running: {attack_cmd}")
                             Bash.exec(attack_cmd)
+                            if MaskAttack.statusHashFile(self.hashFile, cracker='jtr'):
+                                print_successful(f"Hash File {self.hashFile} cracked sucefully.")
+                                break
                             
                 elif ntasks>1 and cpusPerTask==1:  #mpi work
                     parallelAttackinfo =    f"Parallel mask attack description" +\
@@ -155,8 +177,11 @@ class MaskAttack:
                             mask = mask.rstrip()
                             attack_cmd = f"mpirun -n {ntasks} john --mask={mask} --format={self.hashType} {self.hashFile}"
                             print()
-                            print_status(f"Running {attack_cmd}")
+                            print_status(f"Running: {attack_cmd}")
                             Bash.exec(attack_cmd)
+                            if MaskAttack.statusHashFile(self.hashFile, cracker='jtr'):
+                                print_successful(f"Hash File {self.hashFile} cracked sucefully.")
+                                break
                             
                 else:   # serial work(canceled because parallel support is enable)
                     print_status("So boring, you will attack parallelly(ntasks>1 [MPI] or cpusPerTask>1 [OMP])")
@@ -258,7 +283,7 @@ class MaskAttack:
                     Bash.exec(f"sbatch {slurmScript}")
 
                 elif cpusPerTask==1 and ntasks==1 and nodes==1:
-                    print_status("You have a cluster  do not waste their power!")
+                    print_status("You have a cluster  do not waste its power!")
                     sys.exit(1)
 
                 else:

@@ -57,24 +57,6 @@ def main():
                         help='Maximum time to perform the attack(HH:MM:SS)')
 
 
-    
-    # subparser = parser.add_subparsers(help='mattack utilities')
-
-    # # search subparse
-    # search_parser = subparser.add_parser('search', help='Search by a valid hash with a given pattern')
-
-    # search_parser.add_argument('pattern', type=str, help='pattern to search hashes', default=None)
-    # password_cracker = search_parser.add_mutually_exclusive_group(required=True)
-    # password_cracker.add_argument('--jtr', action='store_true')
-    # password_cracker.add_argument('--hc', action='store_true')
-
-
-    # # search subparse
-    # check_parser = subparser.add_parser('check', help='Check status of an hash')
-    # check_parser.add_argument('hash', type=str, help='Check status of the given hash', default=None)
-
-
-
     args = parser.parse_args()
     masksFile = args.masks
     hashType = args.format
