@@ -12,17 +12,16 @@ class FilePath(str):
             else:
                 if os.path.exists(filePath) and not os.path.isfile(filePath):
                     raise IsADirectoryError
-                
+
                 if not os.path.exists(filePath): # no exist file
                     raise FileNotFoundError
 
                 elif not os.access(filePath, os.R_OK):
-                    raise PermissionError 
-                
+                    raise PermissionError
 
         except PermissionError as error:
             print_failure(f"ERROR: {error}")
-        
+
         except FileNotFoundError as error:
             print_failure(f"ERROR: {error}")
 
@@ -31,8 +30,8 @@ class FilePath(str):
 
     def pathFile(self):
         return self.path
-    
-    def checkReadAccess(self):        
+
+    def checkReadAccess(self):
         filePath = FilePath(self.path)
         if os.access(filePath, os.R_OK):
             return True
@@ -51,12 +50,12 @@ class FilePath(str):
         return False
 
     @staticmethod
-    def readAccess(path):        
+    def readAccess(path):
         filePath = FilePath(path)
         if os.access(filePath, os.R_OK):
             return True
         return False
-             
+
 
     @staticmethod
     def writeAccess(path):
@@ -64,7 +63,7 @@ class FilePath(str):
         if os.access(filePath, os.W_OK):
             return True
         return False
-    
+
     @staticmethod
     def rwAccess(path):
         filePath = FilePath(path)
@@ -75,3 +74,13 @@ class FilePath(str):
 
     def __repr__(self):
         return self.path
+
+"""
+    @staticmethod
+    def readBlock(path, BLOCK):
+        filePath = FilePath(path)
+        if filePath.checkReadAccess():
+            with open(filePath, 'r') as fileBlock:
+                readBlock = [fileBlock.readline().rstrip() for k in range(BLOCK)]
+            return readBlock
+"""
