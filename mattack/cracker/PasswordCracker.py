@@ -41,7 +41,7 @@ class PasswordCracker:
         """
 
         # validation of existence and read access of input file arguments
-        for inputFile in [__hashFile, __wordlist, __maskFile]:
+        for inputFile in [__hashFile, *__wordlist, __maskFile]:
             if inputFile:
                 inputFilePath = FilePath(inputFile)
                 if not inputFilePath.checkReadAccess():
