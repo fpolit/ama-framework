@@ -33,6 +33,7 @@ class Combinator:
         secondWordlistPath = FilePath(secondWordlist)
 
         with open(firstWordlistPath, 'r') as _firstWordlist:
+            pass
             # combine the wordlists
 
 
@@ -44,15 +45,17 @@ class Combinator:
 
 
     def hybridWMF(wordlist, maskFile):
-
+        pass
 
     def hybridWM(wordlist, mask):
         """
         generate all the combination of the words in the wordlist and the generated words by the mask
         """
+        pass
 
 
     def hybridWM(wordlist, mask):
         """
         generate all the combination of the generated words by the mask and the words in the wordlist
         """
+        pass

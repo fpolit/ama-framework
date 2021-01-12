@@ -1,21 +1,35 @@
 #!/usr/bin/env python3
+#
+# hattack utility - search by valids hash types in PasswordCracker supported crackers given a pattern
+#
+# Maintainer: glozanoa <glozanoa@uni.pe>
 
 import argparse
-from .core import MaskAttack
+
+# cracker modules - import
+from ..cracker.PasswordCracker import PasswordCracker
+from ..cracker.John import John
+from ..cracker.Hashcat import Hashcat
 
 def main():
     parser = argparse.ArgumentParser(description="Search by a hash format given a pattern - mattack utility", prog='msearch')
 
-    parser.add_argument('pattern', type=str, help='pattern to search hash format', default=None)
-    #password_cracker = parser.add_mutually_exclusive_group(required=True)
-    parser.add_argument('--jtr', action='store_true')
-    parser.add_argument('--hc', action='store_true')
+    parser.add_argument('pattern', type=str,
+                        help='pattern to search hash format')
+
+    parser.add_argument('-c', '--cracker', type=str, choices=PasswordCracker.crackers,
+                                required=True, help="Password Cracker")
+
     parser.add_argument('-s', '--sensitive', action='store_true', help="Enable sensitive search")
 
     args = parser.parse_args()
+
     pattern = args.pattern
-    jtr = args.jtr  # if True search a hash format for john the ripper
-    hc = args.hc    # if True search a hash format for hashcat
+    cracker = args.cracker
     sensitive = args.sensitive
-    
-    MaskAttack.search(pattern, sensitive=sensitive, jtrFormats=jtr, hcFormats=hc)
+
+    if cracker in ["john", "jtr"]:
+        John.searchHash(pattern, sensitive=sensitive)
+
+    elif cracker in ["hashcat", "hc"]:
+        Hashcat.searchHash(pattern, sensitive=sensitive)

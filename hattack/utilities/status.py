@@ -1,53 +1,51 @@
 #!/usr/bin/env python3
 
-import argparse
-import os
-from .core import MaskAttack
+# hstatus utilities - check the status of a hash or an hash file
+#
+# Maintainer: glozanoa <glozanoa@uni.pe>
 
+
+import argparse
 from fineprint.status import print_successful, print_failure, print_status
 
+#cracker module imports
+from ..cracker.PasswordCracker import PasswordCracker
 
-def status(hash):
-    """
-        Check the status of a hash in the potfile of the supported crackers(jtr and hc) of mattack
+# utilitie module imports
+from .utilitiesExceptions import NoArgumentProvided
 
-        return: status of tha hash (False: uncracked, True: cracked) and the cracker that crack the hash otherwise return None
-    """
-    crackers = MaskAttack.crackers
-    # staus of hash(False: no cracked)
-    for cracker in crackers:
-        if MaskAttack.statusHash(hash, cracker):
-            return [True, cracker]
-    return [False, None]
 
 def main():
-    parser = argparse.ArgumentParser(description="Check hash status - mattack utility", prog='mstatus')
+    parser = argparse.ArgumentParser(description="Check hash status - hattack utility", prog='hstatus')
 
     # check subparse
-    parser.add_argument('hash', help='Hash (or hash file) to check status')
+    parser.add_argument('-qh', '--queryHash', type=str,
+                        help='Hash (or hash file) to check status')
     # if --file is true, then the hash is a hash file (name of the file) otherwise is a simple hash
-    parser.add_argument('--file', action='store_true', help='Allow supplied a hash file (check the status of all the hashes in the file)')
+    parser.add_argument('-hf', '--hashFile', type=str,
+                        help='Allow supplied a hash file (check the status of all the hashes in the file)')
 
     pargs = parser.parse_args()
 
-    if pargs.file and os.path.isfile(pargs.hash): # an hash file was supplied
-        with open(pargs.hash, 'r') as hashfile:
-            print_status("Status\tHash")
-            while hash := hashfile.readline().rstrip():
-                hashStatus, cracker = status(hash)
-                if hashStatus:
-                    print_successful(f"cracked ({cracker})\t{hash}")
-                else:
-                    print_failure(f"uncracked\t{hash}")
+    if not (pargs.hashFile or pargs.queryHash):
+        raise NoArgumentProvided
+    else:
+        if pargs.hashFile: # an hash file was supplied
+            hashFilePath = FilePath(pargs.hashFile)
+            with open(hashFilePath, 'r') as hashFile:
+                while queryHash := hashfile.readline().rstrip():
+                    hashStatus, cracker = PasswordCracker.globalHashStatus(queryHash)
 
-    else:   # pargs.hash is simply an hash
-        hash = pargs.hash
-        hashStatus, cracker = status(hash)
-        if hashStatus:
-            print_successful(f"cracked ({cracker})\t{hash}")
-        else:
-            print_failure(f"uncracked\t{hash}") 
+                    if hashStatus: # hashStatus = True (is cracked)
+                        print_successful(f"cracked ({cracker})\t{queryHash}")
+                    else: # hashStatus = False (not cracked yet)
+                        print_failure(f"uncracked\t{queryHash}")
 
-    
+        if pargs.queryHash:   # pargs.queryHash is simply an hash
+            queryHash = pargs.queryHash
+            hashStatus, cracker = PasswordCracker.globalHashStatus(queryHash)
 
-    
+            if hashStatus:
+                print_successful(f"cracked ({cracker})\t{queryHash}")
+            else:
+                print_failure(f"uncracked\t{queryHash}")
