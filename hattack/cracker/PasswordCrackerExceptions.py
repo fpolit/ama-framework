@@ -12,6 +12,7 @@ class CrackerExecNotFound(Exception):
         self.warningMsg = f"{self.passwordCracker} executable didn't found"
         super().__init__(self.warningMsg)
 
+
 class CrackerDisableError(Exception):
     def __init__(self, crackerName):
         self.cracker = crackerName
@@ -31,6 +32,20 @@ class CrackerHashError(Exception):
         self.cracker = cracker.name
         self.hashType = hashType
         self.warningMsg = f"Invalid {self.cracker} hash type: {self.hashType}"
+        super().__init__(self.warningMsg)
+
+
+class NotSupportedCracker(Exception):
+    def __init__(self, cracker):
+        self.cracker = cracker
+        self.warningMsg = f"Not supported {self.cracker} cracker"
+        super().__init__(self.warningMsg)
+
+
+class InvalidCracker(Exception):
+    def __init__(self, invalidCracker):
+        self.invalidCracker = invalidCracker
+        self.warningMsg = f"Invalid cracker selected: {self.invalidCracker}"
         super().__init__(self.warningMsg)
 
 # exceptions for Hashcat subclass of PaswordCracker class

@@ -11,9 +11,10 @@
 
 
 import os
+import re
 from os.path import dirname
 from sbash.core import Bash
-from fineprint.status import print_status, print_failure
+from fineprint.status import print_status, print_failure, print_successful
 
 # cracker modules
 from .PasswordCracker import PasswordCracker
@@ -35,7 +36,7 @@ from ..hpc.HPCExceptions import ParallelWorkError
 
 # utilities module
 from ..utilities.combinator import Combinator
-from ..utilities.combination import InvalidWordlistNumber
+from ..utilities.combinator import InvalidWordlistNumber
 
 
 class Hashcat(PasswordCracker):
@@ -137,6 +138,24 @@ class Hashcat(PasswordCracker):
                                 hpc = hpc)
 
 
+    @staticmethod
+    def searchHash(pattern, *, sensitive=False):
+        """
+        search by a valid hashcat hash type given a pattern
+        """
+
+        if not sensitive:
+            hashPattern = re.compile(rf"\w*{pattern}\w*", re.IGNORECASE)
+        else:
+            hashPattern = re.compile(rf"\w*{pattern}\w*")
+
+        print_status(f"Hashcat posible hash types(pattern: *{pattern}*)")
+        print_status("id\tname")
+        for hashId, hashType in Hashcat.hashes.items():
+            if hashPattern.search(hashType['Name']):
+                print_successful(f"{hashId}\t{hashType['Name']}")
+
+
 
 class HCAttacks:
     @staticmethod
@@ -195,7 +214,7 @@ class HCAttacks:
     def hybridWMF(*, attackMode=6, hashType, hashFile, wordlist, maskFile, hpc=None):
         Hashcat.checkAttackArgs(_hashType = hashType,
                                 _hashFile = hashFile,
-                                _wordlist = wordlist
+                                _wordlist = wordlist,
                                 _maskFile = maskFile)
         hc = Hashcat()
         print_status(f"Attacking {hashFile} with {wordlist} wordlist and {maskFile} mask file in hybrid WMF attack mode.")
@@ -216,7 +235,7 @@ class HCAttacks:
     def hybridMFW(*, attackMode=7, hashType, hashFile, wordlist, maskFile, hpc=None):
         Hashcat.checkAttackArgs(_hashType = hashType,
                                 _hashFile = hashFile,
-                                _wordlist = wordlist
+                                _wordlist = wordlist,
                                 _maskFile = maskFile)
         hc = Hashcat()
         print_status(f"Attacking {hashFile} with {maskFile} mask file and {wordlist} wordlist in hybrid MFW attack mode.")

@@ -9,8 +9,9 @@
 """
 
 import os
+import re
 from sbash.core import Bash
-from fineprint.status import  print_failure, print_status
+from fineprint.status import print_status, print_failure, print_successful
 
 # cracker modules
 from .PasswordCracker import PasswordCracker
@@ -46,7 +47,7 @@ class John(PasswordCracker):
                   7:"Hybrid-Mask+Wordlist"}
 
     def __init__(self):
-	super().__init__(name=["john"])
+        super().__init__(name=["john"])
 
     @staticmethod
     def benchmark():
@@ -149,6 +150,22 @@ class John(PasswordCracker):
                                  maskFile = maskFile,
                                  hpc = hpc)
 
+
+
+    @staticmethod
+    def searchHash(pattern, *, sensitive=False):
+        """
+        search by a valid john hash type given a pattern
+        """
+        if not sensitive:
+            hashPattern = re.compile(rf"\w*{pattern}\w*", re.IGNORECASE)
+        else:
+            hashPattern = re.compile(rf"\w*{pattern}\w*")
+
+        print_status(f"John the Ripper posible hash types(pattern: *{pattern}*)")
+        for hashType in John.hashes:
+            if hashPattern.search(hashType):
+                print_successful(hashType)
 
 class JTRAttacks:
 
@@ -258,20 +275,21 @@ class JTRAttacks:
 
         print_status(f"Attacking {hashFile} with {maskFile} in mask attack mode.")
         if hpc:
-            parallelJobType = slurm.parserParallelJob()
-            if not  parallelJobType in ["MPI", "OMP"]:
-                raise ParallelWorkError(parallelJobType)
+            pass
+            # parallelJobType = slurm.parserParallelJob()
+            # if not  parallelJobType in ["MPI", "OMP"]:
+            #     raise ParallelWorkError(parallelJobType)
 
-            slurm, extra = hpc.parameters()
-            if parallelJobType == "MPI":
-                parallelWork = [f"srun mpirun {jtr.mainexec} --mask={}--format={hashType} {hashFile}"]
+            # slurm, extra = hpc.parameters()
+            # if parallelJobType == "MPI":
+            #     parallelWork = [f"srun mpirun {jtr.mainexec} --mask={}--format={hashType} {hashFile}"]
 
-            elif parallelJobType == "OMP":
-                parallelWork = [f"srun {jtr.mainexec} --format={hashType} {hashFile}"]
+            # elif parallelJobType == "OMP":
+            #     parallelWork = [f"srun {jtr.mainexec} --format={hashType} {hashFile}"]
 
-            slurmScriptName = extra['slurm-script']
-            HPC.genScript(slurm, extra, parallelWork)
-            Bash.exec("sbatch {slurmScriptName}")
+            # slurmScriptName = extra['slurm-script']
+            # HPC.genScript(slurm, extra, parallelWork)
+            # Bash.exec("sbatch {slurmScriptName}")
 
         else:
             with open(maskFile, 'r') as masks:

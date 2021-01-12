@@ -7,15 +7,18 @@ from fineprint.status import print_failure, print_successful, print_status
 
 # importing PasswordCracker exceptions
 from .PasswordCrackerExceptions import CrackerExecNotFound
-
+from .PasswordCrackerExceptions import InvalidCracker
+from .PasswordCrackerExceptions import NotSupportedCracker
 # base module imports
 from ..base.FilePath import FilePath
+
 
 class PasswordCracker:
     """
         PasswordCracker (hashcat, john)
     """
     crackProcesses = None
+    crackers = ["john", "hashcat"]
     def __init__(self, name, *, executable=[], status=None, path=None, version=None):
         self.name = name #it can be a list of name (for example [hashcat, hc])
         self.exec=None
@@ -49,35 +52,86 @@ class PasswordCracker:
                     raise PermissionError
 
 
+    @staticmethod
+    def searchHash(pattern, *, sensitive=False):
+
+        if cracker in PasswordCracker.crackers:
+            if not sensitive:
+                hashPattern = re.compile(rf"\w*{search}\w*", re.IGNORECASE)
+            else:
+                hashPattern = re.compile(rf"\w*{search}\w*")
+
+            if cracker in ["john", "jtr"]: # search by a jtr hash format
+                print_status(f"John the Ripper posible hash types(pattern: *{search}*)")
+                for hashType in John.hashes:
+                    if hashPattern.search(hashFormat):
+                        print_successful(hashFormat)
+
+            if cracker in ["hashcat", "hc"]: # search by an hashcat hash format
+                print_status(f"Hashcat posible hash types(pattern: *{search}*)")
+                print_status("id\tname")
+                for hashId, hashType in Hashcat.hashes.items():
+                    if hashPattern.search(hashType['Name']):
+                        print_successful(f"{hashId}\t{hashType['Name']}")
+        else:
+            raise InvalidCracker(cracker)
+
 
     @staticmethod
-    def statusHash(cracker, queryHash, potfile=None):
-        if potfile:
-            potFilePath = FilePath(potfile)
-            if isinstance(cracker, John):
-                crackedPattern = re.compile(rf"\$(\W*|\w*)\$({queryHash})(\$(\W*|\w*)\$)?:(\W*|\w*|\@*)")
-            elif isinstance(cracker, Hashcat):
-                crackedPattern = re.compile(rf"({queryHash}):(\W*|\w*)")
+    def hashStatus(cracker, queryHash, potfile=None):
+        # NOTE: CHECK crackedPattern
+        import pdb; pdb.set_trace()
+        if cracker  in PasswordCracker.crackers:
+            if potfile:
+                potFilePath = FilePath(potfile)
+
+                if cracker in ["john", "jtr"]:
+                    crackedPattern = re.compile(rf"\$(\W*|\w*)\$({queryHash})(\$(\W*|\w*)\$)?:(\W*|\w*|\@*)")
+
+                elif cracker in ["hashcat", "hc"]:
+                    crackedPattern = re.compile(rf"({queryHash}):(\W*|\w*)")
+
+            else:
+                homePath = os.path.expanduser("~")
+                if cracker in ["john", "jtr"]:
+                    potFilePath = FilePath(os.path.join(homePath, ".john/john.pot"))
+                    crackedPattern = re.compile(rf"\$(\W*|\w*)\$({queryHash})(\$(\W*|\w*)\$)?:(\W*|\w*|\@*)")
+
+                elif cracker in ["hashcat", "hc"]:
+                    potFilePath = FilePath(os.path.join(homePath, ".hashcat/hashcat.potfile"))
+                    crackedPattern = re.compile(rf"({queryHash}):(\W*|\w*)")
+
+            with open(potFilePath, 'r') as _potFile:
+                while   crackedHash := _potFile.readline().rstrip():
+                    if crackedPattern.fullmatch(crackedHash):
+                        return True
+            return False
 
         else:
-            homePath = os.path.expanduser("~")
-            if isinstance(cracker, John):
-                potFilePath = FilePath(os.path.join(homePath, ".john/john.pot"))
-                crackedPattern = re.compile(rf"\$(\W*|\w*)\$({queryHash})(\$(\W*|\w*)\$)?:(\W*|\w*|\@*)")
-            elif isinstance(cracker, Hashcat):
-                potFilePath = FilePath(os.path.join(homePath, ".hashcat/hashcat.potfile"))
-                crackedPattern = re.compile(rf"({queryHash}):(\W*|\w*)")
+            raise NotSupportedCracker(cracker)
 
-        with open(potFilePath, 'r') as potFile:
-            while   crackedHash := potfile.readline().rstrip():
-                if(crackedPattern.fullmatch(crackedHash)):
-                    return True
-        return False
 
     @staticmethod
-    def statusHashFile(cracker, strHashFile, potfile=None):
+    def globalHashStatus(queryHash, potfile=None):
         """
-        Check if all the hashes in the hashFile are cracked
+        Check the status of queryHash in the potfile of all the supported crackers by PasswordCracker(jtr and hc)
+
+        return the status of the hash (False: hash is uncracked, True: hash is cracked) and the cracker that crack the hash otherwise return None
+        """
+
+        crackers = PasswordCracker.crackers
+        # staus of hash(False: no cracked, True:cracked)
+        #import pdb; pdb.set_trace()
+        for cracker in crackers:
+            if PasswordCracker.hashStatus(cracker, queryHash, potfile):
+                return [True, cracker]
+        return [False, None]
+
+
+    @staticmethod
+    def hashFileStatus(cracker, hashFile, potfile=None):
+        """
+        Check if all the hashes in the hashFile are cracked by cracker
 
         return:
         True - if all the hashes in hashFile are cracked
@@ -86,15 +140,30 @@ class PasswordCracker:
         hashFilePath = FilePath(strHashFile)
 
         if hashFilePath.checkReadAccess():
-            with open(hashFilePath , 'r') as hashFile:
-                while queryHash := hashFile.readline().rstrip():
-                    if not PasswordCracker.statusHash(cracker, queryHash, potfile):
+            with open(hashFilePath , 'r') as _hashFile:
+                while queryHash := _hashFile.readline().rstrip():
+                    if not PasswordCracker.hashStatus(cracker, queryHash, potfile):
                         return False
             return True
 
         else:
             print_failure(f"No read permission in {hashFilePath} file")
             raise PermissionError
+
+    @staticmethod
+    def globalHashFileStatus(hashFile, potfile=None):
+        """
+        Check the status of all the hashes in the hash file in the potfile of the supported crackers by PasswordCracker(jtr and hc)
+
+        return the status of the hash (False: some hash is uncracked, True: all hashes are cracked) and the cracker that crack the hash otherwise return None
+        """
+
+        crackers = PasswordCracker.crackers
+        # staus of hash(False: no cracked, True:cracked)
+        for cracker in crackers:
+            if PasswordCracker.hashFileStatus(cracker, hashFile, potfile):
+                return [True, cracker]
+        return [False, None]
 
 
     def getName(self):
