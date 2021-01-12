@@ -16,7 +16,7 @@ class ParallelWorkError(Exception):
     """
 
     def __init__(self, parallelJobType):
-        self.warningMsg = f"No supported {parallelJobType} parallel jobs.")
+        self.warningMsg = f"No supported {parallelJobType} parallel jobs."
         super().__init__(self.warningMsg)
 
 

@@ -6,7 +6,8 @@ from fineprint.status import print_failure
 class FilePath(str):
     def __init__(self, filePath):
         try:
-            if os.path.isfile(filePath) and os.access(filePath, os.R_OK):
+            self.path = None
+            if os.path.isfile(filePath):
                     self.path = filePath
 
             else:
@@ -16,8 +17,8 @@ class FilePath(str):
                 if not os.path.exists(filePath): # no exist file
                     raise FileNotFoundError
 
-                elif not os.access(filePath, os.R_OK):
-                    raise PermissionError
+                # elif not os.access(filePath, os.R_OK):
+                #     raise PermissionError
 
         except PermissionError as error:
             print_failure(f"ERROR: {error}")
@@ -32,19 +33,19 @@ class FilePath(str):
         return self.path
 
     def checkReadAccess(self):
-        filePath = FilePath(self.path)
+        filePath = self.path
         if os.access(filePath, os.R_OK):
             return True
         return False
 
     def checkWriteAccess(self):
-        filePath = FilePath(self.path)
+        filePath = self.path
         if os.access(filePath, os.W_OK):
             return True
         return False
 
     def checkrwAccess(self):
-        filePath = FilePath(self.path)
+        filePath = self.path
         if os.access(filePath, os.W_OK) and os.access(filePath, os.R_OK):
             return True
         return False

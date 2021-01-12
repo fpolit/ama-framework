@@ -10,18 +10,18 @@ class HPC:
     HPC hold the necesary parameter to submit a parallel task (with slurm)
     """
 
-    def __init__(self, gpus=None, nodes=None, ntasks=None, partition=None, cpusPerTask=1, memPerCpu=None,
+    def __init__(self, *, gpus=None, nodes=None, ntasks=None, partition=None, cpusPerTask=1, memPerCpu=None,
                  jobName="maskattack", output=None, error=None, time=None, slurmScript="maskattack.slurm"):
         # slurm parameters
         self.gpus = gpus
         self.nodes = nodes
-        self.ntasks = tasks
+        self.ntasks = ntasks
         self.partition = partition
         self.cpusPerTask = cpusPerTask
         self.memPerCpu = memPerCpu
         self.jobName = jobName
         self.output = output
-        self.error error
+        self.error = error
         self.time = time
 
         # extra parameters
@@ -102,7 +102,7 @@ class HPC:
 
         with open(slurmScriptName, 'w') as slurmScript:
             slurmScript.write("#!/bin/bash\n")
-            for flag, argument in slurm:
+            for flag, argument in slurm.items():
                 if not flag == "gpu":
                     slurmScript.write(f"#SBATCH --{flag}={argument}\n")
                 else:
@@ -128,7 +128,7 @@ class HPC:
 
         with open(slurmScriptName, 'w') as slurmScript:
             slurmScript.write("#!/bin/bash\n")
-            for flag, argument in slurm:
+            for flag, argument in slurm.items():
                 if not flag == "gpu":
                     slurmScript.write(f"#SBATCH --{flag}={argument}\n")
                 else:

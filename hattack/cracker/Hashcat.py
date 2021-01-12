@@ -43,7 +43,7 @@ class Hashcat(PasswordCracker):
     hashes = hashes
     attackMode = {  0:"Wordlist",
                     1:"Combination",
-                    3:"Mask Attack",
+                    3:"Mask",
                     6:"Hybrid Wordlist + Mask",
                     7:"Hybrid Mask + Wordlist"}
 

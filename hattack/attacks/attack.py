@@ -1,14 +1,24 @@
 #!/usr/bin/env python3
 
 import argparse
+from argparse import RawTextHelpFormatter
+
 from configparser import ConfigParser
-from ..cracker import John, Hashcat
+
+# cracker modules import
+from ..cracker.John import John
+from ..cracker.Hashcat import Hashcat
+
+# hpc modules import
 from ..hpc.HPC import HPC
+
+# base modules import
 from ..base.FilePath import FilePath
 
 
 def hattackCLIParser():
-    parser = argparse.ArgumentParser(description="Hash attack manager", prog='hattack')
+    parser = argparse.ArgumentParser(description="Hash attack manager", prog='hattack',
+                                     formatter_class=RawTextHelpFormatter)
 
     parser.add_argument('hashFile',
                             help='Hash file to crack')
@@ -29,8 +39,22 @@ def hattackCLIParser():
     cracker_parser = parser.add_argument_group('Password Cracker arguments')
     cracker_parser.add_argument('-c', '--cracker', type=str, choices=['hc', 'jtr'],
                                 required=True, help="Password Cracker")
+
+
+    attackModes = {'john': John.attackMode,
+                   'hashcat': Hashcat.attackMode}
+    helpAttackMode = ""
+    for cracker, attackMode in attackModes.items():
+        helpAttackMode += f" # | {cracker}\n"
+        helpAttackMode +=  "------------\n"
+        for attackId, attackInfo in attackMode.items():
+            helpAttackMode += f" {attackId} | {attackInfo}\n"
+        helpAttackMode += "\n"
+    #print(f"helpAttack: {helpAttackMode}")
+
     cracker_parser.add_argument('-a', '--attack', type=int,
-                                required=True, help="Attack mode")
+                                required=True,
+                                help=f"Attack Mode.\n{helpAttackMode}")
 
     # HPC parameters
     hpc_parser = parser.add_argument_group('HPC arguments',
@@ -68,12 +92,33 @@ def hattackCLIParser():
     hpc_parser.add_argument('-t', '--time', type=str, default=None,
                         help='Maximum time to perform the attack(HH:MM:SS)')
 
+
+    # help arguments
+    # help_parser = parser.add_argument_group('Help arguments',
+    #                                     'Options to get help')
+
+    # help_parser.add_argument('-gh', '--getHelp', choices=['attack', 'examples'],
+    #                          help='Get help of specific arguments')
     return parser
 
 def main():
 
     parser = hattackCLIParser()
     args = parser.parse_args()
+
+    # help_parser
+    # if args.getHelp:
+    #     helpme = args.getHelp
+    #     if helpme == 'attack':
+    #         attackModes = {'john': John.attackMode,
+    #                        'hashcat': Hashcat.attackMode}
+
+
+    #             print("\n")
+
+    #     elif helpme == 'examples':
+    #         pass
+
 
     if args.ifile: # read the argument from a ini file
         ifile = args.ifile
@@ -131,6 +176,7 @@ def main():
             raise PermissionError
     else:
         # fundamental arguments
+        wordlist = args.wordlist
         masksFile = args.masks
         hashType = args.hashType
         hashFile = args.hashFile
@@ -154,7 +200,7 @@ def main():
                   partition   = partition,
                   cpusPerTask = cpusPerTask,
                   memPerCpu   = memPerCpu,
-                  jobName     = jobname,
+                  jobName     = jobName,
                   output      = output,
                   error       = error,
                   time        = time,
@@ -164,94 +210,18 @@ def main():
         attackMode = args.attack
         cracker = args.cracker
 
-    if args.cracker == "jtr":
+    if args.cracker in "jtr":
         John.selectAttack(attackMode = attackMode,
                           hashType = hashType,
                           hashFile = hashFile,
                           wordlist = wordlist,
-                          maskFile = maskFile,
+                          masksFile = masksFile,
                           hpc = hpc)
 
-    elif args.cracker == "hc":
+    elif args.cracker in "hc":
         Hashcat.selectAttack(attackMode = attackMode,
                              hashType = hashType,
                              hashFile = hashFile,
                              wordlist = wordlist,
-                             maskFile = maskFile,
+                             masksFile = masksFile,
                              hpc = hpc)
-
-
-
-# def debugAttack():
-#     parser = hattackCLIParser()
-#     args = parser.parse_args()
-
-#     # fundamental arguments
-#     masksFile = args.masks
-#     hashType = args.hashType
-#     hashFile = args.hashFile
-
-#     # hpc arguments
-#     gpus        = args.gpu
-#     nodes       = args.nodes
-#     ntasks      = args.ntasks
-#     partition   = args.partition
-#     cpusPerTask = args.cpusPerTask
-#     memPerCpu   = args.memPerCpu
-#     jobName     = args.jobname
-#     output      = args.output
-#     error       = args.error
-#     time        = args.time
-#     slurmScript = args.slurm
-
-
-#     # hpc = HPC(gpus        = gpus,
-#     #           nodes       = nodes,
-#     #           ntasks      = ntasks,
-#     #           partition   = partition,
-#     #           cpusPerTask = cpusPerTask,
-#     #           memPerCpu   = memPerCpu,
-#     #           jobName     = jobname,
-#     #           output      = output,
-#     #           error       = error,
-#     #           time        = time,
-#     #           slurmScript = slurmScript)
-
-
-#     # password cracker arguments
-#     attackMode = args.attack
-#     cracker =  args.cracker
-
-#     print("[+] Fundamental arguments.")
-#     print(f"""
-#     masksFile = {args.masks}
-#     hashType = {args.hashType}
-#     hashFile = {args.hashFile}
-#     """)
-
-
-#     print("[+] HPC arguments.")
-#     print(f"""
-#     gpus        = {args.gpu}
-#     nodes       = {args.nodes}
-#     ntasks      = {args.ntasks}
-#     partition   = {args.partition}
-#     cpusPerTask = {args.cpusPerTask}
-#     memPerCpu   = {args.memPerCpu}
-#     jobName     = {args.jobname}
-#     output      = {args.output}
-#     error       = {args.error}
-#     time        = {args.time}
-#     slurmScript = {args.slurm}
-#     """)
-
-
-#     print("[+] Password Cracker arguments.")
-#     print(f"""
-#     attackMode = {args.attack}
-#     cracker =  {args.cracker}
-#     """)
-
-# if __name__ == "__main__":
-#     #debugAttack()
-#     main()

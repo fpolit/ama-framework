@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+#
+# PasswordCracker - main class to generate password crackers (john, hashcat, ...)
+#
+#
+# Maintainer: glozanoa <glozanoa@uni.pe>
 
 import re
 import os
@@ -9,9 +14,10 @@ from fineprint.status import print_failure, print_successful, print_status
 from .PasswordCrackerExceptions import CrackerExecNotFound
 from .PasswordCrackerExceptions import InvalidCracker
 from .PasswordCrackerExceptions import NotSupportedCracker
+
 # base module imports
 from ..base.FilePath import FilePath
-
+from ..base.ExecPath import getExecPath
 
 class PasswordCracker:
     """
@@ -36,15 +42,18 @@ class PasswordCracker:
 
     @staticmethod
     def checkAttackArgs(*,
-                        __hashFile=None,
-                        __wordlist=None,
-                        __maskFile=None):
+                        _hashFile=None,
+                        _wordlist=None, # can be a list of wordlists
+                        _masksFile=None):
         """
-        check the read permission of hashFile, wordlist and maskFile files
+        check the read permission of hashFile, wordlist and masksFile files
         """
 
         # validation of existence and read access of input file arguments
-        for inputFile in [__hashFile, *__wordlist, __maskFile]:
+        if not isinstance(_wordlist, list):
+            _wordlist = [_wordlist]
+
+        for inputFile in [_hashFile, *_wordlist, _masksFile]:
             if inputFile:
                 inputFilePath = FilePath(inputFile)
                 if not inputFilePath.checkReadAccess():
@@ -80,7 +89,7 @@ class PasswordCracker:
     @staticmethod
     def hashStatus(cracker, queryHash, potfile=None):
         # NOTE: CHECK crackedPattern
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         if cracker  in PasswordCracker.crackers:
             if potfile:
                 potFilePath = FilePath(potfile)
@@ -137,7 +146,7 @@ class PasswordCracker:
         True - if all the hashes in hashFile are cracked
         False - if some hashe in hashFile isn't cracked
         """
-        hashFilePath = FilePath(strHashFile)
+        hashFilePath = FilePath(hashFile)
 
         if hashFilePath.checkReadAccess():
             with open(hashFilePath , 'r') as _hashFile:
@@ -185,12 +194,17 @@ class PasswordCracker:
                 self.status = False
         else:
             # searching the executable plugin in the PATH
-            execPath = os.get_exec_path()
+            #import pdb; pdb.set_trace()
+            execPath = getExecPath()
+            self.exec = []
             for name in self.name:
                 nameExec = re.compile(rf"{name}(\.exe)?")
                 for dirPath in execPath:
                     dirname = dirPath
+                    #print(f"dirname: {dirname}")
                     for executable in os.listdir(dirPath):
+                        #if os.path.isfile(executable):
+                        #print(f"\texecutable : {executable}")
                         if nameExec.fullmatch(executable):
                             execPath = os.path.join(dirname, executable)
                             self.exec.append(execPath)
@@ -213,7 +227,7 @@ class PasswordCracker:
                 print_failure(f"No {self.name} executable in the PATH")
                 return False
 
-    def _validate_status(self):
+    def validateStatus(self):
         if self.checkStatus():
             print_successful(f"Plugin {self.name} is currently active.")
         else:

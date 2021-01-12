@@ -14,6 +14,8 @@ from ..cracker.PasswordCracker import PasswordCracker
 # utilitie module imports
 from .utilitiesExceptions import NoArgumentProvided
 
+# base module imports
+from ..base.FilePath import FilePath
 
 def main():
     parser = argparse.ArgumentParser(description="Check hash status - hattack utility", prog='hstatus')
@@ -33,7 +35,7 @@ def main():
         if pargs.hashFile: # an hash file was supplied
             hashFilePath = FilePath(pargs.hashFile)
             with open(hashFilePath, 'r') as hashFile:
-                while queryHash := hashfile.readline().rstrip():
+                while queryHash := hashFile.readline().rstrip():
                     hashStatus, cracker = PasswordCracker.globalHashStatus(queryHash)
 
                     if hashStatus: # hashStatus = True (is cracked)
