@@ -4,7 +4,7 @@ clean:
 	find . -name '*.py[co]' -delete
 
 virtualenv:
-	virtualenv --prompt '|> mattack <| ' env
+	virtualenv --prompt '|> hattack <| ' env
 	env/bin/pip3 install -r requirements-dev.txt
 	env/bin/python3 setup.py develop
 	@echo
@@ -28,7 +28,7 @@ installdev:
 test:
 	env/bin/python3 -m pytest \
 		-v \
-		--cov=mattack \
+		--cov=hattack \
 		--cov-report=term \
 		--cov-report=html:coverage-report \
 		tests/
