@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from setuptools import setup, find_packages
-from mattack.version import get_version
+from hattack.utilities.version import get_version
 
 VERSION = get_version()
 
@@ -9,14 +9,14 @@ LONG_DESCRIPTION = f.read()
 f.close()
 
 setup(
-    name='mattack',
+    name='hattack',
     version=VERSION,
-    description='mattack allow you perform parallel Mask Attacks in a cluster.',
+    description='hattack allow you perform several hash attacks in a cluster',
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',
     author='glozanoa',
     author_email='glozanoa@uni.pe',
-    url='https://gitlab.com/spolit/mattack.git',
+    url='https://gitlab.com/spolit/hattack.git',
     license='unlicensed',
     packages=find_packages(exclude=['ez_setup', 'tests*']),
     #package_data={'mattack': ['templates/*']},
@@ -28,9 +28,9 @@ setup(
     include_package_data=True,
     entry_points={
         'console_scripts':[
-            'mattack = mattack.attack:main',
-            'msearch = mattack.search:main',
-            'mstatus = mattack.status:main'
+            'hattack = hattack.attacks.attack:main',
+            'hsearch = hattack.utilities.search:main',
+            'hstatus = hattack.utilities.status:main'
             ]
     },
 )
