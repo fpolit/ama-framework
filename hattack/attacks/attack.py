@@ -2,9 +2,11 @@
 
 import argparse
 from configparser import ConfigParser
-#from ..cracker import John, Hashcat
-#from ..hpc.HPC import HPC
+from ..cracker import John, Hashcat
+from ..hpc.HPC import HPC
 from ..base.FilePath import FilePath
+
+
 def hattackCLIParser():
     parser = argparse.ArgumentParser(description="Hash attack manager", prog='hattack')
 
@@ -105,7 +107,7 @@ def main():
             ntasks      = hpc.getint(ntasks, 1)
             partition   = hpc.get(partition, None)
             cpusPerTask = hpc.getint(cpusPerTask, 1)
-            memPerCpu   = hpc.get(memPerCpu '4GB')
+            memPerCpu   = hpc.get(memPerCpu, '4GB')
             jobName     = hpc.get(jobname, 'hashAttack')
             output      = hpc.get(output, None)
             error       = hpc.get(error, None)
@@ -180,75 +182,76 @@ def main():
 
 
 
-def debugAttack():
-    parser = hattackCLIParser()
-    args = parser.parse_args()
+# def debugAttack():
+#     parser = hattackCLIParser()
+#     args = parser.parse_args()
 
-    # fundamental arguments
-    masksFile = args.masks
-    hashType = args.hashType
-    hashFile = args.hashFile
+#     # fundamental arguments
+#     masksFile = args.masks
+#     hashType = args.hashType
+#     hashFile = args.hashFile
 
-    # hpc arguments
-    gpus        = args.gpu
-    nodes       = args.nodes
-    ntasks      = args.ntasks
-    partition   = args.partition
-    cpusPerTask = args.cpusPerTask
-    memPerCpu   = args.memPerCpu
-    jobName     = args.jobname
-    output      = args.output
-    error       = args.error
-    time        = args.time
-    slurmScript = args.slurm
-
-
-    # hpc = HPC(gpus        = gpus,
-    #           nodes       = nodes,
-    #           ntasks      = ntasks,
-    #           partition   = partition,
-    #           cpusPerTask = cpusPerTask,
-    #           memPerCpu   = memPerCpu,
-    #           jobName     = jobname,
-    #           output      = output,
-    #           error       = error,
-    #           time        = time,
-    #           slurmScript = slurmScript)
+#     # hpc arguments
+#     gpus        = args.gpu
+#     nodes       = args.nodes
+#     ntasks      = args.ntasks
+#     partition   = args.partition
+#     cpusPerTask = args.cpusPerTask
+#     memPerCpu   = args.memPerCpu
+#     jobName     = args.jobname
+#     output      = args.output
+#     error       = args.error
+#     time        = args.time
+#     slurmScript = args.slurm
 
 
-    # password cracker arguments
-    attackMode = args.attack
-    cracker =  args.cracker
-
-    print("[+] Fundamental arguments.")
-    print(f"""
-    masksFile = {args.masks}
-    hashType = {args.hashType}
-    hashFile = {args.hashFile}
-    """)
-
-
-    print("[+] HPC arguments.")
-    print(f"""
-    gpus        = {args.gpu}
-    nodes       = {args.nodes}
-    ntasks      = {args.ntasks}
-    partition   = {args.partition}
-    cpusPerTask = {args.cpusPerTask}
-    memPerCpu   = {args.memPerCpu}
-    jobName     = {args.jobname}
-    output      = {args.output}
-    error       = {args.error}
-    time        = {args.time}
-    slurmScript = {args.slurm}
-    """)
+#     # hpc = HPC(gpus        = gpus,
+#     #           nodes       = nodes,
+#     #           ntasks      = ntasks,
+#     #           partition   = partition,
+#     #           cpusPerTask = cpusPerTask,
+#     #           memPerCpu   = memPerCpu,
+#     #           jobName     = jobname,
+#     #           output      = output,
+#     #           error       = error,
+#     #           time        = time,
+#     #           slurmScript = slurmScript)
 
 
-    print("[+] Password Cracker arguments.")
-    print(f"""
-    attackMode = {args.attack}
-    cracker =  {args.cracker}
-    """)
+#     # password cracker arguments
+#     attackMode = args.attack
+#     cracker =  args.cracker
 
-if __name__ == "__main__":
-    debugAttack()
+#     print("[+] Fundamental arguments.")
+#     print(f"""
+#     masksFile = {args.masks}
+#     hashType = {args.hashType}
+#     hashFile = {args.hashFile}
+#     """)
+
+
+#     print("[+] HPC arguments.")
+#     print(f"""
+#     gpus        = {args.gpu}
+#     nodes       = {args.nodes}
+#     ntasks      = {args.ntasks}
+#     partition   = {args.partition}
+#     cpusPerTask = {args.cpusPerTask}
+#     memPerCpu   = {args.memPerCpu}
+#     jobName     = {args.jobname}
+#     output      = {args.output}
+#     error       = {args.error}
+#     time        = {args.time}
+#     slurmScript = {args.slurm}
+#     """)
+
+
+#     print("[+] Password Cracker arguments.")
+#     print(f"""
+#     attackMode = {args.attack}
+#     cracker =  {args.cracker}
+#     """)
+
+# if __name__ == "__main__":
+#     #debugAttack()
+#     main()
