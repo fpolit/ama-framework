@@ -22,7 +22,7 @@ def main():
 
     # check subparse
     parser.add_argument('-qh', '--queryHash', type=str,
-                        help='Hash (or hash file) to check status')
+                        help='Hash to check status')
     # if --file is true, then the hash is a hash file (name of the file) otherwise is a simple hash
     parser.add_argument('-hf', '--hashFile', type=str,
                         help='Allow supplied a hash file (check the status of all the hashes in the file)')

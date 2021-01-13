@@ -38,11 +38,11 @@ from ..utilities.combinator import InvalidWordlistNumber
 class John(PasswordCracker):
     hashes = hashes
 
-    attackMode = {0:"Single",
+    attackMode = {0:"Wordlist",
                   1:"Combination",
-                  2:"Wordlist",
-                  3:"Incremental",
-                  4:"Mask",
+                  2:"Incremental",
+                  3:"Mask",
+                  4:"Single",
                   6:"Hybrid Wordlist + Mask",
                   7:"Hybrid Mask + Wordlist"}
 
@@ -107,14 +107,14 @@ class John(PasswordCracker):
                 masksFile=None,
                 hpc = None):
 
-        #import pdb; pdb.set_trace()
-
         # contruction of hashcat cmd to execute
         John.checkAttackMode(attackMode)
-        if attackMode == 0:# single attack
-            JTRAttacks.single(hashType = hashType,
-                              hashFile = hashFile,
-                              hpc = hpc)
+        if attackMode == 0: #wordlist attack
+            JTRAttacks.wordlist(hashType = hashType,
+                                hashFile = hashFile,
+                                wordlist = wordlist,
+                                hpc = hpc)
+
 
         elif attackMode == 1:# combination attack
             JTRAttacks.combination(hashType = hashType,
@@ -122,22 +122,24 @@ class John(PasswordCracker):
                                    wordlists = wordlist, # (right) wordlist is a list of wordlist
                                    hpc = hpc)
 
-        elif attackMode == 2: #wordlist attack
-            JTRAttacks.wordlist(hashType = hashType,
-                                hashFile = hashFile,
-                                wordlist = wordlist,
-                                hpc = hpc)
 
-        elif attackMode == 3: #incremental attack
+        elif attackMode == 2: #incremental attack
             JTRAttacks.incremental(hashType = hashType,
                                    hashFile = hashFile,
                                    hpc = hpc)
 
-        elif attackMode == 4: #mask attack
+
+        elif attackMode == 3: #mask attack
             JTRAttacks.maskAttack(hashType = hashType,
                                   hashFile = hashFile,
                                   masksFile = masksFile,
                                   hpc = hpc)
+
+
+        elif attackMode == 4:# single attack
+            JTRAttacks.single(hashType = hashType,
+                              hashFile = hashFile,
+                              hpc = hpc)
 
         elif attackMode == 6: #hybrid - wordlist + mask  attack
             JTRAttacks.hybridWMF(hashType = hashType,
@@ -152,7 +154,6 @@ class John(PasswordCracker):
                                  wordlist = wordlist,
                                  masksFile = masksFile,
                                  hpc = hpc)
-
 
 
     @staticmethod
@@ -173,12 +174,13 @@ class John(PasswordCracker):
 class JTRAttacks:
 
     @staticmethod
-    def single(*, attackMode=0, hashType, hashFile, hpc=None):
+    def wordlist(*, attackMode=0, hashType, hashFile, wordlist, hpc=None):
         John.checkAttackArgs(_hashType=hashType,
                              _hashFile=hashFile,
                              _wordlist=wordlist)
         jtr = John()
-        print_status(f"Attacking {hashType} hashes in {hashFile} hash file in straigth  mode.")
+        #import pdb; pdb.set_trace()
+        print_status(f"Attacking {hashType} hashes in {hashFile} hash file with {wordlist} wordlist in wordlist attack mode.")
         if hpc.partition:
             parallelJobType = hpc.parserParallelJob()
             if not  parallelJobType in ["MPI", "OMP"]:
@@ -186,18 +188,18 @@ class JTRAttacks:
 
             slurm, extra = hpc.parameters()
             if parallelJobType == "MPI":
-                parallelWork = [f"srun mpirun {jtr.mainexec} --format={hashType} {hashFile}"]
+                parallelWork = [f"srun mpirun {jtr.mainexec} --wordlist={wordlist} --format={hashType} {hashFile}"]
 
             elif parallelJobType == "OMP":
-                parallelWork = [f"srun {jtr.mainexec} --format={hashType} {hashFile}"]
+                parallelWork = [f"srun {jtr.mainexec} --wordlist={wordlist} --format={hashType} {hashFile}"]
 
-            slurmScriptName = extra['slurm-script']
+            #slurmScriptName = extra['slurm-script']
             HPC.genScript(slurm, extra, parallelWork)
             #Bash.exec("sbatch {slurmScriptName}")
 
         else:
-            singleAttack =   f"{jtr.mainexec} -a {attackMode} -m {hashType} {hashFile} {wordlist}"
-            #Bash.exec(singleAttack)
+            wordlistAttack =   f"{jtr.mainexec} --wordlist={wordlist} --format={hashType} {hashFile}"
+            Bash.exec(wordlistAttack)
 
     @staticmethod
     def combination(*, attackMode=1, hashType, hashFile, wordlists=[], combinedWordlist="combined.txt", hpc=None):
@@ -213,35 +215,7 @@ class JTRAttacks:
 
 
     @staticmethod
-    def wordlist(*, attackMode=2, hashType, hashFile, wordlist, hpc=None):
-        John.checkAttackArgs(_hashType=hashType,
-                             _hashFile=hashFile,
-                             _wordlist=wordlist)
-        jtr = John()
-        print_status(f"Attacking {hashType} hashes in {hashFile} hash file with {wordlist} wordlist in wordlist attack  mode.")
-        if hpc.partition:
-            parallelJobType = hpc.parserParallelJob()
-            if not  parallelJobType in ["MPI", "OMP"]:
-                raise ParallelWorkError(parallelJobType)
-
-            slurm, extra = hpc.parameters()
-            if parallelJobType == "MPI":
-                parallelWork = [f"srun mpirun {jtr.mainexec} --wordlist={wordlist} --format={hashType} {hashFile}"]
-
-            elif parallelJobType == "OMP":
-                parallelWork = [f"srun {jtr.mainexec} --wordlist={wordlist} --format={hashType} {hashFile}"]
-
-            slurmScriptName = extra['slurm-script']
-            HPC.genScript(slurm, extra, parallelWork)
-            #Bash.exec("sbatch {slurmScriptName}")
-
-        else:
-            wordlistAttack =   f"{jtr.mainexec} --wordlist={wordlist} --format={hashType} {hashFile}"
-            #Bash.exec(wordlistAttack)
-
-
-    @staticmethod
-    def incremental(*, attackMode=3, hashType, hashFile, hpc=None):
+    def incremental(*, attackMode=2, hashType, hashFile, hpc=None):
         John.checkAttackArgs(_hashType=hashType,
                              _hashFile=hashFile)
         jtr = John()
@@ -268,7 +242,7 @@ class JTRAttacks:
 
 
     @staticmethod
-    def maskAttack(*, attackMode=4, hashType, hashFile, masksFile, hpc=None):
+    def maskAttack(*, attackMode=3, hashType, hashFile, masksFile, hpc=None):
         John.checkAttackArgs(_hashType=hashType,
                              _hashFile=hashFile,
                              _masksFile=masksFile)
@@ -303,6 +277,33 @@ class JTRAttacks:
                         #Bash.exec(maskAttack)
 
 
+
+    @staticmethod
+    def single(*, attackMode=4, hashType, hashFile, hpc=None):
+        John.checkAttackArgs(_hashType=hashType,
+                             _hashFile=hashFile,
+                             _wordlist=wordlist)
+        jtr = John()
+        print_status(f"Attacking {hashType} hashes in {hashFile} hash file in straigth  mode.")
+        if hpc.partition:
+            parallelJobType = hpc.parserParallelJob()
+            if not  parallelJobType in ["MPI", "OMP"]:
+                raise ParallelWorkError(parallelJobType)
+
+            slurm, extra = hpc.parameters()
+            if parallelJobType == "MPI":
+                parallelWork = [f"srun mpirun {jtr.mainexec} --format={hashType} {hashFile}"]
+
+            elif parallelJobType == "OMP":
+                parallelWork = [f"srun {jtr.mainexec} --format={hashType} {hashFile}"]
+
+            slurmScriptName = extra['slurm-script']
+            HPC.genScript(slurm, extra, parallelWork)
+            #Bash.exec("sbatch {slurmScriptName}")
+
+        else:
+            singleAttack =   f"{jtr.mainexec} -a {attackMode} -m {hashType} {hashFile} {wordlist}"
+            #Bash.exec(singleAttack)
 
     @staticmethod
     def hybridWMF(*, attackMode=6, hashType, hashFile, wordlist, masksFile, hpc=None):

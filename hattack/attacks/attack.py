@@ -6,6 +6,7 @@ from argparse import RawTextHelpFormatter
 from configparser import ConfigParser
 
 # cracker modules import
+from ..cracker.PasswordCracker import PasswordCracker
 from ..cracker.John import John
 from ..cracker.Hashcat import Hashcat
 
@@ -37,10 +38,10 @@ def hattackCLIParser():
 
     # Password cracker parameters
     cracker_parser = parser.add_argument_group('Password Cracker arguments')
-    cracker_parser.add_argument('-c', '--cracker', type=str, choices=['hc', 'jtr'],
+    cracker_parser.add_argument('-c', '--cracker', type=str, choices=PasswordCracker.crackers,
                                 required=True, help="Password Cracker")
 
-
+    #import pdb; pdb.set_
     attackModes = {'john': John.attackMode,
                    'hashcat': Hashcat.attackMode}
     helpAttackMode = ""
@@ -77,7 +78,7 @@ def hattackCLIParser():
     hpc_parser.add_argument('-mc', '--memPerCpu', type=str, default="4GB",
                 help='Memory per CPU(node)')
 
-    hpc_parser.add_argument('-j', '--jobname', type=str, default="maskattack",
+    hpc_parser.add_argument('-j', '--jobname', type=str, default="hashattack",
                         help='Slurm Job Name')
 
     hpc_parser.add_argument('-o', '--output', type=str, default=None,
@@ -86,7 +87,7 @@ def hattackCLIParser():
     hpc_parser.add_argument('-e', '--error', type=str, default=None,
                         help='Slurm Error File Name')
 
-    hpc_parser.add_argument('-s', '--slurm', type=str, default="mattack.slurm",
+    hpc_parser.add_argument('-s', '--slurm', type=str, default="hashattack.slurm",
                         help='Slurm Submit Script Name')
 
     hpc_parser.add_argument('-t', '--time', type=str, default=None,
@@ -210,7 +211,7 @@ def main():
         attackMode = args.attack
         cracker = args.cracker
 
-    if args.cracker in "jtr":
+    if args.cracker in ["john", "jtr"]:
         John.selectAttack(attackMode = attackMode,
                           hashType = hashType,
                           hashFile = hashFile,
@@ -218,7 +219,7 @@ def main():
                           masksFile = masksFile,
                           hpc = hpc)
 
-    elif args.cracker in "hc":
+    elif args.cracker in ["hashcat", "hc"]:
         Hashcat.selectAttack(attackMode = attackMode,
                              hashType = hashType,
                              hashFile = hashFile,

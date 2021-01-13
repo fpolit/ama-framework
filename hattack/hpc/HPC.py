@@ -103,10 +103,12 @@ class HPC:
         with open(slurmScriptName, 'w') as slurmScript:
             slurmScript.write("#!/bin/bash\n")
             for flag, argument in slurm.items():
-                if not flag == "gpu":
+                if flag != "gpu" and argument != None:
                     slurmScript.write(f"#SBATCH --{flag}={argument}\n")
+
                 else:
-                    slurmScript.write(f"#SBATCH --gres={flag}:{argument}\n")
+                    if argument > 0:
+                        slurmScript.write(f"#SBATCH --gres={flag}:{argument}\n")
 
             whiteLine = "\n"
             slurmScript.write(whiteLine)
@@ -121,7 +123,7 @@ class HPC:
 
         parallelWork (list[str]): paralell tasks to perform [task1, task2, ...]
         """
-
+        import pdb; pdb.set_trace()
         #slurm, extra = self.parameters()
         slurmScriptName = extra['slurm-script']
 
@@ -132,7 +134,8 @@ class HPC:
                 if not flag == "gpu":
                     slurmScript.write(f"#SBATCH --{flag}={argument}\n")
                 else:
-                    slurmScript.write(f"#SBATCH --gres={flag}:{argument}\n")
+                    if argument > 0:
+                        slurmScript.write(f"#SBATCH --gres={flag}:{argument}\n")
 
             whiteLine = "\n"
             slurmScript.write(whiteLine)
