@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys
 import argparse
 from argparse import RawTextHelpFormatter
 
@@ -16,9 +17,12 @@ from ..hpc.HPC import HPC
 # base modules import
 from ..base.FilePath import FilePath
 
+# utilities modes import
+from ..utilities.version import get_version
 
 def hattackCLIParser():
-    parser = argparse.ArgumentParser(description="Hash attack manager", prog='hattack',
+    VERSION = get_version()
+    parser = argparse.ArgumentParser(description=f"Hash attack manager - {VERSION}", prog='hattack',
                                      formatter_class=RawTextHelpFormatter)
 
     parser.add_argument('hashFile',
@@ -35,6 +39,13 @@ def hattackCLIParser():
 
     parser.add_argument('-i', '--ifile', default=None,
                         help='input arguments file')
+
+    # parser.add_argument('-h', '--help',
+    #                     help='show help')
+
+    # parser.add_argument('-v', '--version', action='store_true', default=False,
+    #                     help='show hattack version')
+
 
     # Password cracker parameters
     cracker_parser = parser.add_argument_group('Password Cracker arguments')
@@ -75,7 +86,7 @@ def hattackCLIParser():
     hpc_parser.add_argument('-ct', '--cpusPerTask', type=int, default=1,
                     help='Number of tasks per CPU(OMP Threads)')
 
-    hpc_parser.add_argument('-mc', '--memPerCpu', type=str, default="4GB",
+    hpc_parser.add_argument('-mc', '--memPerCpu', type=str, default="1GB",
                 help='Memory per CPU(node)')
 
     hpc_parser.add_argument('-j', '--jobname', type=str, default="hashattack",
@@ -106,6 +117,10 @@ def main():
 
     parser = hattackCLIParser()
     args = parser.parse_args()
+
+    # if args.version:
+    #     print_status(f"hattach version: {get_version()}")
+    #     sys.exit(1)
 
     # help_parser
     # if args.getHelp:

@@ -3,6 +3,9 @@
 clean:
 	find . -name '*.py[co]' -delete
 
+cleanslurm:
+	rm slurm-*.out
+
 virtualenv:
 	virtualenv --prompt '|> hattack <| ' env
 	env/bin/pip3 install -r requirements-dev.txt

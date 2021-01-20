@@ -29,7 +29,7 @@ class AttackModeError(Exception):
 
 class CrackerHashError(Exception):
     def __init__(self, cracker, hashType):
-        self.cracker = cracker.name
+        self.cracker = cracker.getName()
         self.hashType = hashType
         self.warningMsg = f"Invalid {self.cracker} hash type: {self.hashType}"
         super().__init__(self.warningMsg)

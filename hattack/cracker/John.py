@@ -2,8 +2,16 @@
 
 """
 # John class
-# Jan 9 2021 - Implementation of John class
-                (using core module of john python package)
+#
+# Jan 9 2021
+## Implementation of John class
+#  using core module of john python package
+#
+# Jan 18 2021
+## wordlist attack JTRAttacks debugged
+# There is a problem when submitting a MPI parallel job in slurm. It exits with error
+# So submit again it solve the problem (with sbatch).
+#
 #
 # Maintainer: glozanoa <glozanoa@uni.pe>
 """
@@ -173,13 +181,13 @@ class John(PasswordCracker):
 
 class JTRAttacks:
 
+    # debugged
     @staticmethod
     def wordlist(*, attackMode=0, hashType, hashFile, wordlist, hpc=None):
         John.checkAttackArgs(_hashType=hashType,
                              _hashFile=hashFile,
                              _wordlist=wordlist)
         jtr = John()
-        #import pdb; pdb.set_trace()
         print_status(f"Attacking {hashType} hashes in {hashFile} hash file with {wordlist} wordlist in wordlist attack mode.")
         if hpc.partition:
             parallelJobType = hpc.parserParallelJob()
@@ -191,11 +199,13 @@ class JTRAttacks:
                 parallelWork = [f"srun mpirun {jtr.mainexec} --wordlist={wordlist} --format={hashType} {hashFile}"]
 
             elif parallelJobType == "OMP":
-                parallelWork = [f"srun {jtr.mainexec} --wordlist={wordlist} --format={hashType} {hashFile}"]
+                parallelWork = [f"{jtr.mainexec} --wordlist={wordlist} --format={hashType} {hashFile}"]
 
-            #slurmScriptName = extra['slurm-script']
+
             HPC.genScript(slurm, extra, parallelWork)
-            #Bash.exec("sbatch {slurmScriptName}")
+
+            slurmScriptName = extra['slurm-script']
+            Bash.exec(f"sbatch {slurmScriptName}")
 
         else:
             wordlistAttack =   f"{jtr.mainexec} --wordlist={wordlist} --format={hashType} {hashFile}"
@@ -214,6 +224,7 @@ class JTRAttacks:
                             wordlist = combinedWordlistPath)
 
 
+    #debugged
     @staticmethod
     def incremental(*, attackMode=2, hashType, hashFile, hpc=None):
         John.checkAttackArgs(_hashType=hashType,
@@ -230,15 +241,16 @@ class JTRAttacks:
                 parallelWork = [f"srun mpirun {jtr.mainexec} --format={hashType} {hashFile}"]
 
             elif parallelJobType == "OMP":
-                parallelWork = [f"srun {jtr.mainexec} --format={hashType} {hashFile}"]
+                parallelWork = [f"{jtr.mainexec} --format={hashType} {hashFile}"]
+
+            HPC.genScript(slurm, extra, parallelWork)
 
             slurmScriptName = extra['slurm-script']
-            HPC.genScript(slurm, extra, parallelWork)
-            #Bash.exec("sbatch {slurmScriptName}")
+            Bash.exec(f"sbatch {slurmScriptName}")
 
         else:
             incrementalAttack =   f"{jtr.mainexec} --format={hashType} {hashFile}"
-            #Bash.exec(incrementalAttack)
+            Bash.exec(incrementalAttack)
 
 
     @staticmethod
@@ -274,7 +286,7 @@ class JTRAttacks:
                     if not PasswordCracker.globalHashFileStatus(hashFile):
                         maskAttack =   f"{jtr.mainexec} --mask={mask} --format={hashType} {hashFile}"
                         print_status(f"Running: {maskAttack}")
-                        #Bash.exec(maskAttack)
+                        Bash.exec(maskAttack)
 
 
 
@@ -295,7 +307,7 @@ class JTRAttacks:
                 parallelWork = [f"srun mpirun {jtr.mainexec} --format={hashType} {hashFile}"]
 
             elif parallelJobType == "OMP":
-                parallelWork = [f"srun {jtr.mainexec} --format={hashType} {hashFile}"]
+                parallelWork = [f"{jtr.mainexec} --format={hashType} {hashFile}"]
 
             slurmScriptName = extra['slurm-script']
             HPC.genScript(slurm, extra, parallelWork)

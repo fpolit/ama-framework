@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+#
 # hstatus utilities - check the status of a hash or an hash file
 #
 # Maintainer: glozanoa <glozanoa@uni.pe>
@@ -16,6 +16,7 @@ from .utilitiesExceptions import NoArgumentProvided
 
 # base module imports
 from ..base.FilePath import FilePath
+
 
 def main():
     parser = argparse.ArgumentParser(description="Check hash status - hattack utility", prog='hstatus')
@@ -36,18 +37,32 @@ def main():
             hashFilePath = FilePath(pargs.hashFile)
             with open(hashFilePath, 'r') as hashFile:
                 while queryHash := hashFile.readline().rstrip():
-                    hashStatus, cracker = PasswordCracker.globalHashStatus(queryHash)
 
-                    if hashStatus: # hashStatus = True (is cracked)
-                        print_successful(f"cracked ({cracker})\t{queryHash}")
-                    else: # hashStatus = False (not cracked yet)
+                    hashStatus, *crackedHash = PasswordCracker.globalHashStatus(queryHash)
+
+                    if hashStatus:
+                        cracker, crackedHashPot = crackedHash
+                        if cracker in ["john", "jtr"]:
+                            hashType, queryHash, password = crackedHashPot
+                            print_successful(f"cracked ({cracker}: {hashType}\t{queryHash}\t{password})")
+                        elif cracker in ["hashcat", "hc"]:
+                            queryHash, password = crackedHashPot
+                            print_successful(f"cracked ({cracker}: {queryHash}\t{password})")
+                    else:
                         print_failure(f"uncracked\t{queryHash}")
+
 
         if pargs.queryHash:   # pargs.queryHash is simply an hash
             queryHash = pargs.queryHash
-            hashStatus, cracker = PasswordCracker.globalHashStatus(queryHash)
+            hashStatus, *crackedHash = PasswordCracker.globalHashStatus(queryHash)
 
             if hashStatus:
-                print_successful(f"cracked ({cracker})\t{queryHash}")
+                cracker, crackedHashPot = crackedHash
+                if cracker in ["john", "jtr"]:
+                    hashType, queryHash, password = crackedHashPot
+                    print_successful(f"cracked ({cracker}: {hashType}\t{queryHash}\t{password})")
+                elif cracker in ["hashcat", "hc"]:
+                    queryHash, password = crackedHashPot
+                    print_successful(f"cracked ({cracker}: {queryHash}\t{password})")
             else:
                 print_failure(f"uncracked\t{queryHash}")
