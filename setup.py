@@ -30,7 +30,8 @@ setup(
         'console_scripts':[
             'hattack = hattack.attacks.attack:main',
             'hsearch = hattack.utilities.search:main',
-            'hstatus = hattack.utilities.status:main'
-            ]
+            'hstatus = hattack.utilities.status:main',
+            'hcombine = hattack.cli.combinator:main'
+        ]
     },
 )

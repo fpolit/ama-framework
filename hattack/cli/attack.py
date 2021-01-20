@@ -17,7 +17,7 @@ from ..hpc.HPC import HPC
 # base modules import
 from ..base.FilePath import FilePath
 
-# utilities modes import
+# utilities modules import
 from ..utilities.version import get_version
 
 def hattackCLIParser():

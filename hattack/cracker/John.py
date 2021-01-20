@@ -290,32 +290,32 @@ class JTRAttacks:
 
 
 
-    @staticmethod
-    def single(*, attackMode=4, hashType, hashFile, hpc=None):
-        John.checkAttackArgs(_hashType=hashType,
-                             _hashFile=hashFile,
-                             _wordlist=wordlist)
-        jtr = John()
-        print_status(f"Attacking {hashType} hashes in {hashFile} hash file in straigth  mode.")
-        if hpc.partition:
-            parallelJobType = hpc.parserParallelJob()
-            if not  parallelJobType in ["MPI", "OMP"]:
-                raise ParallelWorkError(parallelJobType)
+    # @staticmethod
+    # def single(*, attackMode=4, hashType, hashFile, hpc=None):
+    #     John.checkAttackArgs(_hashType=hashType,
+    #                          _hashFile=hashFile,
+    #                          _wordlist=wordlist)
+    #     jtr = John()
+    #     print_status(f"Attacking {hashType} hashes in {hashFile} hash file in straigth  mode.")
+    #     if hpc.partition:
+    #         parallelJobType = hpc.parserParallelJob()
+    #         if not  parallelJobType in ["MPI", "OMP"]:
+    #             raise ParallelWorkError(parallelJobType)
 
-            slurm, extra = hpc.parameters()
-            if parallelJobType == "MPI":
-                parallelWork = [f"srun mpirun {jtr.mainexec} --format={hashType} {hashFile}"]
+    #         slurm, extra = hpc.parameters()
+    #         if parallelJobType == "MPI":
+    #             parallelWork = [f"srun mpirun {jtr.mainexec} --format={hashType} {hashFile}"]
 
-            elif parallelJobType == "OMP":
-                parallelWork = [f"{jtr.mainexec} --format={hashType} {hashFile}"]
+    #         elif parallelJobType == "OMP":
+    #             parallelWork = [f"{jtr.mainexec} --format={hashType} {hashFile}"]
 
-            slurmScriptName = extra['slurm-script']
-            HPC.genScript(slurm, extra, parallelWork)
-            #Bash.exec("sbatch {slurmScriptName}")
+    #         slurmScriptName = extra['slurm-script']
+    #         HPC.genScript(slurm, extra, parallelWork)
+    #         #Bash.exec("sbatch {slurmScriptName}")
 
-        else:
-            singleAttack =   f"{jtr.mainexec} -a {attackMode} -m {hashType} {hashFile} {wordlist}"
-            #Bash.exec(singleAttack)
+    #     else:
+    #         singleAttack =   f"{jtr.mainexec} -a {attackMode} -m {hashType} {hashFile} {wordlist}"
+    #         #Bash.exec(singleAttack)
 
     @staticmethod
     def hybridWMF(*, attackMode=6, hashType, hashFile, wordlist, masksFile, hpc=None):
