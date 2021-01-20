@@ -1,4 +1,5 @@
 cement==3.0.4
 sbash
 fineprint
+tabulate
 #mpi4py
