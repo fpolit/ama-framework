@@ -28,9 +28,9 @@ setup(
     include_package_data=True,
     entry_points={
         'console_scripts':[
-            'hattack = hattack.attacks.attack:main',
-            'hsearch = hattack.utilities.search:main',
-            'hstatus = hattack.utilities.status:main',
+            'hattack = hattack.cli.attack:main',
+            'hsearch = hattack.cli.search:main',
+            'hstatus = hattack.cli.status:main',
             'hcombine = hattack.cli.combinator:main'
         ]
     },

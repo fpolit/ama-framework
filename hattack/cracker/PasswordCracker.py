@@ -7,7 +7,7 @@
 
 import re
 import os
-
+from tabulate import tabulate
 from fineprint.status import print_failure, print_successful, print_status
 
 # importing PasswordCracker exceptions
@@ -25,6 +25,7 @@ class PasswordCracker:
     """
     crackProcesses = None
     crackers = ["john", "hashcat"]
+
     def __init__(self, name, *, executable=[], status=None, path=None, version=None):
         self.name = name #it can be a list of name (for example [hashcat, hc])
         self.exec=None
@@ -70,13 +71,14 @@ class PasswordCracker:
             else:
                 hashPattern = re.compile(rf"\w*{search}\w*")
 
+            posibleHashes = []
             if cracker in ["john", "jtr"]: # search by a jtr hash format
                 print_status(f"John the Ripper posible hash types(pattern: *{search}*)")
                 for hashType in John.hashes:
                     if hashPattern.search(hashFormat):
                         print_successful(hashFormat)
 
-            if cracker in ["hashcat", "hc"]: # search by an hashcat hash format
+            elif cracker in ["hashcat", "hc"]: # search by an hashcat hash format
                 print_status(f"Hashcat posible hash types(pattern: *{search}*)")
                 print_status("id\tname")
                 for hashId, hashType in Hashcat.hashes.items():
@@ -84,6 +86,39 @@ class PasswordCracker:
                         print_successful(f"{hashId}\t{hashType['Name']}")
         else:
             raise InvalidCracker(cracker)
+
+
+    @staticmethod
+    def reportHashesFileStatus(hashesFile):
+        hashesStatus = [] # status of all the hashes in hashesFile
+
+        hashesFilePath = FilePath(hashesFile)
+        with open(hashesFilePath, 'r') as _hashesFile:
+            while queryHash := _hashesFile.readline().rstrip():
+                crackedHash = PasswordCracker.globalHashStatus(queryHash)
+                #print(f"crackedHash: {crackedHash}")
+
+                if crackedHash:
+                    cracker, hashPot = crackedHash
+                    hashesStatus.append(["cracked", cracker] + hashPot)
+                else:
+                    hashesStatus.append(["uncracked", None, None, queryHash, None])
+
+
+        print(tabulate(hashesStatus, headers=["status", "cracker", "hash type", "hash", "password"]))
+
+    @staticmethod
+    def reportHashStatus(queryHash):
+        hashStatus = []
+        crackedHash = PasswordCracker.globalHashStatus(queryHash)
+
+        if crackedHash:
+            cracker, hashPot = crackedHash
+            hashStatus.append(["cracked", cracker] + hashPot)
+        else:
+            hashStatus.append(["uncracked", None, None, queryHash, None])
+
+        print(tabulate(hashesStatus, headers=["status", "cracker", "hash type", "hash", "password"]))
 
 
     @staticmethod
@@ -124,7 +159,7 @@ class PasswordCracker:
                         if cracker in ["john", "jtr"]:
                             return [hashPot[0], hashPot[1], hashPot[-1]]
                         elif cracker in ["hashcat", "hc"]:
-                            return [hashPot[0], hashPot[1]]
+                            return [None, hashPot[0], hashPot[1]]
             return None
 
         else:
@@ -136,7 +171,7 @@ class PasswordCracker:
         """
         Check the status of queryHash in the potfile of all the supported crackers by PasswordCracker(jtr and hc)
 
-        return the status of the hash (False: hash is uncracked, True: hash is cracked) and the cracker that crack the hash otherwise return None
+        return  the cracker that crack the hash and hashPot(hashType, hash, password) otherwise return None
         """
 
         crackers = PasswordCracker.crackers
@@ -144,8 +179,8 @@ class PasswordCracker:
         #import pdb; pdb.set_trace()
         for cracker in crackers:
             if crackedHashPot := PasswordCracker.hashStatus(cracker, queryHash, potfile):
-                return [True, cracker, crackedHashPot]
-        return [False, None]
+                return [cracker, crackedHashPot]
+        return None
 
 
     @staticmethod
@@ -165,7 +200,7 @@ class PasswordCracker:
                     crackedHash = PasswordCracker.hashStatus(cracker, queryHash, potfile)
                     if not crackedHash:
                         return False
-                    return True
+                return True
         else:
             print_failure(f"No read permission: {hashFilePath}")
             raise PermissionError

@@ -18,6 +18,7 @@
 
 import os
 import re
+from tabulate import tabulate
 from sbash.core import Bash
 from fineprint.status import print_status, print_failure, print_successful
 
@@ -174,10 +175,13 @@ class John(PasswordCracker):
         else:
             hashPattern = re.compile(rf"\w*{pattern}\w*")
 
-        print_status(f"John the Ripper posible hash types(pattern: *{pattern}*)")
+        print_status(f"Posible John the Ripper hashes(pattern: *{pattern}*)")
+        posibleHashes = []
         for hashType in John.hashes:
             if hashPattern.search(hashType):
-                print_successful(hashType)
+                posibleHashes.append([hashType])
+
+        print(tabulate(posibleHashes, headers=["name"]))
 
 class JTRAttacks:
 
@@ -259,8 +263,6 @@ class JTRAttacks:
                              _hashFile=hashFile,
                              _masksFile=masksFile)
         jtr = John()
-        #maskFilePath = FilePath(maskFile)
-        #hashFilePath = FilePath(hashFile)
 
         print_status(f"Attacking {hashType} hashes in {hashFile} hash file with {masksFile} mask file  in mask attack mode.")
         if hpc.partition:
@@ -283,11 +285,14 @@ class JTRAttacks:
         else:
             with open(masksFile, 'r') as masks:
                 while mask := masks.readline().rstrip():
-                    if not PasswordCracker.globalHashFileStatus(hashFile):
+                    cracked = PasswordCracker.hashFileStatus(jtr.getName(), hashFile)
+                    if not cracked:
                         maskAttack =   f"{jtr.mainexec} --mask={mask} --format={hashType} {hashFile}"
                         print_status(f"Running: {maskAttack}")
                         Bash.exec(maskAttack)
-
+                    else:
+                        print_successful(f"All hashes in {hashFile} was cracked")
+                        break
 
 
     # @staticmethod

@@ -12,7 +12,7 @@ class Mask(str):
     charset = {"?l" : string.ascii_lowercase,
                "?u" : string.ascii_uppercase,
                "?d" : string.digits,
-               "?s" : string.punctuation
+               "?s" : string.punctuation,
                "?a" : string.printable
                }
 

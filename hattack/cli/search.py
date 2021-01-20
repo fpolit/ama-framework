@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 #
-# hattack utility - search by valids hash types in PasswordCracker supported crackers given a pattern
+# hsearch -  hattack utility
+#search by valids hash types in the hashes of supported crackers by PasswordCracker given a pattern
 #
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
@@ -12,7 +13,7 @@ from ..cracker.John import John
 from ..cracker.Hashcat import Hashcat
 
 def main():
-    parser = argparse.ArgumentParser(description="Search by a hash format given a pattern - mattack utility", prog='msearch')
+    parser = argparse.ArgumentParser(description="Search by a hash format given a pattern - mattack utility", prog='hsearch')
 
     parser.add_argument('pattern', type=str,
                         help='pattern to search hash format')

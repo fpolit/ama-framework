@@ -139,7 +139,7 @@ class Combinator:
 
 
     @staticmethod
-    def genWords(words=[""], mask, *, inverse=False):
+    def genWords(words, mask, *, inverse=False):
         """
         generate all the posible combination of words + mask
         if inverse is True, it combine mask + words (in that order)

@@ -13,6 +13,7 @@
 import os
 import re
 from os.path import dirname
+from tabulate import tabulate
 from sbash.core import Bash
 from fineprint.status import print_status, print_failure, print_successful
 
@@ -149,12 +150,15 @@ class Hashcat(PasswordCracker):
         else:
             hashPattern = re.compile(rf"\w*{pattern}\w*")
 
-        print_status(f"Hashcat posible hash types(pattern: *{pattern}*)")
-        print_status("id\tname")
+        print_status(f"Posible Hashcat hashes(pattern: *{pattern}*)")
+        posibleHashes = []
         for hashId, hashType in Hashcat.hashes.items():
-            if hashPattern.search(hashType['Name']):
-                print_successful(f"{hashId}\t{hashType['Name']}")
+            hashName, description = hashType.values()
+            #print(f"hashcat hash: {hashName}")
+            if hashPattern.search(hashName):
+                posibleHashes.append([hashId, hashName, description])
 
+        print(tabulate(posibleHashes, headers=["id", "name", "description"]))
 
 
 class HCAttacks:
