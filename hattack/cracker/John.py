@@ -117,6 +117,7 @@ class John(PasswordCracker):
         # contruction of hashcat cmd to execute
         John.checkAttackMode(attackMode)
         if attackMode == 0: #wordlist attack
+            wordlist = wordlist[0]
             JTRAttacks.wordlist(hashType = hashType,
                                 hashFile = hashFile,
                                 wordlist = wordlist,
@@ -316,18 +317,18 @@ class JTRAttacks:
                              #_masksFile = masksFile,
                              _wordlist = wordlist)
 
-        jtr = John()
         print_status(f"Attacking {hashType} hashes in {hashFile} file with an hybrid MFW attack.")
         hybridWordlist = "hybrid.txt"
 
         if Mask.isMask(masksFile): # masksFile is a simple mask
-            #wordlist = wordlists[0]
+            wordlist = wordlist[0]
             mask = masksFile
             with open(hybridWordlist, 'w') as outputFile:
                 Combinator.genHybridWM(wordlist, mask , outputFile, inverse=False)
-            print_successful(f"Combinated wordlist and mask was generated: {output}")
+            print_successful(f"Combinated wordlist and mask was generated: {hybridWordlist}")
 
         else:
+            wordlist = wordlist[0]
             Combinator.hybridWMF(wordlist  = wordlist,
                                  masksFile = masksFile,
                                  output    = hybridWordlist)
@@ -347,7 +348,7 @@ class JTRAttacks:
                              #_masksFile = masksFile,
                              _wordlist = wordlist)
 
-        jtr = John()
+        #jtr = John()
         print_status(f"Attacking {hashType} hashes in {hashFile} hash with an hybrid MFW attack.")
         hybridWordlist = "hybrid.txt"
 
@@ -355,7 +356,7 @@ class JTRAttacks:
             mask = masksFile
             with open(hybridWordlist, 'w') as outputFile:
                 Combinator.genHybridWM(wordlist, mask , outputFile, inverse=True)
-            print_successful(f"Combinated mask and wordlist was generated: {output}")
+            print_successful(f"Combinated mask and wordlist was generated: {hybridWordlist}")
 
         else:
             Combinator.hybridMFW(masksFile = masksFile,

@@ -13,7 +13,7 @@ class HPC:
     """
 
     def __init__(self, *, gpus=None, nodes=None, ntasks=None, partition=None, cpusPerTask=1, memPerCpu=None,
-                 jobName="hashattack", output=None, error=None, time=None, slurmScript="hashattack.slurm"):
+                 jobName="crack", output=None, error=None, time=None, slurmScript="hashattack.slurm"):
         # slurm parameters
         self.gpus = gpus
         self.nodes = nodes
@@ -170,6 +170,9 @@ class HPC:
                 else: # gpu flag
                     if argument > 0:
                         slurmScript.write(f"#SBATCH --gres={flag}:{argument}\n")
+
+            if HPC.parserJob(slurm) == "OMP":
+                slurmScript.write("export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK\n")
 
 
             whiteLine = "\n"

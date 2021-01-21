@@ -100,7 +100,7 @@ def hattackCLIParser():
     hpc_parser.add_argument('-mc', '--memPerCpu', type=str, default="1GB",
                 help='Memory per CPU(node)')
 
-    hpc_parser.add_argument('-j', '--jobname', type=str, default="hashattack",
+    hpc_parser.add_argument('-j', '--jobname', type=str, default="hattack",
                         help='Slurm Job Name')
 
     hpc_parser.add_argument('-o', '--output', type=str, default=None,
@@ -109,7 +109,7 @@ def hattackCLIParser():
     hpc_parser.add_argument('-e', '--error', type=str, default=None,
                         help='Slurm Error File Name')
 
-    hpc_parser.add_argument('-s', '--slurm', type=str, default="hashattack.slurm",
+    hpc_parser.add_argument('-s', '--slurm', type=str, default="hattack.slurm",
                         help='Slurm Submit Script Name')
 
     hpc_parser.add_argument('-t', '--time', type=str, default=None,

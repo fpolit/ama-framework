@@ -45,13 +45,12 @@ class Combinator:
                 with open(output, 'w') as outputFile:
                     Combinator.genHybridWM(wordlist, mask, outputFile, inverse=False)
 
-                print_successful(f"Combinated  wordlist and mask was generated: {output}")
-
+                print_successful(f"Combinated wordlist and mask was generated: {output}")
 
             elif len(wordlists) == 1 and len(masksFiles) == 1 and output:
                 wordlist = wordlists[0]
                 masksFile = masksFiles[0]
-                Combinator.hybridMFW(wordlist = wordlist,
+                Combinator.hybridWMF(wordlist = wordlist,
                                      masksFile = masksFile,
                                      output = output)
 
@@ -61,17 +60,19 @@ class Combinator:
             if not output:
                 raise NoOutputFileSupplied
 
+
         elif action == 7:
             if mask and len(wordlists) == 1 and output:
                 wordlist = wordlists[0]
                 with open(output, 'w') as outputFile:
                     Combinator.genHybridWM(wordlist, mask, outputFile, inverse=True)
+
                 print_successful(f"Combinated mask and wordlist was generated: {output}")
 
             elif len(wordlists) == 1 and len(masksFiles) == 1 and output:
                 wordlist = wordlists[0]
                 masksFile = masksFiles[0]
-                Combinator.hybridWMF(wordlist = wordlist,
+                Combinator.hybridMFW(wordlist = wordlist,
                                      masksFile = masksFile,
                                      output = output)
 
@@ -101,9 +102,9 @@ class Combinator:
         secondWordlistPath = FilePath(secondWordlist)
 
         with open(combinedWordlist, 'w') as _combinedWordlist:
-            with open(firstWordlistPath, 'r') as _firstWordlist:
+            with open(firstWordlistPath, 'r', errors='ignore') as _firstWordlist:
                 while word1w := _firstWordlist.readline().rstrip():
-                    with open(secondWordlistPath, 'r') as _secondWordlist:
+                    with open(secondWordlistPath, 'r',errors='ignore') as _secondWordlist:
                         while word2w := _secondWordlist.readline().rstrip():
                             combinedWord = word1w + word2w
                             _combinedWordlist.write(f"{combinedWord}\n")
@@ -122,7 +123,7 @@ class Combinator:
                 while mask := masks.readline().rstrip():
                     Combinator.genHybridWM(wordlist, mask, outputFile, inverse=False)
 
-        print_successful(f"Combinated masks file and wordlist was generated: {output}")
+        print_successful(f"Combinated wordlist and masks file was generated: {output}")
 
     @staticmethod
     def hybridMFW(*, masksFile, wordlist, output):

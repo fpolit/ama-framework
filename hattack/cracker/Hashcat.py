@@ -89,9 +89,9 @@ class Hashcat(PasswordCracker):
                         _hashFile=None,
                         _wordlist=None,
                         _maskFile=None):
-        PasswordCracker.checkAttackArgs(__hashFile = _hashFile,
-                                        __wordlist = _wordlist,
-                                        __maskFile = _maskFile)
+        PasswordCracker.checkAttackArgs(_hashFile = _hashFile,
+                                        _wordlist = _wordlist,
+                                        _masksFile = _maskFile)
 
         Hashcat.checkHashType(_hashType)
 
@@ -102,7 +102,7 @@ class Hashcat(PasswordCracker):
                 hashType=None,
                 hashFile=None,
                 wordlist=[],
-                maskFile=None,
+                masksFile=None,
                 hpc = None):
 
         # contruction of hashcat cmd to execute
@@ -122,20 +122,20 @@ class Hashcat(PasswordCracker):
         elif attackMode == 3:   #mask attack
             HCAttacks.maskAttack(hashType = hashType,
                                  hashFile = hashFile,
-                                 maskFile = maskFile,
+                                 maskFile = masksFile,
                                  hpc = hpc)
 
         elif attackMode == 6:   #hybridWMF attack (wordlist + mask file)
             HCAttacks.hybridWMF(hashType = hashType,
                                 hashFile = hashFile,
                                 wordlist = wordlist,
-                                maskFile = maskFile,
+                                maskFile = masksFile,
                                 hpc = hpc)
         elif attackMode == 7:   #hybridMFW attack (mask file + wordlist)
             HCAttacks.hybridMFW(hashType = hashType,
                                 hashFile = hashFile,
                                 wordlist = wordlist,
-                                maskFile = maskFile,
+                                maskFile = masksFile,
                                 hpc = hpc)
 
 
@@ -164,9 +164,9 @@ class Hashcat(PasswordCracker):
 class HCAttacks:
     @staticmethod
     def wordlist(*, attackMode=0, hashType, hashFile, wordlist, hpc=None):
-        PasswordCracker.checkAttackArgs(_hashType=hashType,
-                                        _hashFile=hashFile,
-                                        _wordlist=wordlist)
+        Hashcat.checkAttackArgs(_hashType=hashType,
+                                _hashFile=hashFile,
+                                _wordlist=wordlist)
         hc = Hashcat()
         print_status(f"Attacking {hashFile} with {wordlist} in straigth mode.")
         if hpc:
@@ -178,9 +178,9 @@ class HCAttacks:
 
     @staticmethod
     def combination(*, attackMode=1, hashType, hashFile, wordlists=[], hpc=None):
-        John.checkAttackArgs(_hashType=hashType,
-                             _hashFile=hashFile,
-                             _wordlist=wordlists)
+        Hashcat.checkAttackArgs(_hashType=hashType,
+                                _hashFile=hashFile,
+                                _wordlist=wordlists)
 
 
         if hpc:
