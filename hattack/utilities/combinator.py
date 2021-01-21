@@ -25,8 +25,8 @@ from ..utilities.utilitiesExceptions import InvalidCombinationAction
 
 class Combinator:
     actions = {0: 'Wordlists combination',
-               1: 'Wordlist + Masks file or mask',
-               2: 'Masks file or mask + Wordlist'}
+               6: 'Wordlist + Masks file or mask',
+               7: 'Masks file or mask + Wordlist'}
 
     @staticmethod
     def selectAction(*, wordlists=None, masksFiles=None, mask=None, action, output):
@@ -39,13 +39,13 @@ class Combinator:
 
             Combinator.wordlist(wordlists, output)
 
-        elif action == 1:
+        elif action == 6:
             if mask and len(wordlists) == 1 and output:
                 wordlist = wordlists[0]
                 with open(output, 'w') as outputFile:
                     Combinator.genHybridWM(wordlist, mask, outputFile, inverse=False)
 
-                print_successful(f"Combinated mask and wordlist was generated: {output}")
+                print_successful(f"Combinated  wordlist and mask was generated: {output}")
 
 
             elif len(wordlists) == 1 and len(masksFiles) == 1 and output:
@@ -61,12 +61,12 @@ class Combinator:
             if not output:
                 raise NoOutputFileSupplied
 
-        elif action == 2:
+        elif action == 7:
             if mask and len(wordlists) == 1 and output:
                 wordlist = wordlists[0]
                 with open(output, 'w') as outputFile:
                     Combinator.genHybridWM(wordlist, mask, outputFile, inverse=True)
-                print_successful(f"Combinated wordlist and mask was generated: {output}")
+                print_successful(f"Combinated mask and wordlist was generated: {output}")
 
             elif len(wordlists) == 1 and len(masksFiles) == 1 and output:
                 wordlist = wordlists[0]
@@ -106,6 +106,8 @@ class Combinator:
                     with open(secondWordlistPath, 'r') as _secondWordlist:
                         while word2w := _secondWordlist.readline().rstrip():
                             combinedWord = word1w + word2w
+                            _combinedWordlist.write(f"{combinedWord}\n")
+                            combinedWord = word2w + word1w
                             _combinedWordlist.write(f"{combinedWord}\n")
 
 
