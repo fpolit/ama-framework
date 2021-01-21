@@ -45,8 +45,8 @@ class Hashcat(PasswordCracker):
     attackMode = {  0:"Wordlist",
                     1:"Combination",
                     3:"Mask",
-                    6:"Hybrid Wordlist + Mask",
-                    7:"Hybrid Mask + Wordlist"}
+                    6:"Hybrid:\n\twordlist + masks file or mask",
+                    7:"Hybrid:\n\tmasks file or mask + wordlist"}
 
     def __init__(self):
         super().__init__(name=['hashcat', 'hc'])

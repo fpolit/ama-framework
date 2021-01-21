@@ -29,6 +29,7 @@ from ..hashes.jtr import hashes
 
 # base module
 from ..base.FilePath import FilePath
+from ..base.Mask import Mask
 
 # hpc module
 from ..hpc.HPC import HPC
@@ -49,8 +50,8 @@ class John(PasswordCracker):
                   2:"Incremental",
                   3:"Mask",
                   #4:"Single",
-                  6:"Hybrid Wordlist + Mask",
-                  7:"Hybrid Mask + Wordlist"}
+                  6:"Hybrid:\n\twordlist + masks file or mask",
+                  7:"Hybrid:\n\tmasks file or mask + wordlist"}
 
     def __init__(self):
         super().__init__(name=["john"])
@@ -189,7 +190,7 @@ class JTRAttacks:
                              _hashFile=hashFile,
                              _wordlist=wordlist)
         jtr = John()
-        print_status(f"Attacking {hashType} hashes in {hashFile} hash file with {wordlist} wordlist in wordlist attack mode.")
+        print_status(f"Attacking {hashType} hashes in {hashFile} file with {wordlist} wordlist.")
         if hpc.partition:
             parallelJobType = hpc.parserParallelJob()
             if not  parallelJobType in ["MPI", "OMP"]:
@@ -212,6 +213,7 @@ class JTRAttacks:
             wordlistAttack =   f"{jtr.mainexec} --wordlist={wordlist} --format={hashType} {hashFile}"
             Bash.exec(wordlistAttack)
 
+    #debugged
     @staticmethod
     def combination(*, attackMode=1, hashType, hashFile, wordlists=[], combinedWordlist="combined.txt", hpc=None):
         John.checkAttackArgs(_hashType=hashType,
@@ -222,7 +224,8 @@ class JTRAttacks:
         Combinator.wordlist(wordlists, combinedWordlist)
         JTRAttacks.wordlist(hashType = hashType,
                             hashFile = hashFile,
-                            wordlist = combinedWordlist)
+                            wordlist = combinedWordlist,
+                            hpc = hpc)
 
 
     #debugged
@@ -231,7 +234,7 @@ class JTRAttacks:
         John.checkAttackArgs(_hashType=hashType,
                              _hashFile=hashFile)
         jtr = John()
-        print_status(f"Attacking {hashType} hashes in {hashFile} hash file in incremental mode.")
+        print_status(f"Attacking {hashType} hashes in {hashFile} file in incremental mode.")
         if hpc.partition:
             parallelJobType = hpc.parserParallelJob()
             if not  parallelJobType in ["MPI", "OMP"]:
@@ -261,11 +264,9 @@ class JTRAttacks:
                              _masksFile=masksFile)
         jtr = John()
 
-        print_status(f"Attacking {hashType} hashes in {hashFile} hash file with {masksFile} mask file  in mask attack mode.")
+        print_status(f"Attacking {hashType} hashes in {hashFile} file with {masksFile} mask file.")
         if hpc.partition:
-            #pyscript =
-            pass
-
+            print_failure("No supported yet")
 
         else:
             with open(masksFile, 'r') as masks:
@@ -273,7 +274,7 @@ class JTRAttacks:
                     cracked = PasswordCracker.hashFileStatus(jtr.getName(), hashFile)
                     if not cracked:
                         maskAttack =   f"{jtr.mainexec} --mask={mask} --format={hashType} {hashFile}"
-                        print_status(f"Running: {maskAttack}")
+                        print_status(f"\nRunning: {maskAttack}")
                         Bash.exec(maskAttack)
 
             PasswordCracker.reportHashesFileStatus(hashFIle)
@@ -310,17 +311,26 @@ class JTRAttacks:
         """
         hybrid attack (wordlist + mask file) attack
         """
-        PasswordCracker.checkAttackArgs(_hashType = hashType,
-                                        _hashFile = hashFile,
-                                        _masksFile = masksFile,
-                                        _wordlist = wordlist)
+        John.checkAttackArgs(_hashType = hashType,
+                             _hashFile = hashFile,
+                             #_masksFile = masksFile,
+                             _wordlist = wordlist)
 
         jtr = John()
-        print_status(f"Attacking {hashType} hashes in {hashFile} hash file in hybrid WMF attack mode.")
+        print_status(f"Attacking {hashType} hashes in {hashFile} file with an hybrid MFW attack.")
         hybridWordlist = "hybrid.txt"
-        Combinator.hybridWMF(wordlist  = wordlist,
-                             masksFile = masksFile,
-                             output    = hybridWordlist)
+
+        if Mask.isMask(masksFile): # masksFile is a simple mask
+            #wordlist = wordlists[0]
+            mask = masksFile
+            with open(hybridWordlist, 'w') as outputFile:
+                Combinator.genHybridWM(wordlist, mask , outputFile, inverse=False)
+            print_successful(f"Combinated wordlist and mask was generated: {output}")
+
+        else:
+            Combinator.hybridWMF(wordlist  = wordlist,
+                                 masksFile = masksFile,
+                                 output    = hybridWordlist)
 
         JTRAttacks.wordlist(hashType = hashType,
                             hashFile = hashFile,
@@ -332,20 +342,27 @@ class JTRAttacks:
         """
         hybrid attack (mask file + wordlist) attack
         """
-        PasswordCracker.checkAttackArgs(_hashType = hashType,
-                                        _hashFile = hashFile,
-                                        _masksFile = masksFile,
-                                        _wordlist = wordlist)
+        John.checkAttackArgs(_hashType = hashType,
+                             _hashFile = hashFile,
+                             #_masksFile = masksFile,
+                             _wordlist = wordlist)
 
         jtr = John()
-        print_status(f"Attacking {hashType} hashes in {hashFile} hash file in hybrid MFW attack mode.")
-        #maskFilePath = FilePath(maskFile)
+        print_status(f"Attacking {hashType} hashes in {hashFile} hash with an hybrid MFW attack.")
         hybridWordlist = "hybrid.txt"
-        Combinator.hybridMFW(masksFile = masksFile,
-                             wordlist  = wordlist,
-                             output    = hybridWordlist)
+
+        if Mask.isMask(masksFile): # masksFile is a simple mask
+            mask = masksFile
+            with open(hybridWordlist, 'w') as outputFile:
+                Combinator.genHybridWM(wordlist, mask , outputFile, inverse=True)
+            print_successful(f"Combinated mask and wordlist was generated: {output}")
+
+        else:
+            Combinator.hybridMFW(masksFile = masksFile,
+                                 wordlist  = wordlist,
+                                 output    = hybridWordlist)
 
         JTRAttacks.wordlist(hashType = hashType,
                             hashFile = hashFile,
-                            wordlist = combinedWordlist,
+                            wordlist = hybridWordlist,
                             hpc = hpc)

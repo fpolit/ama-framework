@@ -129,41 +129,52 @@ class PasswordCracker:
 
         #import pdb;pdb.set_trace()
 
-        if cracker  in PasswordCracker.crackers:
-            if potfile:
-                potFilePath = FilePath(potfile)
+        try:
+            if cracker  in PasswordCracker.crackers:
+                if potfile:
+                    potFilePath = FilePath(potfile)
 
-                if cracker in ["john", "jtr"]:
-                    crackedPattern = re.compile(rf"\$(\W*|\w*|.*)\$({queryHash})(\$(\W*|\w*|.*)\$)?:(\W*|\w*|.*)", re.DOTALL)
+                    if cracker in ["john", "jtr"]:
+                        crackedPattern = re.compile(rf"\$(\W*|\w*|.*)\$({queryHash})(\$(\W*|\w*|.*)\$)?:(\W*|\w*|.*)", re.DOTALL)
 
-                elif cracker in ["hashcat", "hc"]:
-                    crackedPattern = re.compile(rf"({queryHash}):(\W*|\w*|.*)", re.DOTALL)
+                    elif cracker in ["hashcat", "hc"]:
+                        crackedPattern = re.compile(rf"({queryHash}):(\W*|\w*|.*)", re.DOTALL)
+
+                    else:
+                        homePath = os.path.expanduser("~")
+                        if cracker in ["john", "jtr"]:
+                            johnPotFile = os.path.join(homePath, ".john/john.pot")
+                            potFilePath = FilePath(johnPotFile)
+                            crackedPattern = re.compile(rf"\$(\W*|\w*|.*)\$({queryHash})(\$(\W*|\w*|.*)\$)?:(\W*|\w*|.*)", re.DOTALL)
+
+                        elif cracker in ["hashcat", "hc"]:
+                            hashcatPotFile = os.path.join(homePath, ".hashcat/hashcat.potfile")
+                            potFilePath = FilePath(hashcatPotFile)
+                            crackedPattern = re.compile(rf"({queryHash}):(\W*|\w*|.*)", re.DOTALL)
+
+                    print(f"potFilePath: {potFilePath}")
+                    with open(potFilePath, 'r') as _potFile:
+                        while   crackedHash := _potFile.readline().rstrip():
+                            if crackedHashPot := crackedPattern.fullmatch(crackedHash):
+                                hashPot = crackedHashPot.groups()
+                                #_potFile.close()
+                                if cracker in ["john", "jtr"]:
+                                    return [hashPot[0], hashPot[1], hashPot[-1]]
+                                elif cracker in ["hashcat", "hc"]:
+                                    return [None, hashPot[0], hashPot[1]]
+                    return None
 
             else:
-                homePath = os.path.expanduser("~")
-                if cracker in ["john", "jtr"]:
-                    johnPotFile = os.path.join(homePath, ".john/john.pot")
-                    potFilePath = FilePath(johnPotFile)
-                    crackedPattern = re.compile(rf"\$(\W*|\w*|.*)\$({queryHash})(\$(\W*|\w*|.*)\$)?:(\W*|\w*|.*)", re.DOTALL)
+                raise NotSupportedCracker(cracker)
 
-                elif cracker in ["hashcat", "hc"]:
-                    hashcatPotFile = os.path.join(homePath, ".hashcat/hashcat.potfile")
-                    potFilePath = FilePath(hashcatPotFile)
-                    crackedPattern = re.compile(rf"({queryHash}):(\W*|\w*|.*)", re.DOTALL)
-
-            with open(potFilePath, 'r') as _potFile:
-                while   crackedHash := _potFile.readline().rstrip():
-                    if crackedHashPot := crackedPattern.fullmatch(crackedHash):
-                        hashPot = crackedHashPot.groups()
-                        #_potFile.close()
-                        if cracker in ["john", "jtr"]:
-                            return [hashPot[0], hashPot[1], hashPot[-1]]
-                        elif cracker in ["hashcat", "hc"]:
-                            return [None, hashPot[0], hashPot[1]]
+        except FileNotFoundError as error:
             return None
 
-        else:
-            raise NotSupportedCracker(cracker)
+        except NotSupportedCracker as error:
+            print_failure(f"ERROR: {error}")
+            return None
+
+
 
 
     @staticmethod
@@ -258,11 +269,11 @@ class PasswordCracker:
                         if nameExec.fullmatch(executable):
                             execPath = os.path.join(dirname, executable)
                             self.exec.append(execPath)
-                            print_successful(f"{execPath} executable found.")
 
             if self.exec:
                 self.status = True
                 self.mainexec = self.exec[0]
+                print_successful(f"using {self.mainexec} cracker executable")
             else:
                 raise CrackerExecNotFound(self.name)
 
@@ -279,6 +290,6 @@ class PasswordCracker:
 
     def validateStatus(self):
         if self.checkStatus():
-            print_successful(f"Plugin {self.name} is currently active.")
+            print_successful(f"cracker {self.name} is currently active.")
         else:
-            raise Exception("PLugin {self.name} is disable.")
+            raise Exception("cracker {self.name} is disable.")

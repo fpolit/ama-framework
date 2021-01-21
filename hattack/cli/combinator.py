@@ -11,7 +11,7 @@ from ..utilities.version import get_version
 
 def CombinatorCLIParser():
     VERSION = get_version()
-    parser = argparse.ArgumentParser(description=f"Combinator hattack utilitie - {VERSION}", prog="hcombine",
+    parser = argparse.ArgumentParser(description=f"Combinator (hattack utility) - {VERSION}", prog="hcombine",
                                      formatter_class=RawTextHelpFormatter)
 
     parser.add_argument('-w', '--wordlist', nargs='+',

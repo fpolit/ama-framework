@@ -29,16 +29,16 @@ def hattackCLIParser():
                             help='Hash file to crack')
 
     parser.add_argument('-m', '--masks', default=None,
-                        help='Mask File to perform Mask Attack')
+                        help='Masks file or mask')
 
-    parser.add_argument('-w', '--wordlist', nargs='?', default=None,
+    parser.add_argument('-w', '--wordlist', nargs='+', default=None,
                         help='Worlist')
 
     parser.add_argument('-ht', '--hashType', required=True,
-                        help='Hash type (john or hashcat hash type)')
+                        help='Hash type (john or hashcat hash)')
 
     parser.add_argument('-i', '--ifile', default=None,
-                        help='input arguments file')
+                        help='Input arguments file')
 
     # parser.add_argument('-h', '--help',
     #                     help='show help')
