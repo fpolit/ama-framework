@@ -3,6 +3,7 @@
 import sys
 import argparse
 from argparse import RawTextHelpFormatter
+from tabulate import tabulate
 
 # utilities modules import
 from ..utilities.combinator import Combinator
@@ -16,17 +17,16 @@ def CombinatorCLIParser():
     parser.add_argument('-w', '--wordlist', nargs='+',
                         help='wordlist to combine')
 
-    parser.add_argument('-m', '--masksFiles', nargs='*',
+    parser.add_argument('-mf', '--masksFiles', nargs='*',
                         help='masks file to combine')
 
+    parser.add_argument('-m', '--mask', type=str,
+                        help='mask to combine')
 
     parser.add_argument('-o', '--output', required=True,
                         help='output file')
 
-    helpAction = "Combination mode\n\n"
-    helpAction += "# | action\n----------\n"
-    for idAction, action in Combinator.actions.items():
-        helpAction += f"{idAction} | {action}\n"
+    helpAction = tabulate(Combinator.actions.items(), headers=["#", "action"])
 
     parser.add_argument('-a', '--action', type=int, required=True,
                         help=helpAction)
@@ -40,18 +40,21 @@ def main():
     args = parser.parse_args()
 
     wordlists = args.wordlist
-    masksFile = args.masksFiles
+    masksFiles = args.masksFiles
+    mask = args.mask
     action = args.action
     output = args.output
 
     print(f"""
     wordlists  = {wordlists}
-    masksFiles = {masksFile}
+    masksFiles = {masksFiles}
+    mask       = {mask}
     action     = {action}
     output     = {output}
     """)
 
-    # Combinator.selectAction(wordlists = wordlists,
-    #                         masksFiles = masksFiles,
-    #                         action = action,
-    #                         output=output)
+    Combinator.selectAction(wordlists  = wordlists,
+                            masksFiles = masksFiles,
+                            mask       = mask,
+                            action     = action,
+                            output     = output)

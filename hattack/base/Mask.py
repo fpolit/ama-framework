@@ -30,7 +30,11 @@ class Mask(str):
     @staticmethod
     def _genIterMask(mask, inverse=False):
         if inverse:
-            iterMask = iter(mask[::-1])
+            inverseMask = ""
+            for charset in mask[::-2]:
+                inverseMask += f"?{charset}"
+            iterMask = iter(inverseMask)
+
         else:
             iterMask = iter(mask)
 

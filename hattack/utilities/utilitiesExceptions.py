@@ -26,3 +26,9 @@ class InvalidWordlistNumber(Exception):
 class NoOutputFileSupplied(Exception):
     def __init__(self):
         super().__init__("No output file supplied")
+
+
+class InvalidCombinationAction(Exception):
+    def __init__(self, action):
+        self.warning = f"Invalid Combination Acction: {action}"
+        super().__init__(self.warning)

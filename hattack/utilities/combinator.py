@@ -5,6 +5,8 @@
 # Maintainer : glozanoa <glozanoa@uni.pe>
 
 #from mpi4py import MPI
+import shutil
+from fineprint.status import print_successful
 
 # base modules imports
 from ..base.Mask import Mask
@@ -18,15 +20,18 @@ from ..base.MaskExceptions import MaskError
 from ..utilities.utilitiesExceptions import InvalidArgumentsGiven
 from ..utilities.utilitiesExceptions import InvalidWordlistNumber
 from ..utilities.utilitiesExceptions import NoOutputFileSupplied
+from ..utilities.utilitiesExceptions import InvalidCombinationAction
 
 
 class Combinator:
     actions = {0: 'Wordlists combination',
-               1: 'Masks file + Wordlist',
-               2: 'Wordlist + Masks file'}
+               1: 'Wordlist + Masks file or mask',
+               2: 'Masks file or mask + Wordlist'}
 
     @staticmethod
-    def selectAction(*, wordlists=None, masksFiles=None, action, output):
+    def selectAction(*, wordlists=None, masksFiles=None, mask=None, action, output):
+        #import pdb; pdb.set_trace()
+
         if action == 0:
             wordlistNumber = len(wordlists)
             if wordlistNumber != 2:
@@ -35,22 +40,50 @@ class Combinator:
             Combinator.wordlist(wordlists, output)
 
         elif action == 1:
-            if not (len(wordlists) == 1 and len(masksFiles) == 1):
+            if mask and len(wordlists) == 1 and output:
+                wordlist = wordlists[0]
+                with open(output, 'w') as outputFile:
+                    Combinator.genHybridWM(wordlist, mask, outputFile, inverse=False)
+
+                print_successful(f"Combinated mask and wordlist was generated: {output}")
+
+
+            elif len(wordlists) == 1 and len(masksFiles) == 1 and output:
+                wordlist = wordlists[0]
+                masksFile = masksFiles[0]
+                Combinator.hybridMFW(wordlist = wordlist,
+                                     masksFile = masksFile,
+                                     output = output)
+
+            elif not (len(wordlists) == 1 and len(masksFiles) == 1):
                 raise InvalidArgumentsGiven({'wordlists':wordlists, 'masksFiles': masksFiles})
 
             if not output:
                 raise NoOutputFileSupplied
-
-            Combinator.hybridWMF(wordlists, masksFiles, output)
 
         elif action == 2:
-            if not (len(wordlists) == 1 and len(masksFiles) == 1):
+            if mask and len(wordlists) == 1 and output:
+                wordlist = wordlists[0]
+                with open(output, 'w') as outputFile:
+                    Combinator.genHybridWM(wordlist, mask, outputFile, inverse=True)
+                print_successful(f"Combinated wordlist and mask was generated: {output}")
+
+            elif len(wordlists) == 1 and len(masksFiles) == 1 and output:
+                wordlist = wordlists[0]
+                masksFile = masksFiles[0]
+                Combinator.hybridWMF(wordlist = wordlist,
+                                     masksFile = masksFile,
+                                     output = output)
+
+            elif not (len(wordlists) == 1 and len(masksFiles) == 1):
                 raise InvalidArgumentsGiven({'wordlists':wordlists, 'masksFiles': masksFiles})
 
             if not output:
                 raise NoOutputFileSupplied
 
-            Combinator.hybridMFW(masksFiles, wordlists, output)
+        else:
+            raise InvalidCombinationAction(action)
+
 
     @staticmethod
     def wordlist(wordlists, combinedWordlist):
@@ -76,62 +109,50 @@ class Combinator:
                             _combinedWordlist.write(f"{combinedWord}\n")
 
 
-        print_successful(f"Combinated wordlist was generated: {combinedWordlist}")
+        print_successful(f"Combinated wordlist generated: {combinedWordlist}")
 
 
     @staticmethod
-    def hybridWMF(wordlist, masksFile, output):
-        with open(masksFile, 'r') as masks:
-            genwmf = [] #generated words of combination of wordlist + masks (of masksFile)
-            while mask := masks.readline().rstrip():
-                genwmf += genWords(wordlist, mask)
+    def hybridWMF(*, wordlist, masksFile, output):
 
-        # writing output with generated words
         with open(output, 'w') as outputFile:
-            for generateWord in genwmf:
-                outputFile.write(f"{generateWord}\n")
+            with open(masksFile, 'r') as masks:
+                while mask := masks.readline().rstrip():
+                    Combinator.genHybridWM(wordlist, mask, outputFile, inverse=False)
 
-        print_successful(f"Combinated wordlist and masks file was generated: {output}")
-
+        print_successful(f"Combinated masks file and wordlist was generated: {output}")
 
     @staticmethod
-    def hybridMFW(masksFile, wordlist, output):
+    def hybridMFW(*, masksFile, wordlist, output):
         """
         generate all the combination of the generated words by the mask and the words in the wordlist
         """
 
-        with open(masksFile, 'r') as masks:
-            genmfw = [] #generated words of combination of masks(of masksFile) + wordlist
-            while mask := masks.readline().rstrip():
-                genmfw += genWords(wordlist, mask, inverse=True)
-
-        # writing output with generated words
         with open(output, 'w') as outputFile:
-            for generateWord in genwmf:
-                outputFile.write(f"{generateWord}\n")
+            with open(masksFile, 'r') as masks:
+                while mask := masks.readline().rstrip():
+                    Combinator.genHybridWM(wordlist, mask, outputFile, inverse=True)
 
         print_successful(f"Combinated masks file and wordlist was generated: {output}")
 
 
     @staticmethod
-    def expand(wordsFile, maskSymbol, *, inverse=False):
+    def expand(words, maskSymbol, *, inverse=False):
         # genWords variable store the combination of
-        #word (of wordFile) + maskSymbol(["?l" (abc...z) or "?u" or ... or "?a"])
+        #word (of words list) + maskSymbol(["?l" (abc...z) or "?u" or ... or "?a"])
         # if inverser=True: it will combine maskSymbol + word
         genWords = []
         if maskSymbol in Mask.charset:
             if inverse:
-                with open(wordsFile, 'r') as words:
-                    while word := words.readline().rstrip():
-                        for character in Mask.charset[maskSymbol]:
-                            genWords.append(character + word)
+                for word in words:
+                    for character in Mask.charset[maskSymbol]:
+                        genWords.append(character + word)
                 return genWords
 
             else:
-                with open(wordFile, 'r') as words:
-                    while word := words.readline().rstrip():
-                        for character in Mask.charset[maskSymbol]:
-                            genWords.append(word + character)
+                for word in words:
+                    for character in Mask.charset[maskSymbol]:
+                        genWords.append(word + character)
                 return genWords
 
         else:
@@ -139,16 +160,20 @@ class Combinator:
 
 
     @staticmethod
-    def genWords(words, mask, *, inverse=False):
+    def genHybridWM(wordsFile, mask, outputFile, *, inverse=False):
         """
         generate all the posible combination of words + mask
         if inverse is True, it combine mask + words (in that order)
         """
 
         if Mask.isMask(mask):
-            for word in words:
-                for maskSymbol in Mask._genIterMask(mask, inverse):
-                    words = Mask.expand(words, maskSymbol, inverse)
-            return words
+            with open(wordsFile, 'r') as words:
+                while word := words.readline().rstrip():
+                    genWords = [word]
+                    for maskSymbol in Mask._genIterMask(mask, inverse):
+                        genWords = Combinator.expand(genWords, maskSymbol, inverse = inverse)
+
+                    for combinedWord in genWords:
+                        outputFile.write(f"{combinedWord}\n")
         else:
             raise MaskError(mask)

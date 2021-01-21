@@ -3,7 +3,7 @@
 import sys
 import argparse
 from argparse import RawTextHelpFormatter
-
+from tabulate import tabulate
 from configparser import ConfigParser
 
 # cracker modules import
@@ -53,20 +53,31 @@ def hattackCLIParser():
                                 required=True, help="Password Cracker")
 
     #import pdb; pdb.set_
-    attackModes = {'john': John.attackMode,
-                   'hashcat': Hashcat.attackMode}
+    # attackModes = {'john': John.attackMode,
+    #                'hashcat': Hashcat.attackMode}
+    # helpAttackMode = ""
+    # for cracker, attackMode in attackModes.items():
+    #     helpAttackMode += f" # | {cracker}\n"
+    #     helpAttackMode +=  "------------\n"
+    #     for attackId, attackInfo in attackMode.items():
+    #         helpAttackMode += f" {attackId} | {attackInfo}\n"
+    #     helpAttackMode += "\n"
+
     helpAttackMode = ""
-    for cracker, attackMode in attackModes.items():
-        helpAttackMode += f" # | {cracker}\n"
-        helpAttackMode +=  "------------\n"
-        for attackId, attackInfo in attackMode.items():
-            helpAttackMode += f" {attackId} | {attackInfo}\n"
-        helpAttackMode += "\n"
-    #print(f"helpAttack: {helpAttackMode}")
+
+    #john attack modes
+    #helpAttackMode += "\njohn\n"
+    helpAttackMode += tabulate(John.attackMode.items(), headers=["#", "john attacks"])
+    helpAttackMode += "\n\n"
+
+    #hashcat attack modes
+    #helpAttackMode += "\nhashcat\n"
+    helpAttackMode += tabulate(Hashcat.attackMode.items(), headers=["#", "hashcat attacks"])
+    helpAttackMode += "\n"
 
     cracker_parser.add_argument('-a', '--attack', type=int,
                                 required=True,
-                                help=f"Attack Mode.\n{helpAttackMode}")
+                                help=f"{helpAttackMode}")
 
     # HPC parameters
     hpc_parser = parser.add_argument_group('HPC arguments',

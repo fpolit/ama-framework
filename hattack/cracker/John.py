@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-
-"""
 # John class
 #
 # Jan 9 2021
@@ -13,8 +11,7 @@
 # So submit again it solve the problem (with sbatch).
 #
 #
-# Maintainer: glozanoa <glozanoa@uni.pe>
-"""
+# Maintainer: Gustavo Lozano <glozanoa@uni.pe>
 
 import os
 import re
@@ -51,7 +48,7 @@ class John(PasswordCracker):
                   1:"Combination",
                   2:"Incremental",
                   3:"Mask",
-                  4:"Single",
+                  #4:"Single",
                   6:"Hybrid Wordlist + Mask",
                   7:"Hybrid Mask + Wordlist"}
 
@@ -222,10 +219,10 @@ class JTRAttacks:
                              _wordlist=wordlists)
 
 
-        combinedWordlistPath = Combinator.wordlist(wordlists, combinedWordlist)
+        Combinator.wordlist(wordlists, combinedWordlist)
         JTRAttacks.wordlist(hashType = hashType,
                             hashFile = hashFile,
-                            wordlist = combinedWordlistPath)
+                            wordlist = combinedWordlist)
 
 
     #debugged
@@ -266,21 +263,9 @@ class JTRAttacks:
 
         print_status(f"Attacking {hashType} hashes in {hashFile} hash file with {masksFile} mask file  in mask attack mode.")
         if hpc.partition:
+            #pyscript =
             pass
-            # parallelJobType = slurm.parserParallelJob()
-            # if not  parallelJobType in ["MPI", "OMP"]:
-            #     raise ParallelWorkError(parallelJobType)
 
-            # slurm, extra = hpc.parameters()
-            # if parallelJobType == "MPI":
-            #     parallelWork = [f"srun mpirun {jtr.mainexec} --mask={}--format={hashType} {hashFile}"]
-
-            # elif parallelJobType == "OMP":
-            #     parallelWork = [f"srun {jtr.mainexec} --format={hashType} {hashFile}"]
-
-            # slurmScriptName = extra['slurm-script']
-            # HPC.genScript(slurm, extra, parallelWork)
-            # Bash.exec("sbatch {slurmScriptName}")
 
         else:
             with open(masksFile, 'r') as masks:
@@ -290,10 +275,8 @@ class JTRAttacks:
                         maskAttack =   f"{jtr.mainexec} --mask={mask} --format={hashType} {hashFile}"
                         print_status(f"Running: {maskAttack}")
                         Bash.exec(maskAttack)
-                    else:
-                        print_successful(f"All hashes in {hashFile} was cracked")
-                        break
 
+            PasswordCracker.reportHashesFileStatus(hashFIle)
 
     # @staticmethod
     # def single(*, attackMode=4, hashType, hashFile, hpc=None):
@@ -334,11 +317,14 @@ class JTRAttacks:
 
         jtr = John()
         print_status(f"Attacking {hashType} hashes in {hashFile} hash file in hybrid WMF attack mode.")
-        #maskFilePath = FilePath(maskFile)
-        combinedWordlistPath = Combinator.hybridWMF(wordlist, masksFile)
+        hybridWordlist = "hybrid.txt"
+        Combinator.hybridWMF(wordlist  = wordlist,
+                             masksFile = masksFile,
+                             output    = hybridWordlist)
+
         JTRAttacks.wordlist(hashType = hashType,
                             hashFile = hashFile,
-                            wordlist = combinedWordlist,
+                            wordlist = hybridWordlist,
                             hpc = hpc)
 
     @staticmethod
@@ -354,7 +340,11 @@ class JTRAttacks:
         jtr = John()
         print_status(f"Attacking {hashType} hashes in {hashFile} hash file in hybrid MFW attack mode.")
         #maskFilePath = FilePath(maskFile)
-        combinedWordlistPath = Combinator.hybridMFW(masksFile, wordlist)
+        hybridWordlist = "hybrid.txt"
+        Combinator.hybridMFW(masksFile = masksFile,
+                             wordlist  = wordlist,
+                             output    = hybridWordlist)
+
         JTRAttacks.wordlist(hashType = hashType,
                             hashFile = hashFile,
                             wordlist = combinedWordlist,
