@@ -1,5 +1,5 @@
 # hattack - hash attack
-Initially `hattack` was simply an integrator of [PPACK](https://gitlab.com/spolit/ppack) (mask generator) and a `pasword cracker`(hashcat or john the ripper) to perform `mask attacks` against an hash submiting parallel tasks in a cluster using `Slurm`. But we extend it to perform diverse attacks (wordlist attacks, combination attacks, hybrid attacks [wordlist + masks or masks + wordlist] and of course mask attacks)
+Initially `hattack` was a simple integrator of [PPACK](https://gitlab.com/spolit/ppack) (mask generator) and a `password cracker`(hashcat or john the ripper) to perform `mask attacks` against hashes submiting parallel tasks in a cluster using `Slurm`. But we extend it to perform diverse attacks (wordlist attacks, combination attacks, hybrid attacks [wordlist + masks or masks + wordlist] and of course mask attacks)
 
 ### Dependences
 * Openmpi (with slurm support)
