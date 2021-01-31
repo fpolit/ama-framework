@@ -44,6 +44,7 @@ class Hashcat(PasswordCracker):
     hashes = hashes
     attackMode = {  0:"Wordlist",
                     1:"Combination",
+                    2:"Incremental",
                     3:"Mask",
                     6:"Hybrid:\n\twordlist + masks file or mask",
                     7:"Hybrid:\n\tmasks file or mask + wordlist"}
@@ -193,6 +194,20 @@ class HCAttacks:
             firstWordlist, secondWordlist = wordlists
             combinationAttack = f"{hc.mainexec} -a {attackMode} -m {hashType} {hashFile} {firstwordlist} {secondwordlist}"
             Bash.exec(combinationAttack)
+
+
+    @staticmethod
+    def incremental(*, attackMode=2, hashType, hashesFile, minlength=1, maxlength, hpc=None):
+        if hpc:
+            pass
+        else:
+            mask = '?a'*(minlength-1)
+            for k in range(minlength, maxlength):
+                if not PasswordCracker.statusHashFile(hashesFile):
+                    mask += '?a'
+                    incrementalAttack = f"hashcat -a 3 -m {hashType} {mask}"
+                    Bash.exec(incrementalAttack)
+
 
 
     @staticmethod

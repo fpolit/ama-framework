@@ -79,6 +79,13 @@ def hattackCLIParser():
                                 required=True,
                                 help=f"{helpAttackMode}")
 
+    cracker_parser.add_argument('--minlength', type=int, default=1,
+                                help="minimum mask length(incremental mode)")
+
+    cracker_parser.add_argument('--maxlength', type=int,
+                                help="maximum mask length(incremental mode)")
+
+
     # HPC parameters
     hpc_parser = parser.add_argument_group('HPC arguments',
                                         'Options to submit a parallel task in slurm')
@@ -236,6 +243,8 @@ def main():
         # password cracker arguments
         attackMode = args.attack
         cracker = args.cracker
+        minlength = args.minlength
+        maxlength = args.maxlength if args.maxlength else args.minlength
 
     if args.cracker in ["john", "jtr"]:
         John.selectAttack(attackMode = attackMode,

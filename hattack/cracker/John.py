@@ -199,7 +199,7 @@ class JTRAttacks:
 
             slurm, extra = hpc.parameters()
             if parallelJobType == "MPI":
-                parallelWork = [f"srun mpirun {jtr.mainexec} --wordlist={wordlist} --format={hashType} {hashFile}"]
+                parallelWork = [f"srun --mpi=pmix_v3 {jtr.mainexec} --wordlist={wordlist} --format={hashType} {hashFile}"]
 
             elif parallelJobType == "OMP":
                 parallelWork = [f"{jtr.mainexec} --wordlist={wordlist} --format={hashType} {hashFile}"]
@@ -243,7 +243,7 @@ class JTRAttacks:
 
             slurm, extra = hpc.parameters()
             if parallelJobType == "MPI":
-                parallelWork = [f"srun mpirun {jtr.mainexec} --format={hashType} {hashFile}"]
+                parallelWork = [f"srun --mpi=pmix_v3 {jtr.mainexec} --format={hashType} {hashFile}"]
 
             elif parallelJobType == "OMP":
                 parallelWork = [f"{jtr.mainexec} --format={hashType} {hashFile}"]

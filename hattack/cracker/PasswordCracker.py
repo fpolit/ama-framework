@@ -118,7 +118,7 @@ class PasswordCracker:
         else:
             hashStatus.append(["uncracked", None, None, queryHash, None])
 
-        print(tabulate(hashesStatus, headers=["status", "cracker", "hash type", "hash", "password"]))
+        print(tabulate(hashStatus, headers=["status", "cracker", "hash type", "hash", "password"]))
 
 
     @staticmethod
@@ -140,29 +140,29 @@ class PasswordCracker:
                     elif cracker in ["hashcat", "hc"]:
                         crackedPattern = re.compile(rf"({queryHash}):(\W*|\w*|.*)", re.DOTALL)
 
-                    else:
-                        homePath = os.path.expanduser("~")
-                        if cracker in ["john", "jtr"]:
-                            johnPotFile = os.path.join(homePath, ".john/john.pot")
-                            potFilePath = FilePath(johnPotFile)
-                            crackedPattern = re.compile(rf"\$(\W*|\w*|.*)\$({queryHash})(\$(\W*|\w*|.*)\$)?:(\W*|\w*|.*)", re.DOTALL)
+                else:
+                    homePath = os.path.expanduser("~")
+                    if cracker in ["john", "jtr"]:
+                        johnPotFile = os.path.join(homePath, ".john/john.pot")
+                        potFilePath = FilePath(johnPotFile)
+                        crackedPattern = re.compile(rf"\$(\W*|\w*|.*)\$({queryHash})(\$(\W*|\w*|.*)\$)?:(\W*|\w*|.*)", re.DOTALL)
 
-                        elif cracker in ["hashcat", "hc"]:
-                            hashcatPotFile = os.path.join(homePath, ".hashcat/hashcat.potfile")
-                            potFilePath = FilePath(hashcatPotFile)
-                            crackedPattern = re.compile(rf"({queryHash}):(\W*|\w*|.*)", re.DOTALL)
+                    elif cracker in ["hashcat", "hc"]:
+                        hashcatPotFile = os.path.join(homePath, ".hashcat/hashcat.potfile")
+                        potFilePath = FilePath(hashcatPotFile)
+                        crackedPattern = re.compile(rf"({queryHash}):(\W*|\w*|.*)", re.DOTALL)
 
-                    print(f"potFilePath: {potFilePath}")
-                    with open(potFilePath, 'r') as _potFile:
-                        while   crackedHash := _potFile.readline().rstrip():
-                            if crackedHashPot := crackedPattern.fullmatch(crackedHash):
-                                hashPot = crackedHashPot.groups()
-                                #_potFile.close()
-                                if cracker in ["john", "jtr"]:
-                                    return [hashPot[0], hashPot[1], hashPot[-1]]
-                                elif cracker in ["hashcat", "hc"]:
-                                    return [None, hashPot[0], hashPot[1]]
-                    return None
+                print(f"potfile: {potFilePath}")
+                with open(potFilePath, 'r') as _potFile:
+                    while   crackedHash := _potFile.readline().rstrip():
+                        if crackedHashPot := crackedPattern.fullmatch(crackedHash):
+                            hashPot = crackedHashPot.groups()
+                            #_potFile.close()
+                            if cracker in ["john", "jtr"]:
+                                return [hashPot[0], hashPot[1], hashPot[-1]]
+                            elif cracker in ["hashcat", "hc"]:
+                                return [None, hashPot[0], hashPot[1]]
+                return None
 
             else:
                 raise NotSupportedCracker(cracker)
