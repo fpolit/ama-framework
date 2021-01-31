@@ -2,7 +2,7 @@
 Initially `hattack` was a simple integrator of [PPACK](https://gitlab.com/spolit/ppack) (mask generator) and a `password cracker`(hashcat or john the ripper) to perform `mask attacks` against hashes submiting parallel tasks in a cluster using `Slurm`. But we extend it to perform diverse attacks (wordlist attacks, combination attacks, hybrid attacks [wordlist + masks or masks + wordlist] and of course mask attacks)
 
 ### Dependences
-* Openmpi (with slurm support)
+* Openmpi (with slurm and pmix support)
 * John The Ripper (with MPI support)
 * Hashcat (needed for massively parallel mask attacks)
 * HPC Cluster (needed to submit parallel tasks in a cluster with slurm)
