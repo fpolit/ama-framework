@@ -1,6 +1,3 @@
-[submodule "docs/hattack.wiki"]
-	path = docs/hattack.wiki
-	url = git@gitlab.com:spolit/hattack.wiki.git
 [submodule "docs/aman.wiki"]
 	path = docs/aman.wiki
 	url = git@gitlab.com:spolit/aman.wiki.git
