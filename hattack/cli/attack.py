@@ -76,35 +76,95 @@ def hattackCLIParser():
     # HPC parameters
     hpc_parser = parser.add_argument_group('HPC arguments',
                                         'Options to submit a parallel task in slurm')
-    hpc_parser.add_argument('-g', '--gpu', type=int, default=0,
-                        help='Number of GPU nodes')
 
-    hpc_parser.add_argument('-N', '--nodes', type=int, default=1,
-                        help='Number of nodes')
 
-    hpc_parser.add_argument('-n', '--ntasks', type=int, default=1,
-                        help='Number of tasks(MPI process)')
 
-    hpc_parser.add_argument('-p', '--partition', type=str, default=None,
-                        help='Slurm Partition')
+    hpc_parser.add_argument('-a', '--array',
+                            help='array job')
 
-    hpc_parser.add_argument('-ct', '--cpusPerTask', type=int, default=1,
-                    help='Number of tasks per CPU(OMP Threads)')
+    hpc_parser.add_argument('-A', '--account',
+                            help='account name')
 
-    hpc_parser.add_argument('-mc', '--memPerCpu', type=str, default="1GB",
-                help='Memory per CPU(node)')
+    hpc_parser.add_argument('-d', '--dependency',
+                            help='dependency list')
 
-    hpc_parser.add_argument('-j', '--jobname', type=str, default="hattack",
-                        help='Slurm Job Name')
+    hpc_parser.add_argument('-D', '--chdir',
+                            help='homework directory')
 
-    hpc_parser.add_argument('-o', '--output', type=str, default=None,
-                        help='Slurm Output File Name')
+    hpc_parser.add_argument('-e', '--error',
+                            help='error file')
 
-    hpc_parser.add_argument('-e', '--error', type=str, default=None,
-                        help='Slurm Error File Name')
+    hpc_parser.add_argument('-J', '--jobName',
+                            help='job name')
 
     hpc_parser.add_argument('-t', '--time', type=str, default=None,
                             help='Maximum time to perform the attack(HH:MM:SS)')
+    hpc_parser.add_argument('-M', '--cluster',
+                            help='cluster name')
+
+    hpc_parser.add_argument('-m', '--distribution',
+                            choices=['block', 'cyclic',
+                                     'plane', 'arbitrary'],
+                            help='distribution method')
+
+    hpc_parser.add_argument('--mail-type',
+                            choices=['BEGIN', 'END', 'FAIL',
+                                     'ALL', 'TIME_LIMIT'],
+                            help='email notification type')
+
+    hpc_parser.add_argument('mail-user',
+                            help='email to receive notifications')
+    hpc_parser.add_argument('mem': self.mem)
+    hpc_parser.add_argument('mem-per-cpu': self.memPerCpu)
+    hpc_parser.add_argument('nodes': self.nodes)
+    hpc_parser.add_argument('ntasks': self.ntasks)
+    hpc_parser.add_argument('nice': self.nice)
+    hpc_parser.add_argument('output': self.output)
+    hpc_parser.add_argument('open-mode': self.openMode)
+    hpc_parser.add_argument('partition': self.partition)
+    hpc_parser.add_argument('reservation': self.reservation)
+    hpc_parser.add_argument('time': self.time)
+    hpc_parser.add_argument('test-only': self.testOnly)
+    hpc_parser.add_argument('verbose': self.verbose)
+    hpc_parser.add_argument('nodelist': self.nodelist)
+    hpc_parser.add_argument('wait': self.wait)
+    hpc_parser.add_argument('exclude':self.exclude)
+    hpc_parser.add_argument('cpus-per-task': self.cpusPerTask)
+
+
+
+    # hpc_parser.add_argument('-g', '--gpu', type=int, default=0,
+    #                     help='Number of GPU nodes')
+
+    # hpc_parser.add_argument('-N', '--nodes', type=int, default=1,
+    #                     help='Number of nodes')
+
+    # hpc_parser.add_argument('-n', '--ntasks', type=int, default=1,
+    #                     help='Number of tasks(MPI process)')
+
+    # hpc_parser.add_argument('-p', '--partition', type=str, default=None,
+    #                     help='Slurm Partition')
+
+    # hpc_parser.add_argument('-ct', '--cpusPerTask', type=int, default=1,
+    #                 help='Number of tasks per CPU(OMP Threads)')
+
+    # hpc_parser.add_argument('-mc', '--memPerCpu', type=str, default="1GB",
+    #             help='Memory per CPU(node)')
+
+    # hpc_parser.add_argument('-j', '--jobname', type=str, default="hattack",
+    #                     help='Slurm Job Name')
+
+    # hpc_parser.add_argument('-o', '--output', type=str, default=None,
+    #                     help='Slurm Output File Name')
+
+    # hpc_parser.add_argument('-e', '--error', type=str, default=None,
+    #                     help='Slurm Error File Name')
+
+    # hpc_parser.add_argument('-s', '--slurm', type=str, default="hattack.slurm",
+    #                     help='Slurm Submit Script Name')
+
+    # hpc_parser.add_argument('-t', '--time', type=str, default=None,
+    #                     help='Maximum time to perform the attack(HH:MM:SS)')
 
     hpc_parser.add_argument('--pmix', type=str, default='pmix_v3',
                             help='pmix type')
