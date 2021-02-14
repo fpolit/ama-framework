@@ -7,7 +7,7 @@ cleanslurm:
 	rm slurm-*.out
 
 virtualenv:
-	virtualenv --prompt '|> hattack <| ' env
+	virtualenv --prompt '(hattack)' env
 	env/bin/pip3 install -r requirements-dev.txt
 	env/bin/python3 setup.py develop
 	@echo
