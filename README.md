@@ -23,6 +23,7 @@ Visit our [wiki](https://gitlab.com/spolit/aman/-/wikis/home), there you can fin
 Visit our [wiki](https://gitlab.com/spolit/aman/-/wikis/home), there you can find useful documentation about `aman`.  
 
 
-**NOTE**: DO NOT USE `aman` IN ILLEGAL ACTIVITIES.
+**NOTE: DO NOT USE `aman` IN ILLEGAL ACTIVITIES**
+
 Happy Hacking!  
 ~ glozanoa
