@@ -7,7 +7,7 @@ cleanslurm:
 	rm slurm-*.out
 
 virtualenv:
-	virtualenv --prompt '(hattack)' env
+	virtualenv --prompt '(aman)' env
 	env/bin/pip3 install -r requirements-dev.txt
 	env/bin/python3 setup.py develop
 	@echo
@@ -31,13 +31,13 @@ installdev:
 test:
 	env/bin/python3 -m pytest \
 		-v \
-		--cov=hattack \
+		--cov=aman \
 		--cov-report=term \
 		--cov-report=html:coverage-report \
 		tests/
 
 docker: clean
-	docker build -t mattack:latest .
+	docker build -t aman:latest .
 
 dist: clean
 	rm -rf dist/*

@@ -32,10 +32,10 @@ from ..base.FilePath import FilePath
 from ..base.Mask import Mask
 
 # hpc module
-from ..hpc.HPC import HPC
+from ..slurm.HPC import HPC
 
 # hpc exceptions
-from ..hpc.HPCExceptions import ParallelWorkError
+from ..slurm.HPCExceptions import ParallelWorkError
 
 # utilities module
 from ..utilities.combinator import Combinator
@@ -49,7 +49,7 @@ class John(PasswordCracker):
                   1:"Combination",
                   2:"Incremental",
                   3:"Mask",
-                  #4:"Single",
+                  4:"Single",
                   6:"Hybrid:\n\twordlist + masks file or mask",
                   7:"Hybrid:\n\tmasks file or mask + wordlist"}
 
@@ -199,7 +199,7 @@ class JTRAttacks:
 
             slurm, extra = hpc.parameters()
             if parallelJobType == "MPI":
-                parallelWork = [f"srun --mpi=pmix_v3 {jtr.mainexec} --wordlist={wordlist} --format={hashType} {hashFile}"]
+                parallelWork = [f"srun --mpi={hpc.pmix} {jtr.mainexec} --wordlist={wordlist} --format={hashType} {hashFile}"]
 
             elif parallelJobType == "OMP":
                 parallelWork = [f"{jtr.mainexec} --wordlist={wordlist} --format={hashType} {hashFile}"]
@@ -229,7 +229,7 @@ class JTRAttacks:
                             hpc = hpc)
 
 
-    #debugged
+    #debugged (NOTE: John continue when the hass was cracked)
     @staticmethod
     def incremental(*, attackMode=2, hashType, hashFile, hpc=None):
         John.checkAttackArgs(_hashType=hashType,
@@ -243,7 +243,7 @@ class JTRAttacks:
 
             slurm, extra = hpc.parameters()
             if parallelJobType == "MPI":
-                parallelWork = [f"srun --mpi=pmix_v3 {jtr.mainexec} --format={hashType} {hashFile}"]
+                parallelWork = [f"srun --mpi={hpc.pmix} {jtr.mainexec} --format={hashType} {hashFile}"]
 
             elif parallelJobType == "OMP":
                 parallelWork = [f"{jtr.mainexec} --format={hashType} {hashFile}"]
@@ -258,6 +258,7 @@ class JTRAttacks:
             Bash.exec(incrementalAttack)
 
 
+    #tested
     @staticmethod
     def maskAttack(*, attackMode=3, hashType, hashFile, masksFile, hpc=None):
         John.checkAttackArgs(_hashType=hashType,
@@ -265,9 +266,20 @@ class JTRAttacks:
                              _masksFile=masksFile)
         jtr = John()
 
-        print_status(f"Attacking {hashType} hashes in {hashFile} file with {masksFile} mask file.")
+        print_successful(f"Attacking {hashType} hashes in {hashFile} file with {masksFile} mask file.")
         if hpc.partition:
-            print_failure("No supported yet")
+            maskAttackScript = "maskAttack.py"
+            JTRAttacks.genMaskAttack(hashType = hashType,
+                                     hashesFile = hashFile,
+                                     masksFile = masksFile,
+                                     hpc = hpc,
+                                     maskAttackScript = maskAttackScript)
+
+            parallelWork = [f"python3 {maskAttackScript}"]
+            slurm, extra = hpc.parameters()
+            slurmScriptName = extra['slurm-script']
+            HPC.genScript(slurm, extra, parallelWork)
+            Bash.exec(f"sbatch {slurmScriptName}")
 
         else:
             with open(masksFile, 'r') as masks:
@@ -280,32 +292,96 @@ class JTRAttacks:
 
             PasswordCracker.reportHashesFileStatus(hashFIle)
 
-    # @staticmethod
-    # def single(*, attackMode=4, hashType, hashFile, hpc=None):
-    #     John.checkAttackArgs(_hashType=hashType,
-    #                          _hashFile=hashFile,
-    #                          _wordlist=wordlist)
-    #     jtr = John()
-    #     print_status(f"Attacking {hashType} hashes in {hashFile} hash file in straigth  mode.")
-    #     if hpc.partition:
-    #         parallelJobType = hpc.parserParallelJob()
-    #         if not  parallelJobType in ["MPI", "OMP"]:
-    #             raise ParallelWorkError(parallelJobType)
+    # tested
+    @staticmethod
+    def genMaskAttack(*, hashType, hashesFile, masksFile, hpc, maskAttackScript='maskAttack.py'):
+        _mask = "{mask}"
+        _jtr_mainexec = "{jtr.mainexec}"
+        _attack = "{attack}"
+        _masksFile = f"'{masksFile}'"
+        _hashesFile = f"'{hashesFile}'"
+        _attack_msg = "{attack_msg}"
 
-    #         slurm, extra = hpc.parameters()
-    #         if parallelJobType == "MPI":
-    #             parallelWork = [f"srun mpirun {jtr.mainexec} --format={hashType} {hashFile}"]
 
-    #         elif parallelJobType == "OMP":
-    #             parallelWork = [f"{jtr.mainexec} --format={hashType} {hashFile}"]
+        parallelJobType = hpc.parserParallelJob()
+        if not  parallelJobType in ["MPI", "OMP"]:
+            raise ParallelWorkError(parallelJobType)
 
-    #         slurmScriptName = extra['slurm-script']
-    #         HPC.genScript(slurm, extra, parallelWork)
-    #         #Bash.exec("sbatch {slurmScriptName}")
+        slurm, extra = hpc.parameters()
+        #maskAttack = ""
+        if parallelJobType == "MPI":
+            maskAttack = f"""
+#!/bin/env python3
 
-    #     else:
-    #         singleAttack =   f"{jtr.mainexec} -a {attackMode} -m {hashType} {hashFile} {wordlist}"
-    #         #Bash.exec(singleAttack)
+from hattack.cracker.PasswordCracker import PasswordCracker
+from hattack.cracker.John import John
+from sbash.core import Bash
+
+jtr = John()
+
+with open({_masksFile}, 'r') as masks:
+    while mask := masks.readline().rstrip():
+        cracked = PasswordCracker.hashFileStatus(jtr.getName(), {_hashesFile})
+        if not cracked:
+            attack =   f"srun --mpi={hpc.pmix} {_jtr_mainexec} --mask={_mask} --format={hashType} {hashesFile}"
+            attack_msg = f"Running: {_attack}"
+            Bash.exec(f"echo {_attack_msg}")
+            Bash.exec(attack)
+            """
+
+
+        elif parallelJobType == "OMP":
+            maskAttack =f"""
+#!/usr/bin/env python3
+
+from hattack.cracker.PasswordCracker import PasswordCracker
+from hattack.cracker.John import John
+from sbash.core import Bash
+
+jtr = John()
+
+with open({_masksFile}, 'r') as masks:
+    while mask := masks.readline().rstrip():
+        cracked = PasswordCracker.hashFileStatus(jtr.getName(), {_hashesFile})
+        if not cracked:
+            attack =   f"srun {_jtr_mainexec} --mask={_mask} --format={hashType} {hashesFile}"
+            attack_msg = f"Running: {_attack}"
+            Bash.exec(f"echo {_attack_msg}")
+            Bash.exec(attack)
+            """
+
+        with open(maskAttackScript, 'w') as attack:
+            attack.write(maskAttack)
+
+        print_status(f"Mask attack script generated: {maskAttackScript}")
+
+    # tested
+    @staticmethod
+    def single(*, attackMode=4, hashType, hashFile, hpc=None):
+        John.checkAttackArgs(_hashType=hashType,
+                             _hashFile=hashFile)
+                             #_wordlist=wordlist)
+        jtr = John()
+        print_status(f"Attacking {hashType} hashes in {hashFile} hash file in straigth  mode.")
+        if hpc.partition:
+            parallelJobType = hpc.parserParallelJob()
+            if not  parallelJobType in ["MPI", "OMP"]:
+                raise ParallelWorkError(parallelJobType)
+
+            slurm, extra = hpc.parameters()
+            if parallelJobType == "MPI":
+                parallelWork = [f"srun --mpi={hpc.pmix} {jtr.mainexec} --single --format={hashType} {hashFile}"]
+
+            elif parallelJobType == "OMP":
+                parallelWork = [f"{jtr.mainexec} --single --format={hashType} {hashFile}"]
+
+            slurmScriptName = extra['slurm-script']
+            HPC.genScript(slurm, extra, parallelWork)
+            Bash.exec(f"sbatch {slurmScriptName}")
+
+        else:
+            singleAttack = f"{jtr.mainexec} --single --format={hashType} {hashFile}"
+            Bash.exec(singleAttack)
 
     @staticmethod
     def hybridWMF(*, attackMode=6, hashType, hashFile, wordlist, masksFile, hpc=None):

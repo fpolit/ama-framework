@@ -9,15 +9,15 @@ LONG_DESCRIPTION = f.read()
 f.close()
 
 setup(
-    name='hattack',
+    name='aman',
     version=VERSION,
-    description='hattack allow you perform several hash attacks in a cluster',
+    description='aman allow you perform several attacks in a cluster',
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',
     author='glozanoa',
     author_email='glozanoa@uni.pe',
     url='https://gitlab.com/spolit/hattack.git',
-    license='unlicensed',
+    license='GPL3',
     packages=find_packages(exclude=['ez_setup', 'tests*']),
     #package_data={'mattack': ['templates/*']},
     install_requires=[
@@ -28,10 +28,10 @@ setup(
     include_package_data=True,
     entry_points={
         'console_scripts':[
-            'hattack = hattack.cli.attack:main',
-            'hsearch = hattack.cli.search:main',
-            'hstatus = hattack.cli.status:main',
-            'hcombine = hattack.cli.combinator:main'
+            'aman = aman.cli.attack:main',
+            'hsearch = aman.cli.search:main',
+            'hstatus = aman.cli.status:main',
+            #'hcombine = aman.cli.combinator:main'
         ]
     },
 )

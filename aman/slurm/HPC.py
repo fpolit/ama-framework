@@ -12,7 +12,7 @@ class HPC:
     HPC hold the necesary parameter to submit a parallel task (with slurm)
     """
 
-   def __init__(self, *, array=None, account=None, dependecy=None, chdir=None, error=None,
+    def __init__(self, *, array=None, account=None, dependecy=None, chdir=None, error=None,
                  jobName="hattack", cluster=None, distribution="block", mailType=None, mailUser=None,
                  mem=None, memPerCpu=None, nodes=1, ntasks=1, nice=None, output=None, openMode="truncate",
                  partition=None, reservation=None, time=None, testOnly=False, verbose=False,
@@ -26,7 +26,7 @@ class HPC:
         self.chdir = chdir # -D <homework directory path>
         self.error = error # -e <error file path>
         self.jobName = jobName # -J <str>
-        self.cluster = clusters # -M <cluster name>
+        self.cluster = cluster # -M <cluster name>
         self.distribution = distribution # -m <block|cyclic|plane|arbitrary>
         self.mailType = mailType # NONE <BEGIN|END|FAIL|REQUEUE|ALL|TIME_LIMIT_PP>, PP: percent of the limit time
         self.mailUser = mailUser # NONE <user email>

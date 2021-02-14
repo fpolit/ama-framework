@@ -30,10 +30,10 @@ from .PasswordCrackerExceptions import AttackModeError
 from .PasswordCrackerExceptions import CrackerHashError
 
 # hpc module
-from ..hpc.HPC import HPC
+from ..slurm.HPC import HPC
 
 # hpc exceptions
-from ..hpc.HPCExceptions import ParallelWorkError
+from ..slurm.HPCExceptions import ParallelWorkError
 
 # utilities module
 from ..utilities.combinator import Combinator
@@ -182,7 +182,6 @@ class HCAttacks:
         Hashcat.checkAttackArgs(_hashType=hashType,
                                 _hashFile=hashFile,
                                 _wordlist=wordlists)
-
 
         if hpc:
             pass

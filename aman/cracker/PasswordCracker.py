@@ -152,7 +152,7 @@ class PasswordCracker:
                         potFilePath = FilePath(hashcatPotFile)
                         crackedPattern = re.compile(rf"({queryHash}):(\W*|\w*|.*)", re.DOTALL)
 
-                print(f"potfile: {potFilePath}")
+                #print(f"potfile: {potFilePath}")
                 with open(potFilePath, 'r') as _potFile:
                     while   crackedHash := _potFile.readline().rstrip():
                         if crackedHashPot := crackedPattern.fullmatch(crackedHash):
