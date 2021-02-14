@@ -52,26 +52,13 @@ def hattackCLIParser():
     cracker_parser.add_argument('-c', '--cracker', type=str, choices=PasswordCracker.crackers,
                                 required=True, help="Password Cracker")
 
-    #import pdb; pdb.set_
-    # attackModes = {'john': John.attackMode,
-    #                'hashcat': Hashcat.attackMode}
-    # helpAttackMode = ""
-    # for cracker, attackMode in attackModes.items():
-    #     helpAttackMode += f" # | {cracker}\n"
-    #     helpAttackMode +=  "------------\n"
-    #     for attackId, attackInfo in attackMode.items():
-    #         helpAttackMode += f" {attackId} | {attackInfo}\n"
-    #     helpAttackMode += "\n"
-
     helpAttackMode = ""
 
     #john attack modes
-    #helpAttackMode += "\njohn\n"
     helpAttackMode += tabulate(John.attackMode.items(), headers=["#", "john attacks"])
     helpAttackMode += "\n\n"
 
     #hashcat attack modes
-    #helpAttackMode += "\nhashcat\n"
     helpAttackMode += tabulate(Hashcat.attackMode.items(), headers=["#", "hashcat attacks"])
     helpAttackMode += "\n"
 
@@ -116,19 +103,15 @@ def hattackCLIParser():
     hpc_parser.add_argument('-e', '--error', type=str, default=None,
                         help='Slurm Error File Name')
 
+    hpc_parser.add_argument('-t', '--time', type=str, default=None,
+                            help='Maximum time to perform the attack(HH:MM:SS)')
+
+    hpc_parser.add_argument('--pmix', type=str, default='pmix_v3',
+                            help='pmix type')
+
     hpc_parser.add_argument('-s', '--slurm', type=str, default="hattack.slurm",
                         help='Slurm Submit Script Name')
 
-    hpc_parser.add_argument('-t', '--time', type=str, default=None,
-                        help='Maximum time to perform the attack(HH:MM:SS)')
-
-
-    # help arguments
-    # help_parser = parser.add_argument_group('Help arguments',
-    #                                     'Options to get help')
-
-    # help_parser.add_argument('-gh', '--getHelp', choices=['attack', 'examples'],
-    #                          help='Get help of specific arguments')
     return parser
 
 def main():
@@ -226,6 +209,7 @@ def main():
         output      = args.output
         error       = args.error
         time        = args.time
+        pmix         = args.pmix
         slurmScript = args.slurm
 
         hpc = HPC(gpus        = gpus,
@@ -238,6 +222,7 @@ def main():
                   output      = output,
                   error       = error,
                   time        = time,
+                  pmix        = pmix,
                   slurmScript = slurmScript)
 
         # password cracker arguments

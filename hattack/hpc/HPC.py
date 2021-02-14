@@ -13,7 +13,7 @@ class HPC:
     """
 
     def __init__(self, *, gpus=None, nodes=None, ntasks=None, partition=None, cpusPerTask=1, memPerCpu=None,
-                 jobName="crack", output=None, error=None, time=None, slurmScript="hashattack.slurm"):
+                 jobName="crack", output=None, error=None, time=None, pmix='pmix_v3', slurmScript="hashattack.slurm"):
         # slurm parameters
         self.gpus = gpus
         self.nodes = nodes
@@ -25,6 +25,7 @@ class HPC:
         self.output = output
         self.error = error
         self.time = time
+        self.pmix = pmix
 
         # extra parameters
         self.slurmScript = slurmScript
