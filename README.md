@@ -6,6 +6,7 @@ Initially `aman` was a simple integrator of [PPACK](https://gitlab.com/spolit/pp
 * John The Ripper (with MPI support)
 * Hashcat (to perform attacks using the GPU power)
 * Hydra (to perform attacks again services)
+* PPACK (to analyze wordlists and generate tuned masks)
 * HPC Cluster (needed to submit parallel tasks in a cluster with slurm)
 
 Visit our [wiki](https://gitlab.com/spolit/aman/-/wikis/home), there you can find guides to install properly `Openmpi`, `Jhon The Ripper` and configure an `HPC cluster`
