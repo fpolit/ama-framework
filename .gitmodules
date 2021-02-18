@@ -1,3 +1,15 @@
 [submodule "docs/aman.wiki"]
 	path = docs/aman.wiki
 	url = git@gitlab.com:spolit/aman.wiki.git
+[submodule "ama/base/CeWL"]
+	path = ama/base/wordlists/CeWL
+	url = https://github.com/digininja/CeWL.git
+[submodule "ama/base/cupp"]
+	path = ama/base/wordlists/cupp
+	url = https://github.com/Mebus/cupp.git
+[submodule "ama/base/wordlists/pydictor"]
+	path = ama/base/wordlists/pydictor
+	url = https://github.com/LandGrey/pydictor.git
+[submodule "ama/base/hashes/hashID"]
+	path = ama/base/hashes/hashID
+	url = https://github.com/psypanda/hashID.git
