@@ -7,7 +7,7 @@ cleanslurm:
 	rm slurm-*.out
 
 virtualenv:
-	virtualenv --prompt '(aman)' env
+	virtualenv --prompt '(ama)' env
 	env/bin/pip3 install -r requirements-dev.txt
 	env/bin/python3 setup.py develop
 	@echo
@@ -31,13 +31,13 @@ installdev:
 test:
 	env/bin/python3 -m pytest \
 		-v \
-		--cov=aman \
+		--cov=ama \
 		--cov-report=term \
 		--cov-report=html:coverage-report \
 		tests/
 
 docker: clean
-	docker build -t aman:latest .
+	docker build -t ama:latest .
 
 dist: clean
 	rm -rf dist/*

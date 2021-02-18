@@ -1,5 +1,12 @@
-cement==3.0.4
-sbash
+psycopg2
 fineprint
-tabulate
+sbash
+random-password-generator
+cliff
+
+
+#cement==3.0.4
+#sbash
+#fineprint
+#tabulate
 #mpi4py
