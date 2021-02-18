@@ -11,20 +11,22 @@ from tabulate import tabulate
 from fineprint.status import print_failure, print_successful, print_status
 
 # importing PasswordCracker exceptions
-from .PasswordCrackerExceptions import CrackerExecNotFound
-from .PasswordCrackerExceptions import InvalidCracker
-from .PasswordCrackerExceptions import NotSupportedCracker
+from .passwordCrackerExceptions import CrackerExecNotFound
+from .passwordCrackerExceptions import InvalidCracker
+from .passwordCrackerExceptions import NotSupportedCracker
 
 # base module imports
-from ..base.FilePath import FilePath
-from ..base.ExecPath import getExecPath
+from ama.base.path import FilePath
+from ama.base.path import getExecPath
 
 class PasswordCracker:
     """
-        PasswordCracker (hashcat, john)
+        PasswordCracker (hash and credential crackers) - General Password Cracker class
     """
-    crackProcesses = None
-    crackers = ["john", "hashcat"]
+    #crackProcesses = None
+    #crackers = ["john", "hashcat"]
+    hashCrackers = ["jtr", "hc"]
+    credentialCrackers = ["hydra"]
 
     def __init__(self, name, *, executable=[], status=None, path=None, version=None):
         self.name = name #it can be a list of name (for example [hashcat, hc])

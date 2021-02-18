@@ -1,12 +1,20 @@
 #!/usr/bin/env python3
-from setuptools import setup, find_packages
-#from hattack.utilities.version import get_version
+#
+# ama-framework setup
+#
+# date: Feb 18 2021
+# Maintainer: glozanoa <glozanoa@uni.pe>
 
-VERSION = "1.0"
+
+from setuptools import setup, find_packages
+from ama.base.version import get_version
+
+VERSION = get_version()
 
 f = open('README.md', 'r')
 LONG_DESCRIPTION = f.read()
 f.close()
+
 
 setup(
     name='ama',
@@ -33,7 +41,10 @@ setup(
         ],
 
         'ama.cli':[
-            'search = ama.core.search:SearchHashes'
+            'hashes = ama.core.hashes:SearchHashes',
+            'loot hashes = ama.core.loot:LootHashes',
+            'loot credential = ama.core.loot:LootCredential',
+            'search = ama.core.search:SearchModules'
         ],
 
         'amadb.cli':[

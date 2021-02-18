@@ -4,7 +4,7 @@
 Hashcat hashes
 """
 
-hashes = {
+hcHashes = {
     "900": {
         "Name": "MD4",
         "Category": "Raw Hash"

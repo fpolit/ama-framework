@@ -5,7 +5,7 @@
 # Maintainer: Gustavo Lozano <glozanoa@uni.pe>
 
 # cracker modules import
-from .PasswordCracker import PasswordCracker
+from .passwordCracker import PasswordCracker
 
 
 class Hydra(PasswordCracker):
@@ -31,3 +31,4 @@ class Hydra(PasswordCracker):
                ssl=None, oldssl=None,
                targetsFile=None
                ):
+        pass

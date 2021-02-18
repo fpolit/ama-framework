@@ -1,46 +1,74 @@
 #!/usr/bin/env python3
 #
-# ama subcommand - seach by valid hashes types given a pattern
+# ama subcommand - search avaliables ama modules
 #
 # date: Feb 18 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
-
-from ama import Ama
+import re
 
 # cliff imports
-from cliff.command import Command
+from cliff.lister import Lister
 
-# import modules of core/crack
-from .cracker import PasswordCracker
-from .cracker import John
-from .cracker import Hashcat
+# import data/modules
+from ama.data import getAmaModules
 
 
-class SearchHashes(Command):
+class SearchModules(Lister):
     """
-    Seach by valid hashes types given a pattern
+    Search avaliables ama modules
     """
     def get_parser(self, prog_name):
-        parser = super(SearchHashes, self).get_parser(prog_name)
-        parser.add_argument('pattern', type=str,
-                            help='pattern to search valid hashes types')
-
-        parser.add_argument('-c', '--cracker', type=str, choices=PasswordCracker.crackers,
-                            required=True, help="Password Cracker")
-
-        parser.add_argument('-s', '--sensitive', action='store_true', help="Enable sensitive search")
+        parser = super(SearchModules, self).get_parser(prog_name)
+        parser.add_argument('name',
+                            help='module name')
+        parser.add_argument('-mt', '--moduleType',
+                            help='module type')
 
         return parser
 
     def take_action(self, parsed_args):
-        pattern = parsed_args.pattern
-        cracker = parsed_args.cracker
-        sensitive = parsed_args.sensitive
+        moduleName = parsed_args.name
+        moduleType = parsed_args.moduleType
 
-        if cracker in ["john", "jtr"]:
-            John.searchHash(pattern, sensitive=sensitive)
+        filteredAmaModules = SearchModules.search(moduleName, moduleType)
 
-        elif cracker in ["hashcat", "hc"]:
-            Hashcat.searchHash(pattern, sensitive=sensitive)
+        return (('#', 'Module'),
+                filteredAmaModules)
 
+    @staticmethod
+    def search(self, moduleName, moduleType):
+        """
+        Search availables ama modules given a moduleName and moduleType.
+        Return a tuple of formated tuples
+        like (enumeration module, ModuleType/ModuleSubtype/amaModule)
+        """
+        amaModules = getAmaModules()
+        filteredModules = []
+        if moduleType and moduleName:
+            if moduleType in amaModules:
+                amaModulesSubtype = amaModules[moduleType]
+                moduleNamePattern = re.compile(rf"[\w\W]*{moduleName}[\w\W]*")
+
+                idModule = 0
+                for moduleSubtype, modules in amaModulesSubtype:
+                    for amaModule in modules:
+                        if moduleNamePattern.fullmatch(amaModule):
+                            idModule += 1
+                            filteredModules.append((idModule,
+                                                    f"{moduleType}/{moduleSubtype}/{amaModule}"))
+
+                return filteredModules
+
+            else:
+                filteredModules = [(None, None)]
+                return filteredModules
+        else:
+            if not moduleName:
+                filteredModules = [(None, None)]
+                return filteredModules
+            else:
+                for moduleType in amaModules.keys():
+                    filteredModules += \
+                        SearchModules.search(moduleName, moduleType)
+                return filteredModules

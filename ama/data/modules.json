@@ -1,0 +1,14 @@
+{
+    "cracker":
+    {
+        "hashes": ["john", "hashcat"],
+        "services": ["hydra"]
+    },
+    "auxiliary":
+    {
+        "wordlists": ["crunch", "cewl", "cupp", "pydictor"],
+        "hashes": ["hashid"],
+        "masks": ["ppack", "pack"],
+        "combinator": ["mixer"]
+    }
+}

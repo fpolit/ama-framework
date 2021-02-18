@@ -26,7 +26,7 @@ install:
 	
 installdev:
 	python3 -m pip install -r requirements-dev.txt
-	python3 -m pip install .
+	python3 -m pip install . --verbose
 
 test:
 	env/bin/python3 -m pytest \

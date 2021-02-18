@@ -3,7 +3,7 @@
 Jhon the Ripper hashes
 """
 
-hashes=[
+jtrHashes=[
 "descrypt",             "bsdicrypt",            "md5crypt",         "md5crypt-long",      "bcrypt",             "scrypt",
 "tripcode",             "AndroidBackup",        "adxcrypt",         "agilekeychain",      "aix-ssha1",          "aix-ssha256",
 "aix-ssha512",          "andOTP",               "ansible",          "argon2",             "as400-des",          "as400-ssha1",

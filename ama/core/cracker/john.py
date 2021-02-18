@@ -20,15 +20,15 @@ from sbash.core import Bash
 from fineprint.status import print_status, print_failure, print_successful
 
 # cracker modules
-from .PasswordCracker import PasswordCracker
+from .passwordCracker import PasswordCracker
 
-from .PasswordCrackerExceptions import CrackerHashError
+from .passwordCrackerExceptions import CrackerHashError
 
 # hashes modules
-from ..hashes.jtr import hashes
+from ama.data.hashes import jtrHashes
 
 # base module
-from ..base.FilePath import FilePath
+from ama.base.filepath import FilePath
 from ..base.Mask import Mask
 
 # hpc module
@@ -43,7 +43,7 @@ from ..utilities.combinator import InvalidWordlistNumber
 
 
 class John(PasswordCracker):
-    hashes = hashes
+    hashes = jtrHashes
 
     attackMode = {0:"Wordlist",
                   1:"Combination",
