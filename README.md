@@ -23,8 +23,8 @@ Visit our [wiki](https://gitlab.com/spolit/ama/-/wikis/home), there you can find
 ### Usage
 Visit our [wiki](https://gitlab.com/spolit/ama/-/wikis/home), there you can find useful documentation about `ama`.  
 
-
-**NOTE: DO NOT USE `aman` IN ILLEGAL ACTIVITIES**
+     Please do not use ama in military or secret service organizations,
+                      or for illegal purposes
 
 Happy Hacking!  
 ~ glozanoa
