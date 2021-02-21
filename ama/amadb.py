@@ -19,7 +19,7 @@ from fineprint.status import print_status
 # import ama version
 from ama.base.version import get_version
 
-class AmaDBCLI(App):
+class AmaInit(App):
     """
     CLI App to interact with ama-framework's database
     """

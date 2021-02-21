@@ -16,8 +16,8 @@ from .passwordCrackerExceptions import InvalidCracker
 from .passwordCrackerExceptions import NotSupportedCracker
 
 # base module imports
-from ama.base.path import FilePath
-from ama.base.path import getExecPath
+#from ama.base.path import FilePath
+#from ama.base.path import getExecPath
 
 class PasswordCracker:
     """

@@ -7,7 +7,7 @@ from .HPCExceptions import HybridWorkError
 from .HPCExceptions import SlurmParametersError
 #from .HPCExceptions import ParallelWorkError
 
-class HPC:
+class Slurm:
     """
     HPC hold the necesary parameter to submit a parallel task (with slurm)
     """
@@ -19,7 +19,7 @@ class HPC:
                  nodelist=None, wait=False, exclude=None, cpusPerTask=1,
                  slurmScript="hattack.slurm"):
 
-        # slurm parameters - shortcut - arguments
+        # slurm parameters (core) - shortcut - arguments
         self.array = array # -a <e.x: 0-15 or 0,6,16-32>
         self.account = account # -A <account>
         self.dependency = dependency # -d
@@ -50,33 +50,18 @@ class HPC:
         self.exclude = exclude # -x <nodelist>
 
 
-
-        # self.nodes = nodes
-        # self.ntasks = ntasks
-        # self.partition = partition
-        # self.cpusPerTask = cpusPerTask
-        # self.memPerCpu = memPerCpu
-        # self.jobName = jobName
-        # self.output = output
-        # self.error = error
-        # self.time = time
-
-        # self.gpus = gpus
-
-
-
         # extra parameters
         self.slurmScript = slurmScript
 
 
 
 
-    def slurmParameters(self):
+    def coreParameters(self):
         """
-        return only slurm parameters
+        return only core parameters (slurm)
         """
 
-        slurm = {'array': self.array,
+        core = {'array': self.array,
                  'account': self.account,
                  'dependency': self.dependecy,
                  'chdir': self.chdir,
@@ -88,6 +73,7 @@ class HPC:
                  'mail-user': self.mailUser,
                  'mem': self.mem,
                  'mem-per-cpu': self.memPerCpu,
+                 'cpus-per-task': self.cpusPerTask,
                  'nodes': self.nodes,
                  'ntasks': self.ntasks,
                  'nice': self.nice,
@@ -100,41 +86,40 @@ class HPC:
                  'verbose': self.verbose,
                  'nodelist': self.nodelist,
                  'wait': self.wait,
-                 'exclude':self.exclude,
-                 'cpus-per-task': self.cpusPerTask}
+                 'exclude':self.exclude}
 
-        return slurm
+        return core
 
 
     def parameters(self):
         """
-        return slurm and extra parameters
+        return core and extra parameters
         """
-        slurm  = self.slurmParameters()
+        core  = self.coreParameters()
         extra = {'slurm-script': self.slurmScript}
-        return [slurm, extra]
+        return [core, extra]
 
 
 
     @staticmethod
-    def parserJob(slurm):
+    def parserJob(core):
         """
-        slurm : is the slurm dictonary returned parameters or slurmParameters methods
+        core : is the core dictonary returned by  coreParameters methods
         """
-        if slurm["gpu"] == 0 and slurm["nodes"] == 1 and slurm["ntasks"] == 1 and slurm["cpus-per-task"] > 1:
+        if core["gpu"] == 0 and core["nodes"] == 1 and core["ntasks"] == 1 and core["cpus-per-task"] > 1:
             return "OMP"
 
-        elif slurm["gpu"] == 0 and slurm["nodes"] >= 1 and slurm["ntasks"] >= 1 and slurm["cpus-per-task"] == 1:
+        elif core["gpu"] == 0 and core["nodes"] >= 1 and core["ntasks"] >= 1 and core["cpus-per-task"] == 1:
             return "MPI"
 
-        elif slurm["gpu"] > 0 and slurm["nodes"] == 1 and slurm["ntasks"] == 1 and slurm["cpus-per-task"] == 1:
+        elif core["gpu"] > 0 and core["nodes"] == 1 and core["ntasks"] == 1 and core["cpus-per-task"] == 1:
             return "GPU"
 
-        elif slurm["gpu"] > 0 and slurm["nodes"] >= 1 and slurm["ntasks"] >= 1 and slurm["cpus-per-task"] >= 1:
-            raise HybridWorkError({'gpus': slurm["gpu"], 'nodes': slurm["nodes"],
-                                   'ntasks': slurm["ntasks"], 'cpuPerTask': slurm["cpu-per-task"]})
+        elif core["gpu"] > 0 and core["nodes"] >= 1 and core["ntasks"] >= 1 and core["cpus-per-task"] >= 1:
+            raise HybridWorkError({'gpus': core["gpu"], 'nodes': core["nodes"],
+                                   'ntasks': core["ntasks"], 'cpuPerTask': core["cpu-per-task"]})
         else:
-            raise SlurmParametersError(slurm)
+            raise SlurmParametersError(core)
 
 
 
@@ -170,13 +155,13 @@ class HPC:
         parallelWork (list[str]): paralell tasks to perform [task1, task2, ...]
         """
 
-        slurm, extra = self.parameters()
+        core, extra = self.parameters()
         slurmScriptName = extra['slurm-script']
 
 
         with open(slurmScriptName, 'w') as slurmScript:
             slurmScript.write("#!/bin/bash\n")
-            for flag, argument in slurm.items():
+            for flag, argument in core.items():
                 if flag != "gpu" and argument != None:
                     slurmScript.write(f"#SBATCH --{flag}={argument}\n")
 
@@ -184,7 +169,7 @@ class HPC:
                     if argument > 0:
                         slurmScript.write(f"#SBATCH --gres={flag}:{argument}\n")
 
-            if HPC.parserJob(slurm) == "OMP":
+            if Slurm.parserJob(core) == "OMP":
                 slurmScript.write("export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK\n")
 
             whiteLine = "\n"
@@ -197,9 +182,9 @@ class HPC:
 
 
     @staticmethod
-    def genScript(slurm, extra, parallelWork):
+    def genScript(core, extra, parallelWork):
         """
-        [slurm, extra] are the variable returned by parameters method
+        [core, extra] are the variable returned by coreParameters method
         generate a slurm script to submit with sbatch using the slurm parameters(slurm constructor parameters) and the parallelWork variable(list of task to perform)
 
         parallelWork (list[str]): paralell tasks to perform [task1, task2, ...]
@@ -211,7 +196,7 @@ class HPC:
 
         with open(slurmScriptName, 'w') as slurmScript:
             slurmScript.write("#!/bin/bash\n")
-            for flag, argument in slurm.items():
+            for flag, argument in core.items():
                 if not flag == "gpu":
                     if argument:
                         slurmScript.write(f"#SBATCH --{flag}={argument}\n")
@@ -220,7 +205,7 @@ class HPC:
                     if argument > 0:
                         slurmScript.write(f"#SBATCH --gres={flag}:{argument}\n")
 
-            if HPC.parserJob(slurm) == "OMP":
+            if Slurm.parserJob(core) == "OMP":
                 slurmScript.write("export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK\n")
 
 

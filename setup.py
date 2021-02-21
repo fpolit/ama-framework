@@ -40,12 +40,12 @@ setup(
             'amadb = ama.amadb:main'
         ],
 
-        'ama.cli':[
-            'hashes = ama.core.hashes:SearchHashes',
-            'loot hashes = ama.core.loot:LootHashes',
-            'loot credential = ama.core.loot:LootCredential',
-            'search = ama.core.search:SearchModules'
-        ],
+        # 'ama.cli':[
+        #     'hashes = ama.core.hashes:SearchHashes',
+        #     'loot hashes = ama.core.loot:LootHashes',
+        #     'loot credential = ama.core.loot:LootCredential',
+        #     'search = ama.core.search:SearchModules'
+        # ],
 
         'amadb.cli':[
             'init = ama.amadb:InitDB'

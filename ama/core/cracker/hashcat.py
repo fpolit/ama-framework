@@ -17,27 +17,31 @@ from tabulate import tabulate
 from sbash.core import Bash
 from fineprint.status import print_status, print_failure, print_successful
 
-# cracker modules
-from .PasswordCracker import PasswordCracker
-from ..hashes.hc import hashes
 
-# base modules
-from ..base.FilePath import FilePath
+# cmd2 imports
+import cmd2
 
-# importing PasswordCracker exceptions
-from .PasswordCrackerExceptions import CrackerDisableError
-from .PasswordCrackerExceptions import AttackModeError
-from .PasswordCrackerExceptions import CrackerHashError
+# # cracker modules
+# from .PasswordCracker import PasswordCracker
+# from ..hashes.hc import hashes
 
-# hpc module
-from ..slurm.HPC import HPC
+# # base modules
+# from ..base.FilePath import FilePath
 
-# hpc exceptions
-from ..slurm.HPCExceptions import ParallelWorkError
+# # importing PasswordCracker exceptions
+# from .PasswordCrackerExceptions import CrackerDisableError
+# from .PasswordCrackerExceptions import AttackModeError
+# from .PasswordCrackerExceptions import CrackerHashError
 
-# utilities module
-from ..utilities.combinator import Combinator
-from ..utilities.combinator import InvalidWordlistNumber
+# # hpc module
+# from ..slurm.HPC import HPC
+
+# # hpc exceptions
+# from ..slurm.HPCExceptions import ParallelWorkError
+
+# # utilities module
+# from ..utilities.combinator import Combinator
+# from ..utilities.combinator import InvalidWordlistNumber
 
 
 class Hashcat(PasswordCracker):
@@ -143,7 +147,7 @@ class Hashcat(PasswordCracker):
     @staticmethod
     def searchHash(pattern, *, sensitive=False):
         """
-        search by a valid hashcat hash type given a pattern
+        Search valid hashcat's hashes types given a pattern
         """
 
         if not sensitive:
@@ -151,15 +155,13 @@ class Hashcat(PasswordCracker):
         else:
             hashPattern = re.compile(rf"\w*{pattern}\w*")
 
-        print_status(f"Posible Hashcat hashes(pattern: *{pattern}*)")
         posibleHashes = []
         for hashId, hashType in Hashcat.hashes.items():
             hashName, description = hashType.values()
-            #print(f"hashcat hash: {hashName}")
-            if hashPattern.search(hashName):
+            if hashPattern.fullmatch(hashName):
                 posibleHashes.append([hashId, hashName, description])
 
-        print(tabulate(posibleHashes, headers=["id", "name", "description"]))
+        cmd2.Cmd.poutput(tabulate(posibleHashes, headers=["id", "name", "description"]))
 
 
 class HCAttacks:

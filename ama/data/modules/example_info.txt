@@ -1,0 +1,44 @@
+       Name: WordPress Brute Force and User Enumeration Utility                                                      
+     Module: auxiliary/scanner/http/wordpress_login_enum                                                             
+    License: Metasploit Framework License (BSD)                                                                      
+       Rank: Normal 
+
+Provided by:
+  Tiago Ferreira <tiago.ccna@gmail.com>                   
+  Zach Grace <zgrace@404labs.com>                                                                                    
+  Christian Mehlmauer <FireFart@gmail.com>                
+                                                          
+Check supported:                                                                                                     
+  No       
+                                                          
+Basic options:        
+  Name                 Current Setting  Required  Description                                                        
+  ----                 ---------------  --------  -----------                                                        
+  BLANK_PASSWORDS      false            no        Try blank passwords for all users                                  
+  BRUTEFORCE           true             yes       Perform brute force authentication                                 
+  BRUTEFORCE_SPEED     5                yes       How fast to bruteforce, from 0 to 5                                
+  DB_ALL_CREDS         false            no        Try each user/password couple stored in the current database       
+  DB_ALL_PASS          false            no        Add all passwords in the current database to the list              
+  DB_ALL_USERS         false            no        Add all users in the current database to the list                  
+  ENUMERATE_USERNAMES  true             yes       Enumerate usernames                                                
+  PASSWORD                              no        A specific password to authenticate with                           
+  PASS_FILE                             no        File containing passwords, one per line                            
+  Proxies                               no        A proxy chain of format type:host:port[,type:host:port][...]       
+  RANGE_END            10               no        Last user id to enumerate                                          
+  RANGE_START          1                no        First user id to enumerate                                         
+  RHOSTS                                yes       The target host(s), range CIDR identifier, or hosts file with syntax 'file:<path>'                                                                                                      
+  RPORT                80               yes       The target port (TCP)                                              
+  SSL                  false            no        Negotiate SSL/TLS for outgoing connections                         
+  STOP_ON_SUCCESS      false            yes       Stop guessing when a credential works for a host                   
+  TARGETURI            /                yes       The base path to the wordpress application                         
+  THREADS              1                yes       The number of concurrent threads (max one per host)                
+  USERNAME                              no        A specific username to authenticate as                             
+  USERPASS_FILE                         no        File containing users and passwords separated by space, one pair per line                                                    
+  USER_AS_PASS         false            no        Try the username as the password for all users                     
+  USER_FILE                             no        File containing usernames, one per line                            
+  VALIDATE_USERS       true             yes       Validate usernames                                                 
+  VERBOSE              true             yes       Whether to print output for all attempts                           
+  VHOST                                 no        HTTP server virtual host                                           
+                                                                                                                     
+Description:                                                                                                         
+  WordPress Authentication Brute Force and User Enumeration Utility

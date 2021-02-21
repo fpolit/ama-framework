@@ -8,9 +8,30 @@
 import json
 
 
-def getAmaModules(modules='modules.json'):
-    with open(modules, 'r') as supportedModules:
-        amaModules = json.load(supportedModules)
+# import attack/hashes modules
+from ama.core.modules.attack.hashes import (
+    JohnWordlist,
+    JohnIncremental,
+    JohnCombination,
+    JohnHybrid
+)
 
-    return amaModules
+# hashcat attack import
+from ama.core.modules.attack.hashes import (
+    HashcatWordlist,
+    HashcatIncremental,
+    HashcatCombination,
+    HashcatHybrid
+)
 
+amaModules = [
+    [JohnWordlist.mname, JohnWordlist],
+    [JohnIncremental.mname, JohnIncremental],
+    [JohnCombination.mname, JohnCombination],
+    [JohnHybrid.mname, JohnHybrid],
+
+    [HashcatWordlist.mname, HashcatWordlist],
+    [HashcatIncremental.mname, HashcatIncremental]
+    [HashcatCombination.mname, HashcatCombination]
+    [HashcatHybrid.mname, HashcatHybrid]
+]

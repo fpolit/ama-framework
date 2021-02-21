@@ -1,14 +1,219 @@
 {
-    "cracker":
-    {
-        "hashes": ["john", "hashcat"],
-        "services": ["hydra"]
+    "cracker/hashes/john_wordlist": {
+        "name": "Wordlist attack using John The Ripper",
+        "type": "cracker",
+        "subtype": "hashes",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": "Perform wordlists attacks against hashes with john submiting parallel tasks in a cluster using Slurm"
     },
-    "auxiliary":
+
+    "cracker/hashes/john_combination": {
+        "name": "Combination attack using John The Ripper",
+        "type": "cracker",
+        "subtype": "hashes",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": "Perform combination attacks against hashes with john submiting parallel tasks in a cluster using Slurm"
+    },
+
+    "cracker/hashes/john_incremental": {
+        "name": "Incremental attack using John The Ripper",
+        "type": "cracker",
+        "subtype": "hashes",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": "Perform incremental attacks against hashes with john submiting parallel tasks in a cluster using Slurm"
+    },
+
+    "cracker/hashes/john_masks": {
+        "name": "Masks attack using John The Ripper",
+        "type": "cracker",
+        "subtype": "hashes",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": "Perform masks attacks against hashes with john submiting parallel tasks in a cluster using Slurm"
+    },
+
+    "cracker/hashes/john_hybrid": {
+        "name": "Hybrid attack using John The Ripper",
+        "type": "cracker",
+        "subtype": "hashes",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": "Perform hybrids attacks against hasheswith john submiting parallel tasks in a cluster using Slurm"
+    },
+
+    "cracker/hashes/hashcat_wordlist": {
+        "name": "Wordlist attack using Hashcat",
+        "type": "cracker",
+        "subtype": "hashes",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": "Perform wordlists attacks against hashes with hashcat submiting parallel tasks in a cluster using Slurm"
+    },
+
+    "cracker/hashes/hashcat_combination": {
+        "name": "Combination attack using Hashcat",
+        "type": "cracker",
+        "subtype": "hashes",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": "Perform combination attacks against hashes with hashcat submiting parallel tasks in a cluster using Slurm"
+    },
+
+    "cracker/hashes/hashcat_masks": {
+        "name": "Mask attack using Hashcat",
+        "type": "cracker",
+        "subtype": "hashes",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": "Perform masks attacks against hashes with hashcat submiting parallel tasks in a cluster using Slurm"
+    },
+
+    "cracker/hashes/hashcat_hybrid": {
+        "name": "Hybrid attack using Hashcat",
+        "type": "cracker",
+        "subtype": "hashes",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": "Perform hybrids attacks against hashes with hashcat submiting parallel tasks in a cluster using Slurm"
+    },
+
+    "cracker/services/hydra_wordlist": {
+        "name": "Crack services using Hydra",
+        "type": "cracker",
+        "subtype": "services",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": "Perform wordlist attacks against services with hydra submiting parallel tasks in a cluster using Slurm"
+    },
+
+    "cracker/services/hydra_incremental": {
+        "name": "Crack services using Hydra",
+        "type": "cracker",
+        "subtype": "services",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": "Perform incremental  attacks against services with hydra submiting parallel tasks in a cluster using Slurm"
+    },
+
+    "cracker/services/hydra_masks": {
+        "name": "Crack services using Hydra",
+        "type": "cracker",
+        "subtype": "services",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": "Perform masks  attacks against services with hydra submiting parallel tasks in a cluster using Slurm"
+    },
+
+    "auxiliary/wordlists/crunch": {
+        "name":"crunch wordlist generator",
+        "type": "auxiliary",
+        "subtype": "wordlist",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": ""
+    },
+
+    "auxiliary/wordlists/cewl":
     {
-        "wordlists": ["crunch", "cewl", "cupp", "pydictor"],
-        "hashes": ["hashid"],
-        "masks": ["ppack", "pack"],
-        "combinator": ["mixer"]
+        "name":"eewl wordlist generator",
+        "type": "auxiliary",
+        "subtype": "wordlist",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": ""
+    },
+
+    "auxiliary/wordlists/cupp":
+    {
+        "name":"cupp wordlist generator",
+        "type": "auxiliary",
+        "subtype": "wordlist",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": ""
+    },
+
+    "auxiliary/wordlists/pydictor":
+    {
+        "name":"pydictor wordlist generator",
+        "type": "auxiliary",
+        "subtype": "wordlist",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": ""
+    },
+
+    "auxiliary/hashes/hashid":
+    {
+        "name":"hashid hash identifier",
+        "type": "auxiliary",
+        "subtype": "hashes",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": ""
+    },
+
+    "auxiliary/hashes/name_that_hash":
+    {
+        "name":"name_that_hash hash identifier",
+        "type": "auxiliary",
+        "subtype": "hashes",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": ""
+    },
+
+    "auxiliary/masks/ppack":
+    {
+        "name":"ppack password analyzer and mask generator",
+        "type": "auxiliary",
+        "subtype": "masks",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": ""
+    },
+
+    "auxiliary/masks/pack":
+    {
+        "name":"pack password analyzer and mask generator",
+        "type": "auxiliary",
+        "subtype": "masks",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": ""
+    },
+
+    "auxiliary/combinator/mixer":
+    {
+        "name":"mixer combinator",
+        "type": "auxiliary",
+        "subtype": "combinator",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": ""
     }
 }

@@ -2,11 +2,7 @@ psycopg2
 fineprint
 sbash
 random-password-generator
+cmd2
+
+
 cliff
-
-
-#cement==3.0.4
-#sbash
-#fineprint
-#tabulate
-#mpi4py

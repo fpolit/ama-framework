@@ -28,8 +28,8 @@ from .passwordCrackerExceptions import CrackerHashError
 from ama.data.hashes import jtrHashes
 
 # base module
-from ama.base.filepath import FilePath
-from ..base.Mask import Mask
+from ...files.path import FilePath
+from .Mask import Mask
 
 # hpc module
 from ..slurm.HPC import HPC
@@ -167,20 +167,19 @@ class John(PasswordCracker):
     @staticmethod
     def searchHash(pattern, *, sensitive=False):
         """
-        search by a valid john hash type given a pattern
+        Search  john's hashes types given a pattern
         """
         if not sensitive:
             hashPattern = re.compile(rf"\w*{pattern}\w*", re.IGNORECASE)
         else:
             hashPattern = re.compile(rf"\w*{pattern}\w*")
 
-        print_status(f"Posible John the Ripper hashes(pattern: *{pattern}*)")
         posibleHashes = []
         for hashType in John.hashes:
             if hashPattern.search(hashType):
                 posibleHashes.append([hashType])
 
-        print(tabulate(posibleHashes, headers=["name"]))
+        cmd2.Cmd.poutput(tabulate(posibleHashes, headers=["name"]))
 
 class JTRAttacks:
 
