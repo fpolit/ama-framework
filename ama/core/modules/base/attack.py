@@ -13,14 +13,13 @@ from typing import (
 # table formation imports
 from cmd2.table_creator import (
     Column,
-    SimpleTable,
-#    HorizontalAligment
+    SimpleTable
 )
 
 
 class Attack:
     """
-    Base class to build cracker modules
+    Base class to build attack modules
     """
     def __init__(self, *,
                  mname: str, author: List[str],
@@ -72,17 +71,17 @@ class Attack:
         Show options available to set up
         """
 
-        optionsMsg = "Module options (self.mname):"
+        optionsMsg = f"Module options (self.mname):"
 
         optionHeader = ["Name", "Current Setting", "Required", "Description"]
         # attack options
-        formattedAttackOpt = [[nameOpt, *infoOpt] for nameOpt, infoOpt in self.attack.items()]
+        formattedAttackOpt = [[nameOpt.upper(), *infoOpt] for nameOpt, infoOpt in self.attack.items()]
         formattedAttackOpt = tabulate(formattedAttackOpt)
 
         optionsMsg += f"\n\nAttack Options:\n{formattedattackopt}"
 
         # slurm options
-        formattedSlurmOpt = [[nameOpt, *infoOpt] for nameOpt, infoOpt in self.slurm.items()]
+        formattedSlurmOpt = [[nameOpt.upper(), *infoOpt] for nameOpt, infoOpt in self.slurm.items()]
         formattedSlurmOpt = tabulate(formattedSlurmOpt)
 
         optionsMsg += f"\n\nSlurm Options:\n{formattedslurmopt}"

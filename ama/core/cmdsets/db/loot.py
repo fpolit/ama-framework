@@ -16,10 +16,10 @@ from cmd2 import (
 )
 
 # table formation imports
-import cmd2.table_creator import (
+from cmd2.table_creator import (
     Column,
     SimpleTable,
-    HorizontalAligment
+    #HorizontalAligment
 )
 from cmd2 import ansi
 from typing import (
@@ -34,7 +34,7 @@ from ..category import CmdsetCategory as Category
 import psycopg2
 
 # cracker imports
-from ...modules.cracker import PasswordCracker
+from ...cracker import PasswordCracker
 
 
 @with_default_category(Category.DB)

@@ -12,6 +12,7 @@ import json
 from ama.core.modules.attack.hashes import (
     JohnWordlist,
     JohnIncremental,
+    JohnSingle,
     JohnCombination,
     JohnHybrid
 )
@@ -31,12 +32,13 @@ amaModulesType = [
 
 amaModules = {
     f"{JohnWordlist.mname}": JohnWordlist,
-    f"{JohnIncremental.mname}", JohnIncremental,
-    f"{JohnCombination.mname}", JohnCombination,
-    f"{JohnHybrid.mname}", JohnHybrid,
+    f"{JohnIncremental.mname}": JohnIncremental,
+    f"{JohnSingle.mname}": JohnSingle,
+    f"{JohnCombination.mname}": JohnCombination,
+    f"{JohnHybrid.mname}": JohnHybrid,
 
-    f"{HashcatWordlist.mname}", HashcatWordlist,
-    f"{HashcatIncremental.mname}", HashcatIncremental,
-    f"{HashcatCombination.mname}", HashcatCombination,
-    f"{HashcatHybrid.mname}", HashcatHybrid
+    f"{HashcatWordlist.mname}": HashcatWordlist,
+    f"{HashcatIncremental.mname}": HashcatIncremental,
+    f"{HashcatCombination.mname}": HashcatCombination,
+    f"{HashcatHybrid.mname}": HashcatHybrid
 }

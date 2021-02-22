@@ -66,4 +66,4 @@ class Ama(Cmd):
 
 def main(argv=sys.argv[1:]):
     ama = Ama()
-    ama.cmdloop()
+    sys.exit(ama.cmdloop())

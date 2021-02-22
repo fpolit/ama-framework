@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 #
-# incremental attack using john
-# NOTE: rewite module (copied from john_wordlist module)
+# single attack using john
 #
-# date: Feb 21 2021
+# date: Feb 22 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 # base  imports
@@ -13,34 +12,34 @@ from ama.core.modules.base import Attack
 from ama.core.cracker import John
 
 
-class JohnIncremental(Attack):
+class JohnSingle(Attack):
     """
-    Wordlist Attack using john cracker
+    Single Attack using john cracker
     """
 
-    description = "Incremental attack using John The Ripper"
-    mname = "attack/hashes/john_incremental"
+    description = "Single attack using John The Ripper"
+    mname = "attack/hashes/john_single"
     author = [
         "glozanoa <glozanoa@uni.pe>"
     ]
     fuldescription = (
         """
-        Perform incremental attacks against hashes
+        Perform single attacks against hashes
         with john submiting parallel tasks in a cluster using Slurm
         """
         )
     def __init__(self, *, hashType=None, hashesFile=None, slurm=None):
         """
-        Initialization of John incremental attack
+        Initialization of John single attack
 
         Args:
         hashType (str): Jonh's hash type
-        hashesFile (str): Hash file to attack
+        hashesFile (str): Hashes file to attack
         slurm (Slurm): Instance of Slurm class
         """
         attackOptions = {
             'hash_type': hashType,
-            'hashes_file': hashFile
+            'hashes_file': hashesFile
         }
 
         initOptions = {'mname' : nname,
@@ -56,9 +55,9 @@ class JohnIncremental(Attack):
 
     def attack(self):
         """
-        Incremental attack using John the Ripper
+        single attack using John the Ripper
         """
         jtr = John()
-        jtr.incremtalAttack(hashType = self.hash_type,
-                            hashesFile = self.hashes_file,
-                            slurm = self.slurm)
+        jtr.singleAttack(hashType = self.hash_type,
+                         hashesFile = self.hashes_file,
+                         slurm = self.slurm)

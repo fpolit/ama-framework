@@ -7,6 +7,7 @@
 
 
 import argparse
+from argparse import RawTextHelpFormatter
 
 # import db connection modules
 from configparser import ConfigParser
@@ -14,10 +15,10 @@ from getpass import getpass
 import psycopg2
 
 # version import
-from ..version import get_version
+from ...version import get_version
 
 # commandset categories
-from .category import CmdsetCategory as Category
+from ..category import CmdsetCategory as Category
 
 # cmd2 imports
 import cmd2

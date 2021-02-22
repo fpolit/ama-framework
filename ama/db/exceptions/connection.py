@@ -8,7 +8,7 @@
 from psycopg2 import DatabaseError
 
 
-class NoWorkspaceError(DatabaseError):
+class WorkspaceExistsError(DatabaseError):
     """
     No workspace name in workspaces table
     """

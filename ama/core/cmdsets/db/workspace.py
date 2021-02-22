@@ -228,7 +228,7 @@ class Workspace(CommandSet):
                 cur = conn.cursor()
                 workspace_tables = ["hashes", "services"]
                 for table in workspace_tables:
-                    cur.execute(f"DROP TABLE IF EXISTS table_{workspace}}")
+                    cur.execute(f"DROP TABLE IF EXISTS table_{workspace}")
 
                     #delete workspace name from workspaces table
                     deleteWorkspace = (
@@ -269,7 +269,7 @@ class Workspace(CommandSet):
                 workspace_tables = ["hashes", "services"]
                 for workspace  in workspaces:
                     for table in workspace_tables:
-                        cur.execute(f"DROP TABLE IF EXISTS table_{workspace}}")
+                        cur.execute(f"DROP TABLE IF EXISTS table_{workspace}")
 
                     #delete workspace name from workspaces table
                     deleteWorkspace = (

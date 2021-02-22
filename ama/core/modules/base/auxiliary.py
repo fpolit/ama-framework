@@ -13,8 +13,7 @@ from typing import (
 # table formation imports
 from cmd2.table_creator import (
     Column,
-    SimpleTable,
-#    HorizontalAligment
+    SimpleTable
 )
 
 
@@ -23,33 +22,25 @@ class Auxiliary:
     Base class to build auxiliary modules
     """
     def __init__(self, *,
-                 name: str, mname: str, author: List[str],
-                 description: str, slurm, auxiliaryOptions: dict):
+                 mname: str, author: List[str],
+                 description: str, fulldescription: str,
+                 auxiliaryOptions: dict, slurm):
 
-        self.name = name
         self.mname = mname
+        mtype, msubtype, auxiliaryName = mname.split("/")
+        self.mtype = mtype
+        self.msubtype = msubtype
+        self.name = auxiliaryName
         self.author = author
         self.description = description
+        self.fulldescription = fulldescription
+        self.auxiliary = auxiliaryOptions
         self.slurm = slurm
-        self.options = {
-            'name': name,
-            'mtype': mtype,
-            'subtype': msubtype,
-            'author': author,
-            'description': description,
-
-            # attack options format: {"OPTION": [DEFAULT_VALUE, REQUIRED (booleam), DESCRIPTION (str)], ...}
-            'auxiliary': auxiliaryOptions,
-
-            # slurm options format: {"OPTION": [DEFAULT_VALUE, REQUIRED (booleam), DESCRIPTION (str)], ...}
-            'slurm': slurm.slurmParameters
-        }
-
 
 
     def run(self, *args, **kwargs):
         """
-        Default method to perform an attack
+        Default method to run the auxiliary module
         """
         pass
 
@@ -59,7 +50,7 @@ class Auxiliary:
         """
         infoMsg = \
             f"""
-                Name : {self.options['name']}
+                Name : {self.description}
               Module : {self.mname}
              License : GPLv3
 
@@ -70,7 +61,7 @@ class Auxiliary:
         infoMsg += self.optionsMsg()
 
         # description module
-        infoMsg += f"\n\n Description:\n{self.description}"
+        infoMsg += f"\n\n Description:\n{self.fulldescription}"
 
         return infoMsg
 
@@ -80,21 +71,20 @@ class Auxiliary:
         Show options available to set up
         """
 
-        optionsMsg = "Module options ({self.mtype}/{self.msubtype}/{self.mname}):"
+        optionsMsg = f"Module options ({self.mname}):"
 
         optionHeader = ["Name", "Current Setting", "Required", "Description"]
-        # attack options
-        attackOpt = self.options['attack']
-        formattedAttackOpt = [[nameOpt, *infoOpt] for nameOpt, infoOpt in attackOpt.items()]
+
+        # auxiliary options
+        formattedAttackOpt = [[nameOpt.upper(), *infoOpt] for nameOpt, infoOpt in self.auxiliary.items()]
         formattedAttackOpt = tabulate(formattedAttackOpt)
 
         optionsMsg += f"\n\nOptions:\n{formattedattackopt}"
 
         # slurm options
-        slurmOpt = self.options['slurm']
-        formattedSlurmOpt = [[nameOpt, *infoOpt] for nameOpt, infoOpt in slurmOpt.items()]
+        formattedSlurmOpt = [[nameOpt.upper(), *infoOpt] for nameOpt, infoOpt in self.slurm.items()]
         formattedSlurmOpt = tabulate(formattedSlurmOpt)
 
-        optionsMsg += f"\n\nSlurm Options:\n{formattedslurmopt}"
+        optionsMsg += f"\n\nSlurm Options:\n{formattedslurmOpt}"
 
         return optionsMsg

@@ -28,11 +28,13 @@ from password_generator import PasswordGenerator
 # psycopg2 imports
 import psycopg2
 
+# core/validator imports
+from ama.core.validator import Answer
 
 
 class AmaDB:
     @staticmethod
-    def dbInit(dbName="ama", roleName="attacker"):
+    def initDB(dbName="ama", roleName="attacker"):
         """
         Database initialization
         (creation of database, role, and initialization of default workspace)
@@ -111,3 +113,22 @@ class AmaDB:
 
         except (Exception, psycopg2.DatabaseError) as error:
             cmd2.Cmd.pexcept(error)
+
+
+    @staticmethod
+    def deleteDB(dbName=None, roleName=None):
+        """
+        Delete ama-framework database
+        """
+        if dbName:
+            if Answer.shortAnwser(f"Do you really want to delete the {dbName} database(y/n)? "):
+                if roleName:
+                    Bash.exec(f"psql -U {roleName} -c \"DROP DATABASE {dbName}\"")
+                else:
+                    Bash.exec(f"psql -U postgres -c \"DROP DATABASE {dbName}\"")
+
+            else:
+                cmd2.Cmd.pwarning("Be carefully you could lose your data")
+        else:
+            cmd2.Cmd.pwarning("No database was selected to delete")
+
