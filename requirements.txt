@@ -3,6 +3,4 @@ fineprint
 sbash
 random-password-generator
 cmd2
-
-
-cliff
+tabulate
