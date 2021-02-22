@@ -1,74 +1,78 @@
 #!/usr/bin/env python3
 #
-# ama subcommand - search avaliables ama modules
+# module commands set for ama-framework (Module Commands Category)
+# commands set related to search availables modules
+# defined commands: search
 #
-# date: Feb 18 2021
+# date: Feb 21 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
+
+import argparse
 import re
+from tabulate import tabulate
 
-# cliff imports
-from cliff.lister import Lister
+# version import
+from ...version import get_version
 
-# import data/modules
-from ama.data import getAmaModules
+# commandset categories
+from ..category import CmdsetCategory as Category
 
+# cmd2 imports
+from cmd2 import (
+    CommandSet,
+    with_default_category,
+    with_argparser
+)
 
-class SearchModules(Lister):
+# data/modules imports
+from ama.data.modules import amaModulesType
+
+@with_default_category(Category.MODULE)
+class Search(CommandSet):
     """
-    Search avaliables ama modules
+    Module command set category related to search by avalilables ama modules
+    commands set: search
     """
-    def get_parser(self, prog_name):
-        parser = super(SearchModules, self).get_parser(prog_name)
-        parser.add_argument('name',
-                            help='module name')
-        parser.add_argument('-mt', '--moduleType',
-                            help='module type')
 
-        return parser
+    def __init__(self):
+        super().__init__()
 
-    def take_action(self, parsed_args):
-        moduleName = parsed_args.name
-        moduleType = parsed_args.moduleType
+    search_parser = argparse.ArgumentParser()
+    search_parser.add_argument('-t', '--type', dest='moduleType', choices=amaModulesType,
+                               help="Module type")
+    search_parser.add_argument('pattern',
+                               help='Pattern to search availables modules')
 
-        filteredAmaModules = SearchModules.search(moduleName, moduleType)
+    @with_argparser(search_parser)
+    def do_search(self, args):
+        """
+        search by availables modules given a pattern
+        """
+        filteredModules = []
+        idModule = 0
+        pattern = args.pattern
 
-        return (('#', 'Module'),
-                filteredAmaModules)
+        if pattern:
+            for moduleName, moduleClass in self._cmd.modules:
+                if re.search(pattern, moduleName, flag=re.IGNORECASE):
+                    filteredModules.append((index, moduleClass))
+                    idModule += 1
+
+        self._cmd.filteredModules = filteredModules
+
+        Search.show(filteredModules)
+
 
     @staticmethod
-    def search(self, moduleName, moduleType):
+    def show(filteredModules):
         """
-        Search availables ama modules given a moduleName and moduleType.
-        Return a tuple of formated tuples
-        like (enumeration module, ModuleType/ModuleSubtype/amaModule)
+        Show filtered modules
         """
-        amaModules = getAmaModules()
-        filteredModules = []
-        if moduleType and moduleName:
-            if moduleType in amaModules:
-                amaModulesSubtype = amaModules[moduleType]
-                moduleNamePattern = re.compile(rf"[\w\W]*{moduleName}[\w\W]*")
+        headerFM = ["#", "Name", "Description"] # FM: Filtered Modules
+        tableFM = []
 
-                idModule = 0
-                for moduleSubtype, modules in amaModulesSubtype:
-                    for amaModule in modules:
-                        if moduleNamePattern.fullmatch(amaModule):
-                            idModule += 1
-                            filteredModules.append((idModule,
-                                                    f"{moduleType}/{moduleSubtype}/{amaModule}"))
+        for idModule, moduleClass in filteredModules:
+            tableFM.append((idModule, moduleClass.mname, moduleClass.name))
 
-                return filteredModules
-
-            else:
-                filteredModules = [(None, None)]
-                return filteredModules
-        else:
-            if not moduleName:
-                filteredModules = [(None, None)]
-                return filteredModules
-            else:
-                for moduleType in amaModules.keys():
-                    filteredModules += \
-                        SearchModules.search(moduleName, moduleType)
-                return filteredModules
+        cmd2.Cmd.poutput(tabulate(tableFM))

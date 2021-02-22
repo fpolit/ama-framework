@@ -15,7 +15,15 @@ from .core.cmdsets.db import (
     Loot
 )
 
-from 
+from .core.cmdsets.module import (
+    Search,
+    Information,
+    Interaction
+)
+
+from.core.cmdsets.core import (
+    Core
+)
 
 # cmd2 imports
 import cmd2
@@ -51,9 +59,9 @@ class Ama(Cmd):
         self.default_category = CORE_CATEGORY
         self.db_conn = None
         self.workspace = "default"
-        self.modules = amaModules
-        self.selectedModule = None # selected module with use command
-        self.filteredModules = None # filtered modules by a search
+        self.modules = amaModules # format {NAME: MODULE_CLASS, ....}
+        self.selectedModule = None # selected module with use command (class of the module)
+        self.filteredModules = None # filtered modules by a search (format: [(#, MODULE_CLASS), ...])
 
 
 def main(argv=sys.argv[1:]):

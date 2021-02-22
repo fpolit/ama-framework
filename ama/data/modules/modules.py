@@ -24,14 +24,19 @@ from ama.core.modules.attack.hashes import (
     HashcatHybrid
 )
 
-amaModules = [
-    [JohnWordlist.mname, JohnWordlist],
-    [JohnIncremental.mname, JohnIncremental],
-    [JohnCombination.mname, JohnCombination],
-    [JohnHybrid.mname, JohnHybrid],
-
-    [HashcatWordlist.mname, HashcatWordlist],
-    [HashcatIncremental.mname, HashcatIncremental]
-    [HashcatCombination.mname, HashcatCombination]
-    [HashcatHybrid.mname, HashcatHybrid]
+amaModulesType = [
+    "attack",
+    "auxiliary"
 ]
+
+amaModules = {
+    f"{JohnWordlist.mname}": JohnWordlist,
+    f"{JohnIncremental.mname}", JohnIncremental,
+    f"{JohnCombination.mname}", JohnCombination,
+    f"{JohnHybrid.mname}", JohnHybrid,
+
+    f"{HashcatWordlist.mname}", HashcatWordlist,
+    f"{HashcatIncremental.mname}", HashcatIncremental,
+    f"{HashcatCombination.mname}", HashcatCombination,
+    f"{HashcatHybrid.mname}", HashcatHybrid
+}
