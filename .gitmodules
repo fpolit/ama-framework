@@ -4,3 +4,36 @@
 [submodule "pack"]
 	path = ama/core/auxiliary/analysis/pack
 	url = https://github.com/fpolit/pack.git
+[submodule "ppack"]
+	path = ama/core/auxiliary/analysis/ppack
+	url = https://github.com/fpolit/ppack.git
+[submodule "pipal"]
+	path = ama/core/auxiliary/analysis/pipal
+	url = https://github.com/fpolit/pipal.git
+[submodule "mixer"]
+	path = ama/core/auxiliary/combinator/mixer
+	url = https://github.com/fpolit/mixer.git
+[submodule "crunch"]
+	path = ama/core/auxiliary/wordlists/crunch
+	url = https://github.com/fpolit/crunch.git
+[submodule "cupp"]
+	path = ama/core/auxiliary/wordlists/cupp
+	url = https://github.com/fpolit/cupp.git
+[submodule "pydictor"]
+	path = ama/core/auxiliary/wordlists/pydictor
+	url = https://github.com/fpolit/pydictor.git
+[submodule "cewl"]
+	path = ama/core/auxiliary/wordlists/cewl
+	url = https://github.com/fpolit/cewl.git
+[submodule "nth"]
+	path = ama/core/auxiliary/hashes/nth
+	url = https://github.com/fpolit/nth.git
+[submodule "hash_hammer"]
+	path = ama/core/auxiliary/hashes/hash_hammer
+	url = https://github.com/fpolit/hash_hammer.git
+[submodule "hate_crack"]
+	path = ama/core/auxiliary/hashes/hate_crack
+	url = https://github.com/fpolit/hate_crack.git
+[submodule "hashid"]
+	path = ama/core/auxiliary/hashes/hashid
+	url = https://github.com/fpolit/hashid.git
