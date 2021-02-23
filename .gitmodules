@@ -1,0 +1,12 @@
+[submodule "cewl"]
+	path = ama/core/auxiliary/wordlists/cewl
+	url = https://github.com/fpolit/cewl.git
+[submodule "crunch"]
+	path = ama/core/auxiliary/wordlists/crunch
+	url = https://github.com/fpolit/crunch.git
+[submodule "cupp"]
+	path = ama/core/auxiliary/wordlists/cupp
+	url = https://github.com/fpolit/cupp.git
+[submodule "pydictor"]
+	path = ama/core/auxiliary/wordlists/pydictor
+	url = https://github.com/fpolit/pydictor.git
