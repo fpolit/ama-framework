@@ -11,7 +11,7 @@
 import cmd2
 
 # varname package imports
-from varname import nameof
+from varname import argname
 
 # validator exceptions import
 from .exceptions import (
@@ -45,20 +45,21 @@ class Args:
     @staticmethod
     def someNotNone(*args):
         """
-        Check that if there is a argument not None otherwise raise a exception (AllNoneArgumentsError)
+        Check if there is a argument not None otherwise raise a exception (AllNoneArgumentsError)
 
         Raise:
-        AllNoneArgumentsError: Error if all arguments are  None
+        AllNoneArgumentsError: Error if all arguments are None
         """
         someNotNone = False
         noneArgs = []
 
-        for arg in args:
+        names = argname(*args)
+        for name, arg in zip(names, args):
             if arg is not None:
                 someNotNone = True
             else:
-                cmd2.Cmd.pwarning(f"{nameof(arg) variable is None}")
+                cmd2.Cmd.pwarning(f"{name} variable is None")
                 noneArgs.append(arg)
 
-        if not someNotNone: #some supplied argument is not None
+        if not someNotNone: #all supplied argument are None
             raise AllNoneArgumentsError(noneArgs)
