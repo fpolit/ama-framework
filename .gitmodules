@@ -13,9 +13,6 @@
 [submodule "ama/core/auxiliary/analysis/ppack"]
 	path = ama/core/auxiliary/analysis/ppack
 	url = https://github.com/fpolit/ppack.git
-[submodule "ama/core/auxiliary/analysis/pack"]
-	path = ama/core/auxiliary/analysis/pack
-	url = https://github.com/fpolit/pack.git
 [submodule "ama/core/auxiliary/analysis/pipal"]
 	path = ama/core/auxiliary/analysis/pipal
 	url = https://github.com/fpolit/pipal.git
