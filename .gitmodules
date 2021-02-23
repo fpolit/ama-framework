@@ -22,9 +22,6 @@
 [submodule "ama/core/auxiliary/hashes/nth"]
 	path = ama/core/auxiliary/hashes/nth
 	url = https://github.com/HashPals/Name-That-Hash.git
-[submodule "ama/core/auxiliary/hashes/hashID"]
-	path = ama/core/auxiliary/hashes/hashID
-	url = https://github.com/psypanda/hashID.git
 [submodule "ama/core/auxiliary/analysis/pipal"]
 	path = ama/core/auxiliary/analysis/pipal
 	url = https://github.com/digininja/pipal.git
