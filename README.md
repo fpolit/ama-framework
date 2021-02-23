@@ -15,7 +15,7 @@ Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can fi
 
 ### Installation
 
-#### User
+#### Users
 ```bash
     git clone https://gitlab.com/spolit/ama.git
     cd ama
@@ -24,8 +24,8 @@ Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can fi
 
 #### Developers
 If you want to contribute to `ama-framework` your welcome. 
-As developer you will first create python virtualenv 
-and then install `ama` and the developer parackages.
+As developer you will first create a python virtualenv 
+and then install `ama` and the developer packages.
 ```bash
 	git clone https://github.com/fpolit/ama-framework.git ama
 	cd ama
