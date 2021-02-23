@@ -23,7 +23,7 @@ Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can fi
 ```
 
 #### Developers
-If you want to contribute to `ama-framework` your welcome. 
+If you want to contribute to `ama-framework` you are welcome. 
 As developer you will first create a python virtualenv 
 and then install `ama` and the developer packages.
 ```bash
