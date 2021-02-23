@@ -10,19 +10,32 @@ Initially `ama` was a simple integrator of [PPACK](https://gitlab.com/spolit/ppa
 * PPACK (to analyze wordlists and generate tuned masks)
 * HPC Cluster (needed to submit parallel tasks in a cluster with slurm)
 
-Visit our [wiki](https://gitlab.com/spolit/ama/-/wikis/home), there you can find guides to install properly `Openmpi`, `Jhon The Ripper` and configure an `HPC cluster`
+Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can find guides to install properly `Openmpi`, `Jhon The Ripper` and configure an `HPC cluster`
 
 
 ### Installation
 
+#### User
 ```bash
     git clone https://gitlab.com/spolit/ama.git
     cd ama
     make install
 ```
 
+#### Developers
+If you want to contribute to `ama-framework` your welcome. 
+As developer you will first create python virtualenv 
+and then install `ama` and the developer parackages.
+```bash
+	git clone https://github.com/fpolit/ama-framework.git ama
+	cd ama
+	make virtualenv
+	source env/bin/activate
+	make installdev
+```
+
 ### Usage
-Visit our [wiki](https://gitlab.com/spolit/ama/-/wikis/home), there you can find useful documentation about `ama`.  
+Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can find useful documentation about `ama`.  
 
      Please do not use ama in military or secret service organizations,
                       or for illegal purposes
