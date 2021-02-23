@@ -34,3 +34,6 @@
 [submodule "ama/core/auxiliary/hashes/hashid"]
 	path = ama/core/auxiliary/hashes/hashid
 	url = https://github.com/psypanda/hashID.git
+[submodule "ama/core/auxiliary/hashes/hash_hammer"]
+	path = ama/core/auxiliary/hashes/hash_hammer
+	url = https://github.com/Jayy001/HashHammer.git
