@@ -8,7 +8,10 @@
 import json
 
 
-# import attack/hashes modules
+### attacks modules imports
+## import attack/hashes modules
+
+# john attacks import
 from ama.core.modules.attack.hashes import (
     JohnWordlist,
     JohnIncremental,
@@ -17,13 +20,25 @@ from ama.core.modules.attack.hashes import (
     JohnHybrid
 )
 
-# hashcat attack import
+# hashcat attacks import
 from ama.core.modules.attack.hashes import (
     HashcatWordlist,
     HashcatIncremental,
     HashcatCombination,
     HashcatHybrid
 )
+
+## import attack/hashes modules
+# hydra attacks import
+from ama.core.modules.attack.services import (
+    hydraWordlist
+)
+
+
+### auxiliary modules imports
+## import auxiliary/wordlists modules
+
+
 
 amaModulesType = [
     "attack",
@@ -40,5 +55,7 @@ amaModules = {
     f"{HashcatWordlist.mname}": HashcatWordlist,
     f"{HashcatIncremental.mname}": HashcatIncremental,
     f"{HashcatCombination.mname}": HashcatCombination,
-    f"{HashcatHybrid.mname}": HashcatHybrid
+    f"{HashcatHybrid.mname}": HashcatHybrid,
+
+    f"Hydra.mname": hydraWordlist
 }

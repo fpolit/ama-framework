@@ -27,6 +27,9 @@ from sbash import Bash
 # cmd2 imports
 import cmd2
 
+# slurm imports
+from ..slurm import Slurm
+
 # PasswordCracker class import
 from .cracker import PasswordCracker
 
@@ -43,9 +46,9 @@ class John(PasswordCracker):
     """
     John password cracker
     This class implement the diverse attack of john the ripper and its benchmark
-    Suported Attacks: wordlist, incremental, single, combination, hybrid
+    Suported Attacks: wordlist, incremental, masks, single, combination, hybrid
     """
-    hashes = jtrHashes
+    HASHES = jtrHashes
 
     def __init__(self):
         super().__init__(["john", "jtr"], version="1.9.0-jumbo-1 MPI + OMP")
@@ -60,10 +63,10 @@ class John(PasswordCracker):
             hashType (str): hash type
 
         Raises:
-            CrackerHashError: Error if the given hash isn't a valid hash type
+            InvalidHashType: Error if the hasType is an unsopported john hash type
         """
 
-        if not (hashType in John.hashes):
+        if not (hashType in John.HASHES):
             raise InvalidHashType(hashType)
         return True
 

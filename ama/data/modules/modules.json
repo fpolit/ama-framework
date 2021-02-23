@@ -119,6 +119,26 @@
         "description": "Perform masks  attacks against services with hydra submiting parallel tasks in a cluster using Slurm"
     },
 
+    "cracker/services/hydra_combination": {
+        "name": "Crack services using Hydra",
+        "type": "cracker",
+        "subtype": "services",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": "Perform combination attacks against services with hydra submiting parallel tasks in a cluster using Slurm"
+    },
+
+    "cracker/services/hydra_hydrid": {
+        "name": "Crack services using Hydra",
+        "type": "cracker",
+        "subtype": "services",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": "Perform hybrid attacks against services with hydra submiting parallel tasks in a cluster using Slurm"
+    },
+
     "auxiliary/wordlists/crunch": {
         "name":"crunch wordlist generator",
         "type": "auxiliary",

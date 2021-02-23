@@ -58,3 +58,10 @@ class InvalidHashTypeError(Exception):
     def __init__(self, hashType):
         self.warning = f"Invalid hash Type: {hashType}"
         super().__init__(self.warning)
+
+
+# exceptions for hydra cracker (subclass of PaswordCracker class)
+class InvalidSeviceError(Exception):
+    def __init__(self, service):
+        self.warning = f"Invalid service: {service}"
+        super().__init__(self.warning)

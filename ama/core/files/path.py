@@ -22,7 +22,7 @@ class Path:
         invalidPermission = {'read': [], 'write':[], 'execution':[]}
         for permission in permissions:
             for path in paths:
-                if os.path.exists(path):
+                if (path is not None) and os.path.exists(path):
                     if not os.access(path, permission):
                         if permission == os.R_OK:
                             cmd2.Cmd.pwarning(f"{path} haven't read permission")
@@ -39,10 +39,11 @@ class Path:
                             permissionCheck = False
                             invalidPermission['execution'].append(path)
                 else:
-                    cmd2.Cmd.pwarning(f"{path} path doesn't exist")
-                    permissionCheck = False
+                    if path:
+                        cmd2.Cmd.pwarning(f"{path} path doesn't exist")
+                        permissionCheck = False
+                    else: #path = None
+                        cmd2.Cmd.pwarning(f"No path supplied (path:None)")
 
         if not permissionCheck:
             raise PermissionError(f"Permission Error: {**invalidPermission}")
-
-        return permissionCheck

@@ -80,7 +80,7 @@ class Interaction(CommandSet):
             if moduleClass.mtype == "attack":
                 if variable in moduleClass.attack or
                 variable in moduleClass.slurm:
-                
+
                     self._cmd.selectedModule.attack[variable] = value
                 else:
                     cmd2.Cmd.pwarning(f"No {variable} in {moduleClass.mname} module")
