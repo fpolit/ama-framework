@@ -31,6 +31,6 @@
 [submodule "ama/core/auxiliary/hashes/hate_crack"]
 	path = ama/core/auxiliary/hashes/hate_crack
 	url = https://github.com/trustedsec/hate_crack.git
-[submodule "ama/core/auxiliary/hashes/HashHammer"]
-	path = ama/core/auxiliary/hashes/HashHammer
-	url = https://github.com/Jayy001/HashHammer.git
+[submodule "ama/core/auxiliary/hashes/hashid"]
+	path = ama/core/auxiliary/hashes/hashid
+	url = https://github.com/psypanda/hashID.git
