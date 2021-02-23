@@ -1,0 +1,15 @@
+[submodule "ama/core/auxiliary/analysis/pack"]
+	path = ama/core/auxiliary/analysis/pack
+	url = https://github.com/iphelix/pack.git
+[submodule "ama/core/auxiliary/analysis/ppack"]
+	path = ama/core/auxiliary/analysis/ppack
+	url = https://gitlab.com/spolit/ppack.git
+[submodule "ama/core/auxiliary/wordlists/crunch"]
+	path = ama/core/auxiliary/wordlists/crunch
+	url = https://gitlab.com/glozanoa/crunch.git
+[submodule "ama/core/auxiliary/wordlists/pydictor"]
+	path = ama/core/auxiliary/wordlists/pydictor
+	url = https://github.com/LandGrey/pydictor.git
+[submodule "ama/core/auxiliary/wordlists/cupp"]
+	path = ama/core/auxiliary/wordlists/cupp
+	url = https://github.com/Mebus/cupp.git
