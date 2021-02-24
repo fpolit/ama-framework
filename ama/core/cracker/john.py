@@ -23,14 +23,13 @@ import re
 from tabulate import tabulate
 from sbash import Bash
 
-
 # cmd2 imports
 import cmd2
 
 # slurm imports
 from ..slurm import Slurm
 
-# PasswordCracker class import
+# cracker imports
 from .cracker import PasswordCracker
 
 # john hashes import
@@ -40,7 +39,10 @@ from ama.data.hashes import jtrHashes
 from ..files import Path
 
 # cracker exceptions imports
-from .crackerException import InvalidParallelJobError
+from .crackerException import (
+    InvalidParallelJobError,
+    InvalidHashTypeError
+)
 
 class John(PasswordCracker):
     """
@@ -48,6 +50,7 @@ class John(PasswordCracker):
     This class implement the diverse attack of john the ripper and its benchmark
     Suported Attacks: wordlist, incremental, masks, single, combination, hybrid
     """
+
     HASHES = jtrHashes
 
     def __init__(self):
@@ -63,11 +66,11 @@ class John(PasswordCracker):
             hashType (str): hash type
 
         Raises:
-            InvalidHashType: Error if the hasType is an unsopported john hash type
+            InvalidHashType: Error if the hasType is an unsopported hash type of a cracker
         """
 
         if not (hashType in John.HASHES):
-            raise InvalidHashType(hashType)
+            raise InvalidHashTypeError(John, hashType)
         return True
 
     @staticmethod
@@ -87,7 +90,53 @@ class John(PasswordCracker):
                 filteredhashes.append(hashId, hashType)
                 hashId += 1
 
-        cmd2.Cmd.poutput(tabulate(posibleHashes, headers=["#", "Name"]))
+        cmd2.Cmd.poutput(tabulate(filteredhashes, headers=["#", "Name"]))
+
+
+    @staticmethod
+    def hashStatus(queryHash, potfile=None):
+        """
+        Check the status (broken by John or not) of query hash or hashes file
+
+        Return:
+        if queryHash is in potfile then [HASHTYPE, HASH, PASSWORD] list is returned
+        otherwise None is returned
+        """
+        #import pdb;pdb.set_trace()
+
+        try:
+            crackedPattern = re.compile(rf"\$(\W*|\w*|.*)\$({queryHash})(\$(\W*|\w*|.*)\$)?:(\W*|\w*|.*)", re.DOTALL)
+            if potfile:
+                permission = [os.R_OK]
+                Path.access(permission, potfile)
+
+                # elif cracker in ["hashcat", "hc"]:
+                #     crackedPattern = re.compile(rf"({queryHash}):(\W*|\w*|.*)", re.DOTALL)
+
+            else:
+                HOME = os.path.expanduser("~")
+                potfile = os.path.join(HOME, ".john/john.pot")
+                permission = [os.R_OK]
+                Path.access(permission, potfile)
+
+                # elif cracker in ["hashcat", "hc"]:
+                #     hashcatPotFile = os.path.join(homePath, ".hashcat/hashcat.potfile")
+                #     potFilePath = FilePath(hashcatPotFile)
+                #     crackedPattern = re.compile(rf"({queryHash}):(\W*|\w*|.*)", re.DOTALL)
+
+            #print(f"potfile: {potFilePath}")
+            with open(potfile, 'r') as potFile:
+                while   crackedHash := potFile.readline().rstrip():
+                    if crackedHashPot := crackedPattern.fullmatch(crackedHash):
+                        hashPot = crackedHashPot.groups()
+                        return [hashPot[0], hashPot[1], hashPot[-1]]
+                        # elif cracker in ["hashcat", "hc"]:
+                        #     return [None, hashPot[0], hashPot[1]]
+            return None
+
+
+        except Exception as error:
+            cmd2.Cmd.pexcept(error)
 
 
     def benchmark(self, slurm=None):
