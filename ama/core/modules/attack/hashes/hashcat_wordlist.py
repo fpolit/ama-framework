@@ -7,66 +7,57 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 # base  imports
-from ama.core.modules.base import Attack
+from ama.core.modules.base import (
+    Attack,
+    Argument
+)
 
 # cracker imports
 from ama.core.cracker import Hashcat
-
-# slurm imports
-from ama.core.slurm import Slurm
-
 
 class HashcatWordlist(Attack):
     """
     Wordlist Attack using hashcat cracker
     """
 
-    name = "Wordlist attack using John The Ripper"
-    mname = "attack/hashes/john_wordlist"
+    name = "Wordlist attack using Hashcat"
+    mname = "attack/hashes/hashcat_wordlist"
     author = [
         "glozanoa <glozanoa@uni.pe>"
     ]
     description = (
         """
         Perform wordlists attacks against hashes
-        with john submiting parallel tasks in a cluster using Slurm
+        with hashcat submiting parallel tasks in a cluster using Slurm
         """
     )
 
-    def __init__(self, worklist, hashType, hashFile, slurm):
+    def __init__(self,
+                 worklist:str = None, hashType: str = None, hashesFile: str = None, slurm):
         """
-        REWRITE
+        Initialization of wordlist attack using hashcat
         """
-
-        name = "Wordlist attack using John The Ripper"
-        mname = "attack/hashes/john_wordlist"
-        author = [
-            "glozanoa <glozanoa@uni.pe>"
-        ]
-        description = \
-            """
-            Perform wordlists attacks against hashes
-            with john submiting parallel tasks in a cluster using Slurm
-            """
 
         attackOptions = {
-            'wordlist': wordlist,
-            'hash_type': hashType,
-            'hash_file': hashFile
+            'wordlist': Argument(wordlist, True, "Wordlist file"),
+            'hash_type': Argument(hashType, True, "Hashcat hash type"),
+            'hashes_file': Argument(hashesFile, True, "Hashes file")
         }
 
-        initOptions = {'name': name,
-                       'mname' : nname,
-                       'author': author,
-                       'description': description,
-                       'slurm': slurm,
-                       'atackOptions': attackOptions
-                       }
+        initOptions = {
+            'name': name,
+            'mname' : nname,
+            'author': author,
+            'description': description,
+            'atackOptions': attackOptions,
+            'slurm': slurm
+        }
 
         super().__init__(**initOptions)
 
     def attack(self):
         """
-        WRITE
+        Wordlist attack using Hashcat
         """
-        pass
+        hc = Hashcat()
+        hc.wo

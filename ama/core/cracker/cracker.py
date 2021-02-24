@@ -74,3 +74,11 @@ class PasswordCracker:
             mainexec = None
 
         return mainexec
+
+
+    @staticmethod
+    def hashStatus(queryHash: str = None, hashesFile: str = None):
+        """
+        Creck the status (broken or not) of query hash or hashes file
+        """
+        pass # implement for each child class of PasswordCracker

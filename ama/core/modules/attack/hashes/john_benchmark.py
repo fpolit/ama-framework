@@ -14,7 +14,7 @@ from ama.core.cracker import John
 
 class JohnBenchmark(Attack):
     """
-    Wordlist Attack using john cracker
+    john the ripper benchmark
     """
 
     description = "John the Ripper benchmark"
@@ -46,7 +46,7 @@ class JohnBenchmark(Attack):
 
     def attack(self):
         """
-        Wordlist attack using John the Ripper
+        John the Ripper benchmark
         """
         jtr = John()
         jtr.benchmark(slurm = self.slurm)

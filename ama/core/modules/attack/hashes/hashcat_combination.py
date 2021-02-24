@@ -7,7 +7,10 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 # base  imports
-from ama.core.modules.base import Attack
+from ama.core.modules.base import (
+    Attack,
+    Argument
+)
 
 # cracker imports
 from ama.core.cracker import Hashcat
@@ -33,15 +36,15 @@ class HashcatCombination(Attack):
         """
     )
 
-    def __init__(self, worklist, hashType, hashFile, slurm):
+    def __init__(self, worklists, hashType, hashFile, slurm):
         """
         REWRITE
         """
 
         attackOptions = {
-            'wordlist': wordlist,
-            'hash_type': hashType,
-            'hash_file': hashFile
+            'wordlists': Argument(wordlists, True, "Wordlists to combine"),
+            'hash_type': Argument(hashType, True, "John hash type"),
+            'hash_file': Argument(hashFile, True, "Hash file")
         }
 
         initOptions = {'name': name,

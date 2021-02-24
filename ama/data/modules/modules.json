@@ -193,7 +193,18 @@
         "description": ""
     },
 
-    "auxiliary/hashes/name_that_hash":
+    "auxiliary/hashes/sth":
+    {
+        "name":"hashid hash identifier",
+        "type": "auxiliary",
+        "subtype": "hashes",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": ""
+    },
+
+    "auxiliary/hashes/nth":
     {
         "name":"name_that_hash hash identifier",
         "type": "auxiliary",
@@ -204,7 +215,31 @@
         "description": ""
     },
 
-    "auxiliary/masks/ppack":
+    "auxiliary/hashes/hate_crack":
+    {
+        "name":"hashid hash identifier",
+        "type": "auxiliary",
+        "subtype": "hashes",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": ""
+    },
+
+
+    "auxiliary/hashes/hash_hammer":
+    {
+        "name":"hashid hash identifier",
+        "type": "auxiliary",
+        "subtype": "hashes",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": ""
+    },
+
+
+    "auxiliary/analysis/ppack_statsgen":
     {
         "name":"ppack password analyzer and mask generator",
         "type": "auxiliary",
@@ -215,7 +250,51 @@
         "description": ""
     },
 
-    "auxiliary/masks/pack":
+    "auxiliary/analysis/ppack_maskgen":
+    {
+        "name":"ppack password analyzer and mask generator",
+        "type": "auxiliary",
+        "subtype": "masks",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": ""
+    },
+
+    "auxiliary/analysis/ppack_policygen":
+    {
+        "name":"ppack password analyzer and mask generator",
+        "type": "auxiliary",
+        "subtype": "masks",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": ""
+    },
+
+    "auxiliary/analysis/pack_statsgen":
+    {
+        "name":"pack password analyzer and mask generator",
+        "type": "auxiliary",
+        "subtype": "masks",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": ""
+    },
+
+    "auxiliary/analysis/pack_maskgen":
+    {
+        "name":"pack password analyzer and mask generator",
+        "type": "auxiliary",
+        "subtype": "masks",
+        "author": [
+            "glozanoa <glozanoa@uni.pe>"
+        ],
+        "description": ""
+    },
+
+    "auxiliary/analysis/pack_policygen":
     {
         "name":"pack password analyzer and mask generator",
         "type": "auxiliary",

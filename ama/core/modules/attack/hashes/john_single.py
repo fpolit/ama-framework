@@ -6,7 +6,10 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 # base  imports
-from ama.core.modules.base import Attack
+from ama.core.modules.base import (
+    Attack,
+    Argument
+)
 
 # cracker imports
 from ama.core.cracker import John
@@ -38,17 +41,18 @@ class JohnSingle(Attack):
         slurm (Slurm): Instance of Slurm class
         """
         attackOptions = {
-            'hash_type': hashType,
-            'hashes_file': hashesFile
+            'hash_type': Argument(hashType, True, "John hash type"),
+            'hashes_file': Argument(hashesFile, True, "hashes file")
         }
 
-        initOptions = {'mname' : nname,
-                       'author': author,
-                       'description': description,
-                       'fulldescription':  fulldescription,
-                       'atackOptions': attackOptions,
-                       'slurm': slurm
-                       }
+        initOptions = {
+            'mname' : nname,
+            'author': author,
+            'description': description,
+            'fulldescription':  fulldescription,
+            'atackOptions': attackOptions,
+            'slurm': slurm
+        }
 
         super().__init__(**initOptions)
 
@@ -58,6 +62,6 @@ class JohnSingle(Attack):
         single attack using John the Ripper
         """
         jtr = John()
-        jtr.singleAttack(hashType = self.hash_type,
-                         hashesFile = self.hashes_file,
+        jtr.singleAttack(hashType = self.attack['hash_type'].value,
+                         hashesFile = self.attack['hashes_file'].value,
                          slurm = self.slurm)

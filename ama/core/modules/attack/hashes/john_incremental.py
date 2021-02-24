@@ -7,7 +7,10 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 # base  imports
-from ama.core.modules.base import Attack
+from ama.core.modules.base import (
+    Attack,
+    Argument
+)
 
 # cracker imports
 from ama.core.cracker import John
@@ -39,8 +42,8 @@ class JohnIncremental(Attack):
         slurm (Slurm): Instance of Slurm class
         """
         attackOptions = {
-            'hash_type': hashType,
-            'hashes_file': hashFile
+            'hash_type': Argument(hashType, True, "John hash type"),
+            'hashes_file': Argument(hashFile, True, "Hashes file")
         }
 
         initOptions = {'mname' : nname,
@@ -59,6 +62,6 @@ class JohnIncremental(Attack):
         Incremental attack using John the Ripper
         """
         jtr = John()
-        jtr.incremtalAttack(hashType = self.hash_type,
-                            hashesFile = self.hashes_file,
+        jtr.incremtalAttack(hashType = self.attack['hash_type'].value,
+                            hashesFile = self.attack['hashes_file'].value,
                             slurm = self.slurm)

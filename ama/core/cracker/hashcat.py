@@ -1,147 +1,63 @@
 #!/usr/bin/env python3
-
-"""
+#
 # Hashcat class
 # Jan 9 2021 - Implementation of Hashcat class
-                (using core module of pyhashcat python package)
+#                (using core module of pyhashcat python package)
 #
 # Maintainer: glozanoa <glozanoa@uni.pe>
-"""
 
 
 
 import os
 import re
-from os.path import dirname
 from tabulate import tabulate
-from sbash.core import Bash
-from fineprint.status import print_status, print_failure, print_successful
-
+from sbash import Bash
 
 # cmd2 imports
 import cmd2
 
-# # cracker modules
-# from .PasswordCracker import PasswordCracker
-# from ..hashes.hc import hashes
+# cracker module imports
+from .cracker import PasswordCracker
 
-# # base modules
-# from ..base.FilePath import FilePath
+# cracker exceptions imports
+from .crackerException import (
+    InvalidParallelJobError,
+    InvalidHashTypeError
+)
 
-# # importing PasswordCracker exceptions
-# from .PasswordCrackerExceptions import CrackerDisableError
-# from .PasswordCrackerExceptions import AttackModeError
-# from .PasswordCrackerExceptions import CrackerHashError
+# hashcat hashes import
+from ama.data.hashes import hcHashes
 
-# # hpc module
-# from ..slurm.HPC import HPC
-
-# # hpc exceptions
-# from ..slurm.HPCExceptions import ParallelWorkError
-
-# # utilities module
-# from ..utilities.combinator import Combinator
-# from ..utilities.combinator import InvalidWordlistNumber
+# validator imports
+from ama.core.files import Path
 
 
 class Hashcat(PasswordCracker):
-    hashes = hashes
-    attackMode = {  0:"Wordlist",
-                    1:"Combination",
-                    2:"Incremental",
-                    3:"Mask",
-                    6:"Hybrid:\n\twordlist + masks file or mask",
-                    7:"Hybrid:\n\tmasks file or mask + wordlist"}
+    """
+    Hashcat password cracker
+    This class implement the diverse attack of hashcat and its benchmark
+    Suported Attacks: wordlist, incremental, masks, combination, hybrid
+    """
+
+    HASHES = hcHashes
 
     def __init__(self):
-        super().__init__(name=['hashcat', 'hc'])
-
-
-    @staticmethod
-    def benchmark():
-        cracker = Hashcat()
-        if cracker.checkStatus():
-            benchmark = f"{cracker.mainexec} -b"
-            print_status(f"Running: {benchmark}")
-            Bash.exec(benchmark)
-        else:
-            raise CrackerDisableError("Hashcat")
-
-    @staticmethod
-    def checkAttackMode(attack):
-        if not (attack in Hashcat.attackMode):
-            raise AttackModeError(attack)
-
+        super().__init__(name=['hashcat', 'hc'], version="v6.1.1")
 
     @staticmethod
     def checkHashType(hashType):
-        """ Check if the hash type is correct
+        """
+        Check if the hash type is a valid hashcat hash type
 
         Args:
             hashType (str): hash type
 
         Raises:
-            HashcatHashError: Error if the given hash isn't a valid hash type
+        InvalidHashType: Error if the hasType is an unsopported hash type of a cracker
         """
 
-        if not (hashType in Hashcat.hashes):
-            raise HashcatHashError(hashType)
-
-
-    @staticmethod
-    def checkAttackArgs(*,
-                        _hashType=None,
-                        _hashFile=None,
-                        _wordlist=None,
-                        _maskFile=None):
-        PasswordCracker.checkAttackArgs(_hashFile = _hashFile,
-                                        _wordlist = _wordlist,
-                                        _masksFile = _maskFile)
-
-        Hashcat.checkHashType(_hashType)
-
-
-    @staticmethod
-    def selectAttack(*,
-                attackMode=None,
-                hashType=None,
-                hashFile=None,
-                wordlist=[],
-                masksFile=None,
-                hpc = None):
-
-        # contruction of hashcat cmd to execute
-        Hashcat.checkAttackMode(attackMode)
-        if attackMode == 0:   # wordlist(or straight) attack
-            HCAttacks.wordlist(hashType = hashType,
-                               hashFile = hashFile,
-                               wordlist = wordlist,
-                               hpc = hpc)
-
-        elif attackMode==1: #combination attack
-            HCAttacks.combination(hashType = hashType,
-                                  hashFile = hashFile,
-                                  wordlists = wordlist,
-                                  hpc = hpc)
-
-        elif attackMode == 3:   #mask attack
-            HCAttacks.maskAttack(hashType = hashType,
-                                 hashFile = hashFile,
-                                 maskFile = masksFile,
-                                 hpc = hpc)
-
-        elif attackMode == 6:   #hybridWMF attack (wordlist + mask file)
-            HCAttacks.hybridWMF(hashType = hashType,
-                                hashFile = hashFile,
-                                wordlist = wordlist,
-                                maskFile = masksFile,
-                                hpc = hpc)
-        elif attackMode == 7:   #hybridMFW attack (mask file + wordlist)
-            HCAttacks.hybridMFW(hashType = hashType,
-                                hashFile = hashFile,
-                                wordlist = wordlist,
-                                maskFile = masksFile,
-                                hpc = hpc)
+        if not (hashType in Hashcat.HASHES):
+            raise InvalidHashTypeError(Hashcat, hashType)
 
 
     @staticmethod
@@ -156,13 +72,112 @@ class Hashcat(PasswordCracker):
             hashPattern = re.compile(rf"\w*{pattern}\w*")
 
         posibleHashes = []
-        for hashId, hashType in Hashcat.hashes.items():
+        for hashId, hashType in Hashcat.HASHES.items():
             hashName, description = hashType.values()
             if hashPattern.fullmatch(hashName):
                 posibleHashes.append([hashId, hashName, description])
 
-        cmd2.Cmd.poutput(tabulate(posibleHashes, headers=["id", "name", "description"]))
+        cmd2.Cmd.poutput(tabulate(posibleHashes, headers=["#", "Name", "Description"]))
 
+
+    def benchmark(self, *,
+                  ):
+        """
+        Hashcat benchmark
+        """
+        if self.status:
+            cmd2.Cmd.poutput(f"Performing Hashcat benchmark.")
+            if slurm.partition:
+                cmd2.Cmd.pwarning("Hashcat benchmark does not yet support  Slurm execution")
+            else:
+                johnBenchmark = f"{self.mainexec} -b"
+                Bash.exec(johnBenchmark)
+        else:
+            cmd2.Cmd.pwarning("Cracker {self.mainName} is disable")
+
+    def wordlistAttack(self):
+        if self.status:
+            cmd2.Cmd.poutput(f"Performing Hashcat benchmark.")
+            if slurm.partition:
+                cmd2.Cmd.pwarning("Hashcat benchmark does not yet support  Slurm execution")
+            else:
+                johnBenchmark = f"{self.mainexec} -b"
+                Bash.exec(johnBenchmark)
+        else:
+            cmd2.Cmd.pwarning("Cracker {self.mainName} is disable")
+
+    def wordlist(*, attackMode=0, hashType, hashFile, wordlist, hpc=None):
+        Hashcat.checkAttackArgs(_hashType=hashType,
+                                _hashFile=hashFile,
+                                _wordlist=wordlist)
+        hc = Hashcat()
+        print_status(f"Attacking {hashFile} with {wordlist} in straigth mode.")
+        if hpc:
+            # develop me please
+            pass
+        else:
+            wordlistAttack =   f"{hc.mainexec} -a {attackMode} -m {hashType} {hashFile} {wordlist}"
+            Bash.exec(wordlistAttack)
+
+    @staticmethod
+    def checkAttackMode(attack):
+        if not (attack in Hashcat.attackMode):
+            raise AttackModeError(attack)
+
+    @staticmethod
+    def checkAttackArgs(*,
+                        _hashType=None,
+                        _hashFile=None,
+                        _wordlist=None,
+                        _maskFile=None):
+        PasswordCracker.checkAttackArgs(_hashFile = _hashFile,
+                                        _wordlist = _wordlist,
+                                        _masksFile = _maskFile)
+
+        Hashcat.checkHashType(_hashType)
+
+
+    # @staticmethod
+    # def selectAttack(*,
+    #             attackMode=None,
+    #             hashType=None,
+    #             hashFile=None,
+    #             wordlist=[],
+    #             masksFile=None,
+    #             hpc = None):
+
+    #     # contruction of hashcat cmd to execute
+    #     Hashcat.checkAttackMode(attackMode)
+    #     if attackMode == 0:   # wordlist(or straight) attack
+    #         HCAttacks.wordlist(hashType = hashType,
+    #                            hashFile = hashFile,
+    #                            wordlist = wordlist,
+    #                            hpc = hpc)
+
+    #     elif attackMode==1: #combination attack
+    #         HCAttacks.combination(hashType = hashType,
+    #                               hashFile = hashFile,
+    #                               wordlists = wordlist,
+    #                               hpc = hpc)
+
+    #     elif attackMode == 3:   #mask attack
+    #         HCAttacks.maskAttack(hashType = hashType,
+    #                              hashFile = hashFile,
+    #                              maskFile = masksFile,
+    #                              hpc = hpc)
+
+    #     elif attackMode == 6:   #hybridWMF attack (wordlist + mask file)
+    #         HCAttacks.hybridWMF(hashType = hashType,
+    #                             hashFile = hashFile,
+    #                             wordlist = wordlist,
+    #                             maskFile = masksFile,
+    #                             hpc = hpc)
+    #     elif attackMode == 7:   #hybridMFW attack (mask file + wordlist)
+    #         HCAttacks.hybridMFW(hashType = hashType,
+    #                             hashFile = hashFile,
+    #                             wordlist = wordlist,
+    #                             maskFile = masksFile,
+    #                             hpc = hpc)
 
 class HCAttacks:
     @staticmethod

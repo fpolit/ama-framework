@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
+#
+# Slurm class to manage sbatch parameters to submit parallel jobs
+#
+# Maintainer: glozanoa <glozanoa@uni.pe>
 
-from fineprint.status import print_status
 
-# hpc exceptions
-from .HPCExceptions import HybridWorkError
-from .HPCExceptions import SlurmParametersError
-#from .HPCExceptions import ParallelWorkError
+from typing import List
+
+# base imports
+from ama.core.modules.base import Argument
 
 class Slurm:
     """
-    HPC hold the necesary parameter to submit a parallel task (with slurm)
+    Manage sbatch parameters to submit parallel jobs
     """
 
     def __init__(self, *, array=None, account=None, dependecy=None, chdir=None, error=None,
@@ -20,38 +23,38 @@ class Slurm:
                  slurmScript="hattack.slurm"):
 
         # slurm parameters (core) - shortcut - arguments
-        self.array = array # -a <e.x: 0-15 or 0,6,16-32>
-        self.account = account # -A <account>
-        self.dependency = dependency # -d
-        self.chdir = chdir # -D <homework directory path>
-        self.error = error # -e <error file path>
-        self.jobName = jobName # -J <str>
-        self.cluster = cluster # -M <cluster name>
-        self.distribution = distribution # -m <block|cyclic|plane|arbitrary>
-        self.mailType = mailType # NONE <BEGIN|END|FAIL|REQUEUE|ALL|TIME_LIMIT_PP>, PP: percent of the limit time
-        self.mailUser = mailUser # NONE <user email>
-        self.mem = mem # NONE <size[units]>, units = [K|M|G|T] (memory per node)
-        self.memPerCpu = memPerCpu # NONE <size[units]>
+        self.array = Argument(array, False, "Index of array job (e.g. 0-15 or 0,6,16-32)") # -a <e.x: 0-15 or 0,6,16-32>
+        self.account = Argument(account, False, "Cluster account to submit the job") # -A <account>
+        self.dependency = Argument(dependency, False, "Defer the start of this job until the specified dependencies have been satisfied completed") # -d
+        self.chdir = Argument(chdir, False, "Defer the start of this job until the specified dependencies have been satisfied completed") # -D <homework directory path>
+        self.error = Argument(error, False, "Error file") # -e <error file path>
+        self.jobName = Argument(jobName, False, "Name for the job allocation") # -J <str>
+        self.cluster = Argument(cluster, False, "") # -M <cluster name>
+        self.distribution = Argument(distribution, True, "Distribution methods for remote processes (<block|cyclic|plane|arbitrary>)") # -m <block|cyclic|plane|arbitrary>
+        self.mailType = Argument(mailType, False, "Event types to notify user by email(<BEGIN|END|FAIL|REQUEUE|ALL|TIME_LIMIT_PP>)") # NONE <BEGIN|END|FAIL|REQUEUE|ALL|TIME_LIMIT_PP>, PP: percent of the limit time
+        self.mailUser = Argument(mailUser, False, "User email") # NONE <user email>
+        self.mem = Argument(mem, False, "Memory per node (<size[units]>)") # NONE <size[units]>, units = [K|M|G|T] (memory per node)
+        self.memPerCpu = Argument(memPerCpu, False, "Minimum memory required per allocated CPU (<size[units]>)") # NONE <size[units]>
         self.cpusPerTask = cpusPerTask # -c <ncpus>
-        self.nodes = nodes # -N <minnodes[-maxnodes]>
+        self.nodes = Argument(nodes, True, "(<minnodes[-maxnodes]>)") # -N <minnodes[-maxnodes]>
         self.ntasks = ntasks # -n <number of tasks>
-        self.nice = nice # NONE <adjustment>, adjustment is between +- 2147483645
-        self.output = output # -o <path>
-        self.openMode = openMode # NONE <append|truncate>
-        self.partition = partition # -p <partition>
+        self.nice = Argument(nice, False, "Run the job with an adjusted scheduling") # NONE <adjustment>, adjustment is between +- 2147483645
+        self.output = Argument(output, True, "Output file name (default: slurm-%j.out)") # -o <path>
+        self.openMode = Argument(openMode, True, "Output open mode (<append|truncate>)") # NONE <append|truncate>
+        self.partition = Argument(partition, True, "Partition to submit job") # -p <partition>
         self.reservation = reservation # NONE <reservation>
-        self.time = time # -t <time>
+        self.time = Argument(time, False, "Limit of time (format: DD-HH:MM:SS)") # -t <time>
         # time formats: MM, MM:SS, HH:MM:SS, DD-HH, DD-HH:MM, DD-HH:MM:SS
         # DD:days, HH:hours, MM: minutes, SS:secconds
-        self.testOnly = testOnly # NONE <NO VALUE>,if testOnly=True enable this flag otherwise omit
-        self.verbose = verbose # -v <NO VALUE>, if verbose=True enable this flag otherwise omit
+        self.testOnly = Argument(testOnly, True, "Validate the batch script and return an estimate of when a job would be scheduled to run. No job is actually submitted") # NONE <NO VALUE>,if testOnly=True enable this flag otherwise omit
+        self.verbose = Argument(verbose, False, "Increase the verbosity of sbatch's informational messages") # -v <NO VALUE>, if verbose=True enable this flag otherwise omit
         self.nodelist = nodelist # -w <nodelist>, e.x. nodelist = hw[00-04,06,08]
-        self.wait = wait # -W <NO VALUE>, if wait=True enable this flag otherwise omit
-        self.exclude = exclude # -x <nodelist>
+        self.wait = Argument(wait, False, "Do not exit until the submitted job terminates") # -W <NO VALUE>, if wait=True enable this flag otherwise omit
+        self.exclude = Argument(exclude, False, "Do not exit until the submitted job terminates") # -x <nodelist>
 
 
         # extra parameters
-        self.slurmScript = slurmScript
+        self.slurmScript = Argument(slurmScript, True, "Name of generated batch script")
 
 
 
@@ -96,7 +99,7 @@ class Slurm:
         return core and extra parameters
         """
         core  = self.coreParameters()
-        extra = {'slurm-script': self.slurmScript}
+        extra = {'slurm-script': self.slurmScript.value}
         return [core, extra]
 
 
@@ -148,7 +151,7 @@ class Slurm:
             raise SlurmParametersError(invalidParameters)
 
 
-    def genScript(self, parallelWork):
+    def genSbatchScript(self, parallelWork: List[str] = None):
         """
         generate a slurm script to submit with sbatch using the slurm parameters(constructor parameters) and the parallelWork variable(list of task to perform)
 
@@ -182,7 +185,7 @@ class Slurm:
 
 
     @staticmethod
-    def genScript(core, extra, parallelWork):
+    def genSbatchScript(core, extra, parallelWork):
         """
         [core, extra] are the variable returned by coreParameters method
         generate a slurm script to submit with sbatch using the slurm parameters(slurm constructor parameters) and the parallelWork variable(list of task to perform)

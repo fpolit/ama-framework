@@ -6,7 +6,10 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 # base  imports
-from ama.core.modules.base import Attack
+from ama.core.modules.base import (
+    Attack,
+    Argument
+)
 
 # cracker imports
 from ama.core.cracker import John
@@ -29,7 +32,9 @@ class JohnWordlist(Attack):
         """
         )
 
-    def __init__(self, *, hashType=None, hashesFile=None, worklist=None, slurm=None):
+    def __init__(self, *,
+                 hashType: str =None, hashesFile: str =None,
+                 worklist: str =None, slurm=None):
         """
         Initialization of John  wordlist attack
 
@@ -40,18 +45,19 @@ class JohnWordlist(Attack):
         slurm (Slurm): Instance of Slurm class
         """
         attackOptions = {
-            'wordlist': wordlist,
-            'hash_type': hashType,
-            'hashes_file': hashesFile
+            'wordlist': Argument(wordlist, True, "wordlist file"),
+            'hash_type': Argument(hashType, True, "John hash type"),
+            'hashes_file': Argument(hashesFile, True, "hashes file")
         }
 
-        initOptions = {'mname' : nname,
-                       'author': author,
-                       'description': description,
-                       'fulldescription':  fulldescription,
-                       'atackOptions': attackOptions,
-                       'slurm': slurm
-                       }
+        initOptions = {
+            'mname' : nname,
+            'author': author,
+            'description': description,
+            'fulldescription':  fulldescription,
+            'atackOptions': attackOptions,
+            'slurm': slurm
+        }
 
         super().__init__(**initOptions)
 
@@ -61,7 +67,7 @@ class JohnWordlist(Attack):
         Wordlist attack using John the Ripper
         """
         jtr = John()
-        jtr.wordlistAttack(hashType = self.hash_type,
-                           hashesFile = self.hashes_file,
-                           wordlist = self.wordlist,
+        jtr.wordlistAttack(hashType = self.attack['hash_type'].value,
+                           hashesFile = self.attack['hashes_file'].value,
+                           wordlist = self.attack['wordlist'].value,
                            slurm = self.slurm)

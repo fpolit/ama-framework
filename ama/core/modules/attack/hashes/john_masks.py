@@ -6,7 +6,10 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 # base  imports
-from ama.core.modules.base import Attack
+from ama.core.modules.base import (
+    Attack,
+    Argument
+)
 
 # cracker imports
 from ama.core.cracker import John
@@ -39,9 +42,9 @@ class JohnMasks(Attack):
         slurm (Slurm): Instance of Slurm class
         """
         attackOptions = {
-            'hash_type': hashType,
-            'hashes_file': hashesFile,
-            'masks_file': masksFile
+            'hash_type': Argument(hashType, True, "John hash type"),
+            'hashes_file': Argument(hashesFile, True, "Hashes file"),
+            'masks_file': Argument(masksFile, True, "Masks file")
         }
 
         initOptions = {'mname' : nname,
@@ -60,7 +63,7 @@ class JohnMasks(Attack):
         masks attack using John the Ripper
         """
         jtr = John()
-        jtr.masksAttack(hashType = self.hash_type,
-                        hashesFile = self.hashes_file,
-                        masksFile= self.masks_file,
+        jtr.masksAttack(hashType = self.attack['hash_type'].value,
+                        hashesFile = self.attack['hashes_file'].value,
+                        masksFile= self.attack['masks_file'].value,
                         slurm = self.slurm)

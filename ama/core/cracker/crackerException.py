@@ -48,16 +48,22 @@ class InvalidCracker(Exception):
         self.warningMsg = f"Invalid cracker selected: {self.invalidCracker}"
         super().__init__(self.warningMsg)
 
+
+class InvalidHashTypeError(Exception):
+    def __init__(self, cracker, hashType):
+        crackerName = cracker.mainName
+        self.warning = f"Invalid {crackerName} hash Type: {hashType}"
+        super().__init__(self.warning)
+
+
 # exceptions for john cracker (subclass of PaswordCracker class)
 class InvalidParallelJobError(Exception):
     def __init__(self, parallelJob):
         self.warning = f"Invalid parallel job: {parallelJob}"
         super().__init__(self.warning)
 
-class InvalidHashTypeError(Exception):
-    def __init__(self, hashType):
-        self.warning = f"Invalid hash Type: {hashType}"
-        super().__init__(self.warning)
+
+# exceptions for hashcat cracker (subclass of PaswordCracker class)
 
 
 # exceptions for hydra cracker (subclass of PaswordCracker class)
