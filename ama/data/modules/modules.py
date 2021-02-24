@@ -3,15 +3,18 @@
 # ama supported modules
 #
 # date: Feb 18 2021
+# john and hashcat attacks imports
+#
+# date: Feb 23 2021
+# hydra attacks imports
+#
 # Maintainer: glozanoa <glozanoa@uni.pe>
-
-import json
 
 
 ### attacks modules imports
-## import attack/hashes modules
+## attack/hashes modules imports
 
-# john attacks import
+# john attacks imports
 from ama.core.modules.attack.hashes import (
     JohnWordlist,
     JohnIncremental,
@@ -20,7 +23,7 @@ from ama.core.modules.attack.hashes import (
     JohnHybrid
 )
 
-# hashcat attacks import
+# hashcat attacks imports
 from ama.core.modules.attack.hashes import (
     HashcatWordlist,
     HashcatIncremental,
@@ -28,16 +31,29 @@ from ama.core.modules.attack.hashes import (
     HashcatHybrid
 )
 
-## import attack/hashes modules
-# hydra attacks import
+## attack/hashes modules imports
+# hydra attacks imports
 from ama.core.modules.attack.services import (
     hydraWordlist
 )
 
 
 ### auxiliary modules imports
-## import auxiliary/wordlists modules
+## auxiliary/wordlists modules imports
 
+
+## auxiliary/hashes modules imports
+
+
+## auxiliary/combinator modules imports
+
+
+## auxiliary/analysis modules imports
+# pack auxiliary/analysis modules
+from ama.core.modules.auxiliary.analysis import (
+    PackStatsgen,
+    PackMaskgen
+)
 
 
 amaModulesType = [
@@ -46,16 +62,35 @@ amaModulesType = [
 ]
 
 amaModules = {
+### attack modules
+
+    ## attack/hash modules
+    # john attacks
     f"{JohnWordlist.mname}": JohnWordlist,
     f"{JohnIncremental.mname}": JohnIncremental,
     f"{JohnSingle.mname}": JohnSingle,
     f"{JohnCombination.mname}": JohnCombination,
     f"{JohnHybrid.mname}": JohnHybrid,
 
+    # john attacks
     f"{HashcatWordlist.mname}": HashcatWordlist,
     f"{HashcatIncremental.mname}": HashcatIncremental,
     f"{HashcatCombination.mname}": HashcatCombination,
     f"{HashcatHybrid.mname}": HashcatHybrid,
 
-    f"Hydra.mname": hydraWordlist
+    ## attack/services modules
+    # hydra attacks
+    f"{Hydra.mname}": hydraWordlist,
+
+
+### auxiliary modules
+    ## auxiliary/wordlists modules
+
+    ## auxiliary/hashes modules
+
+    ## auxiliary/combinator modules
+
+    ## auxiliary/analysis modules
+    f"{PackStatsgen.mname}": PackStatsgen,
+    f"{PackMaskgen.mname}": PackMaskgen
 }

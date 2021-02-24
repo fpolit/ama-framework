@@ -28,6 +28,7 @@ class JohnWordlist(Attack):
         with john submiting parallel tasks in a cluster using Slurm
         """
         )
+
     def __init__(self, *, hashType=None, hashesFile=None, worklist=None, slurm=None):
         """
         Initialization of John  wordlist attack
