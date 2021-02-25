@@ -66,22 +66,21 @@ class Hashcat(PasswordCracker):
         Search valid hashcat's hashes types given a pattern
         """
 
-        if not sensitive:
-            hashPattern = re.compile(rf"\w*{pattern}\w*", re.IGNORECASE)
+        if sensitive:
+            hashPattern = re.compile(rf"[\W|\w|\.]*{pattern}[\W|\w|\.]*")
         else:
-            hashPattern = re.compile(rf"\w*{pattern}\w*")
+            hashPattern = re.compile(rf"[\W|\w|\.]*{pattern}[\W|\w|\.]*", re.IGNORECASE)
 
         posibleHashes = []
         for hashId, hashType in Hashcat.HASHES.items():
             hashName, description = hashType.values()
             if hashPattern.fullmatch(hashName):
-                posibleHashes.append([hashId, hashName, description])
+                posibleHashes.append((hashId, hashName, description))
 
-        cmd2.Cmd.poutput(tabulate(posibleHashes, headers=["#", "Name", "Description"]))
+        print(tabulate(posibleHashes, headers=["#", "Name", "Description"]))
 
 
-    def benchmark(self, *,
-                  ):
+    def benchmark(self, slurm=None):
         """
         Hashcat benchmark
         """

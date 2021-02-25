@@ -14,18 +14,21 @@ from ama.core.modules.base import (
 # cracker imports
 from ama.core.cracker import John
 
+# slurm import
+from ama.core.slurm import Slurm
 
 class JohnSingle(Attack):
     """
     Single Attack using john cracker
     """
 
-    description = "Single attack using John The Ripper"
-    mname = "attack/hashes/john_single"
-    author = [
+    DESCRIPTION = "Single attack using John The Ripper"
+    MNAME = "attack/hashes/john_single"
+    MTYPE, MSUBTYPE, NAME = MNAME.split("/")
+    AUTHOR = [
         "glozanoa <glozanoa@uni.pe>"
     ]
-    fuldescription = (
+    FULLDESCRIPTION = (
         """
         Perform single attacks against hashes
         with john submiting parallel tasks in a cluster using Slurm
@@ -42,15 +45,18 @@ class JohnSingle(Attack):
         """
         attackOptions = {
             'hash_type': Argument(hashType, True, "John hash type"),
-            'hashes_file': Argument(hashesFile, True, "hashes file")
+            'hashes_file': Argument(hashesFile, True, "Hashes file")
         }
 
+        if slurm is None:
+            slurm = Slurm()
+
         initOptions = {
-            'mname' : nname,
-            'author': author,
-            'description': description,
-            'fulldescription':  fulldescription,
-            'atackOptions': attackOptions,
+            'mname' : JohnSingle.MNAME,
+            'author': JohnSingle.AUTHOR,
+            'description': JohnSingle.DESCRIPTION,
+            'fulldescription':  JohnSingle.FULLDESCRIPTION,
+            'attackOptions': attackOptions,
             'slurm': slurm
         }
 
@@ -59,7 +65,7 @@ class JohnSingle(Attack):
 
     def attack(self):
         """
-        single attack using John the Ripper
+        Single attack using John the Ripper
         """
         jtr = John()
         jtr.singleAttack(hashType = self.attack['hash_type'].value,

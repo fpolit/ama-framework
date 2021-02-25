@@ -48,7 +48,7 @@ class PasswordCracker:
                 cmd2.Cmd.pwarning(f"No executable founded for cracker: {name}")
 
     @staticmethod
-    def searchMainexec(crackerName: List(str)):
+    def searchMainexec(crackerName: List[str]):
         """
         Search an executable file of a password cracker using crackerName (list) as patterns
         """
@@ -79,6 +79,6 @@ class PasswordCracker:
     @staticmethod
     def hashStatus(queryHash: str = None, hashesFile: str = None):
         """
-        Creck the status (broken or not) of query hash or hashes file
+        Check the status (broken or not) of query hash or hashes file
         """
         pass # implement for each child class of PasswordCracker

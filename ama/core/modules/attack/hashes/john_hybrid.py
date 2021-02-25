@@ -14,24 +14,30 @@ from ama.core.modules.base import (
 # cracker imports
 from ama.core.cracker import John
 
+# slurm import
+from ama.core.slurm import Slurm
 
-class JohnSingle(Attack):
+class JohnHybrid(Attack):
     """
-    Single Attack using john cracker
+    Hybrid Attack using john cracker
     """
 
-    description = "Single attack using John The Ripper"
-    mname = "attack/hashes/john_single"
-    author = [
+    DESCRIPTION = "Hybrid attack using John The Ripper"
+    MNAME = "attack/hashes/john_hybrid"
+    MTYPE, MSUBTYPE, NAME = MNAME.split("/")
+    AUTHOR = [
         "glozanoa <glozanoa@uni.pe>"
     ]
-    fuldescription = (
+    FULLDESCRIPTION = (
         """
-        Perform single attacks against hashes
+        Perform hybrid attacks against hashes
         with john submiting parallel tasks in a cluster using Slurm
         """
         )
-    def __init__(self, *, hashType=None, hashesFile=None, masksFile=None, wordlist=None, slurm=None, inverse=False):
+
+    def __init__(self, *,
+                 hashType=None, hashesFile=None, masksFile=None,
+                 wordlist=None, slurm=None, inverse=False):
         """
         Initialization of John hybrid attack
 
@@ -47,14 +53,17 @@ class JohnSingle(Attack):
             'hashes_file': Argument(hashesFile, True, "Hashes file"),
             'masks_file': Argument(masksFile, True, "Masks file"),
             'wordlist': Argument(wordlist, True, "Wordlist file"),
-            'inverse': Argument(inverse, False, "False: wordlits + masks <> True: masks + wordlist")
+            'inverse': Argument(inverse, True, "False: wordlits + masks <> True: masks + wordlist")
         }
 
-        initOptions = {'mname' : nname,
-                       'author': author,
-                       'description': description,
-                       'fulldescription':  fulldescription,
-                       'atackOptions': attackOptions,
+        if slurm is None:
+            slurm = Slurm()
+
+        initOptions = {'mname' : JohnHybrid.MNAME,
+                       'author': JohnHybrid.AUTHOR,
+                       'description': JohnHybrid.DESCRIPTION,
+                       'fulldescription':  JohnHybrid.FULLDESCRIPTION,
+                       'attackOptions': attackOptions,
                        'slurm': slurm
                        }
 

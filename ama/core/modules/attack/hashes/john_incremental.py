@@ -15,23 +15,27 @@ from ama.core.modules.base import (
 # cracker imports
 from ama.core.cracker import John
 
+# slurm import
+from ama.core.slurm import Slurm
 
 class JohnIncremental(Attack):
     """
     Wordlist Attack using john cracker
     """
 
-    description = "Incremental attack using John The Ripper"
-    mname = "attack/hashes/john_incremental"
-    author = [
+    DESCRIPTION = "Incremental attack using John The Ripper"
+    MNAME = "attack/hashes/john_incremental"
+    MTYPE, MSUBTYPE, NAME = MNAME.split("/")
+    AUTHOR = [
         "glozanoa <glozanoa@uni.pe>"
     ]
-    fuldescription = (
+    FULLDESCRIPTION = (
         """
         Perform incremental attacks against hashes
         with john submiting parallel tasks in a cluster using Slurm
         """
         )
+
     def __init__(self, *, hashType=None, hashesFile=None, slurm=None):
         """
         Initialization of John incremental attack
@@ -43,16 +47,20 @@ class JohnIncremental(Attack):
         """
         attackOptions = {
             'hash_type': Argument(hashType, True, "John hash type"),
-            'hashes_file': Argument(hashFile, True, "Hashes file")
+            'hashes_file': Argument(hashesFile, True, "Hashes file")
         }
 
-        initOptions = {'mname' : nname,
-                       'author': author,
-                       'description': description,
-                       'fulldescription':  fulldescription,
-                       'atackOptions': attackOptions,
-                       'slurm': slurm
-                       }
+        if slurm is None:
+            slurm = Slurm()
+
+        initOptions = {
+            'mname' : JohnIncremental.MNAME,
+            'author': JohnIncremental.AUTHOR,
+            'description': JohnIncremental.DESCRIPTION,
+            'fulldescription':  JohnIncremental.FULLDESCRIPTION,
+            'attackOptions': attackOptions,
+            'slurm': slurm
+        }
 
         super().__init__(**initOptions)
 

@@ -58,8 +58,8 @@ class PackStatsgen(Auxiliary):
             'maxlength': maxlength,
             'simplemask': simplemask,
             'charset': charset,
-            'quiet':  quiet
-            'hiderare': hiderare,
+            'quiet':  quiet,
+            'hiderare': hiderare
         }
 
         initOptions = {

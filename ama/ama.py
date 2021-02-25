@@ -9,11 +9,11 @@ import sys
 import argparse
 
 # cmdsets imports
-from .core.cmdsets.db import (
-    Workspace,
-    Connection,
-    Loot
-)
+# from .core.cmdsets.db import (
+#     Workspace,
+#     Connection,
+#     Loot
+# )
 
 from .core.cmdsets.module import (
     Search,
@@ -36,31 +36,32 @@ from .core.banner import Banner
 from .core.cmdsets import CmdsetCategory as Category
 
 # import ama version
-from ama.base.version import get_version
+from ama.core.version import get_version
 
 # import ama availables modules
-from ama.data.modules import getAmaModules
+from ama.data.modules import amaModules
 
 class Ama(Cmd):
     """
     CLI App to interact with ama-framework
     """
-    CORE_CATEGORY = Category.CORE
-    MODULE_CATEGORY = Category.MODULE
-    DB_CATEGORY = Category.DB
-    SLURM_CATEGORY = Category.SLURM
+    # CORE_CATEGORY = Category.CORE
+    # MODULE_CATEGORY = Category.MODULE
+    # DB_CATEGORY = Category.DB
+    # SLURM_CATEGORY = Category.SLURM
 
     def __init__(self):
         super().__init__(use_ipython=True)
 
+        self.debug = True
         self.intro = Banner.random()
         self.prompt = "ama > "
         self.continuation_prompt = "> "
-        self.default_category = CORE_CATEGORY
+        self.default_category = Category.CORE
         self.db_conn = None
         self.workspace = "default"
         self.modules = amaModules # format {NAME: MODULE_CLASS, ....}
-        self.selectedModule = None # selected module with use command (class of the module)
+        self.selectedModule = None # selected module with use command (Instance of the module)
         self.filteredModules = None # filtered modules by a search (format: [(#, MODULE_CLASS), ...])
 
 

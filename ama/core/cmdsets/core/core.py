@@ -9,12 +9,16 @@
 import argparse
 
 # version import
-from ..version import get_version
+from ama.core.version import get_version
+
+#banner import
+from ama.core.banner import Banner
 
 # commandset categories
-from .category import CmdsetCategory as Category
+from ..category import CmdsetCategory as Category
 
 # cmd2 imports
+import cmd2
 from cmd2 import (
     CommandSet,
     with_default_category,
@@ -22,18 +26,20 @@ from cmd2 import (
 )
 
 #import hashes
-from ...data.hashes import (
+from ama.data.hashes import (
     jtrHashes,
     hcHashes
 )
 
 # import crackers
-from ..modules.cracker import (
+from ama.core.cracker import (
     John,
     Hashcat,
 )
 
-@with_default_category(Category.CORE)
+
+
+#@with_default_category(Category.CORE)
 class Core(CommandSet):
     """
     Core command set category
@@ -42,27 +48,35 @@ class Core(CommandSet):
     def __init__(self):
         super().__init__()
 
-    def do_exit(self):
+    def do_exit(self,  _: cmd2.Statement):
         """
         Exit ama-framework
         """
         return True
 
-    def do_version(self):
+    def do_version(self, _: cmd2.Statement):
         """
-        ama-framework version
+        Print version of ama-framework
         """
-        return get_version()
+        print(get_version())
+
+    def do_banner(self, _: cmd2.Statement):
+        """
+        Print banner of ama-framework
+        """
+
+        print(Banner.random())
 
     hashes_parser = argparse.ArgumentParser()
     hashes_parser.add_argument('-c', '--cracker', choices=['jtr', 'hc'], required=True,
                                help="Password cracker")
 
-    hashes_parser.add_argument('-s', '--sensitive',
+    hashes_parser.add_argument('-s', '--sensitive', action='store_true',
                                help="Sensitive search")
 
     hashes_parser.add_argument('pattern',
                                help="Pattern to search")
+
 
     @with_argparser(hashes_parser)
     def do_hashes(self, args):

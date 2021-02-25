@@ -46,4 +46,4 @@ class Path:
                         cmd2.Cmd.pwarning(f"No path supplied (path:None)")
 
         if not permissionCheck:
-            raise PermissionError(f"Permission Error: {**invalidPermission}")
+            raise PermissionError(f"Permission Error: {invalidPermission}")

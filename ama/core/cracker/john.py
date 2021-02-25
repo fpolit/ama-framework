@@ -78,19 +78,19 @@ class John(PasswordCracker):
         """
         Search  john's hashes types given a pattern
         """
-        if not sensitive:
-            hashPattern = re.compile(rf"\w*{pattern}\w*", re.IGNORECASE)
+        if sensitive:
+            hashPattern = re.compile(rf"[\W|\w|\.]*{pattern}[\W|\w|\.]*")
         else:
-            hashPattern = re.compile(rf"\w*{pattern}\w*")
+            hashPattern = re.compile(rf"[\W|\w|\.]*{pattern}[\W|\w|\.]*", re.IGNORECASE)
 
         filteredhashes = []
         hashId = 0
-        for hashType in John.hashes:
+        for hashType in John.HASHES:
             if hashPattern.fullmatch(hashType):
-                filteredhashes.append(hashId, hashType)
+                filteredhashes.append((hashId, hashType))
                 hashId += 1
 
-        cmd2.Cmd.poutput(tabulate(filteredhashes, headers=["#", "Name"]))
+        print(tabulate(filteredhashes, headers=["#", "Name"]))
 
 
     @staticmethod
@@ -155,7 +155,7 @@ class John(PasswordCracker):
                     parallelWork = [
                         (
                             f"srun --mpi={slurm.pmix}"
-                            f" {self..mainexec} -b"
+                            f" {self.mainexec} -b"
                         )
                     ]
 
@@ -205,7 +205,7 @@ class John(PasswordCracker):
                             parallelWork = [
                                 (
                                     f"srun --mpi={slurm.pmix}"
-                                    f" {self..mainexec} --wordlist={wordlist}"
+                                    f" {self.mainexec} --wordlist={wordlist}"
                                     f" --format={hashType} {hashesFile}"
                                 )
                             ]
@@ -281,7 +281,7 @@ class John(PasswordCracker):
                             parallelWork = [
                                 (
                                     f"srun --mpi={slurm.pmix}"
-                                    f" {self..mainexec} --incremental"
+                                    f" {self.mainexec} --incremental"
                                     f" --format={hashType} {hashesFile}"
                                 )
                             ]
@@ -438,7 +438,7 @@ with open({_masksFile}, 'r') as masks:
                             parallelWork = [
                                 (
                                     f"srun --mpi={slurm.pmix}"
-                                    f" {self..mainexec} --single"
+                                    f" {self.mainexec} --single"
                                     f" --format={hashType} {hashesFile}"
                                 )
                             ]

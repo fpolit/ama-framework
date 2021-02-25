@@ -8,6 +8,7 @@
 
 
 import argparse
+from fineprint.status import print_failure
 
 # version import
 from ...version import get_version
@@ -22,6 +23,16 @@ from cmd2 import (
     with_argparser
 )
 
+
+# modules.base import
+from ama.core.modules.base import (
+    Attack,
+    Auxiliary
+)
+
+# slurm import
+from ama.core.slurm import Slurm
+
 @with_default_category(Category.MODULE)
 class Interaction(CommandSet):
     """
@@ -35,33 +46,47 @@ class Interaction(CommandSet):
 
     use_parser = argparse.ArgumentParser()
     use_parser.add_argument('module', help="ama module")
+
+    @with_argparser(use_parser)
     def do_use(self, args):
         """
         Select a avaliable module
         """
+        selected = False
+        module = args.module
 
-        selected = False # module no selected yet
+        try:
+            module = int(module)
 
-        if isinstance(module, int): # request information about a filtered module
             for moduleId, moduleClass in self._cmd.filteredModules:
                 if moduleId == module:
                     selected = True
                     self._cmd.selectedModule = moduleClass
-                    moduleType = moduleclass.mtype
-                    moduleSubtype = moduleClass.msubtype
-                    moduleName = moduleClass.
+                    moduleType = moduleClass.MTYPE
+                    moduleSubtype = moduleClass.MSUBTYPE
+                    moduleName = moduleClass.NAME
                     #moduleType, moduleSubtype, moduleName = moduleClass.mname.split("/")
-                    self._cmd.prompt = f"ama {moduleType}({moduleSubtype}/{moduleName})> "
+                    self._cmd.prompt = f"ama {moduleType}({moduleSubtype}/{moduleName}) > "
                     break
 
-        elif isinstance(module, str):
-            for moduleClass in self._cmd.modules.values():
+        except ValueError: # module is a string
+            for moduleName, moduleClass in self._cmd.modules.items():
                 if module == moduleClass.mname:
                     selected = True
                     self._cmd.selectedModule = moduleClass
-                    moduleType, moduleSubtype, moduleName = moduleClass.mname.split("/")
-                    self._cmd.prompt = f"ama {moduleType}({moduleSubtype}/{moduleName})> "
+                    moduleType = moduleClass.MTYPE
+                    moduleSubtype = moduleClass.MSUBTYPE
+                    moduleName = moduleClass.NAME
+                    self._cmd.prompt = f"ama {moduleType}({moduleSubtype}/{moduleName}) > "
                     break
+
+
+        if not selected:
+            if isinstance(module, int):
+                print_failure(f"No module available with id:  {module}")
+            else: # if module string or other type
+                print_failure(f"No module available:  {module}")
+
 
     setv_parser = argparse.ArgumentParser()
     setv_parser.add_argument("variable", help="variable to set value")
@@ -72,28 +97,33 @@ class Interaction(CommandSet):
         """
         Set a value to a variable
         """
-        moduleClass = self._cmd.selectedModule
+        selectedModule = self._cmd.selectedModule
 
-        if moduleClass:
+        if selectedModule:
             variable = args.variable.lower()
             value = args.value
-            if moduleClass.mtype == "attack":
-                if variable in moduleClass.attack or
-                variable in moduleClass.slurm:
 
-                    self._cmd.selectedModule.attack[variable] = value
-                else:
-                    cmd2.Cmd.pwarning(f"No {variable} in {moduleClass.mname} module")
+            if selectedModule.isVariable(variable):
+                if isinstance(selectedModule, Attack):
+                    if selectedModule.isAttackVariable(variable):
+                        self.attack[variable] = value
+                    else: #variable is a slurm variable
+                        slurmOptions = self.slurm.options()
+                        slurmOptions[variable] = value
+                        self.slurm = Slurm(**slurmOptions)
 
-            elif moduleClass.mtype == "auxiliary":
-                if variable in moduleClass.auxiliary:
-                    self._cmd.selectedModule.auxiliary[variable] = value
-
-                else:
-                    cmd2.Cmd.pwarning(f"No {variable} in {moduleClass.mname} module")
+                elif isinstance(selectedModule, Auxiliary):
+                    if selectedModule.isAuxiliaryVariable(variable):
+                        self.auxiliary[variable] = value
+                    else: #variable is a slurm variable
+                        slurmOptions = self.slurm.options()
+                        slurmOptions[variable] = value
+                        self.slurm = Slurm(**slurmOptions)
+            else:
+                print_failure(f"No {variable} variable in {moduleClass.mname} module")
 
         else:
-            cmd2.Cmd.poutput("No module selected")
+            print_failure("No module selected")
 
     def do_setvg(self, args):
         """
@@ -106,7 +136,7 @@ class Interaction(CommandSet):
         Stop interaction with selected module and go back to main ama-framework console
         """
         self._cmd.selectedModule = None
-        self._cmd.prompt = "ama> "
+        self._cmd.prompt = "ama > "
 
     def do_attack(self, args):
         """

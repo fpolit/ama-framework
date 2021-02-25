@@ -19,6 +19,7 @@ from ...version import get_version
 from ..category import CmdsetCategory as Category
 
 # cmd2 imports
+import cmd2
 from cmd2 import (
     CommandSet,
     with_default_category,
@@ -39,11 +40,12 @@ class Search(CommandSet):
         super().__init__()
 
     search_parser = argparse.ArgumentParser()
-    search_parser.add_argument('-t', '--type', dest='moduleType', choices=amaModulesType,
+    search_parser.add_argument('-t', '--type', dest='moduleType', choices=amaModulesType, default=None,
                                help="Module type")
     search_parser.add_argument('pattern',
                                help='Pattern to search availables modules')
 
+    # debugged
     @with_argparser(search_parser)
     def do_search(self, args):
         """
@@ -52,12 +54,21 @@ class Search(CommandSet):
         filteredModules = []
         idModule = 0
         pattern = args.pattern
-
+        #import pdb; pdb.set_trace()
         if pattern:
-            for moduleName, moduleClass in self._cmd.modules:
-                if re.search(pattern, moduleName, flag=re.IGNORECASE):
-                    filteredModules.append((index, moduleClass))
-                    idModule += 1
+            moduleType = args.moduleType
+            if moduleType:
+                for moduleName, moduleClass in self._cmd.modules.items():
+                    if moduleType == moduleClass.MTYPE and \
+                       re.search(pattern, moduleName, flags=re.IGNORECASE):
+                        filteredModules.append((idModule, moduleClass))
+                        idModule += 1
+            else:
+                for moduleName, moduleClass in self._cmd.modules.items():
+                    if re.search(pattern, moduleName, flags=re.IGNORECASE):
+                        filteredModules.append((idModule, moduleClass))
+                        idModule += 1
+
 
         self._cmd.filteredModules = filteredModules
 
@@ -73,6 +84,7 @@ class Search(CommandSet):
         tableFM = []
 
         for idModule, moduleClass in filteredModules:
-            tableFM.append((idModule, moduleClass.mname, moduleClass.name))
+            tableFM.append((idModule, moduleClass.MNAME, moduleClass.DESCRIPTION))
 
-        cmd2.Cmd.poutput(tabulate(tableFM))
+        #cmd2.Cmd.poutput(tabulate(tableFM, headers=headerFM))
+        print(tabulate(tableFM, headers=headerFM))

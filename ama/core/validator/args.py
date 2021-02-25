@@ -33,10 +33,11 @@ class Args:
         someNone = False
         noneArgs = []
 
-        for arg in args:
+        names = argname(*args)
+        for name, arg in zip(names, args):
             if arg is None:
                 someNone = True
-                cmd2.Cmd.pwarning(f"{nameof(arg) variable is None}")
+                cmd2.Cmd.pwarning(f"{name} variable is None")
                 noneArgs.append(arg)
 
         if someNone:

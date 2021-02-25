@@ -14,18 +14,21 @@ from ama.core.modules.base import (
 # cracker imports
 from ama.core.cracker import John
 
+# slurm import
+from ama.core.slurm import Slurm
 
 class JohnWordlist(Attack):
     """
     Wordlist Attack using john cracker
     """
 
-    description = "Wordlist attack using John The Ripper"
-    mname = "attack/hashes/john_wordlist"
-    author = [
+    DESCRIPTION = "Wordlist attack using John The Ripper"
+    MNAME = "attack/hashes/john_wordlist"
+    MTYPE, MSUBTYPE, NAME = MNAME.split("/")
+    AUTHOR = [
         "glozanoa <glozanoa@uni.pe>"
     ]
-    fuldescription = (
+    FULLDESCRIPTION = (
         """
         Perform wordlists attacks against hashes
         with john submiting parallel tasks in a cluster using Slurm
@@ -33,8 +36,8 @@ class JohnWordlist(Attack):
         )
 
     def __init__(self, *,
-                 hashType: str =None, hashesFile: str =None,
-                 worklist: str =None, slurm=None):
+                 hashType: str = None, hashesFile: str = None,
+                 wordlist: str = None, slurm=None):
         """
         Initialization of John  wordlist attack
 
@@ -50,12 +53,15 @@ class JohnWordlist(Attack):
             'hashes_file': Argument(hashesFile, True, "hashes file")
         }
 
+        if slurm is None:
+            slurm = Slurm()
+
         initOptions = {
-            'mname' : nname,
-            'author': author,
-            'description': description,
-            'fulldescription':  fulldescription,
-            'atackOptions': attackOptions,
+            'mname' : JohnWordlist.MNAME,
+            'author': JohnWordlist.AUTHOR,
+            'description': JohnWordlist.DESCRIPTION,
+            'fulldescription':  JohnWordlist.FULLDESCRIPTION,
+            'attackOptions': attackOptions,
             'slurm': slurm
         }
 

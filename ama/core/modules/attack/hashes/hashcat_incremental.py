@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 #
 # incremental attack using hashcat
-# NOTE: rewite module (copied from john_wordlist module)
 #
 # date: Feb 21 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 # base  imports
-from ama.core.modules.base import Attack
+from ama.core.modules.base import (
+    Attack,
+    Argument
+)
 
 # cracker imports
 from ama.core.cracker import Hashcat
@@ -22,37 +24,42 @@ class HashcatIncremental(Attack):
     """
 
 
-    name = "Wordlist attack using John The Ripper"
-    mname = "attack/hashes/john_wordlist"
-    author = [
+    DESCRIPTION = "Incremental attack using Hashcat"
+    MNAME = "attack/hashes/hashcat_incremental"
+    MTYPE, MSUBTYPE, NAME = MNAME.split("/")
+    AUTHOR = [
         "glozanoa <glozanoa@uni.pe>"
     ]
-    description = (
+    FULLDESCRIPTION = (
         """
-        Perform wordlists attacks against hashes
-        with john submiting parallel tasks in a cluster using Slurm
+        Perform incremental attacks against hashes
+        with hashcat submiting parallel tasks in a cluster using Slurm
         """
     )
 
-    def __init__(self, worklist, hashType, hashFile, slurm):
+    def __init__(self, *,
+                 hashType:int = None, hashFile:str = None, slurm=None):
         """
-        REWRITE
+        Initialization of incremental attack using Hashcat
         """
 
         attackOptions = {
-            'wordlist': wordlist,
-            'hash_type': hashType,
-            'hash_file': hashFile
+            'hash_type': Argument(hashType, True, "Hashcat hash type"),
+            'hashes_file': Argument(hashesFile, True, "Hashes file"),
         }
 
-        initOptions = {'name': name,
-                       'mname' : nname,
-                       'author': author,
-                       'description': description,
-                       'slurm': slurm,
-                       'atackOptions': attackOptions
-                       }
 
+        if slurm is None:
+            slurm = Slurm()
+
+        initOptions = {
+            'mname' : HashcatIncremental.MNAME,
+            'author': HashcatIncremental.AUTHOR,
+            'description': HashcatIncremental.DESCRIPTION,
+            'fulldescription':  HashcatIncremental.FULLDESCRIPTION,
+            'attackOptions': attackOptions,
+            'slurm': slurm
+        }
         super().__init__(**initOptions)
 
     def attack(self):

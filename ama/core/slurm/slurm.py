@@ -15,12 +15,12 @@ class Slurm:
     Manage sbatch parameters to submit parallel jobs
     """
 
-    def __init__(self, *, array=None, account=None, dependecy=None, chdir=None, error=None,
-                 jobName="hattack", cluster=None, distribution="block", mailType=None, mailUser=None,
+    def __init__(self, *, array=None, account=None, dependency=None, chdir=None, error=None,
+                 jobName="attack", cluster=None, distribution="block", mailType=None, mailUser=None,
                  mem=None, memPerCpu=None, nodes=1, ntasks=1, nice=None, output=None, openMode="truncate",
                  partition=None, reservation=None, time=None, testOnly=False, verbose=False,
                  nodelist=None, wait=False, exclude=None, cpusPerTask=1,
-                 slurmScript="hattack.slurm"):
+                 slurmScript="attack.slurm"):
 
         # slurm parameters (core) - shortcut - arguments
         self.array = Argument(array, False, "Index of array job (e.g. 0-15 or 0,6,16-32)") # -a <e.x: 0-15 or 0,6,16-32>
@@ -35,20 +35,20 @@ class Slurm:
         self.mailUser = Argument(mailUser, False, "User email") # NONE <user email>
         self.mem = Argument(mem, False, "Memory per node (<size[units]>)") # NONE <size[units]>, units = [K|M|G|T] (memory per node)
         self.memPerCpu = Argument(memPerCpu, False, "Minimum memory required per allocated CPU (<size[units]>)") # NONE <size[units]>
-        self.cpusPerTask = cpusPerTask # -c <ncpus>
+        self.cpusPerTask = Argument(cpusPerTask, True, "Number of processors per task") # -c <ncpus>
         self.nodes = Argument(nodes, True, "(<minnodes[-maxnodes]>)") # -N <minnodes[-maxnodes]>
-        self.ntasks = ntasks # -n <number of tasks>
+        self.ntasks = Argument(ntasks, True, "Number of tasks") # -n <number of tasks>
         self.nice = Argument(nice, False, "Run the job with an adjusted scheduling") # NONE <adjustment>, adjustment is between +- 2147483645
         self.output = Argument(output, True, "Output file name (default: slurm-%j.out)") # -o <path>
         self.openMode = Argument(openMode, True, "Output open mode (<append|truncate>)") # NONE <append|truncate>
         self.partition = Argument(partition, True, "Partition to submit job") # -p <partition>
-        self.reservation = reservation # NONE <reservation>
+        self.reservation = Argument(reservation, False, "Resource reservation name") # NONE <reservation>
         self.time = Argument(time, False, "Limit of time (format: DD-HH:MM:SS)") # -t <time>
         # time formats: MM, MM:SS, HH:MM:SS, DD-HH, DD-HH:MM, DD-HH:MM:SS
         # DD:days, HH:hours, MM: minutes, SS:secconds
         self.testOnly = Argument(testOnly, True, "Validate the batch script and return an estimate of when a job would be scheduled to run. No job is actually submitted") # NONE <NO VALUE>,if testOnly=True enable this flag otherwise omit
         self.verbose = Argument(verbose, False, "Increase the verbosity of sbatch's informational messages") # -v <NO VALUE>, if verbose=True enable this flag otherwise omit
-        self.nodelist = nodelist # -w <nodelist>, e.x. nodelist = hw[00-04,06,08]
+        self.nodelist = Argument(nodelist, False, "Nodelist") # -w <nodelist>, e.x. nodelist = hw[00-04,06,08]
         self.wait = Argument(wait, False, "Do not exit until the submitted job terminates") # -W <NO VALUE>, if wait=True enable this flag otherwise omit
         self.exclude = Argument(exclude, False, "Do not exit until the submitted job terminates") # -x <nodelist>
 
@@ -64,32 +64,32 @@ class Slurm:
         return only core parameters (slurm)
         """
 
-        core = {'array': self.array,
-                 'account': self.account,
-                 'dependency': self.dependecy,
-                 'chdir': self.chdir,
-                 'error': self.error,
-                 'jobName': self.jobName,
-                 'cluster': self.cluster,
-                 'distribution': self.distribution,
-                 'mail-type': self.mailType,
-                 'mail-user': self.mailUser,
-                 'mem': self.mem,
-                 'mem-per-cpu': self.memPerCpu,
-                 'cpus-per-task': self.cpusPerTask,
-                 'nodes': self.nodes,
-                 'ntasks': self.ntasks,
-                 'nice': self.nice,
-                 'output': self.output,
-                 'open-mode': self.openMode,
-                 'partition': self.partition,
-                 'reservation': self.reservation,
-                 'time': self.time,
-                 'test-only': self.testOnly,
-                 'verbose': self.verbose,
-                 'nodelist': self.nodelist,
-                 'wait': self.wait,
-                 'exclude':self.exclude}
+        core = {'array': self.array.value,
+                 'account': self.account.value,
+                 'dependency': self.dependency.value,
+                 'chdir': self.chdir.value,
+                 'error': self.error.value,
+                 'jobName': self.jobName.value,
+                 'cluster': self.cluster.value,
+                 'distribution': self.distribution.value,
+                 'mail-type': self.mailType.value,
+                 'mail-user': self.mailUser.value,
+                 'mem': self.mem.value,
+                 'mem-per-cpu': self.memPerCpu.value,
+                 'cpus-per-task': self.cpusPerTask.value,
+                 'nodes': self.nodes.value,
+                 'ntasks': self.ntasks.value,
+                 'nice': self.nice.value,
+                 'output': self.output.value,
+                 'open-mode': self.openMode.value,
+                 'partition': self.partition.value,
+                 'reservation': self.reservation.value,
+                 'time': self.time.value,
+                 'test-only': self.testOnly.value,
+                 'verbose': self.verbose.value,
+                 'nodelist': self.nodelist.value,
+                 'wait': self.wait.value,
+                 'exclude':self.exclude.value}
 
         return core
 
@@ -103,6 +103,36 @@ class Slurm:
         return [core, extra]
 
 
+    def options(self):
+        core = {'array': self.array,
+                'account': self.account,
+                'dependency': self.dependency,
+                'chdir': self.chdir,
+                'error': self.error,
+                'job-name': self.jobName,
+                'cluster': self.cluster,
+                'distribution': self.distribution,
+                'mail-type': self.mailType,
+                'mail-user': self.mailUser,
+                'mem': self.mem,
+                'mem-per-cpu': self.memPerCpu,
+                'cpus-per-task': self.cpusPerTask,
+                'nodes': self.nodes,
+                'ntasks': self.ntasks,
+                'nice': self.nice,
+                'output': self.output,
+                'open-mode': self.openMode,
+                'partition': self.partition,
+                'reservation': self.reservation,
+                'time': self.time,
+                'test-only': self.testOnly,
+                'verbose': self.verbose,
+                'nodelist': self.nodelist,
+                'wait': self.wait,
+                'exclude':self.exclude}
+
+        extra = {'slurm-script': self.slurmScript}
+        return {**core, **extra}
 
     @staticmethod
     def parserJob(core):

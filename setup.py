@@ -7,7 +7,7 @@
 
 
 from setuptools import setup, find_packages
-from ama.base.version import get_version
+from ama.core.version import get_version
 
 VERSION = get_version()
 

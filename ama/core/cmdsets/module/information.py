@@ -24,6 +24,10 @@ from cmd2 import (
     with_argparser
 )
 
+from fineprint.status import (
+    print_failure
+)
+
 @with_default_category(Category.MODULE)
 class Information(CommandSet):
     """
@@ -35,58 +39,73 @@ class Information(CommandSet):
         super().__init__()
 
     info_parser = argparse.ArgumentParser()
-    info_parser.add_argument('module', nargs='?', default=None
+    info_parser.add_argument('module', nargs='?', default=None,
                              help="ama module")
     @with_argparser(info_parser)
     def do_info(self, args):
         """
         Supplied information about a module
         """
+        #import pdb; pdb.set_trace()
+        module = args.module
 
-        if isinstance(module, int): # request information about a filtered module
+        try:
+            module = int(module)
             for moduleId, moduleClass in self._cmd.filteredModules:
                 if moduleId == module:
-                    cmd2.Cmd.poutput(moduleClass.infoMsg())
+                    moduleInstance = moduleClass()
+                    print(moduleInstance.infoMsg())
+                    #cmd2.Cmd.poutput(moduleInstance.infoMsg())
                     break
 
-        elif isinstance(module, str):
+        except ValueError: # module is a string
             for moduleClass in self._cmd.modules.values():
-                if module == moduleClass.mname:
-                    cmd2.Cmd.poutput(moduleClass.infoMsg())
+                if module == moduleClass.MNAME:
+                    moduleInstance = moduleClass()
+                    print(moduleInstance.infoMsg())
+                    #cmd2.Cmd.poutput(moduleInstance.infoMsg())
                     break
-
-        elif module is None:
-            if self._cmd.selectedModule is not None:
-                cmd2.Cmd.poutput(self._cmd.selectedModule.infoMsg())
-
-        else:
-            cmd2.Cmd.pwarning("No module selected")
-
+        except TypeError: # module is None
+            selectedModule = self._cmd.selectedModule
+            if selectedModule:
+                print(selectedModule.infoMsg())
+                #cmd2.Cmd.poutput(moduleInstance.infoMsg())
+            else:
+                print_failure("No module selected")
 
 
     options_parser = argparse.ArgumentParser()
-    options_parser.add_argument('module', nargs='?', default=None
+    options_parser.add_argument('module', nargs='?', default=None,
                              help="ama module")
+
+    @with_argparser(options_parser)
     def do_options(self, args):
         """
         Show availables options of a module
         """
 
-        if isinstance(module, int): # request information about a filtered module
+        module = args.module
+
+        try:
+            module = int(module)
             for moduleId, moduleClass in self._cmd.filteredModules:
                 if moduleId == module:
-                    cmd2.Cmd.poutput(moduleClass.optionsMsg())
+                    moduleInstance = moduleClass()
+                    print(moduleInstance.optionsMsg())
+                    #cmd2.Cmd.poutput(moduleInstance.infoMsg())
                     break
 
-        elif isinstance(module, str):
+        except ValueError: # module is a string
             for moduleClass in self._cmd.modules.values():
-                if module == moduleClass.mname:
-                    cmd2.Cmd.poutput(moduleClass.optionsMsg())
+                if module == moduleClass.MNAME:
+                    moduleInstance = moduleClass()
+                    print(moduleInstance.optionsMsg())
+                    #cmd2.Cmd.poutput(moduleInstance.infoMsg())
                     break
-
-        elif module is None:
-            if self._cmd.selectedModule is not None:
-                cmd2.Cmd.poutput(self._cmd.selectedModule.optionsMsg())
-
-        else:
-            cmd2.Cmd.pwarning("No module selected")
+        except TypeError: # module is None
+            selectedModule = self._cmd.selectedModule
+            if selectedModule:
+                print(selectedModule.optionsMsg())
+                #cmd2.Cmd.poutput(moduleInstance.infoMsg())
+            else:
+                print_failure("No module selected")

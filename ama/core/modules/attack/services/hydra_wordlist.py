@@ -66,7 +66,7 @@ class HydraWordlist(Attack):
             'port': port,
             'ip4': ip4,
             'output': output,
-            'output_format' outputFormat,
+            'output_format': outputFormat,
             'verbose': verbose,
             'stop_in_sucess': stopInSucess,
             'stop_in_sucess_per_target': stopInSucessPerTarget,

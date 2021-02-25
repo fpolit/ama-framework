@@ -5,6 +5,8 @@
 # date: Feb 20 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
+from tabulate import tabulate
+
 from typing import (
     List,
     Any
@@ -17,26 +19,22 @@ from cmd2.table_creator import (
 )
 
 
+
 class Attack:
     """
     Base class to build attack modules
     """
     def __init__(self, *,
                  mname: str, author: List[str],
-                 description: str, fulldesciption: str,
+                 description: str, fulldescription: str,
                  attackOptions: dict, slurm):
 
         self.mname = mname
-        mtype, msubtype, attackName = mname.split("/")
-        self.mtype = mtype
-        self.msubtype = msubtype
-        self.name = attackName
         self.author = author
         self.description = description
-        self.fulldesciption = fulldesciption
+        self.fulldesciption = fulldescription
         self.attack = attackOptions
         self.slurm = slurm
-
 
     def attack(self, *args, **kwargs):
         """
@@ -50,18 +48,19 @@ class Attack:
         """
         infoMsg = \
             f"""
-                Name : {self.description}
-              Module : {self.mname}
-             License : GPLv3
+   Name : {self.description}
+ Module : {self.mname}
+License : GPLv3
 
-            Author:
-              glozanoa <glozanoa@uni.pe>
+  Author:
             """
+        for author in self.author:
+            infoMsg += f"{author}\n"
 
         infoMsg += self.optionsMsg()
 
         # description module
-        infoMsg += f"\n\n Description:\n{self.fulldescription}"
+        infoMsg += f"\n\nDescription:\n{self.fulldesciption}"
 
         return infoMsg
 
@@ -71,19 +70,46 @@ class Attack:
         Show options available to set up
         """
 
-        optionsMsg = f"Module options (self.mname):"
+        optionsMsg =(
+            f"""
+            Module: {self.mname}
+            """
+         )
 
         optionHeader = ["Name", "Current Setting", "Required", "Description"]
         # attack options
-        formattedAttackOpt = [[nameOpt.upper(), *infoOpt] for nameOpt, infoOpt in self.attack.items()]
-        formattedAttackOpt = tabulate(formattedAttackOpt)
+        formattedAttackOpt = [[name.upper(), option.value, option.required, option.description]
+                              for name, option in self.attack.items()]
+        formattedAttackOpt = tabulate(formattedAttackOpt, headers=optionHeader)
 
-        optionsMsg += f"\n\nAttack Options:\n{formattedattackopt}"
+        optionsMsg += f"\nModule Options:\n{formattedAttackOpt}"
 
         # slurm options
-        formattedSlurmOpt = [[nameOpt.upper(), *infoOpt] for nameOpt, infoOpt in self.slurm.items()]
-        formattedSlurmOpt = tabulate(formattedSlurmOpt)
+        slurmOptions = self.slurm.options()
+        formattedSlurmOpt = [[name.upper(), option.value, option.required, option.description]
+                             for name, option in slurmOptions.items()]
+        formattedSlurmOpt = tabulate(formattedSlurmOpt, headers=optionHeader)
 
-        optionsMsg += f"\n\nSlurm Options:\n{formattedslurmopt}"
+        optionsMsg += f"\n\nSlurm Options:\n{formattedSlurmOpt}"
 
         return optionsMsg
+
+
+    def isVariable(self, variable):
+        if variable in self.attack or \
+           variable in self.slurm.options():
+            return True
+        else:
+            return False
+
+    def isAttackVariable(self, variable):
+        if variable in self.attack:
+            return True
+        else:
+            return False
+
+    def isSlurmVariable(self, variable):
+        if variable in self.slurm.options():
+            return True
+        else:
+            return False

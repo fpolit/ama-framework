@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 #
 # combination attack using hashcat
-# NOTE: rewite module (copied from john_wordlist module)
 #
 # date: Feb 21 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
+
+from typing import List
 
 # base  imports
 from ama.core.modules.base import (
@@ -24,41 +25,49 @@ class HashcatCombination(Attack):
     Combination Attack using hashcat cracker
     """
 
-    name = "Wordlist attack using John The Ripper"
-    mname = "attack/hashes/john_wordlist"
-    author = [
+
+    DESCRIPTION = "Combination attack using Hashcat"
+    MNAME = "attack/hashes/hashcat_combination"
+    MTYPE, MSUBTYPE, NAME = MNAME.split("/")
+    AUTHOR = [
         "glozanoa <glozanoa@uni.pe>"
     ]
-    description = (
+    FULLDESCRIPTION = (
         """
-        Perform wordlists attacks against hashes
-        with john submiting parallel tasks in a cluster using Slurm
+        Perform combination attacks against hashes
+        with hashcat submiting parallel tasks in a cluster using Slurm
         """
     )
 
-    def __init__(self, worklists, hashType, hashFile, slurm):
+    def __init__(self, *,
+                 worklists: List[str] = None, hashType:int = None,
+                 hashesFile: str = None, slurm=None):
         """
-        REWRITE
+        Initialization of combination attack using Hashcat
         """
 
         attackOptions = {
             'wordlists': Argument(wordlists, True, "Wordlists to combine"),
-            'hash_type': Argument(hashType, True, "John hash type"),
-            'hash_file': Argument(hashFile, True, "Hash file")
+            'hash_type': Argument(hashType, True, "Hashcat hash type"),
+            'hashes_file': Argument(hashFile, True, "Hashes file")
         }
 
-        initOptions = {'name': name,
-                       'mname' : nname,
-                       'author': author,
-                       'description': description,
-                       'slurm': slurm,
-                       'atackOptions': attackOptions
-                       }
 
+        if slurm is None:
+            slurm = Slurm()
+
+        initOptions = {
+            'mname' : HashcatCombination.MNAME,
+            'author': HashcatCombination.AUTHOR,
+            'description': HashcatCombination.DESCRIPTION,
+            'fulldescription':  HashcatCombination.FULLDESCRIPTION,
+            'attackOptions': attackOptions,
+            'slurm': slurm
+        }
         super().__init__(**initOptions)
 
     def attack(self):
         """
-        WRITE
+        Combination attack using Hashcat
         """
         pass

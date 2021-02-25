@@ -6,11 +6,33 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import random
+from ama.data.modules import (
+    attackModules,
+    auxiliaryWordlistModules,
+    auxiliaryHashesModules,
+    auxiliaryCombinatortModules,
+    auxiliaryAnalysisModules
+)
 
-class Banners:
+from ama.core.version import get_version
+
+
+class Banner:
     """
-    Ama banners
+    Ama banner
     """
+    AMA_INFO = "A specialized environment for the password cracking process"
+    AMA_MODULES_INFO = (
+        f"""
+            Attack Modules: {len(attackModules)}
+            Auxliary:
+                Analysis Modules   : {len(auxiliaryWordlistModules)}
+                Hashes Modules     : {len(auxiliaryHashesModules)}
+                Combinator Modules : {len(auxiliaryCombinatortModules)}
+                Analysis Modules   : {len(auxiliaryAnalysisModules)}
+        """
+    )
+    AMA_VERSION = get_version()
     def __init__(self):
         self.banners = (
             r"""
@@ -33,5 +55,14 @@ class Banners:
         """
         return a random banner of ama
         """
-        amaBanner = Banners()
-        return random.choice(amaBanner.banners)
+        amaBanner = Banner()
+        randomBanner = random.choice(amaBanner.banners)
+
+        return (
+        f"""
+    {Banner.AMA_INFO}
+        {randomBanner}
+        VERSION: {Banner.AMA_VERSION}
+        {Banner.AMA_MODULES_INFO}
+        """
+        )

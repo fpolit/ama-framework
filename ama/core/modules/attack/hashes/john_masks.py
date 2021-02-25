@@ -14,6 +14,8 @@ from ama.core.modules.base import (
 # cracker imports
 from ama.core.cracker import John
 
+# slurm import
+from ama.core.slurm import Slurm
 
 
 class JohnMasks(Attack):
@@ -21,12 +23,13 @@ class JohnMasks(Attack):
     Mask Attack using john cracker
     """
 
-    description = "Masks attack using John The Ripper"
-    mname = "attack/hashes/john_masks"
-    author = [
+    DESCRIPTION = "Masks attack using John The Ripper"
+    MNAME = "attack/hashes/john_masks"
+    MTYPE, MSUBTYPE, NAME = MNAME.split("/")
+    AUTHOR = [
         "glozanoa <glozanoa@uni.pe>"
     ]
-    fuldescription = (
+    FULLDESCRIPTION = (
         """
         Perform mask attacks against hashes
         with john submiting parallel tasks in a cluster using Slurm
@@ -47,13 +50,17 @@ class JohnMasks(Attack):
             'masks_file': Argument(masksFile, True, "Masks file")
         }
 
-        initOptions = {'mname' : nname,
-                       'author': author,
-                       'description': description,
-                       'fulldescription':  fulldescription,
-                       'atackOptions': attackOptions,
-                       'slurm': slurm
-                       }
+        if slurm is None:
+            slurm = Slurm()
+
+        initOptions = {
+            'mname' : JohnMasks.MNAME,
+            'author': JohnMasks.AUTHOR,
+            'description': JohnMasks.DESCRIPTION,
+            'fulldescription':  JohnMasks.FULLDESCRIPTION,
+            'attackOptions': attackOptions,
+            'slurm': slurm
+        }
 
         super().__init__(**initOptions)
 
