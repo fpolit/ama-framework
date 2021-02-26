@@ -9,6 +9,12 @@
 import argparse
 from argparse import RawTextHelpFormatter
 
+# fineprint import
+from fineprint.status import (
+    print_status,
+    print_failure
+)
+
 # import db connection modules
 from configparser import ConfigParser
 from getpass import getpass
@@ -68,7 +74,8 @@ class Connection(CommandSet):
                 del self._cmd.db_creds['password']
 
         except (Exception, psycopg2.DatabaseError) as error:
-            cmd2.Cmd.pexcept(error)
+            #cmd2.Cmd.pexcept(error)
+            print_failure(error)
 
 
     def do_db_disconnect(self, args):
@@ -82,7 +89,8 @@ class Connection(CommandSet):
             del self._cmd.db_creds
 
         except (Exception, psycopg2.DatabaseError) as error:
-            cmd2.Cmd.pexcept(error)
+            #cmd2.Cmd.pexcept(error)
+            print_failure(error)
 
     def do_db_status(self, args):
         """
@@ -92,7 +100,8 @@ class Connection(CommandSet):
             dbName = self._cmd.dbName
             cmd2.Cmd.poutput(f"Connected to {dbName} database")
         else:
-            cmd2.Cmd.poutput(f"Database not connected")
+            #cmd2.Cmd.poutput(f"Database not connected")
+            print_failure(f"Database not connected")
 
     @staticmethod
     def dbCreds(dbconfig, section='postgresql'):
@@ -102,13 +111,14 @@ class Connection(CommandSet):
         db_creds = {}
 
         if db_parser.has_section(section):
-            params = parser.items(section)
+            params = db_parser.items(section)
             for key, value in params:
                 db_creds[key] = value
             password = getpass("Password: ")
             db_creds['password'] = password
 
         else:
-            cmd2.Cmd.pwarning(f"Section {section} not found in {dbconfig} file")
+            #cmd2.Cmd.pwarning(f"Section {section} not found in {dbconfig} file")
+            print_failure(f"Section {section} not found in {dbconfig} file")
 
         return db_creds

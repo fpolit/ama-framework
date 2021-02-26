@@ -10,7 +10,10 @@ import cmd2
 
 
 # module.base imports
-from ama.core.modules.base import Auxiliary
+from ama.core.modules.base import (
+    Auxiliary,
+    Argument
+)
 
 # pack import
 from ama.core.auxiliary.analysis.pack import (

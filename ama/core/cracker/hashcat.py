@@ -18,7 +18,7 @@ import cmd2
 
 # cracker module imports
 from .cracker import PasswordCracker
-
+from .crackedHash import CrackedHash
 # cracker exceptions imports
 from .crackerException import (
     InvalidParallelJobError,
@@ -59,7 +59,6 @@ class Hashcat(PasswordCracker):
         if not (hashType in Hashcat.HASHES):
             raise InvalidHashTypeError(Hashcat, hashType)
 
-
     @staticmethod
     def searchHash(pattern, *, sensitive=False):
         """
@@ -78,6 +77,70 @@ class Hashcat(PasswordCracker):
                 posibleHashes.append((hashId, hashName, description))
 
         print(tabulate(posibleHashes, headers=["#", "Name", "Description"]))
+
+
+    @staticmethod
+    def hashStatus(queryHash, potfile=None):
+        """
+        Check the status (broken by John or not) of query hash
+
+        Return:
+        if queryHash is in potfile then [HASHTYPE, HASH, PASSWORD] list is returned
+        otherwise None is returned
+        """
+        #import pdb;pdb.set_trace()
+
+        if potfile is None:
+            HOME = os.path.expanduser("~")
+            potfile = os.path.join(HOME, ".hashcat/hashcat.potfile")
+
+        try:
+            permission = [os.R_OK]
+            Path.access(permission, potfile)
+
+            crackedPattern = re.compile(rf"({queryHash}):(\W*|\w*|.*)", re.DOTALL)
+
+            with open(potfile, 'r') as potFile:
+                while   crackedHash := potFile.readline().rstrip():
+                    if crackedHashPot := crackedPattern.fullmatch(crackedHash):
+                        hashPot = crackedHashPot.groups()
+                        return CrackedHash(crackedHash = hashPot[0],
+                                           password = hashPot[1],
+                                           cracker = Hashcat)
+
+            return None
+
+
+        except Exception as error:
+            cmd2.Cmd.pexcept(error)
+
+    @staticmethod
+    def hashesFileStatus(queryHashesFile, potfile=None):
+        """
+        Check the status (broken by Hashcat or not) of hashes in queryHashesFile
+        """
+        hashesStatus = {'cracked': [], "uncracked": []}
+
+        if potfile is None:
+            HOME = os.path.expanduser("~")
+            potfile = os.path.join(HOME, ".hashcat/hashcat.pot")
+
+        try:
+            permission = [os.R_OK]
+            Path.access(permission, potfile, queryHashesFile)
+
+
+            with open(queryHashesFile, 'r') as hashesFile:
+                while queryHash := hashesFile.readline().rsplit():
+                    if crackerHash := John.hashStatus(queryHash, potfile):
+                        hashesStatus['cracked'].append(crackerHash)
+                    else:
+                        hashesStatus['uncracked'].append([queryHash])
+
+            return hashesStatus
+
+        except Exception as error:
+            cmd2.Cmd.pexcept(error)
 
 
     def benchmark(self, slurm=None):

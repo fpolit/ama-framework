@@ -34,7 +34,7 @@ from ..category import CmdsetCategory as Category
 import psycopg2
 
 # cracker imports
-from ...cracker import PasswordCracker
+#from ama.core.cracker.cracker import PasswordCracker
 
 
 @with_default_category(Category.DB)
@@ -62,14 +62,14 @@ class Loot(CommandSet):
 
     hashes_parser = cmd2.Cmd2ArgumentParser()
     hashes_parser.add_argument('-cr', '--cracker', type=str, default=None,
-                                 choices=PasswordCracker.hashCrackers, help="Hash Cracker")
+                                 choices=["jtr", "hc"], help="Hash Cracker")
     hashes_parser.add_argument('-m', dest='hashType', default=None,
                                help="hash type")
 
     hashes_parser.add_argument('-c', '--columns' , default=None,
                                help="hash type")
 
-    @cmd2.as_subcommand_to('cut', 'hashes', hashes_parser)
+    @cmd2.as_subcommand_to('loot', 'hashes', hashes_parser)
     def loot_hashes(self, args):
         """
         Show loot of cracked hashes

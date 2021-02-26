@@ -8,7 +8,10 @@
 
 
 import argparse
-from fineprint.status import print_failure
+from fineprint.status import (
+    print_failure,
+    print_status
+)
 
 # version import
 from ...version import get_version
@@ -61,7 +64,7 @@ class Interaction(CommandSet):
             for moduleId, moduleClass in self._cmd.filteredModules:
                 if moduleId == module:
                     selected = True
-                    self._cmd.selectedModule = moduleClass
+                    self._cmd.selectedModule = moduleClass()
                     moduleType = moduleClass.MTYPE
                     moduleSubtype = moduleClass.MSUBTYPE
                     moduleName = moduleClass.NAME
@@ -71,9 +74,9 @@ class Interaction(CommandSet):
 
         except ValueError: # module is a string
             for moduleName, moduleClass in self._cmd.modules.items():
-                if module == moduleClass.mname:
+                if module == moduleClass.MNAME:
                     selected = True
-                    self._cmd.selectedModule = moduleClass
+                    self._cmd.selectedModule = moduleClass()
                     moduleType = moduleClass.MTYPE
                     moduleSubtype = moduleClass.MSUBTYPE
                     moduleName = moduleClass.NAME
@@ -97,6 +100,8 @@ class Interaction(CommandSet):
         """
         Set a value to a variable
         """
+        #import pdb; pdb.set_trace()
+
         selectedModule = self._cmd.selectedModule
 
         if selectedModule:
@@ -106,30 +111,32 @@ class Interaction(CommandSet):
             if selectedModule.isVariable(variable):
                 if isinstance(selectedModule, Attack):
                     if selectedModule.isAttackVariable(variable):
-                        self.attack[variable] = value
+                        selectedModule.attack[variable].value = value
                     else: #variable is a slurm variable
-                        slurmOptions = self.slurm.options()
-                        slurmOptions[variable] = value
-                        self.slurm = Slurm(**slurmOptions)
+                        slurmOptions = selectedModule.slurm.options()
+                        slurmOptions[variable].value = value
+                        selectedModule.slurm = Slurm(**slurmOptions)
 
                 elif isinstance(selectedModule, Auxiliary):
                     if selectedModule.isAuxiliaryVariable(variable):
-                        self.auxiliary[variable] = value
+                        selectedModule.auxiliary[variable].value = value
                     else: #variable is a slurm variable
-                        slurmOptions = self.slurm.options()
-                        slurmOptions[variable] = value
-                        self.slurm = Slurm(**slurmOptions)
+                        slurmOptions = selectedModule.slurm.options()
+                        slurmOptions[variable].value = value
+                        selectedModule.slurm = Slurm(**slurmOptions)
+
+                self._cmd.selectedModule = selectedModule
             else:
-                print_failure(f"No {variable} variable in {moduleClass.mname} module")
+                print_failure(f"No {variable.upper()} variable in {selectedModule.mname} module")
 
         else:
             print_failure("No module selected")
 
-    def do_setvg(self, args):
-        """
-        Set a value to a variable globally
-        """
-        pass
+    # def do_setvg(self, args):
+    #     """
+    #     Set a value to a variable globally
+    #     """
+    #     pass
 
     def do_back(self, args):
         """
@@ -143,7 +150,7 @@ class Interaction(CommandSet):
         Perform a attack with the selected module
         """
         attackModule = self._cmd.selectedModule
-        cmd2.Cmd.poutput(f"Running {attackModule.mname} module")
+        print_status(f"Running {attackModule.mname} module")
         attackModule.attack()
 
     def do_run(self, args):
@@ -151,5 +158,5 @@ class Interaction(CommandSet):
         Run the selected auxiliary module
         """
         auxiliaryModule = self._cmd.selectedModule
-        cmd2.Cmd.poutput(f"Running {auxiliaryModule.mname} module")
+        print_status(f"Running {auxiliaryModule.mname} module")
         auxiliaryModule.run()

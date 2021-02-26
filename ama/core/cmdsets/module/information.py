@@ -49,29 +49,42 @@ class Information(CommandSet):
         #import pdb; pdb.set_trace()
         module = args.module
 
-        try:
-            module = int(module)
-            for moduleId, moduleClass in self._cmd.filteredModules:
-                if moduleId == module:
-                    moduleInstance = moduleClass()
-                    print(moduleInstance.infoMsg())
-                    #cmd2.Cmd.poutput(moduleInstance.infoMsg())
-                    break
-
-        except ValueError: # module is a string
-            for moduleClass in self._cmd.modules.values():
-                if module == moduleClass.MNAME:
-                    moduleInstance = moduleClass()
-                    print(moduleInstance.infoMsg())
-                    #cmd2.Cmd.poutput(moduleInstance.infoMsg())
-                    break
-        except TypeError: # module is None
+        if module is None:
             selectedModule = self._cmd.selectedModule
             if selectedModule:
                 print(selectedModule.infoMsg())
                 #cmd2.Cmd.poutput(moduleInstance.infoMsg())
             else:
                 print_failure("No module selected")
+
+        else:
+            try:
+                module = int(module)
+                for moduleId, moduleClass in self._cmd.filteredModules:
+                    if moduleId == module:
+                        moduleInstance = moduleClass()
+                        print(moduleInstance.infoMsg())
+                        #cmd2.Cmd.poutput(moduleInstance.infoMsg())
+                        break
+
+            except ValueError: # module is a string
+                for moduleClass in self._cmd.modules.values():
+                    if module == moduleClass.MNAME:
+                        moduleInstance = moduleClass()
+                        print(moduleInstance.infoMsg())
+                        #cmd2.Cmd.poutput(moduleInstance.infoMsg())
+                        break
+
+
+    # def do_modules(self, _: cmd2.Statement):
+    #     """
+    #     show all the availables ama modules
+    #     """
+    #     amaModulesTable = []
+
+
+    #     for moduleName, moduleClass in self._cmd.modules:
+    #         amaModulesTable.appen([moduleName, ])
 
 
     options_parser = argparse.ArgumentParser()
@@ -86,26 +99,28 @@ class Information(CommandSet):
 
         module = args.module
 
-        try:
-            module = int(module)
-            for moduleId, moduleClass in self._cmd.filteredModules:
-                if moduleId == module:
-                    moduleInstance = moduleClass()
-                    print(moduleInstance.optionsMsg())
-                    #cmd2.Cmd.poutput(moduleInstance.infoMsg())
-                    break
-
-        except ValueError: # module is a string
-            for moduleClass in self._cmd.modules.values():
-                if module == moduleClass.MNAME:
-                    moduleInstance = moduleClass()
-                    print(moduleInstance.optionsMsg())
-                    #cmd2.Cmd.poutput(moduleInstance.infoMsg())
-                    break
-        except TypeError: # module is None
+        if module is None:
             selectedModule = self._cmd.selectedModule
             if selectedModule:
                 print(selectedModule.optionsMsg())
                 #cmd2.Cmd.poutput(moduleInstance.infoMsg())
             else:
                 print_failure("No module selected")
+
+        else:
+            try:
+                module = int(module)
+                for moduleId, moduleClass in self._cmd.filteredModules:
+                    if moduleId == module:
+                        moduleInstance = moduleClass()
+                        print(moduleInstance.optionsMsg())
+                        #cmd2.Cmd.poutput(moduleInstance.infoMsg())
+                        break
+
+            except ValueError: # module is a string
+                for moduleClass in self._cmd.modules.values():
+                    if module == moduleClass.MNAME:
+                        moduleInstance = moduleClass()
+                        print(moduleInstance.optionsMsg())
+                        #cmd2.Cmd.poutput(moduleInstance.infoMsg())
+                        break

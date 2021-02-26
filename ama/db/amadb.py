@@ -40,7 +40,9 @@ class AmaDB:
         (creation of database, role, and initialization of default workspace)
         """
         try:
-            cmd2.Cmd.poutput(f"Creating {roleName} role")
+            #import pdb; pdb.set_trace()
+            #cmd2.Cmd.poutput(f"Creating {roleName} role")
+            print_status(f"Creating {roleName} role")
 
             password = getpass(prompt=f"Password for {roleName} role (empty for ramdon generation): ")
             randomPasswd = False
@@ -56,13 +58,19 @@ class AmaDB:
                 randomPasswd = True
 
             Bash.exec(f"psql -U postgres -c \"CREATE ROLE {roleName} WITH LOGIN CREATEDB PASSWORD '{password}'\"")
-            cmd2.Cmd.poutput(f"Role {roleName} has been created")
-            if randomPasswd:
-                cmd2.Cmd.poutput(f"Password {roleName} role: {password}")
+            Bash.exec(f"psql -U postgres -c \"CREATE DATABASE {roleName} OWNER {roleName}\"", quiet=True)
+            #cmd2.Cmd.poutput(f"Role {roleName} has been created")
+            print_status(f"Role {roleName} has been created")
 
-            cmd2.Cmd.poutput(f"Creating {dbName} database")
+            if randomPasswd:
+                #cmd2.Cmd.poutput(f"Password {roleName} role: {password}")
+                print_successful(f"Password {roleName} role: {password}")
+
+            #cmd2.Cmd.poutput(f"Creating {dbName} database")
+            print_status(f"Creating {dbName} database")
             Bash.exec(f"psql -U {roleName} -c \"CREATE DATABASE {dbName} OWNER {roleName}\"")
-            cmd2.Cmd.poutput("Database {dbName} has been created")
+            #cmd2.Cmd.poutput("Database {dbName} has been created")
+            print_successful(f"Database {dbName} has been created")
 
             # creation workspaces table
             dbCredential = {'host':'localhost', 'database': dbName, 'user': roleName, 'password': password}
@@ -70,12 +78,12 @@ class AmaDB:
 
             tablesCreation = (
                 """
-                CREATE TABLE IF NOT EXIST workspaces (
+                CREATE TABLE IF NOT EXISTS workspaces (
                 name VARCHAR (100) UNIQUE NOT NULL
                 )
                 """,
                 f"""
-                CREATE TABLE IF NOT EXIST hashes_{workspace} (
+                CREATE TABLE IF NOT EXISTS hashes_{workspace} (
                 hash VARCHAR (100) UNIQUE NOT NULL,
                 type VARCHAR (20),
                 cracker VARCHAR (20) NOT NULL,
@@ -83,10 +91,10 @@ class AmaDB:
                 )
                 """,
                 f"""
-                CREATE TABLE IF NOT EXIST services_{workspace} (
+                CREATE TABLE IF NOT EXISTS services_{workspace} (
                 service VARCHAR (20) NOT NULL,
-                target INET NOT NULL,
-                user VARCHAR (20) NOT NULL,
+                target VARCHAR (15) NOT NULL,
+                service_user VARCHAR (20) NOT NULL,
                 password VARCHAR (32) NOT NULL
                 )
                 """
@@ -112,7 +120,8 @@ class AmaDB:
             cur.close()
 
         except (Exception, psycopg2.DatabaseError) as error:
-            cmd2.Cmd.pexcept(error)
+            #cmd2.Cmd.pexcept(error)
+            print_failure(error)
 
 
     @staticmethod
@@ -128,7 +137,9 @@ class AmaDB:
                     Bash.exec(f"psql -U postgres -c \"DROP DATABASE {dbName}\"")
 
             else:
-                cmd2.Cmd.pwarning("Be carefully you could lose your data")
+                #cmd2.Cmd.pwarning("Be carefully you could lose your data")
+                print_failure("Be carefully you could lose your data")
         else:
-            cmd2.Cmd.pwarning("No database was selected to delete")
+            #cmd2.Cmd.pwarning("No database was selected to delete")
+            print_failure("No database was selected to delete")
 

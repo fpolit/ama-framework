@@ -9,11 +9,11 @@ import sys
 import argparse
 
 # cmdsets imports
-# from .core.cmdsets.db import (
-#     Workspace,
-#     Connection,
-#     Loot
-# )
+from .core.cmdsets.db import (
+     Workspace,
+     Connection,
+     Loot
+)
 
 from .core.cmdsets.module import (
     Search,

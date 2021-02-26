@@ -22,7 +22,7 @@ def amadbParser():
 
     amadb_parser = argparse.ArgumentParser(prog='amadb', description="Manage ama-framework database service")
     db_options = amadb_parser.add_argument_group("Database")
-    db_options.add_argument('--ama-db-name', dest="dbName", default='amadb',
+    db_options.add_argument('--ama-db-name', dest="dbName", default='ama',
                             help="Database name")
     db_options.add_argument('--ama-role-name', dest="roleName", default='attacker',
                             help="Role name")
@@ -44,7 +44,7 @@ def amadbParser():
 from fineprint.status import print_status
 
 def initDB(args):
-    print_status(f"Executing initDB({args})")
+    #print_status(f"Executing initDB({args})")
     AmaDB.initDB(args.dbName, args.roleName)
 
 #def reinitDB(args):

@@ -78,7 +78,7 @@ License : GPLv3
 
         optionHeader = ["Name", "Current Setting", "Required", "Description"]
         # attack options
-        formattedAttackOpt = [[name.upper(), option.value, option.required, option.description]
+        formattedAttackOpt = [[name.upper(), *option.getAttributes()]
                               for name, option in self.attack.items()]
         formattedAttackOpt = tabulate(formattedAttackOpt, headers=optionHeader)
 
@@ -86,7 +86,7 @@ License : GPLv3
 
         # slurm options
         slurmOptions = self.slurm.options()
-        formattedSlurmOpt = [[name.upper(), option.value, option.required, option.description]
+        formattedSlurmOpt = [[name.upper(), *option.getAttributes()]
                              for name, option in slurmOptions.items()]
         formattedSlurmOpt = tabulate(formattedSlurmOpt, headers=optionHeader)
 

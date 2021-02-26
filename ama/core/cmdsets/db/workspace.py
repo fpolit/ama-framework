@@ -8,12 +8,17 @@
 
 import argparse
 
+#fineprint imports
+from fineprint.status import (
+    print_failure
+)
+
 # import db connection modules
 from getpass import getpass
 import psycopg2
 
 # version import
-from ...version import get_version
+from ama.core.version import get_version
 
 # commandset categories
 from ..category import CmdsetCategory as Category
@@ -30,8 +35,7 @@ from cmd2 import (
 from ama.db.exceptions import WorkspaceExistsError
 
 # valiadator imports
-from ...validator import Answer
-
+from ama.core.validator import Answer
 
 @with_default_category(Category.DB)
 class Workspace(CommandSet):
@@ -62,7 +66,8 @@ class Workspace(CommandSet):
         Manager of ama-framework workspaces
         """
         if self._cmd.db_conn is None:
-            cmd2.Cmd.pwarning("Database not connected")
+            #cmd2.Cmd.pwarning("Database not connected")
+            print_failure("Database not connected")
         else:
             if args.switch:
                 switchWorkspace = args.switch
@@ -87,10 +92,15 @@ class Workspace(CommandSet):
                 newWorkspace = args.rename[1]
                 Workspace.rename(oldWorkspace, newWorkspace, **self._cmd.db_creds)
 
+            else: #show the availables workspaces
+                pass
+
 
     def existWorkspace(self, workspace=None):
         """
         Check if a workspace exist or not
+        Return:
+          return True if workspace exist otherwise return False
         """
         if workspace:
             try:
@@ -106,10 +116,12 @@ class Workspace(CommandSet):
                     return False
 
             except (Exception, psycopg2.DatabaseError) as error:
-                cmd2.Cmd.pexcept(error)
+                #cmd2.Cmd.pexcept(error)
+                print_failure(error)
                 return False #check if this return work or if it's useless
         else:
-            cmd2.Cmd.pwarning("No workspace selected")
+            #cmd2.Cmd.pwarning("No workspace selected")
+            print_failure("No workspace selected")
             return False
 
     @staticmethod
@@ -135,7 +147,8 @@ class Workspace(CommandSet):
                     return False
 
             except (Exception, psycopg2.DatabaseError) as error:
-                cmd2.Cmd.pexcept(error)
+                #cmd2.Cmd.pexcept(error)
+                print_failure(error)
                 return False
 
             finally:
@@ -144,7 +157,8 @@ class Workspace(CommandSet):
                     del dbCredential
 
         else:
-            cmd2.Cmd.pwarning("No workspace selected")
+            #cmd2.Cmd.pwarning("No workspace selected")
+            print_failure("No workspace selected")
             return False
 
     def switch(self, workspace=None):
@@ -164,7 +178,8 @@ class Workspace(CommandSet):
             except (Exception, psycopg2.DatabaseError) as error:
                 cmd2.Cmd.pexcept(error)
         else:
-            cmd2.Cmd.pwarning("No workspace selected")
+            #cmd2.Cmd.pwarning("No workspace selected")
+            print_failure("No workspace selected")
 
     @staticmethod
     def init(workspace=None, *, database="ama", user="attacker", host='localhost'):
@@ -207,7 +222,8 @@ class Workspace(CommandSet):
             cmd2.Cmd.poutput(f"Added workspace: {workspace}")
 
         except (Exception, psycopg2.DatabaseError) as error:
-            cmd2.Cmd.pexcept(error)
+            #cmd2.Cmd.pexcept(error)
+            print_failure(error)
 
         finally:
             if conn is not None:
@@ -243,9 +259,11 @@ class Workspace(CommandSet):
                     cmd2.Cmd.poutput(f"Workspace {workspace} was deleted")
 
             except (Exception, psycopg2.DatabaseError) as error:
-                cmd2.Cmd.pexcept(error)
+                #cmd2.Cmd.pexcept(error)
+                print_failure(error)
         else:
-            cmd2.Cmd.pwarning(f"Workspace {workspace} doesn't exist")
+            #cmd2.Cmd.pwarning(f"Workspace {workspace} doesn't exist")
+            print_failure(f"Workspace {workspace} doesn't exist")
 
     @staticmethod
     def deleteall(*, database="ama", user="attacker", host='localhost'):
@@ -285,7 +303,8 @@ class Workspace(CommandSet):
                 cmd2.Cmd.poutput(f"Workspaces were deleted")
 
             except (Exception, psycopg2.DatabaseError) as error:
-                cmd2.Cmd.pexcept(error)
+                #cmd2.Cmd.pexcept(error)
+                print_failure(error)
 
         else:
             cmd2.Cmd.poutput("Be carefully you could lose all your data.")
@@ -326,11 +345,14 @@ class Workspace(CommandSet):
                     conn.commit()
 
                 cur.close()
-                cmd2.Cmd.poutput(f"Workspace {oldWorkspace} rename to {newWorkspace}")
+                #cmd2.Cmd.poutput(f"Workspace {oldWorkspace} rename to {newWorkspace}")
+                print_failure(f"Workspace {oldWorkspace} rename to {newWorkspace}")
 
             except (Exception, psycopg2.DatabaseError) as error:
-                cmd2.Cmd.pexcept(error)
+                #cmd2.Cmd.pexcept(error)
+                print_failure(error)
 
         else:
-            cmd2.Cmd.pwarning(f"Workspace {oldWorkspace} doesn't exist")
+            #cmd2.Cmd.pwarning(f"Workspace {oldWorkspace} doesn't exist")
+            print_failure(f"Workspace {oldWorkspace} doesn't exist")
 

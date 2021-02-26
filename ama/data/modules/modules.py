@@ -46,7 +46,9 @@ from ama.core.modules.attack.services import (
 
 
 ## auxiliary/hashes modules imports
-
+from ama.core.modules.auxiliary.hashes import (
+    HashesStatus
+)
 
 ## auxiliary/combinator modules imports
 
@@ -89,7 +91,9 @@ attackModules = {
 ## auxiliary/wordlists modules
 auxiliaryWordlistModules = {}
 ## auxiliary/hashes modules
-auxiliaryHashesModules = {}
+auxiliaryHashesModules = {
+    f"{HashesStatus.MNAME}": HashesStatus,
+}
 ## auxiliary/combinator modules
 auxiliaryCombinatortModules = {}
 ## auxiliary/analysis modules

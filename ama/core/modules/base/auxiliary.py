@@ -5,6 +5,8 @@
 # date: Feb 20 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
+from tabulate import tabulate
+
 from typing import (
     List,
     Any
@@ -50,13 +52,15 @@ class Auxiliary:
         """
         infoMsg = \
             f"""
-                Name : {self.description}
-              Module : {self.mname}
-             License : GPLv3
+   Name : {self.description}
+ Module : {self.mname}
+License : GPLv3
 
-            Author:
-              glozanoa <glozanoa@uni.pe>
+  Author:
             """
+
+        for author in self.author:
+            infoMsg += f"{author}\n"
 
         infoMsg += self.optionsMsg()
 
@@ -71,20 +75,49 @@ class Auxiliary:
         Show options available to set up
         """
 
-        optionsMsg = f"Module options ({self.mname}):"
+        optionsMsg =(
+            f"""
+            Module: {self.mname}
+            """
+         )
+
 
         optionHeader = ["Name", "Current Setting", "Required", "Description"]
 
         # auxiliary options
-        formattedAttackOpt = [[nameOpt.upper(), *infoOpt] for nameOpt, infoOpt in self.auxiliary.items()]
-        formattedAttackOpt = tabulate(formattedAttackOpt)
+        formattedOpt = [[name.upper(), *option.getAttributes()]
+                              for name, option in self.auxiliary.items()]
+        formattedOpt = tabulate(formattedOpt, headers=optionHeader)
 
-        optionsMsg += f"\n\nOptions:\n{formattedattackopt}"
+        optionsMsg += f"\n\nOptions:\n{formattedOpt}"
 
         # slurm options
-        formattedSlurmOpt = [[nameOpt.upper(), *infoOpt] for nameOpt, infoOpt in self.slurm.items()]
-        formattedSlurmOpt = tabulate(formattedSlurmOpt)
+        slurmOptions = self.slurm.options()
+        formattedSlurmOpt = [[name.upper(), *option.getAttributes()]
+                             for name, option in slurmOptions.items()]
+        formattedSlurmOpt = tabulate(formattedSlurmOpt, headers=optionHeader)
 
-        optionsMsg += f"\n\nSlurm Options:\n{formattedslurmOpt}"
+        optionsMsg += f"\n\nSlurm Options:\n{formattedSlurmOpt}"
 
         return optionsMsg
+
+
+
+    def isVariable(self, variable):
+        if variable in self.auxiliary or \
+           variable in self.slurm.options():
+            return True
+        else:
+            return False
+
+    def isAuxiliaryVariable(self, variable):
+        if variable in self.auxiliary:
+            return True
+        else:
+            return False
+
+    def isSlurmVariable(self, variable):
+        if variable in self.slurm.options():
+            return True
+        else:
+            return False

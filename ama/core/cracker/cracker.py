@@ -47,6 +47,10 @@ class PasswordCracker:
                 self.status = False
                 cmd2.Cmd.pwarning(f"No executable founded for cracker: {name}")
 
+    def __repr__(self):
+        #return f"Cracker(name: {self.mainName}, version: {self.version})"
+        return self.mainName
+
     @staticmethod
     def searchMainexec(crackerName: List[str]):
         """

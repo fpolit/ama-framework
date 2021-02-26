@@ -31,6 +31,7 @@ from ..slurm import Slurm
 
 # cracker imports
 from .cracker import PasswordCracker
+from .crackedHash import CrackedHash
 
 # john hashes import
 from ama.data.hashes import jtrHashes
@@ -55,7 +56,6 @@ class John(PasswordCracker):
 
     def __init__(self):
         super().__init__(["john", "jtr"], version="1.9.0-jumbo-1 MPI + OMP")
-
 
     @staticmethod
     def checkHashType(hashType):
@@ -96,7 +96,7 @@ class John(PasswordCracker):
     @staticmethod
     def hashStatus(queryHash, potfile=None):
         """
-        Check the status (broken by John or not) of query hash or hashes file
+        Check the status (broken by John or not) of query hash
 
         Return:
         if queryHash is in potfile then [HASHTYPE, HASH, PASSWORD] list is returned
@@ -104,39 +104,60 @@ class John(PasswordCracker):
         """
         #import pdb;pdb.set_trace()
 
+        if potfile is None:
+            HOME = os.path.expanduser("~")
+            potfile = os.path.join(HOME, ".john/john.pot")
+
         try:
-            crackedPattern = re.compile(rf"\$(\W*|\w*|.*)\$({queryHash})(\$(\W*|\w*|.*)\$)?:(\W*|\w*|.*)", re.DOTALL)
-            if potfile:
-                permission = [os.R_OK]
-                Path.access(permission, potfile)
+            permission = [os.R_OK]
+            Path.access(permission, potfile)
 
-                # elif cracker in ["hashcat", "hc"]:
-                #     crackedPattern = re.compile(rf"({queryHash}):(\W*|\w*|.*)", re.DOTALL)
+            crackedPattern = re.compile(rf"\$(\W*|\w*|.*)\$({queryHash})(\$(\W*|\w*|.*)\$)?:(\W*|\w*|.*)",
+                                        re.DOTALL)
 
-            else:
-                HOME = os.path.expanduser("~")
-                potfile = os.path.join(HOME, ".john/john.pot")
-                permission = [os.R_OK]
-                Path.access(permission, potfile)
-
-                # elif cracker in ["hashcat", "hc"]:
-                #     hashcatPotFile = os.path.join(homePath, ".hashcat/hashcat.potfile")
-                #     potFilePath = FilePath(hashcatPotFile)
-                #     crackedPattern = re.compile(rf"({queryHash}):(\W*|\w*|.*)", re.DOTALL)
-
-            #print(f"potfile: {potFilePath}")
             with open(potfile, 'r') as potFile:
                 while   crackedHash := potFile.readline().rstrip():
                     if crackedHashPot := crackedPattern.fullmatch(crackedHash):
                         hashPot = crackedHashPot.groups()
-                        return [hashPot[0], hashPot[1], hashPot[-1]]
-                        # elif cracker in ["hashcat", "hc"]:
-                        #     return [None, hashPot[0], hashPot[1]]
+                        return CrackedHash(hashType = hashPot[0],
+                                           crackedHash= hashPot[1],
+                                           password = hashPot[2],
+                                           cracker = John)
+
             return None
 
 
         except Exception as error:
             cmd2.Cmd.pexcept(error)
+
+    @staticmethod
+    def hashesFileStatus(queryHashesFile, potfile=None):
+        """
+        Check the status (broken by John or not) of hashes in queryHashesFile
+        """
+        #import pdb; pdb.set_trace()
+        hashesStatus = {'cracked': [], "uncracked": []}
+
+        if potfile is None:
+            HOME = os.path.expanduser("~")
+            potfile = os.path.join(HOME, ".john/john.pot")
+
+        try:
+            permission = [os.R_OK]
+            Path.access(permission, potfile, queryHashesFile)
+
+
+            with open(queryHashesFile, 'r') as hashesFile:
+                while queryHash := hashesFile.readline().rsplit():
+                    if crackerHash := John.hashStatus(queryHash[0]):
+                        hashesStatus['cracked'].append(crackerHash.getAttributes())
+                    else: #crackedHash is uncracked
+                        hashesStatus['uncracked'].append([queryHash])
+
+            return hashesStatus
+
+        except Exception as error:
+            cmd2.Cmd.pexcept(error, "ERROR")
 
 
     def benchmark(self, slurm=None):

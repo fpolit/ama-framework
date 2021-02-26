@@ -35,6 +35,7 @@ class JohnMasks(Attack):
         with john submiting parallel tasks in a cluster using Slurm
         """
         )
+
     def __init__(self, *, hashType=None, hashesFile=None, masksFile=None, slurm=None):
         """
         Initialization of John masks attack

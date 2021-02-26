@@ -11,6 +11,12 @@ import os
 # cmd2 imports
 import cmd2
 
+# fineprint imports
+from fineprint.status import (
+    print_status,
+    print_failure
+)
+
 class Path:
     @staticmethod
     def access(permissions=[], *paths):
@@ -35,15 +41,18 @@ class Path:
                             invalidPermission['write'].append(path)
 
                         elif permission == os.X_OK:
-                            cmd2.Cmd.pwarning(f"{path} haven't execution permission")
+                            #cmd2.Cmd.pwarning(f"{path} haven't execution permission")
+                            print_failure(f"{path} haven't execution permission")
                             permissionCheck = False
                             invalidPermission['execution'].append(path)
                 else:
                     if path:
-                        cmd2.Cmd.pwarning(f"{path} path doesn't exist")
+                        #cmd2.Cmd.pwarning(f"{path} path doesn't exist")
+                        print_failure(f"{path} path doesn't exist")
                         permissionCheck = False
                     else: #path = None
-                        cmd2.Cmd.pwarning(f"No path supplied (path:None)")
+                        #cmd2.Cmd.pwarning(f"No path supplied (path:None)")
+                        print_failure(f"No path supplied (path:None)")
 
         if not permissionCheck:
             raise PermissionError(f"Permission Error: {invalidPermission}")
