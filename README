@@ -1,11 +1,10 @@
-ama - Attack Manager
-====================
+# ama - Attack Manager
 
 Ama is a specialized environment for the password cracking process. It contains several modules (attacks and auxiliaries) that make the password cracking process efficient.
 Also many ama's attack modules support submiting in a cluster using Slurm, other important feature is that ama is extensible so you can write your own modules. 
 
 
-### Dependences
+## Dependences
 * Hashcat
 * Hydra
 * pmix
@@ -16,8 +15,7 @@ Also many ama's attack modules support submiting in a cluster using Slurm, other
 Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can find guides to install the dependeces properly.
 
 
-Installation
-============
+## Installation
 
 * Users
 ```bash
@@ -38,7 +36,7 @@ and then install `ama` and the developer packages.
 	make installdev
 ```
 
-### Usage
+## Usage
 Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can find useful documentation about `ama`.  
 
      Please do not use ama in military or secret service organizations,
