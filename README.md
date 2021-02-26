@@ -1,7 +1,7 @@
 # ama - Attack Manager
 
 Ama is a specialized environment for the password cracking process. It contains several modules (attacks and auxiliaries) that make the password cracking process efficient.
-Also many ama's attack modules support submiting in a cluster using Slurm, other important feature is that ama is extensible so you can write your own modules. 
+Also many ama's attack modules support can be submitted to a cluster using Slurm, other important feature is that ama is easy extensible so you can write your own modules. 
 
 
 ## Dependences
@@ -18,6 +18,7 @@ Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can fi
 ## Installation
 
 * Users
+
 ```bash
     git clone https://gitlab.com/spolit/ama.git
     cd ama
@@ -25,6 +26,7 @@ Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can fi
 ```
 
 * Developers
+
 If you want to contribute to `ama-framework` you are welcome.   
 As developer you will first create a python virtual enviroment 
 and then install `ama` and the developer packages.
