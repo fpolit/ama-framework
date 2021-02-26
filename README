@@ -1,30 +1,34 @@
-# ama - Attack Manager
-Initially `ama` was a simple integrator of [PPACK](https://gitlab.com/spolit/ppack) (mask generator) and a `password cracker`(`hashcat` or `john the ripper`) to perform `mask attacks` against hashes submiting parallel tasks in a cluster using `Slurm`. Then we extend it to perform diverse attacks (wordlist attacks, combination attacks, hybrid attacks [wordlist + masks or masks + wordlist] and of course mask attacks). But now it also support `hydra` cracker, so you can perform attacks again services (supported by `hydra`) submiting parallel task in a cluster. Now we are developing an enviroment like `metasploit` to interact with `ama-framework` (A specialized framework for the password cracking process)
+ama - Attack Manager
+====================
+
+Ama is a specialized environment for the password cracking process. It contains several modules (attacks and auxiliaries) that make the password cracking process efficient.
+Also many ama's attack modules support submiting in a cluster using Slurm, other important feature is that ama is extensible so you can write your own modules. 
 
 
 ### Dependences
+* Hashcat
+* Hydra
+* pmix
 * Openmpi (with slurm and pmix support)
 * John The Ripper (with MPI support)
-* Hashcat (to perform attacks using the GPU power)
-* Hydra (to perform attacks again services)
-* PPACK (to analyze wordlists and generate tuned masks)
-* HPC Cluster (needed to submit parallel tasks in a cluster with slurm)
+* HPC Cluster (needed to submit parallel tasks with slurm)
 
-Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can find guides to install properly `Openmpi`, `Jhon The Ripper` and configure an `HPC cluster`
+Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can find guides to install the dependeces properly.
 
 
-### Installation
+Installation
+============
 
-#### Users
+* Users
 ```bash
     git clone https://gitlab.com/spolit/ama.git
     cd ama
     make install
 ```
 
-#### Developers
-If you want to contribute to `ama-framework` you are welcome. 
-As developer you will first create a python virtualenv 
+* Developers
+If you want to contribute to `ama-framework` you are welcome.   
+As developer you will first create a python virtual enviroment 
 and then install `ama` and the developer packages.
 ```bash
 	git clone https://github.com/fpolit/ama-framework.git ama
@@ -41,4 +45,4 @@ Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can fi
                       or for illegal purposes
 
 Happy Hacking!  
-~ glozanoa
+      glozanoa
