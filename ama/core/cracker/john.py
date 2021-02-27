@@ -23,6 +23,12 @@ import re
 from tabulate import tabulate
 from sbash import Bash
 
+
+# fineprint imports
+from fineprint import (
+    print_status
+)
+
 # cmd2 imports
 import cmd2
 
@@ -165,7 +171,8 @@ class John(PasswordCracker):
             Run john benchmark
         """
         if self.status:
-            cmd2.Cmd.poutput(f"Performing John Benchmark.")
+            #cmd2.Cmd.poutput(f"Performing John Benchmark.")
+            print_status(f"Performing John Benchmark.")
             if slurm.partition:
                 parallelJobType = slurm.parserParallelJob()
                 if not  parallelJobType in ["MPI", "OMP"]:
@@ -195,8 +202,8 @@ class John(PasswordCracker):
                 johnBenchmark = f"{self.mainexec} -b"
                 Bash.exec(johnBenchmark)
         else:
-            cmd2.Cmd.pwarning("Cracker {self.mainName} is disable")
-
+            #cmd2.Cmd.pwarning(f"Cracker {self.mainName} is disable")
+            print_failure(f"Cracker {self.mainName} is disable")
 
     def wordlistAttack(self , *, hashType, hashesFile, wordlist, slurm=None):
         """

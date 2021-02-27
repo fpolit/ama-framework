@@ -8,13 +8,14 @@
 
 
 import argparse
+
 from fineprint.status import (
     print_failure,
     print_status
 )
 
 # version import
-from ...version import get_version
+from ama.core.version import get_version
 
 # commandset categories
 from ..category import CmdsetCategory as Category
@@ -25,7 +26,6 @@ from cmd2 import (
     with_default_category,
     with_argparser
 )
-
 
 # modules.base import
 from ama.core.modules.base import (
@@ -40,7 +40,7 @@ from ama.core.slurm import Slurm
 class Interaction(CommandSet):
     """
     Module command set category related to interaction with ama modules
-    commands set: use, setv, setvg, back, attack
+    commands set: use, setv, back, attack
     """
 
     def __init__(self):
@@ -68,7 +68,6 @@ class Interaction(CommandSet):
                     moduleType = moduleClass.MTYPE
                     moduleSubtype = moduleClass.MSUBTYPE
                     moduleName = moduleClass.NAME
-                    #moduleType, moduleSubtype, moduleName = moduleClass.mname.split("/")
                     self._cmd.prompt = f"ama {moduleType}({moduleSubtype}/{moduleName}) > "
                     break
 
@@ -112,6 +111,7 @@ class Interaction(CommandSet):
                 if isinstance(selectedModule, Attack):
                     if selectedModule.isAttackVariable(variable):
                         selectedModule.attack[variable].value = value
+
                     else: #variable is a slurm variable
                         slurmOptions = selectedModule.slurm.options()
                         slurmOptions[variable].value = value
@@ -120,6 +120,7 @@ class Interaction(CommandSet):
                 elif isinstance(selectedModule, Auxiliary):
                     if selectedModule.isAuxiliaryVariable(variable):
                         selectedModule.auxiliary[variable].value = value
+
                     else: #variable is a slurm variable
                         slurmOptions = selectedModule.slurm.options()
                         slurmOptions[variable].value = value
@@ -132,12 +133,6 @@ class Interaction(CommandSet):
         else:
             print_failure("No module selected")
 
-    # def do_setvg(self, args):
-    #     """
-    #     Set a value to a variable globally
-    #     """
-    #     pass
-
     def do_back(self, args):
         """
         Stop interaction with selected module and go back to main ama-framework console
@@ -147,16 +142,28 @@ class Interaction(CommandSet):
 
     def do_attack(self, args):
         """
-        Perform a attack with the selected module
+        Perform an attack with the selected module
         """
         attackModule = self._cmd.selectedModule
-        print_status(f"Running {attackModule.mname} module")
-        attackModule.attack()
+        if attackModule:
+            if isinstance(attackModule, Attack):
+                print_status(f"Running {attackModule.mname} module")
+                attackModule.run()
+            else: # auxiliaryModule is an instance of Auxiliary
+                print_failure(f"No attack method for {auxiliaryModule.mname} auxiliary module")
+        else:
+            print_failure("No module selected")
 
     def do_run(self, args):
         """
         Run the selected auxiliary module
         """
         auxiliaryModule = self._cmd.selectedModule
-        print_status(f"Running {auxiliaryModule.mname} module")
-        auxiliaryModule.run()
+        if auxiliaryModule:
+            if isinstance(auxiliaryModule, Auxiliary):
+                print_status(f"Running {auxiliaryModule.mname} module")
+                auxiliaryModule.run()
+            else: # auxiliaryModule is an instance of Attack
+                print_failure(f"No run method for {auxiliaryModule.mname} attack module")
+        else:
+            print_failure("No module selected")

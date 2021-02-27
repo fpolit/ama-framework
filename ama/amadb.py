@@ -13,6 +13,11 @@ import argparse
 # ama.db imports
 from ama.db import AmaDB
 
+# fineprint imports
+from fineprint.status import (
+    print_failure,
+    print_status
+)
 
 
 def amadbParser():
@@ -38,10 +43,8 @@ def amadbParser():
     delete_parser = amadb_subparser.add_parser('delete', description="delete ama-framework database")
     delete_parser.set_defaults(func=deleteDB)
 
-    return amadb_parser.parse_args()
+    return amadb_parser
 
-
-from fineprint.status import print_status
 
 def initDB(args):
     #print_status(f"Executing initDB({args})")
@@ -59,8 +62,14 @@ def main():
     """
     Execute the selected action from the parsed arguments
     """
-    args = amadbParser()
-    args.func(args)
+    amadb_parser = amadbParser()
+    try:
+        args = amadb_parser.parse_args()
+        args.func(args)
+
+    except Exception as error:
+        print_failure(error)
+        amadb_parser.print_help()
 
 
 if __name__=="__main__":

@@ -59,7 +59,7 @@ class Ama(Cmd):
         self.continuation_prompt = "> "
         self.default_category = Category.CORE
         self.db_conn = None
-        self.workspace = "default"
+        self.workspace = "default" # selected workspace
         self.modules = amaModules # format {NAME: MODULE_CLASS, ....}
         self.selectedModule = None # selected module with use command (Instance of the module)
         self.filteredModules = None # filtered modules by a search (format: [(#, MODULE_CLASS), ...])

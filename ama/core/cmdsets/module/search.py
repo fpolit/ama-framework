@@ -42,7 +42,7 @@ class Search(CommandSet):
     search_parser = argparse.ArgumentParser()
     search_parser.add_argument('-t', '--type', dest='moduleType', choices=amaModulesType, default=None,
                                help="Module type")
-    search_parser.add_argument('pattern',
+    search_parser.add_argument('pattern', nargs='?', default='',
                                help='Pattern to search availables modules')
 
     # debugged
@@ -69,6 +69,18 @@ class Search(CommandSet):
                         filteredModules.append((idModule, moduleClass))
                         idModule += 1
 
+        else:
+            moduleType = args.moduleType
+            if moduleType:
+                for moduleName, moduleClass in self._cmd.modules.items():
+                    if moduleType == moduleClass.MTYPE:
+                        filteredModules.append((idModule, moduleClass))
+                        idModule += 1
+            else:
+                for moduleName, moduleClass in self._cmd.modules.items():
+                    filteredModules.append((idModule, moduleClass))
+                    idModule += 1
+
 
         self._cmd.filteredModules = filteredModules
 
@@ -81,10 +93,8 @@ class Search(CommandSet):
         Show filtered modules
         """
         headerFM = ["#", "Name", "Description"] # FM: Filtered Modules
-        tableFM = []
 
-        for idModule, moduleClass in filteredModules:
-            tableFM.append((idModule, moduleClass.MNAME, moduleClass.DESCRIPTION))
+        tableFM = [(idModule, moduleClass.MNAME, moduleClass.DESCRIPTION) for idModule, moduleClass in filteredModules]
 
         #cmd2.Cmd.poutput(tabulate(tableFM, headers=headerFM))
         print(tabulate(tableFM, headers=headerFM))

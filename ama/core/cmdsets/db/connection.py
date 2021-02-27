@@ -2,17 +2,28 @@
 #
 # database commands set from ama-framework (Database Commands Category)
 #
-# date: Feb 20 2021
+#
+# implementation - date: Feb 20 2021
+#
+# implemented classes: Connection
+# implemented Exception classes: NoDatabaseCredentialsSupplied, InvalidFormatDatabaseCredential
+#
+# debug - date: Feb 27 2021
+#
+# debugged functions: do_db_connect, do_db_status, do_db_disconnect, dbCreds
+#
+#
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
-
+import re
 import argparse
 from argparse import RawTextHelpFormatter
 
 # fineprint import
 from fineprint.status import (
     print_status,
-    print_failure
+    print_failure,
+    print_successful
 )
 
 # import db connection modules
@@ -34,6 +45,27 @@ from cmd2 import (
     with_argparser
 )
 
+
+class NoDatabaseCredentialsSupplied(Exception):
+    """
+    Exception to catch error when no database credential supplied
+    """
+
+    def __init__(self):
+        self.warning = "No database credential supplied"
+        super().__init__(self.warning)
+
+
+class InvalidFormatDatabaseCredential(Exception):
+    """
+    Exception to catch error when
+    supplied database credentials are in an invalid format
+    """
+    def __init__(self, invalidCredentials):
+        self.warning = f"Invalid credentials: {invalidCredentials}"
+        super().__init__(self.warning)
+
+
 @with_default_category(Category.DB)
 class Connection(CommandSet):
     """
@@ -43,34 +75,44 @@ class Connection(CommandSet):
     def __init__(self):
         super().__init__()
 
-
-    db_connect_help = \
-        """
-        DB credential file
-
-        connect_amadb.ini
-
-        [postgresql]
-        host = localhost
-        database = ama
-        user = attacker
-        """
     db_connect_parser = argparse.ArgumentParser(formatter_class=RawTextHelpFormatter)
     db_connect_parser.add_argument('-c', '--creds',
-                                   help=db_connect_help)
+                                   help="Postgres database credential file")
+                                   #help=db_connect_help)
+
+    db_connect_parser.add_argument('credentials', nargs='?', default=None,
+                                   help="Postgres database credentials (format: <user>@<host>/<database>)")
 
     @with_argparser(db_connect_parser)
     def do_db_connect(self, args):
         """
         Connect to ama-framework database
         """
+        #import pdb; pdb.set_trace()
         self._cmd.db_conn = None
         try:
-            self._cmd.db_creds = Databasecmdset.dbCreds(args.creds)
-            self._cmd.dbName = self._cmd.db_creds
+            if args.credentials:
+                credentialParser = re.compile(r"([\W|\w]*)@([\W|\w]*)/([\W|\w]*)")
+                if credentials := credentialParser.fullmatch(args.credentials):
+                    user, host, database = credentials.groups()
+                    self._cmd.db_creds = {'host': host, 'database': database, 'user': user}
+                    password = getpass(prompt=f"Password {user} role: ")
+                    self._cmd.db_creds['password'] = password
+                else:
+                    raise InvalidFormatDatabaseCredential(args.credentials)
+
+            elif args.creds:
+                self._cmd.db_creds = Connection.dbCreds(args.creds)
+
+            else: # no database credential supplied
+                raise NoDatabaseCredentialsSupplied
+
+
             if  self._cmd.db_creds:
                 self._cmd.db_conn =  psycopg2.connect(**self._cmd.db_creds)
-                cmd2.Cmd.poutput(f"Connected to {self._cmd.dbName} database")
+                dbName = self._cmd.db_creds['database']
+                #cmd2.Cmd.poutput(f"Connected to {dbName} database")
+                print_successful(f"Connected to {dbName} database")
                 del self._cmd.db_creds['password']
 
         except (Exception, psycopg2.DatabaseError) as error:
@@ -85,7 +127,9 @@ class Connection(CommandSet):
         try:
             self._cmd.db_conn.close()
             self._cmd.db_conn = None
-            cmd2.Cmd.poutput(f"Database {self._cmd.dbName} disconnected")
+            dbName = self._cmd.db_creds['database']
+            #cmd2.Cmd.poutput(f"Database {dbName} disconnected")
+            print_status(f"Database {dbName} disconnected")
             del self._cmd.db_creds
 
         except (Exception, psycopg2.DatabaseError) as error:
@@ -97,8 +141,9 @@ class Connection(CommandSet):
         Report status of ama-framework database connection
         """
         if self._cmd.db_conn:
-            dbName = self._cmd.dbName
-            cmd2.Cmd.poutput(f"Connected to {dbName} database")
+            dbName = self._cmd.db_creds['database']
+            #cmd2.Cmd.poutput(f"Connected to {dbName} database")
+            print_successful(f"Connected to {dbName} database")
         else:
             #cmd2.Cmd.poutput(f"Database not connected")
             print_failure(f"Database not connected")

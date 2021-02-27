@@ -47,9 +47,9 @@ class Slurm:
         # time formats: MM, MM:SS, HH:MM:SS, DD-HH, DD-HH:MM, DD-HH:MM:SS
         # DD:days, HH:hours, MM: minutes, SS:secconds
         self.testOnly = Argument(testOnly, True, "Validate the batch script and return an estimate of when a job would be scheduled to run. No job is actually submitted") # NONE <NO VALUE>,if testOnly=True enable this flag otherwise omit
-        self.verbose = Argument(verbose, False, "Increase the verbosity of sbatch's informational messages") # -v <NO VALUE>, if verbose=True enable this flag otherwise omit
+        self.verbose = Argument(verbose, True, "Increase the verbosity of sbatch's informational messages") # -v <NO VALUE>, if verbose=True enable this flag otherwise omit
         self.nodelist = Argument(nodelist, False, "Nodelist") # -w <nodelist>, e.x. nodelist = hw[00-04,06,08]
-        self.wait = Argument(wait, False, "Do not exit until the submitted job terminates") # -W <NO VALUE>, if wait=True enable this flag otherwise omit
+        self.wait = Argument(wait, True, "Do not exit until the submitted job terminates") # -W <NO VALUE>, if wait=True enable this flag otherwise omit
         self.exclude = Argument(exclude, False, "Do not exit until the submitted job terminates") # -x <nodelist>
 
 

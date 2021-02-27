@@ -39,13 +39,14 @@ class JohnBenchmark(Attack):
         if slurm is None:
             slurm = Slurm()
 
-        initOptions = {'mname' : JohnBenchmark.MNAME,
-                       'author': JohnBenchmark.AUTHOR,
-                       'description': JohnBenchmark.DESCRIPTION,
-                       'fulldescription':  JohnBenchmark.FULLDESCRIPTION,
-                       'attackOptions': attackOptions,
-                       'slurm': slurm
-                       }
+        initOptions = {
+            'mname' : JohnBenchmark.MNAME,
+            'author': JohnBenchmark.AUTHOR,
+            'description': JohnBenchmark.DESCRIPTION,
+            'fulldescription':  JohnBenchmark.FULLDESCRIPTION,
+            'attackOptions': attackOptions,
+            'slurm': slurm
+        }
 
         super().__init__(**initOptions)
 

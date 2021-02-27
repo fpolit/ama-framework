@@ -84,7 +84,7 @@ class AmaDB:
                 """,
                 f"""
                 CREATE TABLE IF NOT EXISTS hashes_{workspace} (
-                hash VARCHAR (100) UNIQUE NOT NULL,
+                hash VARCHAR (128) UNIQUE NOT NULL,
                 type VARCHAR (20),
                 cracker VARCHAR (20) NOT NULL,
                 password VARCHAR (32) NOT NULL
@@ -100,11 +100,12 @@ class AmaDB:
                 """
             )
 
-            valueInsert = \
+            valueInsert = (
                 """
                 INSERT INTO workspaces (name)
                 VALUES (%s);
                 """
+            )
 
             conn = None
             conn = psycopg2.connect(**dbCredential)
