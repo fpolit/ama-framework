@@ -31,7 +31,7 @@ class Slurm:
         self.job_name = Argument(job_name, False, "Name for the job allocation") # -J <str>
         self.cluster = Argument(cluster, False, "") # -M <cluster name>
         self.distribution = Argument(distribution, True, "Distribution methods for remote processes (<block|cyclic|plane|arbitrary>)") # -m <block|cyclic|plane|arbitrary>
-        self.mai_type = Argument(mail_type, False, "Event types to notify user by email(<BEGIN|END|FAIL|REQUEUE|ALL|TIME_LIMIT_PP>)") # NONE <BEGIN|END|FAIL|REQUEUE|ALL|TIME_LIMIT_PP>, PP: percent of the limit time
+        self.mail_type = Argument(mail_type, False, "Event types to notify user by email(<BEGIN|END|FAIL|REQUEUE|ALL|TIME_LIMIT_PP>)") # NONE <BEGIN|END|FAIL|REQUEUE|ALL|TIME_LIMIT_PP>, PP: percent of the limit time
         self.mail_user = Argument(mail_user, False, "User email") # NONE <user email>
         self.mem = Argument(mem, False, "Memory per node (<size[units]>)") # NONE <size[units]>, units = [K|M|G|T] (memory per node)
         self.mem_per_cpu = Argument(mem_per_cpu, False, "Minimum memory required per allocated CPU (<size[units]>)") # NONE <size[units]>
@@ -70,23 +70,23 @@ class Slurm:
             'dependency': self.dependency.value,
             'chdir': self.chdir.value,
             'error': self.error.value,
-            'job_name': self.jobName.value,
+            'job_name': self.job_name.value,
             'cluster': self.cluster.value,
             'distribution': self.distribution.value,
-            'mail_type': self.mailType.value,
-            'mail_user': self.mailUser.value,
+            'mail_type': self.mail_type.value,
+            'mail_user': self.mail_user.value,
             'mem': self.mem.value,
-            'mem_per_cpu': self.memPerCpu.value,
-            'cpus_per_task': self.cpusPerTask.value,
+            'mem_per_cpu': self.mem_per_cpu.value,
+            'cpus_per_task': self.cpus_per_task.value,
             'nodes': self.nodes.value,
             'ntasks': self.ntasks.value,
             'nice': self.nice.value,
             'output': self.output.value,
-            'open_mode': self.openMode.value,
+            'open_mode': self.open_mode.value,
             'partition': self.partition.value,
             'reservation': self.reservation.value,
             'time': self.time.value,
-            'test_only': self.testOnly.value,
+            'test_only': self.test_only.value,
             'verbose': self.verbose.value,
             'nodelist': self.nodelist.value,
             'wait': self.wait.value,
@@ -106,32 +106,33 @@ class Slurm:
 
 
     def options(self):
-        core = {'array': self.array,
-                'account': self.account,
-                'dependency': self.dependency,
-                'chdir': self.chdir,
-                'error': self.error,
-                'job_name': self.job_name,
-                'cluster': self.cluster,
-                'distribution': self.distribution,
-                'mail_type': self.mail_type,
-                'mail_user': self.mail-user,
-                'mem': self.mem,
-                'mem_per_cpu': self.mem_per_cpu,
-                'cpus_per_task': self.cpus_per_task,
-                'nodes': self.nodes,
-                'ntasks': self.ntasks,
-                'nice': self.nice,
-                'output': self.output,
-                'open_mode': self.open_mode,
-                'partition': self.partition,
-                'reservation': self.reservation,
-                'time': self.time,
-                'test_only': self.test_only,
-                'verbose': self.verbose,
-                'nodelist': self.nodelist,
-                'wait': self.wait,
-                'exclude':self.exclude}
+        core = {
+            'array': self.array,
+            'account': self.account,
+            'dependency': self.dependency,
+            'chdir': self.chdir,
+            'error': self.error,
+            'job_name': self.job_name,
+            'cluster': self.cluster,
+            'distribution': self.distribution,
+            'mail_type': self.mail_type,
+            'mail_user': self.mail_user,
+            'mem': self.mem,
+            'mem_per_cpu': self.mem_per_cpu,
+            'cpus_per_task': self.cpus_per_task,
+            'nodes': self.nodes,
+            'ntasks': self.ntasks,
+            'nice': self.nice,
+            'output': self.output,
+            'open_mode': self.open_mode,
+            'partition': self.partition,
+            'reservation': self.reservation,
+            'time': self.time,
+            'test_only': self.test_only,
+            'verbose': self.verbose,
+            'nodelist': self.nodelist,
+            'wait': self.wait,
+            'exclude':self.exclude}
 
         extra = {'slurm_script': self.slurm_script}
         return {**core, **extra}
