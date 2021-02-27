@@ -147,10 +147,10 @@ class Interaction(CommandSet):
         attackModule = self._cmd.selectedModule
         if attackModule:
             if isinstance(attackModule, Attack):
-                print_status(f"Running {attackModule.mname} module")
-                attackModule.run()
+                print_status(f"Running {attackModule.MNAME} module")
+                attackModule.attack()
             else: # auxiliaryModule is an instance of Auxiliary
-                print_failure(f"No attack method for {auxiliaryModule.mname} auxiliary module")
+                print_failure(f"No attack method for {attackModule.MNAME} module")
         else:
             print_failure("No module selected")
 
@@ -161,9 +161,9 @@ class Interaction(CommandSet):
         auxiliaryModule = self._cmd.selectedModule
         if auxiliaryModule:
             if isinstance(auxiliaryModule, Auxiliary):
-                print_status(f"Running {auxiliaryModule.mname} module")
+                print_status(f"Running {auxiliaryModule.MNAME} module")
                 auxiliaryModule.run()
             else: # auxiliaryModule is an instance of Attack
-                print_failure(f"No run method for {auxiliaryModule.mname} attack module")
+                print_failure(f"No run method for {auxiliaryModule.MNAME} module")
         else:
             print_failure("No module selected")
