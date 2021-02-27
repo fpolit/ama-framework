@@ -26,7 +26,7 @@ class Slurm:
         self.array = Argument(array, False, "Index of array job (e.g. 0-15 or 0,6,16-32)") # -a <e.x: 0-15 or 0,6,16-32>
         self.account = Argument(account, False, "Cluster account to submit the job") # -A <account>
         self.dependency = Argument(dependency, False, "Defer the start of this job until the specified dependencies have been satisfied completed") # -d
-        self.chdir = Argument(chdir, False, "Defer the start of this job until the specified dependencies have been satisfied completed") # -D <homework directory path>
+        self.chdir = Argument(chdir, False, "Homework directory path") # -D <homework directory path>
         self.error = Argument(error, False, "Error file") # -e <error file path>
         self.jobName = Argument(jobName, False, "Name for the job allocation") # -J <str>
         self.cluster = Argument(cluster, False, "") # -M <cluster name>

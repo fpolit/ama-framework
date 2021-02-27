@@ -42,7 +42,7 @@ class AmaDB:
         try:
             #import pdb; pdb.set_trace()
             #cmd2.Cmd.poutput(f"Creating {roleName} role")
-            print_status(f"Creating {roleName} role")
+            print_status(f"Creating role:  {roleName}")
 
             password = getpass(prompt=f"Password for {roleName} role (empty for ramdon generation): ")
             randomPasswd = False
@@ -67,7 +67,7 @@ class AmaDB:
                 print_successful(f"Password {roleName} role: {password}")
 
             #cmd2.Cmd.poutput(f"Creating {dbName} database")
-            print_status(f"Creating {dbName} database")
+            print_status(f"Creating database: {dbName}")
             Bash.exec(f"psql -U {roleName} -c \"CREATE DATABASE {dbName} OWNER {roleName}\"")
             #cmd2.Cmd.poutput("Database {dbName} has been created")
             print_successful(f"Database {dbName} has been created")
