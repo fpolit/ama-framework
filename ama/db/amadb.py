@@ -57,7 +57,7 @@ class AmaDB:
                 password = passwd.generate()
                 randomPasswd = True
 
-            Bash.exec(f"psql -U postgres -c \"CREATE ROLE {roleName} WITH LOGIN CREATEDB PASSWORD '{password}'\"")
+            Bash.exec(f"psql -U postgres -c \"CREATE ROLE {roleName} WITH LOGIN CREATEDB PASSWORD '{password}'\"", quiet=True)
             Bash.exec(f"psql -U postgres -c \"CREATE DATABASE {roleName} OWNER {roleName}\"", quiet=True)
             #cmd2.Cmd.poutput(f"Role {roleName} has been created")
             print_status(f"Role {roleName} has been created")
@@ -68,7 +68,7 @@ class AmaDB:
 
             #cmd2.Cmd.poutput(f"Creating {dbName} database")
             print_status(f"Creating database: {dbName}")
-            Bash.exec(f"psql -U {roleName} -c \"CREATE DATABASE {dbName} OWNER {roleName}\"")
+            Bash.exec(f"psql -U {roleName} -c \"CREATE DATABASE {dbName} OWNER {roleName}\"", quiet=True)
             #cmd2.Cmd.poutput("Database {dbName} has been created")
             print_successful(f"Database {dbName} has been created")
 
