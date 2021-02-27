@@ -170,6 +170,7 @@ class John(PasswordCracker):
         """
             Run john benchmark
         """
+
         if self.status:
             #cmd2.Cmd.poutput(f"Performing John Benchmark.")
             print_status(f"Performing John Benchmark.")

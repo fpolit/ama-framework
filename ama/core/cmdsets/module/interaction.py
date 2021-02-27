@@ -140,6 +140,7 @@ class Interaction(CommandSet):
         self._cmd.selectedModule = None
         self._cmd.prompt = "ama > "
 
+    #debugged - data: feb 27 2021
     def do_attack(self, args):
         """
         Perform an attack with the selected module
@@ -154,6 +155,7 @@ class Interaction(CommandSet):
         else:
             print_failure("No module selected")
 
+    #debugged - data: feb 27 2021
     def do_run(self, args):
         """
         Run the selected auxiliary module

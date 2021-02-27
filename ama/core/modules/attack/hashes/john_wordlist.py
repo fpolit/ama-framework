@@ -73,7 +73,7 @@ class JohnWordlist(Attack):
         Wordlist attack using John the Ripper
         """
         jtr = John()
-        jtr.wordlistAttack(hashType = self.attack['hash_type'].value,
-                           hashesFile = self.attack['hashes_file'].value,
-                           wordlist = self.attack['wordlist'].value,
+        jtr.wordlistAttack(hashType = self.attackOpt['hash_type'].value,
+                           hashesFile = self.attackOpt['hashes_file'].value,
+                           wordlist = self.attackOpt['wordlist'].value,
                            slurm = self.slurm)

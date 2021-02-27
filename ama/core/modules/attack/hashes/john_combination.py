@@ -75,7 +75,7 @@ class JohnCombination(Attack):
         Combination attack using John the Ripper
         """
         jtr = John()
-        jtr.combinationAttack(hashType = self.hash_type,
-                              hashesFile = self.hashes_file,
-                              wordlists = self.wordlists,
+        jtr.combinationAttack(hashType = self.attackOpt['hash_type'],
+                              hashesFile = self.attackOpt['hashes_file'],
+                              wordlists = self.attackOpt['wordlists'],
                               slurm = self.slurm)

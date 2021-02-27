@@ -60,7 +60,7 @@ class AmaDB:
             Bash.exec(f"psql -U postgres -c \"CREATE ROLE {roleName} WITH LOGIN CREATEDB PASSWORD '{password}'\"", quiet=True)
             Bash.exec(f"psql -U postgres -c \"CREATE DATABASE {roleName} OWNER {roleName}\"", quiet=True)
             #cmd2.Cmd.poutput(f"Role {roleName} has been created")
-            print_status(f"Role {roleName} has been created")
+            print_successful(f"Role {roleName} has been created")
 
             if randomPasswd:
                 #cmd2.Cmd.poutput(f"Password {roleName} role: {password}")

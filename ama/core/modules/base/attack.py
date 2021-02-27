@@ -33,7 +33,7 @@ class Attack:
         self.author = author
         self.description = description
         self.fulldesciption = fulldescription
-        self.attack = attackOptions
+        self.attackOpt = attackOptions
         self.slurm = slurm
 
     def attack(self, *args, **kwargs):
@@ -79,7 +79,7 @@ License : GPLv3
         optionHeader = ["Name", "Current Setting", "Required", "Description"]
         # attack options
         formattedAttackOpt = [[name.upper(), *option.getAttributes()]
-                              for name, option in self.attack.items()]
+                              for name, option in self.attackOpt.items()]
         formattedAttackOpt = tabulate(formattedAttackOpt, headers=optionHeader)
 
         optionsMsg += f"\nModule Options:\n{formattedAttackOpt}"
@@ -96,14 +96,14 @@ License : GPLv3
 
 
     def isVariable(self, variable):
-        if variable in self.attack or \
+        if variable in self.attackOpt or \
            variable in self.slurm.options():
             return True
         else:
             return False
 
     def isAttackVariable(self, variable):
-        if variable in self.attack:
+        if variable in self.attackOpt:
             return True
         else:
             return False

@@ -75,9 +75,9 @@ class JohnHybrid(Attack):
         hybrid attack using John the Ripper
         """
         jtr = John()
-        jtr.hybridAttack(hashType = self.attack['hash_type'].value,
-                         hashesFile = self.attack['hashes_file'].value,
-                         wordlist = self.attack['wordlist'].value,
-                         masksFile = self.attack['masks_file'].value,
-                         inverse = self.attack['inverse'].value,
+        jtr.hybridAttack(hashType = self.attackOpt['hash_type'].value,
+                         hashesFile = self.attackOpt['hashes_file'].value,
+                         wordlist = self.attackOpt['wordlist'].value,
+                         masksFile = self.attackOpt['masks_file'].value,
+                         inverse = self.attackOpt['inverse'].value,
                          slurm = self.slurm)

@@ -68,6 +68,6 @@ class JohnSingle(Attack):
         Single attack using John the Ripper
         """
         jtr = John()
-        jtr.singleAttack(hashType = self.attack['hash_type'].value,
-                         hashesFile = self.attack['hashes_file'].value,
+        jtr.singleAttack(hashType = self.attackOpt['hash_type'].value,
+                         hashesFile = self.attackOpt['hashes_file'].value,
                          slurm = self.slurm)

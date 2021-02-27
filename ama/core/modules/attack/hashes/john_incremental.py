@@ -70,6 +70,6 @@ class JohnIncremental(Attack):
         Incremental attack using John the Ripper
         """
         jtr = John()
-        jtr.incremtalAttack(hashType = self.attack['hash_type'].value,
-                            hashesFile = self.attack['hashes_file'].value,
+        jtr.incremtalAttack(hashType = self.attackOpt['hash_type'].value,
+                            hashesFile = self.attackOpt['hashes_file'].value,
                             slurm = self.slurm)

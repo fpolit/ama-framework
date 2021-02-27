@@ -71,7 +71,7 @@ class JohnMasks(Attack):
         masks attack using John the Ripper
         """
         jtr = John()
-        jtr.masksAttack(hashType = self.attack['hash_type'].value,
-                        hashesFile = self.attack['hashes_file'].value,
-                        masksFile= self.attack['masks_file'].value,
+        jtr.masksAttack(hashType = self.attackOpt['hash_type'].value,
+                        hashesFile = self.attackOpt['hashes_file'].value,
+                        masksFile= self.attackOpt['masks_file'].value,
                         slurm = self.slurm)
