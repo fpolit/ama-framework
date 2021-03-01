@@ -21,7 +21,7 @@ Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can fi
 * Users
 
 ```bash
-    git clone https://gitlab.com/spolit/ama.git
+    git clone https://github.com/fpolit/ama-framework.git ama
     cd ama
     make install
 ```
