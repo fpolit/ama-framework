@@ -54,7 +54,7 @@ class Interaction(CommandSet):
     @with_argparser(use_parser)
     def do_use(self, args):
         """
-        Select a avaliable module
+        Select a available module
         """
         #import pdb; pdb.set_trace()
         selected = False
@@ -104,6 +104,7 @@ class Interaction(CommandSet):
                             argument = selectedModule.slurm.options.get(option)
                             argument.value = value
                             selectedModule.slurm.options[option] = argument
+                            setattr(selectedModule.slurm, option, value)
 
             self._cmd.selectedModule = selectedModule
 
@@ -120,7 +121,11 @@ class Interaction(CommandSet):
         if selectedModule:
             option = args.option.lower()
             if selectedModule.isOption(option):
-                selectedModule.options[option].value = None
+                if selectedModule.isModuleOption(option):
+                    selectedModule.options[option].value = None
+                else: #is a valid slurm option
+                    selectedModule.slurm.options[option].value = None
+                    setattr(selectedModule.slurm, option, None)
             else:
                 print_failure(f"No {option.upper()} option in {selectedModule.mname} module")
 
@@ -140,7 +145,13 @@ class Interaction(CommandSet):
         if selectedModule:
             option = args.option.lower()
             if selectedModule.isOption(option):
-                selectedModule.options[option].value = None
+                if selectedModule.isModuleOption(option):
+                    selectedModule.options[option].value = None
+                else: #is a valid slurm option
+                    selectedModule.slurm.options[option].value = None
+                    setattr(selectedModule.slurm, option, None)
+
+                #delete option:value from global values
                 if option in self._cmd.gvalues:
                     del self._cmd.gvalues[option]
                 else:
@@ -188,6 +199,7 @@ class Interaction(CommandSet):
                     argument = selectedModule.slurm.options.get(option)
                     argument.value = value
                     selectedModule.slurm.options[option] = argument
+                    setattr(selectedModule.slurm, option, value)
 
                 self._cmd.selectedModule = selectedModule
                 self._cmd.gvalues[option] = value
@@ -234,6 +246,7 @@ class Interaction(CommandSet):
                     argument = selectedModule.slurm.options.get(option)
                     argument.value = value
                     selectedModule.slurm.options[option] = argument
+                    setattr(selectedModule.slurm, option, value)
 
                 self._cmd.selectedModule = selectedModule
             else:
@@ -254,13 +267,13 @@ class Interaction(CommandSet):
         """
         Perform an attack with the selected module
         """
-        attackModule = self._cmd.selectedModule
-        if attackModule:
-            if isinstance(attackModule, Attack):
-                print_status(f"Running {attackModule.MNAME} module")
-                attackModule.attack()
-            else: # auxiliaryModule is an instance of Auxiliary
-                print_failure(f"No attack method for {attackModule.MNAME} module")
+        selectedModule = self._cmd.selectedModule
+        if selectedModule:
+            if isinstance(selectedModule, Attack):
+                print_status(f"Running {selectedModule.MNAME} module")
+                selectedModule.attack()
+            else: # selectedModule is an instance of Auxiliary
+                print_failure(f"No attack method for {selectedModule.MNAME} module")
         else:
             print_failure("No module selected")
 
@@ -269,12 +282,12 @@ class Interaction(CommandSet):
         """
         Run the selected auxiliary module
         """
-        auxiliaryModule = self._cmd.selectedModule
-        if auxiliaryModule:
-            if isinstance(auxiliaryModule, Auxiliary):
-                print_status(f"Running {auxiliaryModule.MNAME} module")
-                auxiliaryModule.run()
-            else: # auxiliaryModule is an instance of Attack
-                print_failure(f"No run method for {auxiliaryModule.MNAME} module")
+        selectedModule = self._cmd.selectedModule
+        if selectedModule:
+            if isinstance(selectedModule, Auxiliary):
+                print_status(f"Running {selectedModule.MNAME} module")
+                selectedModule.run()
+            else: # selectedModule is an instance of Attack
+                print_failure(f"No run method for {selectedModule.MNAME} module")
         else:
             print_failure("No module selected")

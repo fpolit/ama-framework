@@ -54,29 +54,25 @@ class HashesStatus(Auxiliary):
     )
 
     def __init__(self, *,
-                 queryHash: str = None, queryHashesFile:str = None, slurm=None):
+                 query_hashes_file:str = None, slurm=None):
         """
         Initialization of auxiliary/hashes/hashes_status ama module
         """
 
-        auxiliaryOptions = {
-            'hashes_file': Argument(queryHashesFile, True, "Hashes file to check status")
+        auxiliary_options = {
+            'hashes_file': Argument(query_hashes_file, True, "Hashes file to check status")
         }
 
-
-        if slurm is None:
-            slurm = Slurm()
-
-        initOptions = {
+        init_options = {
             'mname' : HashesStatus.MNAME,
             'author': HashesStatus.AUTHOR,
             'description': HashesStatus.DESCRIPTION,
             'fulldescription':  HashesStatus.FULLDESCRIPTION,
-            'auxiliaryOptions': auxiliaryOptions,
+            'auxiliary_options': auxiliary_options,
             'slurm': slurm
         }
 
-        super().__init__(**initOptions)
+        super().__init__(**init_options)
 
 
     def run(self):
@@ -86,44 +82,47 @@ class HashesStatus(Auxiliary):
         #import pdb; pdb.set_trace()
 
         crackers = [John, Hashcat]
-        hashesStatus = {'cracked': [], 'uncracked': []}
+        hashes_status = {'cracked': [], 'uncracked': []}
 
         try:
             permission = [os.R_OK]
-            hashesFile = self.auxiliary['hashes_file'].value
-            Path.access(permission, hashesFile)
+            hashes_file = self.options['hashes_file'].value
+            Path.access(permission, hashes_file)
 
-            with open(hashesFile, 'r') as hashes:
-                while queryHash := hashes.readline().rstrip():
-                    #queryHash = queryHash[0]
+            with open(hashes_file, 'r') as hashes:
+                while query_hash := hashes.readline().rstrip():
+                    #query_hash = queryHash[0]
                     cracked = False
                     for cracker in crackers:
-                        if crackedHash := cracker.hashStatus(queryHash):
+                        if cracked_hash := cracker.hash_status(query_hash):
                             cracked = True
-                            hashesStatus['cracked'].append(crackedHash.getAttributes())
+                            hashes_status['cracked'].append(cracked_hash.getAttributes())
                             break # break for loop
 
                     if not cracked:
-                        hashesStatus['uncracked'].append([queryHash])
+                        hashes_status['uncracked'].append([query_hash])
 
             # print status of hashes in hashesFile
-            hashesStatusTables = (
+            status_hashes_table = (
                 f"""
-                Cracked Hashes
+    Cracked Hashes:
 
-                {tabulate(hashesStatus['cracked'], headers = ['Hash', 'Type', 'Password', 'Cracker'])}
-                """ ,
+{tabulate(hashes_status["cracked"],headers = ["Hash", "Type", "Password", "Cracker"])}
 
-                f"""
-                Uncracked Hashes
-
-                {tabulate(hashesStatus['uncracked'], headers=['Hash'])}
+    Uncracked Hashes:
+                
+{tabulate(hashes_status["uncracked"],headers = ["Hash"])}
                 """
             )
 
-            for table in hashesStatusTables:
-                print(table)
+            print(status_hashes_table)
+            # print("\tCracked Hashes:")
+            # print(tabulate(hashes_status["cracked"],
+            #                headers = ["Hash", "Type", "Password", "Cracker"]))
 
+            # print("\tUncracked Hashes:")
+            # print(tabulate(hashes_status["uncracked"],
+            #                headers = ["Hash"]))
 
         except Exception as error:
             #cmd2.Cmd.pexcept(error)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# argument format supplied to ama modules (attack and auxiliary)
+# argument format for ama modules (attack and auxiliary) arguments
 #
 # date: Feb 25 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>

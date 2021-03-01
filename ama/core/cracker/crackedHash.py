@@ -12,14 +12,14 @@ class CrackedHash:
     Cracked hash by some password cracker
     """
 
-    def __init__(self, *, crackedHash, hashType=None, password, cracker):
-        self.crackedHash = crackedHash
-        self.hashType = hahsType
+    def __init__(self, *, cracked_hash, hash_type=None, password, cracker):
+        self.cracked_hash = cracked_hash
+        self.hash_type = hash_type
         self.password = password
         self.cracker = cracker
 
     def getAttributes(self):
         """
-        Return crackedHash, hashType, password and cracker attributes of CrackedHash
+        Return cracked_hash, hash_type, password and cracker attributes of CrackedHash
         """
-        return [self.crackedHash, self.hashType, self.password, self.cracker]
+        return [self.cracked_hash, self.hash_type, self.password, self.cracker.MAINNAME]

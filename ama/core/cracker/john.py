@@ -60,6 +60,7 @@ class John(PasswordCracker):
     """
 
     HASHES = jtrHashes
+    MAINNAME = "john"
 
     def __init__(self):
         super().__init__(["john", "jtr"], version="1.9.0-jumbo-1 MPI + OMP")
@@ -80,6 +81,7 @@ class John(PasswordCracker):
             raise InvalidHashType(John, hash_type)
         return True
 
+    # debugged - date: Mar 1 2021
     @staticmethod
     def search_hash(pattern, *, sensitive=False):
         """
@@ -101,7 +103,7 @@ class John(PasswordCracker):
 
 
     @staticmethod
-    def hash_status(query_hash, potfile=None):
+    def hash_status(query_hash: str, potfile: str = None):
         """
         Check the status (broken by John or not) of query hash
 
@@ -123,14 +125,13 @@ class John(PasswordCracker):
                                         re.DOTALL)
 
             with open(potfile, 'r') as john_potfile:
-                while   cracked_hash := john_potfile.readline().rstrip():
+                while cracked_hash := john_potfile.readline().rstrip():
                     if cracked_hashpot := cracked_pattern.fullmatch(cracked_hash):
                         hashpot = cracked_hashpot.groups()
-                        return CrackedHash(hashType = hashpot[0],
-                                           crackedHash= hashpot[1],
-                                           password = hashpot[2],
+                        return CrackedHash(hash_type = hashpot[0],
+                                           cracked_hash= hashpot[1],
+                                           password = hashpot[-1],
                                            cracker = John)
-
             return None
 
 
@@ -157,7 +158,8 @@ class John(PasswordCracker):
 
             with open(query_hashes_file, 'r') as hashes_file:
                 while query_hash := hashes_file.readline().rsplit():
-                    if cracker_hash := John.hash_status(queryHash[0]):
+                    query_hash = query_hash[0]
+                    if cracker_hash := John.hash_status():
                         hashes_status['cracked'].append(cracker_hash.getAttributes())
                     else: #crackedHash is uncracked
                         hashes_status['uncracked'].append([query_hash])
@@ -168,7 +170,7 @@ class John(PasswordCracker):
             #cmd2.Cmd.pexcept(error, "ERROR")
             print_failure(error)
 
-
+    # debugged - date: Feb 28 2021
     def benchmark(self, slurm=None):
         """
         Run john benchmark
@@ -208,7 +210,7 @@ class John(PasswordCracker):
             #cmd2.Cmd.pwarning(f"Cracker {self.mainName} is disable")
             print_failure(f"Cracker {self.main_name} is disable")
 
-    
+    # debugged - date: Feb 28 2021
     def wordlist_attack(self , *, hash_type, hashes_file, wordlist, slurm=None):
         """
         Wordlist attack using john submiting parallel tasks in a cluster with Slurm
@@ -219,7 +221,7 @@ class John(PasswordCracker):
         wordlist (str): wordlist to attack
         slurm (Slurm): Instance of Slurm class
         """
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         if self.enable:
             try:
                 permission = [os.R_OK]
@@ -233,7 +235,6 @@ class John(PasswordCracker):
                     if not  parallel_job_type in ["MPI", "OMP"]:
                         raise InvalidParallelJob(parallel_job_type)
 
-                    #core, extra = slurm.parameters()
                     if parallel_job_type == "MPI":
                         parallel_work = [
                             (
@@ -287,68 +288,70 @@ class John(PasswordCracker):
                             wordlist=combinedWordlist)
 
     #NOTE: John continue when the hash was cracked
+    # debugged - date: Feb 28 2021
     def incremental_attack(self, *, hash_type, hashes_file, slurm=None):
         """
         Incemental attack using john submiting parallel tasks in a cluster with Slurm
 
         Args:
-        hash_type (str): Jonh's hash type
+        hash_type (str): John's hash type
         hashes_file (str): Hash file to attack
         slurm (Slurm): Instance of Slurm class
         """
 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
 
-        if self.status:
+        if self.enable:
             try:
                 permission = [os.R_OK]
-                access2args = Path.access(permission, hashesFile)
-                validHash = John.checkHashType(hashType)
-                if  access2args and validHash:
-                    cmd2.Cmd.poutput(f"Attacking {hashType} hashes in {hashesFile} using incremental attack.")
-                    if slurm.partition:
-                        parallelJobType = slurm.parserParallelJob()
-                        if not  parallelJobType in ["MPI", "OMP"]:
-                            raise InvalidParallelJobError(parallelJobType)
+                Path.access(permission, hashes_file)
+                John.check_hash_type(hash_type)
+                #cmd2.Cmd.poutput(f"Attacking {hashType} hashes in {hashesFile} using incremental attack.")
+                print_status(f"Attacking {hash_type} hashes in {hashes_file} using incremental attack.")
+                if slurm.partition:
+                    parallel_job_type = slurm.parallel_job_parser()
+                    if not  parallel_job_type in ["MPI", "OMP"]:
+                        raise InvalidParallelJob(parallel_job_type)
 
-                        core, extra = slurm.parameters()
-                        if parallelJobType == "MPI":
-                            parallelWork = [
-                                (
-                                    f"srun --mpi={slurm.pmix}"
-                                    f" {self.mainexec} --incremental"
-                                    f" --format={hashType} {hashesFile}"
-                                )
-                            ]
+                    #core, extra = slurm.parameters()
+                    if parallel_job_type == "MPI":
+                        parallel_work = [
+                            (
+                                f"srun --mpi={slurm.pmix}"
+                                f" {self.main_exec} --incremental"
+                                f" --format={hash_type} {hashes_file}"
+                            )
+                        ]
 
-                        elif parallelJobType == "OMP":
-                            parallelWork = [
-                                (
-                                    f"{self.mainexec}"
-                                    f" --incremental"
-                                    f" --format={hashType}"
-                                    f" {hashesFile}"
-                                )
-                            ]
+                    elif parallel_job_type == "OMP":
+                        parallel_work = [
+                            (
+                                f"{self.main_exec}"
+                                f" --incremental"
+                                f" --format={hash_type}"
+                                f" {hashes_file}"
+                            )
+                        ]
 
-                        Slurm.genScript(core, extra, parallelWork)
-                        slurmScriptName = extra["slurm-script"]
-                        Bash.exec(f"sbatch {slurmScriptName}")
+                    slurm_script_name = slurm.gen_batch_script(parallel_work)
+                    Bash.exec(f"sbatch {slurm_script_name}")
 
-                    else:
-                        wordlistAttack =  (
-                            f"{self.mainexec}"
-                            f" --incremental"
-                            f" --format={hashType}"
-                            f" {hashesFile}"
-                        )
-                        Bash.exec(wordlistAttack)
+                else:
+                    incremental_attack =  (
+                        f"{self.main_exec}"
+                        f" --incremental"
+                        f" --format={hash_type}"
+                        f" {hashes_file}"
+                    )
+                    Bash.exec(incremental_attack)
 
             except Exception as error:
-                cmd2.Cmd.pexcept(error)
+                #cmd2.Cmd.pexcept(error)
+                print_failure(error)
 
         else:
-            cmd2.Cmd.pwarning("Cracker {self.mainName} is disable")
+            #cmd2.Cmd.pwarning("Cracker {self.mainName} is disable")
+            print_failure("Cracker {self.main_name} is disable")
 
 
     def masksAttack(self, *, hashType, hashesFile, masksFile, slurm=None):
@@ -445,66 +448,68 @@ with open({_masksFile}, 'r') as masks:
 
         print_status(f"Mask attack script generated: {maskAttackScript}")
 
-
-    def singleAttack(self, *, hashType, hashesFile, slurm=None):
+    # debugged - date: Mar 1 2021
+    def single_attack(self, *, hash_type, hashes_file, slurm=None):
         """
         Single attack using john submiting parallel tasks in a cluster with Slurm
 
         Args:
-        hashType (str): Jonh's hash type
-        hashesFile (str): Hashes file to attack
+        hash_type (str): Jonh's hash type
+        hashes_file (str): Hashes file to attack
         slurm (Slurm): Instance of Slurm class
         """
+        #import pdb; pdb.set_trace()
 
-        if self.status:
+        if self.enable:
             try:
                 permission = [os.R_OK]
-                access2args = Path.access(permission, hashFile)
-                validHash = John.checkHashType(hashType)
-                if  access2args and validHash:
-                    cmd2.Cmd.poutput(f"Attacking {hashType} hashes in {hashesFile} using single attack.")
-                    if slurm.partition:
-                        parallelJobType = slurm.parserParallelJob()
-                        if not  parallelJobType in ["MPI", "OMP"]:
-                            raise InvalidParallelJobError(parallelJobType)
+                Path.access(permission, hashes_file)
+                John.check_hash_type(hash_type)
 
-                        core, extra = slurm.parameters()
-                        if parallelJobType == "MPI":
-                            parallelWork = [
-                                (
-                                    f"srun --mpi={slurm.pmix}"
-                                    f" {self.mainexec} --single"
-                                    f" --format={hashType} {hashesFile}"
-                                )
-                            ]
+                #cmd2.Cmd.poutput(f"Attacking {hashType} hashes in {hashesFile} using single attack.")
+                print_status(f"Attacking {hash_type} hashes in {hashes_file} using single attack.")
+                if slurm.partition:
+                    parallel_job_type = slurm.parallel_job_parser()
+                    if not  parallel_job_type in ["MPI", "OMP"]:
+                        raise InvalidParallelJob(parallel_job_type)
 
-                        elif parallelJobType == "OMP":
-                            parallelWork = [
-                                (
-                                    f"{self.mainexec}"
-                                    f" --single"
-                                    f" --format={hashType}"
-                                    f" {hashesFile}"
-                                )
-                            ]
+                    if parallel_job_type == "MPI":
+                        parallel_work = [
+                            (
+                                f"srun --mpi={slurm.pmix}"
+                                f" {self.main_exec} --single"
+                                f" --format={hash_type} {hashes_file}"
+                            )
+                        ]
 
-                        Slurm.genScript(core, extra, parallelWork)
-                        slurmScriptName = extra["slurm-script"]
-                        Bash.exec(f"sbatch {slurmScriptName}")
+                    elif parallel_job_type == "OMP":
+                        parallel_work = [
+                            (
+                                f"{self.main_exec}"
+                                f" --single"
+                                f" --format={hash_type}"
+                                f" {hashes_file}"
+                            )
+                        ]
 
-                    else:
-                        wordlistAttack =  (
-                            f"{self.mainexec}"
-                            f" --single"
-                            f" --format={hashType}"
-                            f" {hashesFile}"
-                        )
-                        Bash.exec(wordlistAttack)
+                    slurm_script_name = slurm.gen_batch_script(parallel_work)
+                    Bash.exec(f"sbatch {slurm_script_name}")
+
+                else:
+                    single_attack =  (
+                        f"{self.main_exec}"
+                        f" --single"
+                        f" --format={hash_type}"
+                        f" {hashes_file}"
+                    )
+                    Bash.exec(single_attack)
 
             except Exception as error:
-                cmd2.Cmd.pexcept(error)
+                #cmd2.Cmd.pexcept(error)
+                print_failure(error)
         else:
-            cmd2.Cmd.pwarning("Cracker {self.mainName} is disable")
+            #cmd2.Cmd.pwarning("Cracker {self.mainName} is disable")
+            print_failure("Cracker {self.main_name} is disable")
 
 
     def hybridAttack(self, *, hashType, hashesFile, wordlist, masksFile, slurm=None, inverse=False):

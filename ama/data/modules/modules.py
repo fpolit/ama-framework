@@ -16,29 +16,29 @@
 
 # john attacks imports
 from ama.core.modules.attack.hashes import (
+    #JohnMasks,
+    JohnBenchmark,
     JohnWordlist,
     JohnIncremental,
-    JohnCombination,
-    JohnHybrid,
-    JohnMasks,
     JohnSingle,
-    JohnBenchmark
+    #JohnCombination,
+    #JohnHybrid
 )
 
 # hashcat attacks imports
-from ama.core.modules.attack.hashes import (
-    HashcatWordlist,
-    HashcatIncremental,
-    HashcatCombination,
-    HashcatHybrid,
-    HashcatMasks
-)
+# from ama.core.modules.attack.hashes import (
+#     #HashcatWordlist,
+#     #HashcatIncremental,
+#     #HashcatCombination,
+#     #HashcatHybrid,
+#     #HashcatMasks
+# )
 
 ## attack/hashes modules imports
 # hydra attacks imports
-from ama.core.modules.attack.services import (
-    HydraWordlist
-)
+# from ama.core.modules.attack.services import (
+#     #HydraWordlist
+# )
 
 
 ### auxiliary modules imports
@@ -67,20 +67,21 @@ amaModulesType = ["attack", "auxiliary"]
 attackModules = {
     ## attack/hash modules
     # john attacks
+
+    f"{JohnBenchmark.MNAME}": JohnBenchmark,
     f"{JohnWordlist.MNAME}": JohnWordlist,
     f"{JohnIncremental.MNAME}": JohnIncremental,
-    f"{JohnCombination.MNAME}": JohnCombination,
-    f"{JohnHybrid.MNAME}": JohnHybrid,
-    f"{JohnMasks.MNAME}": JohnMasks,
     f"{JohnSingle.MNAME}": JohnSingle,
-    f"{JohnBenchmark.MNAME}": JohnBenchmark,
+    #f"{JohnCombination.MNAME}": JohnCombination,
+    #f"{JohnHybrid.MNAME}": JohnHybrid,
+    #f"{JohnMasks.MNAME}": JohnMasks,
 
     # hashcat attacks
-    f"{HashcatWordlist.MNAME}": HashcatWordlist,
-    f"{HashcatIncremental.MNAME}": HashcatIncremental,
-    f"{HashcatCombination.MNAME}": HashcatCombination,
-    f"{HashcatHybrid.MNAME}": HashcatHybrid,
-    f"{HashcatMasks.MNAME}": HashcatMasks,
+    #f"{HashcatWordlist.MNAME}": HashcatWordlist,
+    #f"{HashcatIncremental.MNAME}": HashcatIncremental,
+    #f"{HashcatCombination.MNAME}": HashcatCombination,
+    #f"{HashcatHybrid.MNAME}": HashcatHybrid,
+    #f"{HashcatMasks.MNAME}": HashcatMasks,
 
     ## attack/services modules
     # hydra attacks
@@ -88,14 +89,18 @@ attackModules = {
 }
 
 ### auxiliary modules
+
 ## auxiliary/wordlists modules
 auxiliaryWordlistModules = {}
+
 ## auxiliary/hashes modules
 auxiliaryHashesModules = {
     f"{HashesStatus.MNAME}": HashesStatus,
 }
+
 ## auxiliary/combinator modules
 auxiliaryCombinatortModules = {}
+
 ## auxiliary/analysis modules
 auxiliaryAnalysisModules = {
     # f"{PackStatsgen.mname}": PackStatsgen,

@@ -85,10 +85,11 @@ License : GPLv3
             options += f"\nOptions:\n{module_options_table}"
 
         elif only_slurm:
-            # slurm options
-            slurm_options_table = self.slurm_options(required)
-            slurm_options_table = tabulate(slurm_options_table, headers=options_header)
-            options += f"\n\nSlurm Options:\n{slurm_options_table}"
+            if self.slurm:
+                # slurm options
+                slurm_options_table = self.slurm_options(required)
+                slurm_options_table = tabulate(slurm_options_table, headers=options_header)
+                options += f"\n\nSlurm Options:\n{slurm_options_table}"
 
         else:
             #no filters only_* was supplied, so show all the available options
@@ -98,10 +99,11 @@ License : GPLv3
             module_options_table = tabulate(module_options_table, headers=options_header)
             options += f"\nOptions:\n{module_options_table}"
 
-            # slurm options
-            slurm_options_table = self.slurm_options(required)
-            slurm_options_table = tabulate(slurm_options_table, headers=options_header)
-            options += f"\n\nSlurm Options:\n{slurm_options_table}"
+            if self.slurm:
+                # slurm options
+                slurm_options_table = self.slurm_options(required)
+                slurm_options_table = tabulate(slurm_options_table, headers=options_header)
+                options += f"\n\nSlurm Options:\n{slurm_options_table}"
 
         return options
 
@@ -119,13 +121,15 @@ License : GPLv3
 
 
     def slurm_options(self, required=False):
-        slurm_options = self.slurm.options
-        if required:
-            slurm_options_table = [[name.upper(), *option.getAttributes()]
-                                   for name, option in slurm_options.items() if option.required]
-        else:
-            slurm_options_table = [[name.upper(), *option.getAttributes()]
-                                   for name, option in slurm_options.items()]
+        slurm_options_table = []
+        if self.slurm:
+            slurm_options = self.slurm.options
+            if required:
+                slurm_options_table = [[name.upper(), *option.getAttributes()]
+                                       for name, option in slurm_options.items() if option.required]
+            else:
+                slurm_options_table = [[name.upper(), *option.getAttributes()]
+                                       for name, option in slurm_options.items()]
 
         return slurm_options_table
 
@@ -141,13 +145,13 @@ License : GPLv3
                option in self.slurm.options:
                 return True
         else: #module that doesn't support slurm
-            if variable in self.options:
+            if option in self.options:
                 return True
 
         return False
 
     def isSlurmOption(self, option):
-        if slurm:
+        if self.slurm:
             if option in self.slurm.options:
                 return True
         return False

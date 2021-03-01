@@ -82,8 +82,9 @@ class PasswordCracker:
 
         return None
 
+
     @staticmethod
-    def hashStatus(queryHash: str = None, hashesFile: str = None):
+    def hash_status(query_hash: str, potfile: str = None):
         """
         Check the status (broken or not) of query hash or hashes file
         """

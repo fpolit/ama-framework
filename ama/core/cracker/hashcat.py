@@ -40,6 +40,7 @@ class Hashcat(PasswordCracker):
     """
 
     HASHES = hcHashes
+    MAINNAME = "hashcat"
 
     def __init__(self):
         super().__init__(name=['hashcat', 'hc'], version="v6.1.1")
@@ -80,12 +81,12 @@ class Hashcat(PasswordCracker):
 
 
     @staticmethod
-    def hashStatus(queryHash, potfile=None):
+    def hash_status(query_hash, potfile=None):
         """
-        Check the status (broken by John or not) of query hash
+        Check the status (broken by Hashcat or not) of query hash
 
         Return:
-        if queryHash is in potfile then [HASHTYPE, HASH, PASSWORD] list is returned
+        if query_hash is in potfile then [HASHTYPE, HASH, PASSWORD] list is returned
         otherwise None is returned
         """
         #import pdb;pdb.set_trace()
@@ -98,14 +99,14 @@ class Hashcat(PasswordCracker):
             permission = [os.R_OK]
             Path.access(permission, potfile)
 
-            crackedPattern = re.compile(rf"({queryHash}):(\W*|\w*|.*)", re.DOTALL)
+            cracked_pattern = re.compile(rf"({query_hash}):(\W*|\w*|.*)", re.DOTALL)
 
             with open(potfile, 'r') as potFile:
-                while   crackedHash := potFile.readline().rstrip():
-                    if crackedHashPot := crackedPattern.fullmatch(crackedHash):
-                        hashPot = crackedHashPot.groups()
-                        return CrackedHash(crackedHash = hashPot[0],
-                                           password = hashPot[1],
+                while   cracked_hash := potFile.readline().rstrip():
+                    if cracked_hashpot := cracked_pattern.fullmatch(cracked_hash):
+                        hashpot = cracked_hashpot.groups()
+                        return CrackedHash(cracked_hash = hashpot[0],
+                                           password = hashpot[1],
                                            cracker = Hashcat)
 
             return None
