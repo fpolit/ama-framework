@@ -25,8 +25,9 @@ from sbash import Bash
 
 
 # fineprint imports
-from fineprint import (
-    print_status
+from fineprint.status import (
+    print_status,
+    print_failure
 )
 
 # cmd2 imports
@@ -47,8 +48,8 @@ from ..files import Path
 
 # cracker exceptions imports
 from .crackerException import (
-    InvalidParallelJobError,
-    InvalidHashTypeError
+    InvalidParallelJob,
+    InvalidHashType
 )
 
 class John(PasswordCracker):
@@ -64,48 +65,48 @@ class John(PasswordCracker):
         super().__init__(["john", "jtr"], version="1.9.0-jumbo-1 MPI + OMP")
 
     @staticmethod
-    def checkHashType(hashType):
+    def check_hash_type(hash_type):
         """
-        Check if hashType is a valid hash type
+        Check if hash_type is a valid hash type
 
         Args:
-            hashType (str): hash type
+            hash_type (str): hash type
 
         Raises:
             InvalidHashType: Error if the hasType is an unsopported hash type of a cracker
         """
 
-        if not (hashType in John.HASHES):
-            raise InvalidHashTypeError(John, hashType)
+        if not (hash_type in John.HASHES):
+            raise InvalidHashType(John, hash_type)
         return True
 
     @staticmethod
-    def searchHash(pattern, *, sensitive=False):
+    def search_hash(pattern, *, sensitive=False):
         """
         Search  john's hashes types given a pattern
         """
         if sensitive:
-            hashPattern = re.compile(rf"[\W|\w|\.]*{pattern}[\W|\w|\.]*")
+            hash_pattern = re.compile(rf"[\W|\w|\.]*{pattern}[\W|\w|\.]*")
         else:
-            hashPattern = re.compile(rf"[\W|\w|\.]*{pattern}[\W|\w|\.]*", re.IGNORECASE)
+            hash_pattern = re.compile(rf"[\W|\w|\.]*{pattern}[\W|\w|\.]*", re.IGNORECASE)
 
-        filteredhashes = []
+        filtered_hashes = []
         hashId = 0
-        for hashType in John.HASHES:
-            if hashPattern.fullmatch(hashType):
-                filteredhashes.append((hashId, hashType))
+        for hash_type in John.HASHES:
+            if hash_pattern.fullmatch(hash_type):
+                filtered_hashes.append((hashId, hash_type))
                 hashId += 1
 
-        print(tabulate(filteredhashes, headers=["#", "Name"]))
+        print(tabulate(filtered_hashes, headers=["#", "Name"]))
 
 
     @staticmethod
-    def hashStatus(queryHash, potfile=None):
+    def hash_status(query_hash, potfile=None):
         """
         Check the status (broken by John or not) of query hash
 
         Return:
-        if queryHash is in potfile then [HASHTYPE, HASH, PASSWORD] list is returned
+        if query_hash is in potfile then [HASHTYPE, HASH, PASSWORD] list is returned
         otherwise None is returned
         """
         #import pdb;pdb.set_trace()
@@ -118,31 +119,32 @@ class John(PasswordCracker):
             permission = [os.R_OK]
             Path.access(permission, potfile)
 
-            crackedPattern = re.compile(rf"\$(\W*|\w*|.*)\$({queryHash})(\$(\W*|\w*|.*)\$)?:(\W*|\w*|.*)",
+            cracked_pattern = re.compile(rf"\$(\W*|\w*|.*)\$({query_hash})(\$(\W*|\w*|.*)\$)?:(\W*|\w*|.*)",
                                         re.DOTALL)
 
-            with open(potfile, 'r') as potFile:
-                while   crackedHash := potFile.readline().rstrip():
-                    if crackedHashPot := crackedPattern.fullmatch(crackedHash):
-                        hashPot = crackedHashPot.groups()
-                        return CrackedHash(hashType = hashPot[0],
-                                           crackedHash= hashPot[1],
-                                           password = hashPot[2],
+            with open(potfile, 'r') as john_potfile:
+                while   cracked_hash := john_potfile.readline().rstrip():
+                    if cracked_hashpot := cracked_pattern.fullmatch(cracked_hash):
+                        hashpot = cracked_hashpot.groups()
+                        return CrackedHash(hashType = hashpot[0],
+                                           crackedHash= hashpot[1],
+                                           password = hashpot[2],
                                            cracker = John)
 
             return None
 
 
         except Exception as error:
-            cmd2.Cmd.pexcept(error)
+            #cmd2.Cmd.pexcept(error)
+            print_failure(error)
 
     @staticmethod
-    def hashesFileStatus(queryHashesFile, potfile=None):
+    def hashes_file_status(query_hashes_file, potfile=None):
         """
-        Check the status (broken by John or not) of hashes in queryHashesFile
+        Check the status (broken by John or not) of hashes in query_hashes_file
         """
         #import pdb; pdb.set_trace()
-        hashesStatus = {'cracked': [], "uncracked": []}
+        hashes_status = {'cracked': [], "uncracked": []}
 
         if potfile is None:
             HOME = os.path.expanduser("~")
@@ -150,126 +152,128 @@ class John(PasswordCracker):
 
         try:
             permission = [os.R_OK]
-            Path.access(permission, potfile, queryHashesFile)
+            Path.access(permission, potfile, query_hashes_file)
 
 
-            with open(queryHashesFile, 'r') as hashesFile:
-                while queryHash := hashesFile.readline().rsplit():
-                    if crackerHash := John.hashStatus(queryHash[0]):
-                        hashesStatus['cracked'].append(crackerHash.getAttributes())
+            with open(query_hashes_file, 'r') as hashes_file:
+                while query_hash := hashes_file.readline().rsplit():
+                    if cracker_hash := John.hash_status(queryHash[0]):
+                        hashes_status['cracked'].append(cracker_hash.getAttributes())
                     else: #crackedHash is uncracked
-                        hashesStatus['uncracked'].append([queryHash])
+                        hashes_status['uncracked'].append([query_hash])
 
-            return hashesStatus
+            return hashes_status
 
         except Exception as error:
-            cmd2.Cmd.pexcept(error, "ERROR")
+            #cmd2.Cmd.pexcept(error, "ERROR")
+            print_failure(error)
 
 
     def benchmark(self, slurm=None):
         """
-            Run john benchmark
+        Run john benchmark
         """
-
-        if self.status:
+        #import pdb; pdb.set_trace()
+        if self.enable:
             #cmd2.Cmd.poutput(f"Performing John Benchmark.")
-            print_status(f"Performing John Benchmark.")
+            #print_status(f"Performing John Benchmark.")
             if slurm.partition:
-                parallelJobType = slurm.parserParallelJob()
-                if not  parallelJobType in ["MPI", "OMP"]:
-                    raise InvalidParallelJobError(parallelJobType)
+                parallel_job_type = slurm.parallel_job_parser()
+                if not  parallel_job_type in ["MPI", "OMP"]:
+                    raise InvalidParallelJob(parallel_job_type)
 
-                core, extra = slurm.parameters()
-                if parallelJobType == "MPI":
-                    parallelWork = [
+                #core, extra = slurm.parameters()
+                if parallel_job_type == "MPI":
+                    parallel_work = [
                         (
                             f"srun --mpi={slurm.pmix}"
-                            f" {self.mainexec} -b"
+                            f" {self.main_exec} --test"
                         )
                     ]
 
-                elif parallelJobType == "OMP":
-                    parallelWork = [
-                            f"{self.mainexec} -b"
+                elif parallel_job_type == "OMP":
+                    parallel_work = [
+                            f"{self.main_exec} --test"
                     ]
 
 
-                Slurm.genScript(core, extra, parallelWork)
+                batch_script_name = slurm.gen_batch_script(parallel_work)
 
-                slurmScriptName = extra['slurm-script']
-                Bash.exec(f"sbatch {slurmScriptName}")
+                Bash.exec(f"sbatch {batch_script_name}")
 
             else:
-                johnBenchmark = f"{self.mainexec} -b"
-                Bash.exec(johnBenchmark)
+                john_benchmark = f"{self.main_exec} --test"
+                Bash.exec(john_benchmark)
         else:
             #cmd2.Cmd.pwarning(f"Cracker {self.mainName} is disable")
-            print_failure(f"Cracker {self.mainName} is disable")
+            print_failure(f"Cracker {self.main_name} is disable")
 
-    def wordlistAttack(self , *, hashType, hashesFile, wordlist, slurm=None):
+    
+    def wordlist_attack(self , *, hash_type, hashes_file, wordlist, slurm=None):
         """
         Wordlist attack using john submiting parallel tasks in a cluster with Slurm
 
         Args:
-        hashType (str): Jonh's hash type
-        hashesFile (str): Hash file to attack
+        hash_type (str): Jonh's hash type
+        hashesfile (str): Hash file to attack
         wordlist (str): wordlist to attack
         slurm (Slurm): Instance of Slurm class
         """
-
-        if self.status:
+        import pdb; pdb.set_trace()
+        if self.enable:
             try:
                 permission = [os.R_OK]
-                access2args = Path.access(permission, hashesFile, wordlist)
-                validHash = John.checkHashType(hashType)
-                if  access2args and validHash:
-                    cmd2.Cmd.poutput(f"Attacking {hashType} hashes in {hashesFile} file with {wordlist} wordlist.")
-                    if slurm.partition:
-                        parallelJobType = slurm.parserParallelJob()
-                        if not  parallelJobType in ["MPI", "OMP"]:
-                            raise InvalidParallelJobError(parallelJobType)
+                Path.access(permission, hashes_file, wordlist)
+                John.check_hash_type(hash_type)
 
-                        core, extra = slurm.parameters()
-                        if parallelJobType == "MPI":
-                            parallelWork = [
-                                (
-                                    f"srun --mpi={slurm.pmix}"
-                                    f" {self.mainexec} --wordlist={wordlist}"
-                                    f" --format={hashType} {hashesFile}"
-                                )
-                            ]
+                #cmd2.Cmd.poutput(f"Attacking {hash_type} hashes in {hashesfile} file with {wordlist} wordlist.")
+                print_status(f"Attacking {hash_type} hashes in {hashes_file} file with {wordlist} wordlist")
+                if slurm.partition:
+                    parallel_job_type = slurm.parallel_job_parser()
+                    if not  parallel_job_type in ["MPI", "OMP"]:
+                        raise InvalidParallelJob(parallel_job_type)
 
-                        elif parallelJobType == "OMP":
-                            parallelWork = [
-                                (
-                                    f"{self.mainexec}"
-                                    f" --wordlist={wordlist}"
-                                    f" --format={hashType}"
-                                    f" {hashesFile}"
-                                )
-                            ]
+                    #core, extra = slurm.parameters()
+                    if parallel_job_type == "MPI":
+                        parallel_work = [
+                            (
+                                f"srun --mpi={slurm.pmix}"
+                                f" {self.main_exec} --wordlist={wordlist}"
+                                f" --format={hash_type} {hashes_file}"
+                            )
+                        ]
 
-                        Slurm.genScript(core, extra, parallelWork)
-                        slurmScriptName = extra['slurm-script']
-                        Bash.exec(f"sbatch {slurmScriptName}")
+                    elif parallel_job_type == "OMP":
+                        parallel_work = [
+                            (
+                                f"{self.main_exec}"
+                                f" --wordlist={wordlist}"
+                                f" --format={hash_type}"
+                                f" {hashes_file}"
+                            )
+                        ]
 
-                    else:
-                        wordlistAttack =  (
-                            f"{self.mainexec}"
-                            f" --wordlist={wordlist}"
-                            f" --format={hashType}"
-                            f" {hashesFile}"
-                        )
-                        Bash.exec(wordlistAttack)
+                    slurm_script_name = slurm.gen_batch_script(parallel_work)
+                    Bash.exec(f"sbatch {slurm_script_name}")
 
+                else:
+                    wordlist_attack =  (
+                        f"{self.main_exec}"
+                        f" --wordlist={wordlist}"
+                        f" --format={hash_type}"
+                        f" {hashes_file}"
+                    )
+                    Bash.exec(wordlist_attack)
             except Exception as error:
-                cmd2.Cmd.pexcept(error)
+                #cmd2.Cmd.pexcept(error)
+                print_failure(error)
 
         else:
-            cmd2.Cmd.pwarning("Cracker {self.mainName} is disable")
+            #cmd2.Cmd.pwarning("Cracker {self.main_name} is disable")
+            print_failure("Cracker {self.main_name} is disable")
 
 
-    def combinationAttack(self,* , hashType, hashesFile, wordlists=[], slurm=None,
+    def combination_attack(self,* , hashType, hashesFile, wordlists=[], slurm=None,
                           combinedWordlist="combined.txt"):
         # John.checkAttackArgs(_hashType=hashType,
         #                      _hashFile=hashFile,
@@ -283,15 +287,17 @@ class John(PasswordCracker):
                             wordlist=combinedWordlist)
 
     #NOTE: John continue when the hash was cracked
-    def incrementalAttack(self, *, hashType, hashesFile, slurm=None):
+    def incremental_attack(self, *, hash_type, hashes_file, slurm=None):
         """
         Incemental attack using john submiting parallel tasks in a cluster with Slurm
 
         Args:
-        hashType (str): Jonh's hash type
-        hashesFile (str): Hash file to attack
+        hash_type (str): Jonh's hash type
+        hashes_file (str): Hash file to attack
         slurm (Slurm): Instance of Slurm class
         """
+
+        import pdb; pdb.set_trace()
 
         if self.status:
             try:

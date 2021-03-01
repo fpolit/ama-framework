@@ -21,8 +21,8 @@ from .cracker import PasswordCracker
 from .crackedHash import CrackedHash
 # cracker exceptions imports
 from .crackerException import (
-    InvalidParallelJobError,
-    InvalidHashTypeError
+    InvalidParallelJob,
+    InvalidHashType
 )
 
 # hashcat hashes import
@@ -57,7 +57,7 @@ class Hashcat(PasswordCracker):
         """
 
         if not (hashType in Hashcat.HASHES):
-            raise InvalidHashTypeError(Hashcat, hashType)
+            raise InvalidHashType(Hashcat, hashType)
 
     @staticmethod
     def searchHash(pattern, *, sensitive=False):

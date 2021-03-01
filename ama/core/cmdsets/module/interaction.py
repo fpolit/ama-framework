@@ -50,11 +50,13 @@ class Interaction(CommandSet):
     use_parser = argparse.ArgumentParser()
     use_parser.add_argument('module', help="ama module")
 
+    # debugged - date: Feb 28 2021
     @with_argparser(use_parser)
     def do_use(self, args):
         """
         Select a avaliable module
         """
+        #import pdb; pdb.set_trace()
         selected = False
         module = args.module
 
@@ -89,46 +91,153 @@ class Interaction(CommandSet):
             else: # if module string or other type
                 print_failure(f"No module available:  {module}")
 
+        else: #initialization of selectedModule's options with the global options' values
+            selectedModule = self._cmd.selectedModule
+            for option, value in self._cmd.gvalues.items():
+                if selectedModule.isOption(option):
+                    if selectedModule.isModuleOption(option):
+                        argument = selectedModule.options.get(option)
+                        argument.value = value
+                        selectedModule.options[option] = argument
+                    else:
+                        if selectedModule.slurm:
+                            argument = selectedModule.slurm.options.get(option)
+                            argument.value = value
+                            selectedModule.slurm.options[option] = argument
+
+            self._cmd.selectedModule = selectedModule
+
+    unset_parser = argparse.ArgumentParser()
+    unset_parser.add_argument('option', help='Option to unset value')
+
+    @with_argparser(unset_parser)
+    def do_unset(self, args):
+        """
+        Unset value of an option
+        """
+        selectedModule = self._cmd.selectedModule
+
+        if selectedModule:
+            option = args.option.lower()
+            if selectedModule.isOption(option):
+                selectedModule.options[option].value = None
+            else:
+                print_failure(f"No {option.upper()} option in {selectedModule.mname} module")
+
+        else:
+            print_failure("No module selected")
+
+
+    unsetg_parser = argparse.ArgumentParser()
+    unsetg_parser.add_argument('option', help='Option to unset value')
+    @with_argparser(unsetg_parser)
+    def do_unsetg(self, args):
+        """
+        Unset global value of an option
+        """
+        selectedModule = self._cmd.selectedModule
+
+        if selectedModule:
+            option = args.option.lower()
+            if selectedModule.isOption(option):
+                selectedModule.options[option].value = None
+                if option in self._cmd.gvalues:
+                    del self._cmd.gvalues[option]
+                else:
+                    print_status("{option.upper()} value is not a global value")
+
+            else:
+                print_failure(f"No {option.upper()} option in {selectedModule.mname} module")
+
+        else:
+            print_failure("No module selected")
+
+
+    setvg_parser = argparse.ArgumentParser()
+    setvg_parser.add_argument("option", help="Option to set value")
+    setvg_parser.add_argument("value", help="Value of option")
+
+    @with_argparser(setvg_parser)
+    def do_setvg(self, args):
+        """
+        Set globally a value to an valid option
+        """
+        import pdb; pdb.set_trace()
+
+        selectedModule = self._cmd.selectedModule
+
+        if selectedModule:
+            option = args.option.lower()
+            value = args.value
+
+            try:
+                value = int(value)
+
+            except ValueError: # value is a string
+                if value in ["True", "False"]:
+                    if value == "True":
+                        value = True
+                    else:
+                        value = False
+
+            if selectedModule.isOption(option):
+                if selectedModule.isModuleOption(option): #option is a valid module option
+                    selectedModule.options[option].value = value
+
+                else: #option is a valid slurm option
+                    argument = selectedModule.slurm.options.get(option)
+                    argument.value = value
+                    selectedModule.slurm.options[option] = argument
+
+                self._cmd.selectedModule = selectedModule
+                self._cmd.gvalues[option] = value
+            else:
+                print_failure(f"No {option.upper()} option in {selectedModule.mname} module")
+
+        else:
+            print_failure("No module selected")
+
 
     setv_parser = argparse.ArgumentParser()
-    setv_parser.add_argument("variable", help="variable to set value")
-    setv_parser.add_argument("value", help="value")
+    setv_parser.add_argument("option", help="Option to set value")
+    setv_parser.add_argument("value", help="Value of option")
 
+    #debugged - date: Feb 28 2021
     @with_argparser(setv_parser)
     def do_setv(self, args):
         """
-        Set a value to a variable
+        Set a value to an valid option
         """
         #import pdb; pdb.set_trace()
 
         selectedModule = self._cmd.selectedModule
 
         if selectedModule:
-            variable = args.variable.lower()
+            option = args.option.lower()
             value = args.value
 
-            if selectedModule.isVariable(variable):
-                if isinstance(selectedModule, Attack):
-                    if selectedModule.isAttackVariable(variable):
-                        selectedModule.attack[variable].value = value
+            try:
+                value = int(value)
 
-                    else: #variable is a slurm variable
-                        slurmOptions = selectedModule.slurm.options()
-                        slurmOptions[variable].value = value
-                        selectedModule.slurm = Slurm(**slurmOptions)
+            except ValueError: # value is a string
+                if value in ["True", "False"]:
+                    if value == "True":
+                        value = True
+                    else:
+                        value = False
 
-                elif isinstance(selectedModule, Auxiliary):
-                    if selectedModule.isAuxiliaryVariable(variable):
-                        selectedModule.auxiliary[variable].value = value
+            if selectedModule.isOption(option):
+                if selectedModule.isModuleOption(option): #option is a valid module option
+                    selectedModule.options[option].value = value
 
-                    else: #variable is a slurm variable
-                        slurmOptions = selectedModule.slurm.options()
-                        slurmOptions[variable].value = value
-                        selectedModule.slurm = Slurm(**slurmOptions)
+                else: #option is a valid slurm option
+                    argument = selectedModule.slurm.options.get(option)
+                    argument.value = value
+                    selectedModule.slurm.options[option] = argument
 
                 self._cmd.selectedModule = selectedModule
             else:
-                print_failure(f"No {variable.upper()} variable in {selectedModule.mname} module")
+                print_failure(f"No {option.upper()} option in {selectedModule.mname} module")
 
         else:
             print_failure("No module selected")

@@ -14,7 +14,7 @@ from ..slurm import Slurm
 from .cracker import PasswordCracker
 
 # cracker exceptions import
-from .crackerException import InvalidSeviceError
+from .crackerException import InvalidServiceError
 
 # validator module imports
 from ..validator import Args
@@ -52,7 +52,7 @@ class Hydra(PasswordCracker):
         """
 
         if not (service in Hydra.SERVICES):
-            raise InvalidSeviceError(service)
+            raise InvalidServiceError(service)
 
 
     def wordlistAttack(user=None, usersFile=None, passwdFile=None,

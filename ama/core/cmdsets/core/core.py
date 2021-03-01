@@ -84,6 +84,6 @@ class Core(CommandSet):
         Search by valid hashes types
         """
         if args.cracker == "jtr":
-            John.searchHash(args.pattern, sensitive=args.sensitive)
+            John.search_hash(args.pattern, sensitive=args.sensitive)
         else: # cracker == hc
-            Hashcat.searchHash(args.pattern, sensitive=args.sensitive)
+            Hashcat.search_hash(args.pattern, sensitive=args.sensitive)

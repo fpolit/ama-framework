@@ -24,4 +24,38 @@ class Argument:
     def __repr__(self):
         return f"Argument(value={self.value}, required={self.required}, description={self.description})"
 
+    def __eq__(self, other):
+        if isinstance(other, Argument):
+            return self.value == other.value
+        else:
+            return self.value == other
+
+    def __ne__(self, other):
+        return not (self == other)
+
+    def __lt__(self, other):
+        if isinstance(other, Argument):
+            return self.value < other.value
+        else:
+            return self.value < other
+
+    def __gt__(self, other):
+        if isinstance(other, Argument):
+            return self.value > other.value
+        else:
+            return self.value > other
+
+    def __le__(self, other):
+        if isinstance(other, Argument):
+            return self.value < other.value or self.value == other.value
+        else:
+            return self.value < other or self.value == other
+
+    def __ge__(self, other):
+        if isinstance(other, Argument):
+            return self.value > other.value or self.value == other.value
+        else:
+            return self.value > other or self.value == other
+
+
 #Argument = namedtuple('Argument', ['value', 'required', 'description'])

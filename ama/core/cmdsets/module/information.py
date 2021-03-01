@@ -10,6 +10,12 @@
 
 import argparse
 
+# core.modules.base imports
+from ama.core.modules.base import (
+    Attack,
+    Auxiliary
+)
+
 # version import
 from ...version import get_version
 
@@ -44,7 +50,7 @@ class Information(CommandSet):
     @with_argparser(info_parser)
     def do_info(self, args):
         """
-        Supplied information about a module
+        Provide information about a module
         """
         #import pdb; pdb.set_trace()
         module = args.module
@@ -52,7 +58,7 @@ class Information(CommandSet):
         if module is None:
             selectedModule = self._cmd.selectedModule
             if selectedModule:
-                print(selectedModule.infoMsg())
+                print(selectedModule.info())
                 #cmd2.Cmd.poutput(moduleInstance.infoMsg())
             else:
                 print_failure("No module selected")
@@ -63,33 +69,27 @@ class Information(CommandSet):
                 for moduleId, moduleClass in self._cmd.filteredModules:
                     if moduleId == module:
                         moduleInstance = moduleClass()
-                        print(moduleInstance.infoMsg())
-                        #cmd2.Cmd.poutput(moduleInstance.infoMsg())
+                        print(moduleInstance.info())
                         break
 
             except ValueError: # module is a string
                 for moduleClass in self._cmd.modules.values():
                     if module == moduleClass.MNAME:
                         moduleInstance = moduleClass()
-                        print(moduleInstance.infoMsg())
-                        #cmd2.Cmd.poutput(moduleInstance.infoMsg())
+                        print(moduleInstance.info())
                         break
-
-
-    # def do_modules(self, _: cmd2.Statement):
-    #     """
-    #     show all the availables ama modules
-    #     """
-    #     amaModulesTable = []
-
-
-    #     for moduleName, moduleClass in self._cmd.modules:
-    #         amaModulesTable.appen([moduleName, ])
 
 
     options_parser = argparse.ArgumentParser()
     options_parser.add_argument('module', nargs='?', default=None,
                              help="ama module")
+    options_parser.add_argument('-r', '--required', action='store_true',
+                                help="Only show required options")
+    options_parser.add_argument('-s', '--slurm', action='store_true', dest='only_slurm',
+                                help="Show only slurm options")
+    options_parser.add_argument('-m', '--module', action='store_true', dest='only_module',
+                                help="Show only module options")
+
 
     @with_argparser(options_parser)
     def do_options(self, args):
@@ -102,8 +102,9 @@ class Information(CommandSet):
         if module is None:
             selectedModule = self._cmd.selectedModule
             if selectedModule:
-                print(selectedModule.optionsMsg())
-                #cmd2.Cmd.poutput(moduleInstance.infoMsg())
+                print(selectedModule.available_options(required=args.required,
+                                                       only_slurm = args.only_slurm,
+                                                       only_module = args.only_module))
             else:
                 print_failure("No module selected")
 
@@ -113,14 +114,16 @@ class Information(CommandSet):
                 for moduleId, moduleClass in self._cmd.filteredModules:
                     if moduleId == module:
                         moduleInstance = moduleClass()
-                        print(moduleInstance.optionsMsg())
-                        #cmd2.Cmd.poutput(moduleInstance.infoMsg())
+                        print(moduleInstance.available_options(required=args.required,
+                                                               only_slurm = args.only_slurm,
+                                                               only_module = args.only_module))
                         break
 
             except ValueError: # module is a string
                 for moduleClass in self._cmd.modules.values():
                     if module == moduleClass.MNAME:
                         moduleInstance = moduleClass()
-                        print(moduleInstance.optionsMsg())
-                        #cmd2.Cmd.poutput(moduleInstance.infoMsg())
+                        print(moduleInstance.available_options(required=args.required,
+                                                               only_slurm = args.only_slurm,
+                                                               only_module = args.only_module))
                         break

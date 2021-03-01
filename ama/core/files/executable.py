@@ -7,11 +7,11 @@
 
 import os
 
-def getExecPath():
+def get_exec_path():
     PATH = []
     OSPATH = os.get_exec_path()
-    for k, dirPath in enumerate(OSPATH):
-        if dirPath not in PATH[:k] and os.path.isdir(dirPath):
-            PATH.append(dirPath)
+    for k, dir_path in enumerate(OSPATH):
+        if dir_path not in PATH[:k] and os.path.isdir(dir_path):
+            PATH.append(dir_path)
 
     return PATH

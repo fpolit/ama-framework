@@ -1,2 +1,2 @@
 from .path import Path
-from .executable import getExecPath
+from .executable import get_exec_path
