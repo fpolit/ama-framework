@@ -19,6 +19,9 @@ from ama.core.cracker import John
 # slurm import
 from ama.core.slurm import Slurm
 
+# fineprint imports
+from fineprint.status import print_failure
+
 class JohnBenchmark(Attack):
     """
     john the ripper benchmark
@@ -91,5 +94,10 @@ class JohnBenchmark(Attack):
         """
         John the Ripper benchmark
         """
-        jtr = John()
-        jtr.benchmark(slurm = self.slurm)
+        try:
+            self.no_empty_required_options()
+            jtr = John()
+            jtr.benchmark(slurm = self.slurm)
+
+        except Exception as error:
+            print_failure(error)

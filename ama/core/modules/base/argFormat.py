@@ -15,11 +15,16 @@ class Argument:
         self.required = required
         self.description = description
 
-    def getAttributes(self):
+    def get_attributes(self):
         """
         Return attributes value, required and description in a list
         """
         return [self.value, self.required, self.description]
+
+    @staticmethod
+    def get_empty():
+        EMPTY = Argument(None, False, None)
+        return EMPTY
 
     def __repr__(self):
         return f"Argument(value={self.value}, required={self.required}, description={self.description})"
@@ -29,7 +34,6 @@ class Argument:
             return self.value == other.value
         else:
             return self.value == other
-
     def __ne__(self, other):
         return not (self == other)
 

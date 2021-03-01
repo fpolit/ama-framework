@@ -139,10 +139,26 @@ class John(PasswordCracker):
             #cmd2.Cmd.pexcept(error)
             print_failure(error)
 
+    def are_all_hashes_cracked(hashes_file: str, potfile: str = None):
+        """
+        Check if all hashes are cracked
+        return True if all hashes were cracked otherwise return False
+        """
+        all_cracked = True
+        with open(hashes_file, 'r') as hashes:
+            while query_hash := hashes.readline().rstrip():
+                if John.hash_status(query_hash, potfile) is None: # query_hash isn't cracked yet
+                    all_cracked = False
+                    break
+
+        return all_cracked
+
+
     @staticmethod
     def hashes_file_status(query_hashes_file, potfile=None):
         """
         Check the status (broken by John or not) of hashes in query_hashes_file
+        and return the cracked and uncracked hashes
         """
         #import pdb; pdb.set_trace()
         hashes_status = {'cracked': [], "uncracked": []}
@@ -211,7 +227,9 @@ class John(PasswordCracker):
             print_failure(f"Cracker {self.main_name} is disable")
 
     # debugged - date: Feb 28 2021
-    def wordlist_attack(self , *, hash_type, hashes_file, wordlist, slurm=None):
+    def wordlist_attack(self , *,
+                        hash_type: str , hashes_file: str, wordlist: str,
+                        slurm=None):
         """
         Wordlist attack using john submiting parallel tasks in a cluster with Slurm
 
@@ -289,7 +307,9 @@ class John(PasswordCracker):
 
     #NOTE: John continue when the hash was cracked
     # debugged - date: Feb 28 2021
-    def incremental_attack(self, *, hash_type, hashes_file, slurm=None):
+    def incremental_attack(self, *,
+                           hash_type: str, hashes_file: str,
+                           slurm=None):
         """
         Incemental attack using john submiting parallel tasks in a cluster with Slurm
 
@@ -354,102 +374,132 @@ class John(PasswordCracker):
             print_failure("Cracker {self.main_name} is disable")
 
 
-    def masksAttack(self, *, hashType, hashesFile, masksFile, slurm=None):
-        # John.checkAttackArgs(_hashType=hashType,
-        #                      _hashFile=hashFile,
-        #                      _masksFile=masksFile)
+    def masks_attack(self, *,
+                     hash_type: str, hashes_file: str, masks_file: str,
+                     masks_attack_script: str, slurm):
+        """
+        Masks attack using john submiting parallel tasks in a cluster with Slurm
 
-        print_successful(f"Attacking {hashType} hashes in {hashesFile} file with {masksFile} mask file.")
-        if slurm.partition:
-            maskAttackScript = "maskAttack.py"
-            John.genMaskAttack(hashType = hashType,
-                               hashesFile = hashFile,
-                               masksFile = masksFile,
-                               hpc = hpc,
-                               maskAttackScript = maskAttackScript)
+        Args:
+        hash_type (str): John's hash type
+        hashes_file (str): Hash file to attack
+        masks_file (str): Masks file
+        mask_attack_script (str): Name for generated mask attack script
+        slurm (Slurm): Instance of Slurm class
+        """
 
-            parallelWork = [f"python3 {maskAttackScript}"]
-            slurm, extra = hpc.parameters()
-            slurmScriptName = extra['slurm-script']
-            HPC.genScript(slurm, extra, parallelWork)
-            Bash.exec(f"sbatch {slurmScriptName}")
+        import pdb; pdb.set_trace()
+
+        if self.enable:
+            try:
+                permission = [os.R_OK]
+                Path.access(permission, hahes_file, masks_file)
+                John.check_hash_type(hash_type)
+
+                print_status(f"Attacking {hash_type} hashes in {hashes_file} file with {masks_file} mask file.")
+                if slurm.partition:
+                    John.gen_masks_attack(hash_type = hashType,
+                                          hashes_file = hashFile,
+                                          masks_file = masksFile,
+                                          masks_attack_script = masks_attack_script,
+                                          slurm = slurm)
+
+                    parallel_work = [f"python3 {masks_attack_script}"]
+                    slurm_script_name = slurm.gen_batch_script(parallel_work)
+                    Bash.exec(f"sbatch {slurm_script_name}")
+
+                else:
+                    with open(masks_file, 'r') as masks:
+                        while mask := masks.readline().rstrip():
+                            all_cracked = John.are_all_hashes_cracked(hashes_file)
+                            if not all_cracked:
+                                mask_attack =  (
+                                    f"{jtr.mainexec} --mask={mask}"
+                                    f" --format={hash_type} {hashes_file}"
+                                )
+                                print_status(f"\nRunning: {mask_attack}")
+                                Bash.exec(mask_attack)
+
+            except Exception as error:
+                #cmd2.Cmd.pexcept(error)
+                print_failure(error)
 
         else:
-            with open(masksFile, 'r') as masks:
-                while mask := masks.readline().rstrip():
-                    cracked = PasswordCracker.hashFileStatus(jtr.getName(), hashFile)
-                    if not cracked:
-                        maskAttack =   f"{jtr.mainexec} --mask={mask} --format={hashType} {hashFile}"
-                        print_status(f"\nRunning: {maskAttack}")
-                        Bash.exec(maskAttack)
+            #cmd2.Cmd.pwarning("Cracker {self.main_name} is disable")
+            print_failure("Cracker {self.main_name} is disable")
 
-            PasswordCracker.reportHashesFileStatus(hashFIle)
 
-    # tested
     @staticmethod
-    def genMaskAttack(*, hashType, hashesFile, masksFile, slurm, maskAttackScript="maskAttack.py"):
+    def gen_masks_attack(*,
+                         hash_type: str, hashes_file: str, masks_file: str,
+                         masks_attack_script: str, slurm):
         _mask = "{mask}"
-        _jtr_mainexec = "{jtr.mainexec}"
+        _jtr_main_exec = "{jtr.main_exec}"
         _attack = "{attack}"
-        _masksFile = f"'{masksFile}'"
-        _hashesFile = f"'{hashesFile}'"
-        _attack_msg = "{attack_msg}"
+        _masks_file = f"'{masks_file}'"
+        _hashes_file = f"'{hashes_file}'"
+        #_attack = "{attack}"
 
 
-        parallelJobType = hpc.parserParallelJob()
-        if not  parallelJobType in ["MPI", "OMP"]:
-            raise ParallelWorkError(parallelJobType)
+        parallel_job_type = slurm.parallel_job_parser()
+        if not  parallel_job_type in ["MPI", "OMP"]:
+            raise InvalidParallelJob(parallel_job_type)
 
-        slurm, extra = hpc.parameters()
-        #maskAttack = ""
-        if parallelJobType == "MPI":
-            maskAttack = f"""
+
+        if parallel_job_type == "MPI":
+            masks_attack = (
+                f"""
 #!/bin/env python3
 
-from hattack.cracker.PasswordCracker import PasswordCracker
-from hattack.cracker.John import John
-from sbash.core import Bash
+from ama.core.cracker import John
+from sbash import Bash
 
 jtr = John()
 
 with open({_masksFile}, 'r') as masks:
     while mask := masks.readline().rstrip():
-        cracked = PasswordCracker.hashFileStatus(jtr.getName(), {_hashesFile})
-        if not cracked:
-            attack =   f"srun --mpi={hpc.pmix} {_jtr_mainexec} --mask={_mask} --format={hashType} {hashesFile}"
-            attack_msg = f"Running: {_attack}"
-            Bash.exec(f"echo {_attack_msg}")
-            Bash.exec(attack)
-            """
+        all_cracked = John.are_all_hashes_cracked(hashes_file)
+        if not all_cracked:
+            attack =  (
+                f"srun --mpi={slurm.pmix}"
+                f" {_jtr_main_exec} --mask={mask}"
+                f" --format={hash_type} {hashes_file}"
+            )
+            Bash.exec(_attack)
+                """
+            )
 
+        elif parallel_job_type == "OMP":
+            masks_attack = (
+                f"""
+#!/bin/env python3
 
-        elif parallelJobType == "OMP":
-            maskAttack =f"""
-#!/usr/bin/env python3
-
-from hattack.cracker.PasswordCracker import PasswordCracker
-from hattack.cracker.John import John
-from sbash.core import Bash
+from ama.core.cracker import John
+from sbash import Bash
 
 jtr = John()
 
 with open({_masksFile}, 'r') as masks:
     while mask := masks.readline().rstrip():
-        cracked = PasswordCracker.hashFileStatus(jtr.getName(), {_hashesFile})
-        if not cracked:
-            attack =   f"srun {_jtr_mainexec} --mask={_mask} --format={hashType} {hashesFile}"
-            attack_msg = f"Running: {_attack}"
-            Bash.exec(f"echo {_attack_msg}")
-            Bash.exec(attack)
-            """
+        all_cracked = John.are_all_hashes_cracked(hashes_file)
+        if not all_cracked:
+            attack =  (
+                f"srun {_jtr_main_exec} --mask={mask}"
+                f" --format={hash_type} {hashes_file}"
+            )
+            Bash.exec(_attack)
+                """
+            )
 
-        with open(maskAttackScript, 'w') as attack:
-            attack.write(maskAttack)
+        with open(masks_attack_script, 'w') as attack:
+            attack.write(masks_attack)
 
-        print_status(f"Mask attack script generated: {maskAttackScript}")
+        print_status(f"Masks attack script generated: {masks_attack_script}")
 
     # debugged - date: Mar 1 2021
-    def single_attack(self, *, hash_type, hashes_file, slurm=None):
+    def single_attack(self, *,
+                      hash_type: str, hashes_file: str,
+                      slurm=None):
         """
         Single attack using john submiting parallel tasks in a cluster with Slurm
 

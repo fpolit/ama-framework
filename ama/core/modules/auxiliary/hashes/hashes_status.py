@@ -54,13 +54,15 @@ class HashesStatus(Auxiliary):
     )
 
     def __init__(self, *,
-                 query_hashes_file:str = None, slurm=None):
+                 query_hashes_file:str = None, uncracked_hashes: str = None,
+                 slurm=None):
         """
         Initialization of auxiliary/hashes/hashes_status ama module
         """
 
         auxiliary_options = {
-            'hashes_file': Argument(query_hashes_file, True, "Hashes file to check status")
+            'hashes_file': Argument(query_hashes_file, True, "Hashes file to check status"),
+            'uncracked_hashes': Argument(uncracked_hashes, False, "File to save uncracked hashes")
         }
 
         init_options = {
@@ -75,6 +77,7 @@ class HashesStatus(Auxiliary):
         super().__init__(**init_options)
 
 
+    # debugged - date: Mar 1 2021
     def run(self):
         """
         Execution of auxiliary/hashes/hashes_status ama module
@@ -96,11 +99,16 @@ class HashesStatus(Auxiliary):
                     for cracker in crackers:
                         if cracked_hash := cracker.hash_status(query_hash):
                             cracked = True
-                            hashes_status['cracked'].append(cracked_hash.getAttributes())
+                            hashes_status['cracked'].append(cracked_hash.get_loot())
                             break # break for loop
 
                     if not cracked:
                         hashes_status['uncracked'].append([query_hash])
+
+            if uncracked_hashes := self.options.get('uncracked_hashes', Argument.get_empty()).value:
+                with open(uncracked_hashes, 'w') as uncracked_hashes_file:
+                    for uhash in hashes_status['uncracked']:
+                        uncracked_hashes_file.write(f"{uhash[0]}\n") #hashes_status['uncracked'] struct is [[UNCRACKED_HASH], [OTHER_UNCRACKED_HASH], ...]
 
             # print status of hashes in hashesFile
             status_hashes_table = (
@@ -110,19 +118,12 @@ class HashesStatus(Auxiliary):
 {tabulate(hashes_status["cracked"],headers = ["Hash", "Type", "Password", "Cracker"])}
 
     Uncracked Hashes:
-                
+
 {tabulate(hashes_status["uncracked"],headers = ["Hash"])}
                 """
             )
 
             print(status_hashes_table)
-            # print("\tCracked Hashes:")
-            # print(tabulate(hashes_status["cracked"],
-            #                headers = ["Hash", "Type", "Password", "Cracker"]))
-
-            # print("\tUncracked Hashes:")
-            # print(tabulate(hashes_status["uncracked"],
-            #                headers = ["Hash"]))
 
         except Exception as error:
             #cmd2.Cmd.pexcept(error)

@@ -19,6 +19,10 @@ from ama.core.cracker import John
 # slurm import
 from ama.core.slurm import Slurm
 
+# fineprint imports
+from fineprint.status import print_failure
+
+
 class JohnSingle(Attack):
     """
     Single Attack using john cracker
@@ -100,7 +104,12 @@ class JohnSingle(Attack):
         """
         Single attack using John the Ripper
         """
-        jtr = John()
-        jtr.single_attack(hash_type = self.options['hash_type'].value,
-                          hashes_file = self.options['hashes_file'].value,
-                          slurm = self.slurm)
+        try:
+            self.no_empty_required_options()
+            jtr = John()
+            jtr.single_attack(hash_type = self.options['hash_type'].value,
+                              hashes_file = self.options['hashes_file'].value,
+                              slurm = self.slurm)
+
+        except Exception as error:
+            print_failure(error)

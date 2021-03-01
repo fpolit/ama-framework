@@ -104,8 +104,14 @@ class JohnWordlist(Attack):
         """
         Wordlist attack using John the Ripper
         """
-        jtr = John()
-        jtr.wordlist_attack(hash_type = self.options['hash_type'].value,
-                            hashes_file = self.options['hashes_file'].value,
-                            wordlist = self.options['wordlist'].value,
-                            slurm = self.slurm)
+        try:
+            self.no_empty_required_options()
+            jtr = John()
+            jtr.wordlist_attack(hash_type = self.options['hash_type'].value,
+                                hashes_file = self.options['hashes_file'].value,
+                                wordlist = self.options['wordlist'].value,
+                                slurm = self.slurm)
+            
+        except Exception as error:
+            print_failure(error)
+

@@ -18,7 +18,7 @@ class CrackedHash:
         self.password = password
         self.cracker = cracker
 
-    def getAttributes(self):
+    def get_loot(self):
         """
         Return cracked_hash, hash_type, password and cracker attributes of CrackedHash
         """

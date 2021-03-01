@@ -20,6 +20,9 @@ from ama.core.cracker import John
 # slurm import
 from ama.core.slurm import Slurm
 
+# fineprint imports
+from fineprint.status import print_failure
+
 # debugged - date: Feb 28 2021
 class JohnIncremental(Attack):
     """
@@ -102,7 +105,13 @@ class JohnIncremental(Attack):
         """
         Incremental attack using John the Ripper
         """
-        jtr = John()
-        jtr.incremental_attack(hash_type = self.options['hash_type'].value,
-                               hashes_file = self.options['hashes_file'].value,
-                               slurm = self.slurm)
+
+        try:
+            self.no_empty_required_options()
+            jtr = John()
+            jtr.incremental_attack(hash_type = self.options['hash_type'].value,
+                                   hashes_file = self.options['hashes_file'].value,
+                                   slurm = self.slurm)
+
+        except Exception as error:
+            print_failure(error)

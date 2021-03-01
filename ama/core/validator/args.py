@@ -7,60 +7,77 @@
 #
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
-# cmd2 imports
-import cmd2
-
 # varname package imports
 from varname import argname
 
 # validator exceptions import
 from .exceptions import (
-    NoneArgumentsError,
-    AllNoneArgumentsError
+    SomeArgumentHasNoneValue,
+    AllArgumentsHaveNoneValue,
+    NotAllRequiredArgumentsSupplied
 )
 
 
 class Args:
 
     @staticmethod
-    def notNone(*args):
+    def not_none(*args):
         """
-        Check that all its arguments are not None otherwise raise a exception (NoneArgumentsError)
+        Check that all its arguments are not None otherwise raise SomeArgumentHasNoneValue exception
 
         Raise:
-        NoneArgumentsError: Error if some arguments is None
+        SomeArgumentHasNoneValue: Error if some arguments have None as value
         """
         someNone = False
-        noneArgs = []
+        none_args = []
 
         names = argname(*args)
         for name, arg in zip(names, args):
             if arg is None:
                 someNone = True
-                cmd2.Cmd.pwarning(f"{name} variable is None")
-                noneArgs.append(arg)
+                #cmd2.Cmd.pwarning(f"{name} variable is None")
+                none_args.append(arg)
 
         if someNone:
-            raise NoneArgumentsError(noneArgs)
+            raise SomeArgumentHasNoneValue(*none_args)
 
     @staticmethod
-    def someNotNone(*args):
+    def some_not_none(*args):
         """
-        Check if there is a argument not None otherwise raise a exception (AllNoneArgumentsError)
+        Check if there is an argument not None otherwise raise AllArgumentsHaveNoneValue exception
 
         Raise:
-        AllNoneArgumentsError: Error if all arguments are None
+        AllArgumentsHaveNoneValue: Error if all arguments are None
         """
         someNotNone = False
-        noneArgs = []
+        none_args = []
 
         names = argname(*args)
         for name, arg in zip(names, args):
             if arg is not None:
                 someNotNone = True
             else:
-                cmd2.Cmd.pwarning(f"{name} variable is None")
-                noneArgs.append(arg)
+                #cmd2.Cmd.pwarning(f"{name} variable is None")
+                none_args.append(arg)
 
         if not someNotNone: #all supplied argument are None
-            raise AllNoneArgumentsError(noneArgs)
+            raise AllArgumentsHaveNoneValue(*noneArgs)
+
+    @staticmethod
+    def no_empty_required_options(**kwargs): # kwargs format: {OPTION_NAME: OPTION_VALUE (Instance of Argument),...}
+        """
+        Check that all required variable are supplied otherwise raise NotAllRequiredArgumentsSupplied exception
+        Raise:
+           NotAllRequiredArgumentsSupplied: Error if some required argument wasn't supplied
+        """
+
+        all_supplied = True
+        no_supplied_names = []
+
+        for name, option in kwargs.items():
+            if options.value is None:
+                all_supplied = False
+                no_supplied_names.appens(name)
+
+        if not all_supplied:
+            raise NotAllRequiredArgumentsSupplied(no_supplied_names)

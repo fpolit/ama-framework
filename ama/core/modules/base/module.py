@@ -21,6 +21,9 @@ from fineprint.status import (
     print_successful
 )
 
+# validator import
+from ama.core.validator import Args
+
 class Module:
     """
     base class to build ama modules
@@ -110,10 +113,10 @@ License : GPLv3
 
     def module_options(self, required=False):
         if required:
-            module_options_table = [[name.upper(), *option.getAttributes()]
+            module_options_table = [[name.upper(), *option.get_attributes()]
                                     for name, option in self.options.items() if option.required]
         else:
-            module_options_table = [[name.upper(), *option.getAttributes()]
+            module_options_table = [[name.upper(), *option.get_attributes()]
                                     for name, option in self.options.items()]
 
         return module_options_table
@@ -125,14 +128,29 @@ License : GPLv3
         if self.slurm:
             slurm_options = self.slurm.options
             if required:
-                slurm_options_table = [[name.upper(), *option.getAttributes()]
+                slurm_options_table = [[name.upper(), *option.get_attributes()]
                                        for name, option in slurm_options.items() if option.required]
             else:
-                slurm_options_table = [[name.upper(), *option.getAttributes()]
+                slurm_options_table = [[name.upper(), *option.get_attributes()]
                                        for name, option in slurm_options.items()]
 
         return slurm_options_table
 
+
+    def no_empty_required_options():
+        import pdb; pdb.set_trace()
+        required_module_args = {name: option
+                                for name, options in self.options if option.required}
+
+        required_slurm_args = {}
+        if self.slurm:
+            required_slurm_args = {name: option
+                                   for name, options in self.slurm.options if option.required}
+
+
+        required_args = {**required_module_args, **required_slurm_args}
+
+        Args.no_empty_required_options(**required_args)
 
     def isModuleOption(self, option):
         if option in self.options:
