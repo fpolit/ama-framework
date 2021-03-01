@@ -48,10 +48,10 @@ class NotAllRequiredArgumentsSupplied(Exception):
 
         #names = argname(none_args)
         for index, name in enumerate(args_names):
-            last_index = (len(names)-1)
+            last_index = (len(args_names)-1)
             if index == last_index:
-                self.warning += f" {name}"
+                self.warning += f" {name.upper()}"
             else:
-                self.warning += f" {name},"
+                self.warning += f" {name.upper()},"
 
         super().__init__(self.warning)

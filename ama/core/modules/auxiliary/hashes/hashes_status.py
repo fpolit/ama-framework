@@ -54,14 +54,14 @@ class HashesStatus(Auxiliary):
     )
 
     def __init__(self, *,
-                 query_hashes_file:str = None, uncracked_hashes: str = None,
+                 hashes_file:str = None, uncracked_hashes: str = None,
                  slurm=None):
         """
         Initialization of auxiliary/hashes/hashes_status ama module
         """
 
         auxiliary_options = {
-            'hashes_file': Argument(query_hashes_file, True, "Hashes file to check status"),
+            'hashes_file': Argument(hashes_file, True, "Hashes file to check status"),
             'uncracked_hashes': Argument(uncracked_hashes, False, "File to save uncracked hashes")
         }
 

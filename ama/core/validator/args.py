@@ -75,9 +75,9 @@ class Args:
         no_supplied_names = []
 
         for name, option in kwargs.items():
-            if options.value is None:
+            if option.value is None:
                 all_supplied = False
-                no_supplied_names.appens(name)
+                no_supplied_names.append(name)
 
         if not all_supplied:
             raise NotAllRequiredArgumentsSupplied(no_supplied_names)

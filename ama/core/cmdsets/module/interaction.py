@@ -262,7 +262,14 @@ class Interaction(CommandSet):
         self._cmd.selectedModule = None
         self._cmd.prompt = "ama > "
 
+    attack_parser = argparse.ArgumentParser()
+    attack_parser.add_argument('-l', '--local', action='store_true',
+                               help="Try to perform the attack locally")
+    attack_parser.add_argument('-r', '--report', action='store_true',
+                               help="Show attack report")
+
     #debugged - data: feb 27 2021
+    @with_argparser(attack_parser)
     def do_attack(self, args):
         """
         Perform an attack with the selected module
@@ -271,7 +278,7 @@ class Interaction(CommandSet):
         if selectedModule:
             if isinstance(selectedModule, Attack):
                 print_status(f"Running {selectedModule.MNAME} module")
-                selectedModule.attack()
+                selectedModule.attack(args.local, args.report)
             else: # selectedModule is an instance of Auxiliary
                 print_failure(f"No attack method for {selectedModule.MNAME} module")
         else:

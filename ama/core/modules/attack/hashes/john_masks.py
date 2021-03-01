@@ -106,18 +106,31 @@ class JohnMasks(Attack):
 
         super().__init__(**init_options)
 
-    def attack(self):
+    def attack(self, local=False, report=True):
         """
-        masks attack using John the Ripper
+        Masks attack using John the Ripper
+        Args:
+          local (bool): try to perform the attack locally
         """
+        #import pdb; pdb.set_trace()
         try:
-            self.no_empty_required_options()
+            self.no_empty_required_options(local)
             jtr = John()
-            jtr.masks_attack(hash_type = self.options['hash_type'].value,
-                             hashes_file = self.options['hashes_file'].value,
-                             masks_file= self.options['masks_file'].value,
-                             masks_attack_script= self.options['masks_attack'].value,
-                             slurm = self.slurm)
+            if local:
+                jtr.masks_attack(hash_type = self.options['hash_type'].value,
+                                 hashes_file = self.options['hashes_file'].value,
+                                 masks_file= self.options['masks_file'].value,
+                                 masks_attack_script= self.options['masks_attack'].value,
+                                 report = report,
+                                 slurm = None)
+
+            else: #submit the attack in a cluster with slurm
+                jtr.masks_attack(hash_type = self.options['hash_type'].value,
+                                 hashes_file = self.options['hashes_file'].value,
+                                 masks_file= self.options['masks_file'].value,
+                                 masks_attack_script= self.options['masks_attack'].value,
+                                 report = report,
+                                 slurm = self.slurm)
 
         except Exception as error:
             print_failure(error)

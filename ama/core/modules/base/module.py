@@ -137,15 +137,17 @@ License : GPLv3
         return slurm_options_table
 
 
-    def no_empty_required_options():
-        import pdb; pdb.set_trace()
+    # debugged - date : Mar 1 2021
+    def no_empty_required_options(self, local=False):
+        #import pdb; pdb.set_trace()
         required_module_args = {name: option
-                                for name, options in self.options if option.required}
+                                for name, option in self.options.items() if option.required}
 
         required_slurm_args = {}
-        if self.slurm:
-            required_slurm_args = {name: option
-                                   for name, options in self.slurm.options if option.required}
+        if not local:
+            if self.slurm:
+                required_slurm_args = {name: option
+                                       for name, option in self.slurm.options.items() if option.required}
 
 
         required_args = {**required_module_args, **required_slurm_args}
