@@ -28,9 +28,6 @@
 [submodule "nth"]
 	path = ama/core/auxiliary/hashes/nth
 	url = https://github.com/fpolit/nth.git
-[submodule "hash_hammer"]
-	path = ama/core/auxiliary/hashes/hash_hammer
-	url = https://github.com/fpolit/hash_hammer.git
 [submodule "hate_crack"]
 	path = ama/core/auxiliary/hashes/hate_crack
 	url = https://github.com/fpolit/hate_crack.git
