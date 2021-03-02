@@ -1,3 +1,4 @@
+# base packages
 psycopg2
 fineprint
 sbash
@@ -5,3 +6,23 @@ random-password-generator
 cmd2
 tabulate
 varname
+
+# auxiliary module packages
+
+## auxiliary/hashes
+name-that-hash
+search-that-hash
+hashid
+
+## auxiliary/wordlists
+pydictor
+cupp
+crunch-ama
+
+
+## auxiliary/analysis
+pack-ama
+ppack-ama
+
+## auxiliary/combinator
+mixer-ama
