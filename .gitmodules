@@ -1,15 +1,9 @@
 [submodule "docs/wiki"]
 	path = docs/wiki
 	url = https://github.com/fpolit/ama-framework.wiki.git
-[submodule "ppack"]
-	path = ama/core/auxiliary/analysis/ppack
-	url = https://github.com/fpolit/ppack.git
 [submodule "pipal"]
 	path = ama/core/auxiliary/analysis/pipal
 	url = https://github.com/fpolit/pipal.git
-[submodule "mixer"]
-	path = ama/core/auxiliary/combinator/mixer
-	url = https://github.com/fpolit/mixer.git
 [submodule "crunch"]
 	path = ama/core/auxiliary/wordlists/crunch
 	url = https://github.com/fpolit/crunch.git

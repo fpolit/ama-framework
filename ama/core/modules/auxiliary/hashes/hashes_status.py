@@ -40,7 +40,7 @@ class HashesStatus(Auxiliary):
     """
 
 
-    DESCRIPTION = "Check status of hashes"
+    DESCRIPTION = "Check hashes status"
     MNAME = "auxiliary/hashes/hashes_status"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
     AUTHOR = [

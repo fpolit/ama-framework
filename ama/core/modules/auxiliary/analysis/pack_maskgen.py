@@ -50,9 +50,10 @@ class PackMaskgen(Auxiliary):
                  optindex: bool = False, occurrence: bool = False, complexity: bool = False,
                  checkmasks: List[str] = None, checkmasksfile: str = None,
                  targettime: int = None, showmasks: bool = False, pps: int = None, quiet: bool = False
-                 ):
+                 slurm = None):
+
         self.banner = getPackBanner()
-        auxiliaryOptions = {
+        auxiliary_options = {
             'output': output,
 
             # mask filters
@@ -82,7 +83,7 @@ class PackMaskgen(Auxiliary):
         }
 
 
-        initOptions = {
+        init_options = {
             'mname': mname,
             'author': author,
             'description': description,
@@ -91,7 +92,7 @@ class PackMaskgen(Auxiliary):
             'slurm': slurm
         }
 
-        supper().__init__(**initOptions)
+        supper().__init__(**init_options)
 
 
     def run(self):

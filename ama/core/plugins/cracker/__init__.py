@@ -1,6 +1,7 @@
 #base class
 from .cracker import PasswordCracker
 from .crackedHash import CrackedHash
+
 # crackers
 from .john import John
 from .hashcat import Hashcat

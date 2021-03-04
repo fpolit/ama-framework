@@ -39,7 +39,7 @@ from fineprint.status import (
 import cmd2
 
 # slurm imports
-from ..slurm import Slurm
+from ...slurm import Slurm
 
 # cracker imports
 from .cracker import PasswordCracker
@@ -49,7 +49,7 @@ from .crackedHash import CrackedHash
 from ama.data.hashes import jtrHashes
 
 # core.file imports
-from ..files import Path
+from ...files import Path
 
 # cracker exceptions imports
 from .crackerException import (

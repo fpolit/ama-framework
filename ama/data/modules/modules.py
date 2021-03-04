@@ -43,7 +43,12 @@ from ama.core.modules.attack.hashes import (
 
 ### auxiliary modules imports
 ## auxiliary/wordlists modules imports
-
+from ama.core.modules.auxiliary.wordlists import (
+    CuppInteractive,
+    CuppRefine,
+    CuppDownload,
+    CuppAlecto
+)
 
 ## auxiliary/hashes modules imports
 from ama.core.modules.auxiliary.hashes import (
@@ -91,7 +96,12 @@ attackModules = {
 ### auxiliary modules
 
 ## auxiliary/wordlists modules
-auxiliaryWordlistModules = {}
+auxiliaryWordlistModules = {
+    f"{CuppInteractive.MNAME}": CuppInteractive,
+    f"{CuppRefine.MNAME}": CuppRefine,
+    f"{CuppDownload.MNAME}": CuppDownload,
+    f"{CuppAlecto.MNAME}": CuppAlecto
+}
 
 ## auxiliary/hashes modules
 auxiliaryHashesModules = {

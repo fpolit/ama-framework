@@ -8,7 +8,7 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 # slurm import
-from ..slurm import Slurm
+from ...slurm import Slurm
 
 # cracker modules import
 from .cracker import PasswordCracker
@@ -17,7 +17,7 @@ from .cracker import PasswordCracker
 from .crackerException import InvalidServiceError
 
 # validator module imports
-from ..validator import Args
+from ...validator import Args
 
 class Hydra(PasswordCracker):
     SERVICES = ("adam6500", "asterisk", "afp", "cisco", "cisco-enable", "cvs", "firebird", "ftp", "ftps",
