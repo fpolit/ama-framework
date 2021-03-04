@@ -13,21 +13,9 @@
 [submodule "crunch"]
 	path = ama/core/auxiliary/wordlists/crunch
 	url = https://github.com/fpolit/crunch.git
-[submodule "cupp"]
-	path = ama/core/auxiliary/wordlists/cupp
-	url = https://github.com/fpolit/cupp.git
-[submodule "pydictor"]
-	path = ama/core/auxiliary/wordlists/pydictor
-	url = https://github.com/fpolit/pydictor.git
 [submodule "cewl"]
 	path = ama/core/auxiliary/wordlists/cewl
 	url = https://github.com/fpolit/cewl.git
-[submodule "nth"]
-	path = ama/core/auxiliary/hashes/nth
-	url = https://github.com/fpolit/nth.git
 [submodule "hate_crack"]
 	path = ama/core/auxiliary/hashes/hate_crack
 	url = https://github.com/fpolit/hate_crack.git
-[submodule "hashid"]
-	path = ama/core/auxiliary/hashes/hashid
-	url = https://github.com/fpolit/hashid.git
