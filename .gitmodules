@@ -1,9 +1,6 @@
 [submodule "docs/wiki"]
 	path = docs/wiki
 	url = https://github.com/fpolit/ama-framework.wiki.git
-[submodule "pack"]
-	path = ama/core/auxiliary/analysis/pack
-	url = https://github.com/fpolit/pack.git
 [submodule "ppack"]
 	path = ama/core/auxiliary/analysis/ppack
 	url = https://github.com/fpolit/ppack.git
