@@ -27,7 +27,11 @@ from cmd2 import (
 )
 
 # data/modules imports
-from ama.data.modules import amaModulesType
+from ama.data.modules import (
+    amaModulesType,
+    #amaModulesSubtype
+)
+
 
 @with_default_category(Category.MODULE)
 class Search(CommandSet):
@@ -42,10 +46,12 @@ class Search(CommandSet):
     search_parser = argparse.ArgumentParser()
     search_parser.add_argument('-t', '--type', dest='moduleType', choices=amaModulesType, default=None,
                                help="Module type")
+    # search_parser.add_argument('-s', '--subtype', dest='moduleSubtype', choices=amaModulesSubtype, default=None,
+    #                            help="Module subtype")
     search_parser.add_argument('pattern', nargs='?', default='',
                                help='Pattern to search availables modules')
 
-    # debugged
+    # debugged - date: Mar 4 2021
     @with_argparser(search_parser)
     def do_search(self, args):
         """

@@ -6,4 +6,4 @@ from .crackedHash import CrackedHash
 from .john import John
 from .hashcat import Hashcat
 from .hydra import Hydra
-
+from .sth import STH

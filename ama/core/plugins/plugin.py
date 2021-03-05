@@ -19,7 +19,7 @@ from typing import List
 
 
 class Plugin:
-    def __init__(self, name, *, version=None, main_exec=None):
+    def __init__(self, name, *, version=None, main_exec=None, search_exec=True):
         self.name = name #it can be a list of name (e.g. ["hashcat", "hc"])
         self.main_name = name[0] if isinstance(name, list) else name
         self.version = version
@@ -29,18 +29,22 @@ class Plugin:
         if main_exec:
             self.enable = True
         else:
-            self.main_exec = Plugin.search_main_exec(name)
-            if self.main_exec is None:
-                self.enable = False
-            else:
+            if search_exec:
+                self.main_exec = Plugin.search_main_exec(name)
+                if self.main_exec is None:
+                    self.enable = False
+                else:
+                    self.enable = True
+            else: #this plugin doesn't havent a cli command but the source code is avaliable
                 self.enable = True
+                self.main_exec = None
 
     def __repr__(self):
         return f"Plugin(Name: {self.main_name}, exec: {self.main_exec}, version: {self.version})"
 
     #debugged - date: Feb 27 2021
     @staticmethod
-    def search_main_exec(cracker_name: List[str]):
+    def search_main_exec(plugin_name: List[str]):
         """
         Search an executable file of a plugin using its names (list) as patterns
         """

@@ -6,10 +6,8 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
-
-# cmd2 imports
-import cm2
-# typing import
+from fineprint.status import print_failure
+import cmd2
 from typing import List
 
 # module.base imports
@@ -18,11 +16,8 @@ from ama.core.modules.base import (
     Argument
 )
 
-# hashid imports
-from ama.core.auxiliary.hashes.hashid import (
-    HashID,
-    getHashIDBanner
-)
+# plugins imports
+from ama.core.plugins.auxiliary.hashes import HashID as PLuginHashID
 
 # validator imports
 from ama.core.validator import Args
@@ -33,125 +28,69 @@ class HashID(Auxiliary):
     """
     hash identifier - hashID
     """
-    description = "hash identifier - hashID"
-    mname = "auxiliary/hashes/hashid"
-    author = [
+    DESCRIPTION = "HashID - hash identifier"
+    MNAME = "auxiliary/hashes/hashid"
+    MTYPE, MSUBTYPE, NAME = MNAME.split("/")
+    AUTHOR = [
         "glozanoa <glozanoa@uni.pe>"
     ]
-    fulldescription = (
+
+    FULLDESCRIPTION = (
         """
-        Identify the different types of hashes used to encrypt data
+        Identify different types of hashes used to encrypt data
         and return valid Hashcat or John hashes types
         """
     )
 
+    REFERENCES = [
+        "https://github.com/psypanda/hashID"
+    ]
+
     def __init__(self, *,
-                 queryHash: str = None, hashesFile: str = None, output: str = None,
-                 extended: bool = False, hashcat: bool = True, john: bool = True):
-        self.banner = getHashIDBanner()
+                 hashes: str = None, output: str = None,
+                 extended: bool = True, hashcat: bool = True, john: bool = True):
 
-        auxiliaryOptions = {
-            'query_hash': Argument(queryHash, True, "Hash to identify"),
-            'hashes_file': Argument(hashesFile, False, "Hashes file ot identify"),
+        auxiliary_options = {
+            'hashes': Argument(hashes, True, "Hashes to identify (hash or hashes file)"),
             'output': Argument(output, False, "Output File"),
-            'extended': Argument(extended, False, "List all possible hash algorithms including salted passwords"),
-            'hashcat': Argument(hashcat, False, "Show corresponding Hashcat mode in output"),
-            'john': Argument(john, False, "Show corresponding JohnTheRipper hash format in output")
+            'extended': Argument(extended, True, "List all possible hash algorithms including salted passwords"),
+            'hashcat': Argument(hashcat, True, "Show corresponding Hashcat mode in output"),
+            'john': Argument(john, True, "Show corresponding John hash format in output")
         }
 
-        initOptions = {
-            'mname': mname,
-            'author': author,
-            'description': description,
-            'fulldescription':  fulldescription,
-            'auxiliaryOptions': auxiliaryOptions,
+        init_options = {
+            'mname': HashID.MNAME,
+            'author': HashID.AUTHOR,
+            'description': HashID.DESCRIPTION,
+            'fulldescription': HashID.FULLDESCRIPTION,
+            'references': HashID.REFERENCES,
+            'auxiliary_options': auxiliary_options,
+            'slurm': None
         }
 
-        super().__init__(**initOptions)
+        super().__init__(**init_options)
 
     def run(self):
-        # check that required arguments aren't None
-        for option in self.auxiliary.values():
-            if option.required:
-                Args.notNone(option.value)
+        """
+        Identify an hash or hashes in a file using hashid
+        """
+        try:
+            #import pdb; pdb.set_trace()
 
-        output = self.auxiliary['output'].value
-        if output:
-            permission = [os.R_OK]
-            Path.access(permission, output)
+            self.no_empty_required_options()
+            hashid = PLuginHashID()
 
-        else:
-            pass
+            if os.path.isfile(self.options['hashes'].value):
+                identify = hashid.identify_hashes
 
+            else: # HASHES option is a string (a simple hash)
+                identify = hashid.identify_hash
 
+            identify(self.options['hashes'].value,
+                     hashcat = self.options['hashcat'].value,
+                     john = self.options['john'].value,
+                     extended = self.options['extended'].value,
+                     output = self.options['output'].value)
 
-
-# def main():
-#     usage = "{0} [-h] [-e] [-m] [-j] [-o FILE] [--version] INPUT".format(os.path.basename(__file__))
-
-#     parser = argparse.ArgumentParser(
-#         description="Identify the different types of hashes used to encrypt data",
-#         usage=usage,
-#         epilog=__license__,
-#         add_help=False,
-#         formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=27)
-#     )
-#     # parser.add_argument("strings",
-#     #                     metavar="INPUT", type=str, nargs="*",
-#     #                     help="input to analyze (default: STDIN)")
-#     # group = parser.add_argument_group('options')
-#     # group.add_argument("-e", "--extended",
-#     #                    action="store_true",
-#     #                    help="list all possible hash algorithms including salted passwords")
-#     # group.add_argument("-m", "--mode",
-#     #                    action="store_true",
-#     #                    help="show corresponding Hashcat mode in output")
-#     # group.add_argument("-j", "--john",
-#     #                    action="store_true",
-#     #                    help="show corresponding JohnTheRipper format in output")
-#     # group.add_argument("-o", "--outfile",
-#     #                    metavar="FILE", type=str,
-#     #                    help="write output to file")
-#     # group.add_argument("-h", "--help",
-#     #                    action="help",
-#     #                    help="show this help message and exit")
-#     # group.add_argument("--version",
-#     #                    action="version",
-#     #                    version=__banner__)
-#     # args = parser.parse_args()
-
-#     hashID = HashID()
-
-#     if not args.outfile:
-#         outfile = sys.stdout
-#     else:
-#         try:
-#             outfile = io.open(args.outfile, "w", encoding="utf-8")
-#         except EnvironmentError:
-#             parser.error("Could not open {0}".format(args.output))
-
-#     if not args.strings or args.strings[0] == "-":
-#         while True:
-#             line = sys.stdin.readline()
-#             if not line:
-#                 break
-#             outfile.write(u"Analyzing '{0}'\n".format(line.strip()))
-#             writeResult(hashID.identifyHash(line), outfile, args.mode, args.john, args.extended)
-#             sys.stdout.flush()
-#     else:
-#         for string in args.strings:
-#             if os.path.isfile(string):
-#                 try:
-#                     with io.open(string, "r", encoding="utf-8") as infile:
-#                         outfile.write("--File '{0}'--\n".format(string))
-#                         for line in infile:
-#                             if line.strip():
-#                                 outfile.write(u"Analyzing '{0}'\n".format(line.strip()))
-#                                 writeResult(hashID.identifyHash(line), outfile, args.mode, args.john, args.extended)
-#                 except (EnvironmentError, UnicodeDecodeError):
-#                     outfile.write("--File '{0}' - could not open--".format(string))
-#                 else:
-#                     outfile.write("--End of file '{0}'--".format(string))
-#             else:
-#                 outfile.write(u"Analyzing '{0}'\n".format(string.strip()))
-#                 writeResult(hashID.identifyHash(string), outfile, args.mode, args.john, args.extended)
+        except Exception as error:
+            print_failure(error)

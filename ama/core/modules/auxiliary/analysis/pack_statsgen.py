@@ -2,86 +2,104 @@
 #
 # statsgen pack - auxiliary/analysis/pack_statsgen ama module
 #
-# date: Feb 23 2021
+# date: Mar 5 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 # cmd2 import
 import cmd2
 
-# typing import
-from typing import (
-    List
-)
-
 # module.base imports
-from ama.core.modules.base import Auxiliary
+from ama.core.modules.base import (
+    Auxiliary,
+    Argument
+)
 
 # pack import
-from ama.core.auxiliary.analysis.pack import (
-    StatsGen,
-    getPackversion,
-    getPackBanner
-)
-
-# validator imports
-from ama.core.validator import Args
+from ama.core.plugins.auxiliary.analysis import Pack
 
 
 class PackStatsgen(Auxiliary):
     """
-    Wordlist analysis using pack-statsgen
+    statsgen (pack) - Stats generator
     """
 
-    description = "Wordlist analysis using pack-statsgen"
-    mname = "auxiliary/analysis/pack_statsgen"
-    author = [
+    DESCRIPTION = "Password Statistical Analysis tool"
+    MNAME = "auxiliary/analysis/pack_statsgen"
+    AUTHOR = [
         "glozanoa <glozanoa@uni.pe>"
     ]
-    fulldescription = (
+    FULLDESCRIPTION = (
         """
-        Perform a wordlist analysis using pack-statsgen
-        submiting tasks in a cluster using Slurm
+        Generate statistics of a wordlist and generate masks that will be used by maskgen to generate masks
         """
     )
 
+    REFERENCES = [
+        "https://github.com/iphelix/pack"
+    ]
+
     def __init__(self, *,
-                 wordlist: str = None, output: str = None,
-                 minlength: int = None , maxlenght: int = None,
-                 simplemask: List[str], charset: List[str],
-                 quiet=False, hiderare=False, slurm=None):
-        self.banner = getPackBanner()
+                 output: str = None,
+                 minlength: int = None, maxlength: int = None,
+                 mintime: int = None, maxtime: int = None,
+                 mincomplexity: int = None, maxcomplexity: int = None,
+                 minoccurrence: int = None, maxoccurrence: int= None,
+                 optindex: bool = False, occurrence: bool = False, complexity: bool = False,
+                 checkmasks: List[str] = None, checkmasksfile: str = None,
+                 targettime: int = None, showmasks: bool = False, pps: int = None, quiet: bool = False):
 
-        auxiliaryOptions = {
-            'wordlist': wordlist,
+        self.banner = Pack.STATSGEN_BANNER
+        auxiliary_options = {
             'output': output,
-            'minlength': minlength,
-            'maxlength': maxlength,
-            'simplemask': simplemask,
-            'charset': charset,
-            'quiet':  quiet,
-            'hiderare': hiderare
+
+            # mask filters
+            'min_length': minlength,
+            'max_length': maxlength,
+            'min_time': mintime,
+            'max_time': maxtime,
+            'min_complexity': mincomplexity,
+            'max_complexity': maxcomplexity,
+            'min_occurrence': minoccurrence,
+            'max_occurrence': maxoccurrence,
+
+            # mask sorting
+            'optindex': optindex,
+            'occurrence': occurrence,
+            'complexity': complexity,
+
+            # mask coverage
+            'check_masks': checkmasks,
+            'check_masksfile': checkmasksfile,
+
+            # miscellaneous
+            'target_time': targettime,
+            'show_masks': showmasks,
+            'pps': pps,
+            'quiet': quiet
         }
 
-        initOptions = {
-            'mname': mname,
-            'author': author,
-            'description': description,
-            'fulldescription':  fulldescription,
-            'auxiliaryOptions': auxiliaryOptions,
-            'slurm': slurm
+
+        init_options = {
+            'mname': PackStatsgen.MNAME,
+            'author': PackStatsgen.AUTHOR,
+            'description': PackStatsgen.DESCRIPTION,
+            'fulldescription':  PackStatsgen.FULLDESCRIPTION,
+            'references': PackStatsgen.REFERENCES,
+            'auxiliary_options': auxiliary_options,
+            'slurm': None
         }
 
-        super().__init__(**initOptions)
+        super().__init__(**init_options)
 
 
     def run(self):
-        Args.notNone(self.wordlist)
-        # Print program header
-        if not self.quiet:
-            cmd2.Cmd.poutput(self.banner)
+        # Args.notNone(self.wordlist)
+        # # Print program header
+        # if not self.quiet:
+        #     cmd2.Cmd.poutput(self.banner)
 
-        cmd2.Cmd.poutput(f"[*] Analyzing passwords in {self.wordlist}")
+        # cmd2.Cmd.poutput(f"[*] Analyzing passwords in {self.wordlist}")
 
-        statsgen = StatsGen(**self.auxiliary)
-        statsgen.generate_stats()
-        statsgen.print_stats()
+        # statsgen = StatsGen(**self.auxiliary)
+        # statsgen.generate_stats()
+        # statsgen.print_stats()

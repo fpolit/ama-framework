@@ -32,11 +32,11 @@ If you want to contribute to `ama-framework` you are welcome.
 As developer you will first create a python virtual enviroment 
 and then install `ama` and the developer packages.
 ```bash
-	git clone https://github.com/fpolit/ama-framework.git ama
-	cd ama
-	make virtualenv
-	source env/bin/activate
-	make installdev
+    git clone https://github.com/fpolit/ama-framework.git ama
+    cd ama
+    make virtualenv
+    source env/bin/activate
+    make installdev
 ```
 
 ## Usage
@@ -45,5 +45,5 @@ Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can fi
      Please do not use ama in military or secret service organizations,
                       or for illegal purposes
 
-Happy Hacking!  
+Good luck!  
       glozanoa

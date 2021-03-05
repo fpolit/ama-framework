@@ -9,13 +9,14 @@
 
 # varname package imports
 from varname import argname
+from typing import List
 
 #arg module exceptions
 class SomeArgumentHasNoneValue(Exception):
     """
     Exception to catch error when some argument have None value
     """
-    def __init__(self, *noneArgs):
+    def __init__(self, *none_args):
         self.warning = "Supplied arguments with None value:"
 
         names = argname(none_args)
@@ -43,7 +44,7 @@ class NotAllRequiredArgumentsSupplied(Exception):
     """
     Exception to catch error when not all the required arguments was supplied
     """
-    def __init__(self, args_names):
+    def __init__(self, args_names: List[str]):
         self.warning = "Required arguments with None value:"
 
         #names = argname(none_args)

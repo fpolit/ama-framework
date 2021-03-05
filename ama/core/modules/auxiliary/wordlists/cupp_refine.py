@@ -11,10 +11,13 @@ from fineprint.status import print_failure
 from ama.core.plugins.auxiliary import Cupp
 
 # Auxliary base class
-from ama.core.modules.base import Auxiliary
-from ama.core.modules.base import Argument
+from ama.core.modules.base import (
+    Auxiliary,
+    Argument
+)
 
 
+# debugged - date: Mar 4 2021
 class CuppRefine(Auxiliary):
     """
     Cupp - refine a wordlist
@@ -26,16 +29,20 @@ class CuppRefine(Auxiliary):
     AUTHOR = [
         "glozanoa <glozanoa@uni.pe>"
     ]
-    FULLDESCRIPTION = """
-    Refine a supplied wordlist concatenating words or
-    adding special chars or random numbers to the end of each word
-    """
+
+    FULLDESCRIPTION = (
+        """
+        Refine a supplied wordlist concatenating words or
+        adding special chars or random numbers to the end of each word
+        """
+    )
+
     REFERENCES = [
         "https://www.hackingarticles.in/comprehensive-guide-on-cupp-a-wordlist-generating-tool/",
         "https://github.com/Mebus/cupp"
     ]
 
-    def __init__(self, wordlist: str = None, slurm=None):
+    def __init__(self, wordlist: str = None):
         auxiliary_options = {
             'wordlist': Argument(wordlist, True, "Wordlist to refine")
         }
@@ -44,8 +51,9 @@ class CuppRefine(Auxiliary):
             'author': CuppRefine.AUTHOR,
             'description': CuppRefine.DESCRIPTION,
             'fulldescription': CuppRefine.FULLDESCRIPTION,
-            'options': auxiliary_options,
-            'slurm': slurm
+            'references': CuppRefine.REFERENCES,
+            'auxiliary_options': auxiliary_options,
+            'slurm': None
         }
 
         super().__init__(**init_options)
@@ -55,7 +63,7 @@ class CuppRefine(Auxiliary):
         """
         Refine a wordlist
         """
-
+        import pdb; pdb.set_trace()
         try:
             self.no_empty_required_options()
             cupp = Cupp()

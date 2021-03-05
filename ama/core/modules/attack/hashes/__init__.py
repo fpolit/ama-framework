@@ -13,3 +13,6 @@ from .hashcat_incremental import HashcatIncremental
 from .hashcat_combination import HashcatCombination
 from .hashcat_hybrid import HashcatHybrid
 from .hashcat_masks import HashcatMasks
+
+# sth attack import
+from .sth import STH

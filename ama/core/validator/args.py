@@ -31,7 +31,7 @@ class Args:
         someNone = False
         none_args = []
 
-        names = argname(*args)
+        names = argname(args)
         for name, arg in zip(names, args):
             if arg is None:
                 someNone = True
@@ -49,10 +49,12 @@ class Args:
         Raise:
         AllArgumentsHaveNoneValue: Error if all arguments are None
         """
+        #import pdb; pdb.set_trace()
+
         someNotNone = False
         none_args = []
 
-        names = argname(*args)
+        names = argname(args)
         for name, arg in zip(names, args):
             if arg is not None:
                 someNotNone = True

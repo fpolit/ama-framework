@@ -13,7 +13,7 @@ from ama.core.plugins.auxiliary import Cupp
 # Auxliary base class
 from ama.core.modules.base import Auxiliary
 
-
+# debugged - date: Mar 4 2021
 class CuppDownload(Auxiliary):
     """
     Cupp - Download wordlists
@@ -41,7 +41,9 @@ class CuppDownload(Auxiliary):
             'author': CuppDownload.AUTHOR,
             'description': CuppDownload.DESCRIPTION,
             'fulldescription': CuppDownload.FULLDESCRIPTION,
-            'options': auxiliary_options
+            'references': CuppDownload.REFERENCES,
+            'auxiliary_options': auxiliary_options,
+            'slurm': None
         }
 
         super().__init__(**init_options)

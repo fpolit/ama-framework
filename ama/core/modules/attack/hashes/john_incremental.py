@@ -42,6 +42,8 @@ class JohnIncremental(Attack):
         """
         )
 
+    REFERENCES = None
+
     def __init__(self, *, hash_type=None, hashes_file=None, slurm=None):
         """
         Initialization of John incremental attack
@@ -95,6 +97,7 @@ class JohnIncremental(Attack):
             'author': JohnIncremental.AUTHOR,
             'description': JohnIncremental.DESCRIPTION,
             'fulldescription':  JohnIncremental.FULLDESCRIPTION,
+            'references': JohnIncremental.REFERENCES,
             'attack_options': attack_options,
             'slurm': slurm
         }

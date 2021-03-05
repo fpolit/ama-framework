@@ -31,7 +31,7 @@ class Module:
 
     def __init__(self, *,
                  mname: str, author: List[str],
-                 description: str, fulldescription: str,
+                 description: str, fulldescription: str, references: List[str],
                  options: dict, slurm):
 
         self.mname = mname
@@ -39,6 +39,7 @@ class Module:
         self.description = description
         self.fulldesciption = fulldescription
         self.options = options
+        self.references = references
         self.slurm = slurm
 
 
@@ -59,11 +60,27 @@ License : GPLv3
 
         info_msg += self.available_options()
 
-        # description module
+        # module description
         info_msg += f"\n\nDescription:\n{self.fulldesciption}"
+
+        # module references
+        info_msg += self.available_references()
 
         return info_msg
 
+
+    def available_references(self):
+        """
+        Return a formatted string with all the supplied references
+        """
+        references_msg = ""
+        if self.references:
+            for reference in self.references:
+                references_msg += f"\t{reference}\n"
+
+            references_msg = f"\nReferences:\n{references_msg}"
+
+        return references_msg
 
     def available_options(self, *, required=False, only_slurm=None, only_module=None):
         """

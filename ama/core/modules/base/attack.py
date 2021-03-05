@@ -32,7 +32,7 @@ class Attack(Module):
     """
     def __init__(self, *,
                  mname: str, author: List[str],
-                 description: str, fulldescription: str,
+                 description: str, fulldescription: str, references: List[str],
                  attack_options: dict, slurm):
 
         init_options = {
@@ -40,6 +40,7 @@ class Attack(Module):
             'author': author,
             'description': description,
             'fulldescription': fulldescription,
+            'references': references,
             'options': attack_options,
             'slurm': slurm
         }

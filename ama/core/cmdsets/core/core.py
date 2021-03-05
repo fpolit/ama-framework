@@ -32,7 +32,7 @@ from ama.data.hashes import (
 )
 
 # import crackers
-from ama.core.cracker import (
+from ama.core.plugins.cracker import (
     John,
     Hashcat,
 )

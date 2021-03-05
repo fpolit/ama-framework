@@ -26,10 +26,10 @@ class Banner:
         f"""
             Attack Modules: {len(attackModules)}
             Auxliary:
-                Analysis Modules   : {len(auxiliaryWordlistModules)}
-                Hashes Modules     : {len(auxiliaryHashesModules)}
-                Combinator Modules : {len(auxiliaryCombinatortModules)}
-                Analysis Modules   : {len(auxiliaryAnalysisModules)}
+                Analysis Modules    : {len(auxiliaryAnalysisModules)}
+                Wordlists Modules   : {len(auxiliaryWordlistModules)}
+                Hashes Modules      : {len(auxiliaryHashesModules)}
+                Combinator Modules  : {len(auxiliaryCombinatortModules)}
         """
     )
     AMA_VERSION = get_version()

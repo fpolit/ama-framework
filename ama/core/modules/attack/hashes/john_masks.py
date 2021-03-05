@@ -43,6 +43,8 @@ class JohnMasks(Attack):
         """
         )
 
+    REFERENCES = None
+
     def __init__(self, *,
                  hash_type:str = None, hashes_file:str = None,
                  masks_file: str = None, masks_attack: str = "masks_attack.py",
@@ -102,6 +104,7 @@ class JohnMasks(Attack):
             'author': JohnMasks.AUTHOR,
             'description': JohnMasks.DESCRIPTION,
             'fulldescription':  JohnMasks.FULLDESCRIPTION,
+            'references': JohnMasks.REFERENCES,
             'attack_options': attack_options,
             'slurm': slurm
         }

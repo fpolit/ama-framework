@@ -13,6 +13,7 @@ from ama.core.plugins.auxiliary import Cupp
 # Auxliary base class
 from ama.core.modules.base import Auxiliary
 
+# debugged - date: Mar 4 2021
 class CuppAlecto(Auxiliary):
     """
     Cupp - Alecto
@@ -43,7 +44,9 @@ class CuppAlecto(Auxiliary):
             'author': CuppAlecto.AUTHOR,
             'description': CuppAlecto.DESCRIPTION,
             'fulldescription': CuppAlecto.FULLDESCRIPTION,
-            'options': auxiliary_options
+            'references': CuppAlecto.REFERENCES,
+            'auxiliary_options': auxiliary_options,
+            'slurm': None
         }
 
         super().__init__(**init_options)

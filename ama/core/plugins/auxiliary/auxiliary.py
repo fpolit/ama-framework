@@ -9,7 +9,7 @@ from ..plugin import Plugin
 
 class Auxiliary(Plugin):
     """
-        Password Cracker (hash and credential cracker) - Main Password Cracker class
+        Auxiliary  - main class to generate auxiliary applications
     """
     # Supported auxiliary plugins
     WORDLISTS  = ["pydictor", "cupp", "crunch"]
@@ -17,8 +17,9 @@ class Auxiliary(Plugin):
     ANALYSIS = ["pack", "ppack", "pipal"]
     COMBINATOR = ["mixer"]
 
-    def __init__(self, name, *, version=None, main_exec=None):
+    def __init__(self, name, *, version=None, main_exec=None, search_exec=True):
         super().__init__(name,
                          version = version,
-                         main_exec = main_exec)
+                         main_exec = main_exec,
+                         search_exec= search_exec)
 

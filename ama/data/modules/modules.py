@@ -22,7 +22,8 @@ from ama.core.modules.attack.hashes import (
     JohnSingle,
     JohnMasks,
     #JohnCombination,
-    #JohnHybrid
+    #JohnHybrid,
+    STH
 )
 
 # hashcat attacks imports
@@ -52,7 +53,9 @@ from ama.core.modules.auxiliary.wordlists import (
 
 ## auxiliary/hashes modules imports
 from ama.core.modules.auxiliary.hashes import (
-    HashesStatus
+    HashesStatus,
+    HashID,
+    NTH
 )
 
 ## auxiliary/combinator modules imports
@@ -67,6 +70,7 @@ from ama.core.modules.auxiliary.hashes import (
 
 
 amaModulesType = ["attack", "auxiliary"]
+#amaModulesType = ["attack", "auxiliary"]
 
 # attack modules (hashes and services)
 attackModules = {
@@ -88,6 +92,10 @@ attackModules = {
     #f"{HashcatHybrid.MNAME}": HashcatHybrid,
     #f"{HashcatMasks.MNAME}": HashcatMasks,
 
+
+    # sth
+    f"{STH.MNAME}": STH,
+
     ## attack/services modules
     # hydra attacks
     #f"{HydraWordlist.mname}": HydraWordlist,
@@ -106,8 +114,9 @@ auxiliaryWordlistModules = {
 ## auxiliary/hashes modules
 auxiliaryHashesModules = {
     f"{HashesStatus.MNAME}": HashesStatus,
+    f"{HashID.MNAME}": HashID,
+    f"{NTH.MNAME}": NTH
 }
-
 ## auxiliary/combinator modules
 auxiliaryCombinatortModules = {}
 

@@ -23,7 +23,7 @@ from ama.core.modules.base import (
 )
 
 # cracker import
-from ama.core.cracker import (
+from ama.core.plugins.cracker import (
     Hashcat,
     John
 )
@@ -53,6 +53,8 @@ class HashesStatus(Auxiliary):
         """
     )
 
+    REFERENCES = None
+
     def __init__(self, *,
                  hashes_file:str = None, uncracked_hashes: str = None,
                  slurm=None):
@@ -62,7 +64,7 @@ class HashesStatus(Auxiliary):
 
         auxiliary_options = {
             'hashes_file': Argument(hashes_file, True, "Hashes file to check status"),
-            'uncracked_hashes': Argument(uncracked_hashes, False, "File to save uncracked hashes")
+            'uncracked_hashes': Argument(uncracked_hashes, False, "File name to save uncracked hashes")
         }
 
         init_options = {
@@ -70,6 +72,7 @@ class HashesStatus(Auxiliary):
             'author': HashesStatus.AUTHOR,
             'description': HashesStatus.DESCRIPTION,
             'fulldescription':  HashesStatus.FULLDESCRIPTION,
+            'references': HashesStatus.REFERENCES,
             'auxiliary_options': auxiliary_options,
             'slurm': slurm
         }

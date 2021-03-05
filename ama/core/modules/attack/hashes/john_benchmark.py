@@ -40,6 +40,9 @@ class JohnBenchmark(Attack):
         Perform John benchmark submitting parallel task in a cluster using Slurm
         """
         )
+
+    REFERENCES = None
+
     def __init__(self, slurm=None):
         """
         Initialization of John benchmark class
@@ -85,6 +88,7 @@ class JohnBenchmark(Attack):
             'author': JohnBenchmark.AUTHOR,
             'description': JohnBenchmark.DESCRIPTION,
             'fulldescription':  JohnBenchmark.FULLDESCRIPTION,
+            'references': JohnBenchmark.REFERENCES,
             'attack_options': attack_options,
             'slurm': slurm
         }

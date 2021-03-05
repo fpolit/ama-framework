@@ -24,15 +24,9 @@ setup(
     long_description_content_type='text/markdown',
     author='glozanoa',
     author_email='glozanoa@uni.pe',
-    url='https://gitlab.com/spolit/ama-framework',
+    url='https://github.com/fpolit/ama-framework',
     license='GPL3',
-    packages=find_packages(exclude=['ez_setup', 'tests*']),
-    #package_data={'mattack': ['templates/*']},
-    #install_requires=[
-    #     "cement",
-    #     "sbash",
-    #     "fineprint",
-    # ],
+    packages=find_packages(),
     include_package_data=True,
     entry_points={
         'console_scripts':[

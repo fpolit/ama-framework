@@ -12,7 +12,7 @@ from ama.core.modules.base import (
 )
 
 # cracker imports
-from ama.core.cracker import Hashcat
+from ama.core.plugins.cracker import Hashcat
 
 class HashcatWordlist(Attack):
     """

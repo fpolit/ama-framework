@@ -36,12 +36,16 @@ class JohnSingle(Attack):
     AUTHOR = [
         "glozanoa <glozanoa@uni.pe>"
     ]
+
     FULLDESCRIPTION = (
         """
         Perform single attacks against hashes
         with john submiting parallel tasks in a cluster using Slurm
         """
-        )
+    )
+
+    REFERENCES = None
+
     def __init__(self, *, hash_type=None, hashes_file=None, slurm=None):
         """
         Initialization of John single attack
@@ -95,6 +99,7 @@ class JohnSingle(Attack):
             'author': JohnSingle.AUTHOR,
             'description': JohnSingle.DESCRIPTION,
             'fulldescription':  JohnSingle.FULLDESCRIPTION,
+            'references': JohnSingle.REFERENCES,
             'attack_options': attack_options,
             'slurm': slurm
         }

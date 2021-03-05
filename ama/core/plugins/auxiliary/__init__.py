@@ -1,3 +1,6 @@
+# base auxliary plugin class
+from .auxiliary import Auxiliary
+
 # wordlists auxiliary applications
 from .wordlists import Cupp
 

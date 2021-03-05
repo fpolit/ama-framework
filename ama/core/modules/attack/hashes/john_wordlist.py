@@ -37,6 +37,8 @@ class JohnWordlist(Attack):
         """
         )
 
+    REFERENCES = None
+
     def __init__(self, *,
                  hashType: str = None, hashesFile: str = None,
                  wordlist: str = None, slurm=None):
@@ -93,6 +95,7 @@ class JohnWordlist(Attack):
             'author': JohnWordlist.AUTHOR,
             'description': JohnWordlist.DESCRIPTION,
             'fulldescription':  JohnWordlist.FULLDESCRIPTION,
+            'references': JohnWordlist.REFERENCES,
             'attack_options': attack_options,
             'slurm': slurm
         }
@@ -111,7 +114,7 @@ class JohnWordlist(Attack):
                                 hashes_file = self.options['hashes_file'].value,
                                 wordlist = self.options['wordlist'].value,
                                 slurm = self.slurm)
-            
+
         except Exception as error:
             print_failure(error)
 

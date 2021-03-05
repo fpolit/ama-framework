@@ -28,7 +28,7 @@ class Auxiliary(Module):
     """
     def __init__(self, *,
                  mname: str, author: List[str],
-                 description: str, fulldescription: str,
+                 description: str, fulldescription: str, references: List[str],
                  auxiliary_options: dict, slurm):
 
         init_options = {
@@ -36,6 +36,7 @@ class Auxiliary(Module):
             'author': author,
             'description': description,
             'fulldescription': fulldescription,
+            'references': references,
             'options': auxiliary_options,
             'slurm': slurm
         }
