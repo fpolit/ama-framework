@@ -48,7 +48,7 @@ class Slurm:
         "nodelist",
         "wait",
         "exclude",
-        "gpus"
+        "gpu"
     ]
 
     EXTRA_OPTIONS = [
@@ -106,7 +106,7 @@ class Slurm:
         # self.nodelist = Argument(nodelist, False, "Nodelist") # -w <nodelist>, e.x. nodelist = hw[00-04,06,08]
         # self.wait = Argument(wait, True, "Do not exit until the submitted job terminates") # -W <NO VALUE>, if wait=True enable this flag otherwise omit
         # self.exclude = Argument(exclude, False, "Do not exit until the submitted job terminates") # -x <nodelist>
-        # self.gpus = Argument(gpus, False, "Number of GPUS")
+        # self.gpu = Argument(gpu, False, "Number of GPUS")
 
         # # extra parameters
         # self.slurm_script = Argument(slurm_script, True, "Name for the generated batch script")
@@ -141,7 +141,7 @@ class Slurm:
           parallel job type : OMP or MPI or GPU
         """
         #import pdb; pdb.set_trace()
-        gpus = self.sbatch.get('gpus', 0)
+        gpus = self.sbatch.get('gpu', 0)
         nodes = self.sbatch.get('nodes', 1)
         ntasks = self.sbatch.get('ntasks', 1)
         cpus_per_task = self.sbatch.get('cpus_per_task', 1)
@@ -177,7 +177,7 @@ class Slurm:
         with open(batch_script_name, 'w') as batch_script:
             batch_script.write("#!/bin/bash\n")
             for flag, argument in self.sbatch.items():
-                if flag == "gpus" and argument > 0:
+                if flag == "gpu" and argument > 0:
                     flag = flag.replace("_", "-")
                     batch_script.write(f"#SBATCH --gres={flag}:{argument.value}\n")
                 else:

@@ -19,6 +19,12 @@ from ama.core.plugins.cracker import John
 # slurm import
 from ama.core.slurm import Slurm
 
+#fineprint status
+from fineprint.status import (
+    print_failure,
+    print_status
+)
+
 class JohnWordlist(Attack):
     """
     Wordlist Attack using john cracker
@@ -40,7 +46,7 @@ class JohnWordlist(Attack):
     REFERENCES = None
 
     def __init__(self, *,
-                 hashType: str = None, hashesFile: str = None,
+                 hash_type: str = None, hashes_file: str = None,
                  wordlist: str = None, slurm=None):
         """
         Initialization of John  wordlist attack
@@ -53,8 +59,8 @@ class JohnWordlist(Attack):
         """
         attack_options = {
             'wordlist': Argument(wordlist, True, "wordlist file"),
-            'hash_type': Argument(hashType, True, "John hash type"),
-            'hashes_file': Argument(hashesFile, True, "hashes file")
+            'hash_type': Argument(hash_type, True, "John hash type"),
+            'hashes_file': Argument(hashes_file, True, "hashes file")
         }
 
         if slurm is None:
@@ -110,6 +116,7 @@ class JohnWordlist(Attack):
         try:
             self.no_empty_required_options()
             jtr = John()
+            print_status(f"Running {self.mname} module")
             jtr.wordlist_attack(hash_type = self.options['hash_type'].value,
                                 hashes_file = self.options['hashes_file'].value,
                                 wordlist = self.options['wordlist'].value,

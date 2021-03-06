@@ -18,13 +18,13 @@ import argparse
 from tabulate import tabulate
 
 #fineprint imports
-from fineprint import (
+from fineprint.status import (
     print_failure,
     print_status,
     print_successful
 )
 
-from fineprint import ColorStr
+from fineprint.color import ColorStr
 
 # import db connection modules
 from getpass import getpass

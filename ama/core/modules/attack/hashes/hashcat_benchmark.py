@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 #
-# Masks attack using hashcat
+# hashcat benchmark
 #
 # implementation - date: Mar 6 2021
 #
+#
 # Maintainer: glozanoa <glozanoa@uni.pe>
+
+import os
 
 # base  imports
 from ama.core.modules.base import (
@@ -18,49 +21,40 @@ from ama.core.plugins.cracker import Hashcat
 # slurm import
 from ama.core.slurm import Slurm
 
-#fineprint status
+# fineprint imports
 from fineprint.status import (
     print_failure,
     print_status
 )
 
-
-class HashcatMasks(Attack):
+class HashcatBenchmark(Attack):
     """
-    Masks Attack using hashcat cracker
+    Hashcat the ripper benchmark
     """
 
-    DESCRIPTION = "Masks attack using Hashcat"
-    MNAME = "attack/hashes/hashcat_masks"
+    DESCRIPTION = "Hashcat benchmark"
+    MNAME = "attack/hashes/hashcat_benchmark"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
     AUTHOR = [
         "glozanoa <glozanoa@uni.pe>"
     ]
     FULLDESCRIPTION = (
         """
-        Perform masks attacks against hashes
-        with hashcat submiting parallel tasks in a cluster using Slurm
+        Perform Hashcat benchmark submitting parallel task in a cluster using Slurm
         """
-    )
+        )
 
-    def __init__(self, *,
-                 hash_type: str = None, hashes_file: str = None,
-                 masks_file:str = None,
-                 mask_attack_script:str = "mask_attack.py",
-                 slurm = None):
+    REFERENCES = None
+
+    def __init__(self, slurm=None):
         """
-        Initialization of wordlist attack using hashcat
+        Initialization of Hashcat benchmark class
         """
-
-        attack_options = {
-            'hash_type': Argument(hash_type, True, "Hashcat hash type"),
-            'hashes_file': Argument(hashes_file, True, "Hashes file"),
-            'mask_attack': Argument(mask_attack_script, True, "Generated mask attack script")
-        }
-
+        attack_options = {}
 
         if slurm is None:
             slurm_options = {
+                #"array",
                 "account": Argument(None, False, "Cluster account to submit the job"),
                 "dependency": Argument(None, False, "Defer the start of this job until the specified dependencies have been satisfied completed"),
                 "chdir" : Argument(os.getcwd(), True, "Working directory path"),
@@ -94,28 +88,27 @@ class HashcatMasks(Attack):
             slurm = Slurm(**slurm_options)
 
         init_options = {
-            'mname' : HashcatMasks.MNAME,
-            'author': HashcatMasks.AUTHOR,
-            'description': HashcatMasks.DESCRIPTION,
-            'fulldescription':  HashcatMasks.FULLDESCRIPTION,
-            'references': HashcatMasks.REFERENCES,
+            'mname' : JohnBenchmark.MNAME,
+            'author': JohnBenchmark.AUTHOR,
+            'description': JohnBenchmark.DESCRIPTION,
+            'fulldescription':  JohnBenchmark.FULLDESCRIPTION,
+            'references': JohnBenchmark.REFERENCES,
             'attack_options': attack_options,
             'slurm': slurm
         }
+
         super().__init__(**init_options)
+
 
     def attack(self):
         """
-        Wordlist attack using Hashcat
+        Hashcat benchmark
         """
         try:
             self.no_empty_required_options()
             hc = Hashcat()
             print_status(f"Running {self.mname} module")
-            hc.masks_attack(hash_type = self.options['hash_type'].value,
-                            hashes_file = self.options['hashes_file'].value,
-                            masks_attack_script= self.options['incremental_attack'].value,
-                            slurm = self.slurm)
+            hc.benchmark(slurm = self.slurm)
 
         except Exception as error:
             print_failure(error)

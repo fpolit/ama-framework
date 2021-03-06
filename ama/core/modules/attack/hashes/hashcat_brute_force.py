@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 #
-# Masks attack using hashcat
+# brute force attack using hashcat
 #
-# implementation - date: Mar 6 2021
-#
+# date: Feb 21 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 # base  imports
@@ -25,37 +24,35 @@ from fineprint.status import (
 )
 
 
-class HashcatMasks(Attack):
+class HashcatBruteForce(Attack):
     """
-    Masks Attack using hashcat cracker
+    Brute force Attack using hashcat cracker
     """
 
-    DESCRIPTION = "Masks attack using Hashcat"
-    MNAME = "attack/hashes/hashcat_masks"
+    DESCRIPTION = "Brute force attack using Hashcat"
+    MNAME = "attack/hashes/hashcat_brute_force"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
     AUTHOR = [
         "glozanoa <glozanoa@uni.pe>"
     ]
     FULLDESCRIPTION = (
         """
-        Perform masks attacks against hashes
+        Perform brute force attacks against hashes
         with hashcat submiting parallel tasks in a cluster using Slurm
         """
     )
 
     def __init__(self, *,
-                 hash_type: str = None, hashes_file: str = None,
-                 masks_file:str = None,
-                 mask_attack_script:str = "mask_attack.py",
-                 slurm = None):
+                 mask:str = None, hash_type: str = None,
+                 hashes_file: str = None, slurm = None):
         """
         Initialization of wordlist attack using hashcat
         """
 
         attack_options = {
+            'mask': Argument(mask, True, "Mask to attack"),
             'hash_type': Argument(hash_type, True, "Hashcat hash type"),
-            'hashes_file': Argument(hashes_file, True, "Hashes file"),
-            'mask_attack': Argument(mask_attack_script, True, "Generated mask attack script")
+            'hashes_file': Argument(hashes_file, True, "Hashes file")
         }
 
 
@@ -94,11 +91,11 @@ class HashcatMasks(Attack):
             slurm = Slurm(**slurm_options)
 
         init_options = {
-            'mname' : HashcatMasks.MNAME,
-            'author': HashcatMasks.AUTHOR,
-            'description': HashcatMasks.DESCRIPTION,
-            'fulldescription':  HashcatMasks.FULLDESCRIPTION,
-            'references': HashcatMasks.REFERENCES,
+            'mname' : HashcatBruteForce.MNAME,
+            'author': HashcatBruteForce.AUTHOR,
+            'description': HashcatBruteForce.DESCRIPTION,
+            'fulldescription':  HashcatBruteForce.FULLDESCRIPTION,
+            'references': HashcatBruteForce.REFERENCES,
             'attack_options': attack_options,
             'slurm': slurm
         }
@@ -112,10 +109,10 @@ class HashcatMasks(Attack):
             self.no_empty_required_options()
             hc = Hashcat()
             print_status(f"Running {self.mname} module")
-            hc.masks_attack(hash_type = self.options['hash_type'].value,
-                            hashes_file = self.options['hashes_file'].value,
-                            masks_attack_script= self.options['incremental_attack'].value,
-                            slurm = self.slurm)
+            hc.brute_force_attack(hash_type = self.options['hash_type'].value,
+                                  hashes_file = self.options['hashes_file'].value,
+                                  mask = self.options['mask'].value,
+                                  slurm = self.slurm)
 
         except Exception as error:
             print_failure(error)

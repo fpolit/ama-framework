@@ -103,6 +103,7 @@ class JohnBenchmark(Attack):
         try:
             self.no_empty_required_options()
             jtr = John()
+            print_status(f"Running {self.mname} module")
             jtr.benchmark(slurm = self.slurm)
 
         except Exception as error:

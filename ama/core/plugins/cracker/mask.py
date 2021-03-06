@@ -44,11 +44,10 @@ class Mask(str):
             maskSymbol = next(iterMask, "") + next(iterMask, "")
 
     @staticmethod
-    def isMask(mask):
-        for maskSymbol in Mask._genIterMask(mask):
-            if not maskSymbol in Mask.charset:
-                return False
-        return True
+    def is_valid_mask(mask):
+        for mask_symbol in Mask._genIterMask(mask):
+            if not mask_symbol in Mask.charset:
+                raise InvalidMaskError(mask)
 
     def __len__(self):
         return ceil(len(self.mask)/2)

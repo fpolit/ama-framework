@@ -39,170 +39,172 @@ from pack_ama.banner import (
     policygen_banner
 )
 
-class Pack(Auxiliary):
-    """
-    Identify the different types of hashes
-    """
+# class Pack(Auxiliary):
+#     """
+#     Identify the different types of hashes
+#     """
 
-    MAINNAME = "pack"
+#     MAINNAME = "pack"
 
-    STATSGEN_BANNER = statsgen_banner()
-    MASKGEN_BANNER = maskgen_banner()
-    POLICYGEN_BANNER = policygen_banner()
+#     STATSGEN_BANNER = statsgen_banner()
+#     MASKGEN_BANNER = maskgen_banner()
+#     POLICYGEN_BANNER = policygen_banner()
 
-    def __init__(self):
-        super().__init__(["pack"], version="v0.0.3", search_exec=False)
+#     def __init__(self):
+#         super().__init__(["pack"], version="v0.0.3", search_exec=False)
 
-    def statsgen(self, wordlist: str, *
-                 min_length:int, max_length: int,
-                 charset: List[str], somple_masks: List[str],
-                 output: str, hide_rare: bool, quiet: bool):
+#     def statsgen(self, wordlist: str, *
+#                  min_length:int, max_length: int,
+#                  charset: List[str], somple_masks: List[str],
+#                  output: str, hide_rare: bool, quiet: bool):
 
-        # Print program header
-        if not options.quiet:
-            print header
+#         # Print program header
+#         if not options.quiet:
+#             print header
 
-    if len(args) != 1:
-        parser.error("no passwords file specified")
-        exit(1)
+#     if len(args) != 1:
+#         parser.error("no passwords file specified")
+#         exit(1)
 
-    print "[*] Analyzing passwords in [%s]" % args[0]
+#     print "[*] Analyzing passwords in [%s]" % args[0]
 
-    statsgen = StatsGen()
+#     statsgen = StatsGen()
 
-    if not options.minlength   == None: statsgen.minlength   = options.minlength
-    if not options.maxlength   == None: statsgen.maxlength   = options.maxlength
-    if not options.charsets    == None: statsgen.charsets    = [x.strip() for x in options.charsets.split(',')]
-    if not options.simplemasks == None: statsgen.simplemasks = [x.strip() for x in options.simplemasks.split(',')]
+#     if not options.minlength   == None: statsgen.minlength   = options.minlength
+#     if not options.maxlength   == None: statsgen.maxlength   = options.maxlength
+#     if not options.charsets    == None: statsgen.charsets    = [x.strip() for x in options.charsets.split(',')]
+#     if not options.simplemasks == None: statsgen.simplemasks = [x.strip() for x in options.simplemasks.split(',')]
 
-    if options.hiderare: statsgen.hiderare = options.hiderare
+#     if options.hiderare: statsgen.hiderare = options.hiderare
 
-    if options.output_file:
-        print "[*] Saving advanced masks and occurrences to [%s]" % options.output_file
-        statsgen.output_file = open(options.output_file, 'w')
+#     if options.output_file:
+#         print "[*] Saving advanced masks and occurrences to [%s]" % options.output_file
+#         statsgen.output_file = open(options.output_file, 'w')
 
-    statsgen.generate_stats(args[0])
-    statsgen.print_stats()
-
-
-    def maskgen(self, statsgen_output: str, *,
-                output: str,
-                min_length: int, max_length: int, max_time: int,
-                min_complexity: int, max_complexity: int, min_occurrence: int max_occurrence: int,
-                optindex: bool, occurence: bool, complexity: bool,
-                check_masks: List[str], check_masks_file: str, show_masks: bool,
-                quiet: bool):
-
-        # Print program header
-        if not quiet:
-            print(maskgen_banner())
+#     statsgen.generate_stats(args[0])
+#     statsgen.print_stats()
 
 
-        print "[*] Analyzing masks in [%s]" % args[0]
+#     def maskgen(self, statsgen_output: str, *,
+#                 output: str,
+#                 min_length: int, max_length: int, max_time: int,
+#                 min_complexity: int, max_complexity: int, min_occurrence: int max_occurrence: int,
+#                 optindex: bool, occurence: bool, complexity: bool,
+#                 check_masks: List[str], check_masks_file: str, show_masks: bool,
+#                 quiet: bool):
 
-        maskgen = MaskGen()
-
-        # Settings
-        if options.target_time: maskgen.target_time = options.target_time
-        if options.output_masks:
-            print "[*] Saving generated masks to [%s]" % options.output_masks
-            maskgen.output_file = open(options.output_masks, 'w')
-
-        # Filters
-        if options.minlength:     maskgen.minlength     = options.minlength
-        if options.maxlength:     maskgen.maxlength     = options.maxlength
-        if options.mintime:       maskgen.mintime       = options.mintime
-        if options.maxtime:       maskgen.maxtime       = options.maxtime
-        if options.mincomplexity: maskgen.mincomplexity = options.mincomplexity
-        if options.maxcomplexity: maskgen.maxcomplexity = options.maxcomplexity
-        if options.minoccurrence: maskgen.minoccurrence = options.minoccurrence
-        if options.maxoccurrence: maskgen.maxoccurrence = options.maxoccurrence
-
-        # Custom
-        if options.customcharset1len: maskgen.customcharset1len = options.customcharset1len
-        if options.customcharset2len: maskgen.customcharset2len = options.customcharset2len
-        if options.customcharset3len: maskgen.customcharset3len = options.customcharset3len
-        if options.customcharset4len: maskgen.customcharset4len = options.customcharset4len
-
-        # Misc
-        if options.pps: maskgen.pps = options.pps
-        if options.showmasks: maskgen.showmasks = options.showmasks
-
-        print("[*] Using {:,d} keys/sec for calculations.".format(maskgen.pps))
-
-        # Load masks
-        for arg in args:
-            maskgen.loadmasks(arg)
-
-        # Matching masks from the command-line
-        if check_masks:
-            checkmasks = [m.strip() for m in check_masks.split(',')]
-            print("[*] Checking coverage of the these masks [%s]" % ", ".join(checkmasks))
-            maskgen.getmaskscoverage(checkmasks)
-
-        # Matching masks from a file
-elif check_masks_file:
-    checkmasks_file = open(options.checkmasks_file, 'r')
-    print "[*] Checking coverage of masks in [%s]" % options.checkmasks_file
-    maskgen.getmaskscoverage(checkmasks_file)
-
-    # Printing masks in a file
-    else:
-        # Process masks according to specified sorting algorithm
-        if options.occurrence:
-            sorting_mode = "occurrence"
-        elif options.complexity:
-            sorting_mode = "complexity"
-        else:
-            sorting_mode = "optindex"
-
-        print "[*] Sorting masks by their [%s]." % sorting_mode
-        maskgen.generate_masks(sorting_mode)
-
-    def policygen(self, *,
-                  output: str, pps: int,
-                  showmasks: bool,
-                  min_length:int, max_length:int, min_digit:int max_digit: int,
-                  min_upper:int, max_upper:int, min_special:int, max_special:int,
-                  quiet:bool):
-        # Print program header
-    if not options.quiet:
-        print header
-
-    policygen = PolicyGen()
-
-    # Settings
-    if options.output_masks:
-        print "[*] Saving generated masks to [%s]" % options.output_masks
-        policygen.output_file = open(options.output_masks, 'w')
+#         # Print program header
+#         if not quiet:
+#             print(maskgen_banner())
 
 
-    # Password policy
-    if options.minlength  != None: policygen.minlength  = options.minlength
-    if options.maxlength  != None: policygen.maxlength  = options.maxlength
-    if options.mindigit   != None: policygen.mindigit   = options.mindigit
-    if options.minlower   != None: policygen.minlower   = options.minlower
-    if options.minupper   != None: policygen.minupper   = options.minupper
-    if options.minspecial != None: policygen.minspecial = options.minspecial
-    if options.maxdigit   != None: policygen.maxdigit   = options.maxdigit
-    if options.maxlower   != None: policygen.maxlower   = options.maxlower
-    if options.maxupper   != None: policygen.maxupper   = options.maxupper
-    if options.maxspecial != None: policygen.maxspecial = options.maxspecial
+#         print "[*] Analyzing masks in [%s]" % args[0]
 
-    # Misc
-    if options.pps: policygen.pps = options.pps
-    if options.showmasks: policygen.showmasks = options.showmasks
+#         maskgen = MaskGen()
 
-    print "[*] Using {:,d} keys/sec for calculations.".format(policygen.pps)
+#         # Settings
+#         if options.target_time: maskgen.target_time = options.target_time
+#         if options.output_masks:
+#             print "[*] Saving generated masks to [%s]" % options.output_masks
+#             maskgen.output_file = open(options.output_masks, 'w')
 
-    # Print current password policy
-    print "[*] Password policy:"
-    print "    Pass Lengths: min:%d max:%d" % (policygen.minlength, policygen.maxlength)
-    print "    Min strength: l:%s u:%s d:%s s:%s" % (policygen.minlower, policygen.minupper, policygen.mindigit, policygen.minspecial)
-    print "    Max strength: l:%s u:%s d:%s s:%s" % (policygen.maxlower, policygen.maxupper, policygen.maxdigit, policygen.maxspecial)
+#         # Filters
+#         if options.minlength:     maskgen.minlength     = options.minlength
+#         if options.maxlength:     maskgen.maxlength     = options.maxlength
+#         if options.mintime:       maskgen.mintime       = options.mintime
+#         if options.maxtime:       maskgen.maxtime       = options.maxtime
+#         if options.mincomplexity: maskgen.mincomplexity = options.mincomplexity
+#         if options.maxcomplexity: maskgen.maxcomplexity = options.maxcomplexity
+#         if options.minoccurrence: maskgen.minoccurrence = options.minoccurrence
+#         if options.maxoccurrence: maskgen.maxoccurrence = options.maxoccurrence
 
-    print "[*] Generating [%s] masks." % ("compliant" if not options.noncompliant else "non-compliant")
-    policygen.generate_masks(options.noncompliant)
+#         # Custom
+#         if options.customcharset1len: maskgen.customcharset1len = options.customcharset1len
+#         if options.customcharset2len: maskgen.customcharset2len = options.customcharset2len
+#         if options.customcharset3len: maskgen.customcharset3len = options.customcharset3len
+#         if options.customcharset4len: maskgen.customcharset4len = options.customcharset4len
+
+#         # Misc
+#         if options.pps: maskgen.pps = options.pps
+#         if options.showmasks: maskgen.showmasks = options.showmasks
+
+#         print("[*] Using {:,d} keys/sec for calculations.".format(maskgen.pps))
+
+#         # Load masks
+#         for arg in args:
+#             maskgen.loadmasks(arg)
+
+#         # Matching masks from the command-line
+#         if check_masks:
+#             checkmasks = [m.strip() for m in check_masks.split(',')]
+#             print("[*] Checking coverage of the these masks [%s]" % ", ".join(checkmasks))
+#             maskgen.getmaskscoverage(checkmasks)
+
+#         # Matching masks from a file
+# elif check_masks_file:
+#     checkmasks_file = open(options.checkmasks_file, 'r')
+#     print "[*] Checking coverage of masks in [%s]" % options.checkmasks_file
+#     maskgen.getmaskscoverage(checkmasks_file)
+
+#     # Printing masks in a file
+#     else:
+#         # Process masks according to specified sorting algorithm
+#         if options.occurrence:
+#             sorting_mode = "occurrence"
+#         elif options.complexity:
+#             sorting_mode = "complexity"
+#         else:
+#             sorting_mode = "optindex"
+
+#         print "[*] Sorting masks by their [%s]." % sorting_mode
+#         maskgen.generate_masks(sorting_mode)
+
+#     def policygen(self, *,
+#                   output: str, pps: int,
+#                   showmasks: bool,
+#                   min_length:int, max_length:int, min_digit:int max_digit: int,
+#                   min_upper:int, max_upper:int, min_special:int, max_special:int,
+#                   quiet:bool):
+#         # Print program header
+#     if not options.quiet:
+#         print header
+
+#     policygen = PolicyGen()
+
+#     # Settings
+#     if options.output_masks:
+#         print "[*] Saving generated masks to [%s]" % options.output_masks
+#         policygen.output_file = open(options.output_masks, 'w')
+
+
+#     # Password policy
+#     if options.minlength  != None: policygen.minlength  = options.minlength
+#     if options.maxlength  != None: policygen.maxlength  = options.maxlength
+#     if options.mindigit   != None: policygen.mindigit   = options.mindigit
+#     if options.minlower   != None: policygen.minlower   = options.minlower
+#     if options.minupper   != None: policygen.minupper   = options.minupper
+#     if options.minspecial != None: policygen.minspecial = options.minspecial
+#     if options.maxdigit   != None: policygen.maxdigit   = options.maxdigit
+#     if options.maxlower   != None: policygen.maxlower   = options.maxlower
+#     if options.maxupper   != None: policygen.maxupper   = options.maxupper
+#     if options.maxspecial != None: policygen.maxspecial = options.maxspecial
+
+#     # Misc
+#     if options.pps: policygen.pps = options.pps
+#     if options.showmasks: policygen.showmasks = options.showmasks
+
+#     print "[*] Using {:,d} keys/sec for calculations.".format(policygen.pps)
+
+#     # Print current password policy
+#     print "[*] Password policy:"
+#     print "    Pass Lengths: min:%d max:%d" % (policygen.minlength, policygen.maxlength)
+#     print "    Min strength: l:%s u:%s d:%s s:%s" % (policygen.minlower, policygen.minupper, policygen.mindigit, policygen.minspecial)
+#     print "    Max strength: l:%s u:%s d:%s s:%s" % (policygen.maxlower, policygen.maxupper, policygen.maxdigit, policygen.maxspecial)
+
+#     print "[*] Generating [%s] masks." % ("compliant" if not options.noncompliant else "non-compliant")
+#     policygen.generate_masks(options.noncompliant)
+
+
 
 
 

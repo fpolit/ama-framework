@@ -14,6 +14,8 @@ from fineprint.status import (
     print_status
 )
 
+from fineprint.color import ColorStr
+
 # version import
 from ama.core.version import get_version
 
@@ -70,7 +72,8 @@ class Interaction(CommandSet):
                     moduleType = moduleClass.MTYPE
                     moduleSubtype = moduleClass.MSUBTYPE
                     moduleName = moduleClass.NAME
-                    self._cmd.prompt = f"ama {moduleType}({moduleSubtype}/{moduleName}) > "
+                    subtype_name = ColorStr.ForeRED(f"{moduleSubtype}/{moduleName}")
+                    self._cmd.prompt = f"ama {moduleType}({subtype_name}) > "
                     break
 
         except ValueError: # module is a string

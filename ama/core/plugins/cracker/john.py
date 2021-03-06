@@ -84,7 +84,7 @@ class John(PasswordCracker):
 
         if not (hash_type in John.HASHES):
             raise InvalidHashType(John, hash_type)
-        return True
+
 
     # debugged - date: Mar 1 2021
     @staticmethod
@@ -180,7 +180,7 @@ class John(PasswordCracker):
             with open(query_hashes_file, 'r') as hashes_file:
                 while query_hash := hashes_file.readline().rsplit():
                     query_hash = query_hash[0]
-                    if cracker_hash := John.hash_status():
+                    if cracker_hash := John.hash_status(query_hash):
                         hashes_status['cracked'].append(cracker_hash.getAttributes())
                     else: #crackedHash is uncracked
                         hashes_status['uncracked'].append([query_hash])
@@ -233,14 +233,14 @@ class John(PasswordCracker):
 
     # debugged - date: Feb 28 2021
     def wordlist_attack(self , *,
-                        hash_type: str , hashes_file: str, wordlist: str, report: bool,
-                        slurm=None):
+                        hash_type: str , hashes_file: str, wordlist: str,
+                        slurm):
         """
         Wordlist attack using john submiting parallel tasks in a cluster with Slurm
 
         Args:
         hash_type (str): Jonh's hash type
-        hashesfile (str): Hash file to attack
+        hashes_file (str): Hash file to attack
         wordlist (str): wordlist to attack
         slurm (Slurm): Instance of Slurm class
         """
@@ -289,11 +289,11 @@ class John(PasswordCracker):
                     )
                     Bash.exec(wordlist_attack)
 
-                    if report: # show attack report
-                        from ama.core.modules.auxiliary.hashes import HashesStatus
-                        attack_report = HashesStatus(hashes_file=hashes_file)
-                        print("\n Wordlist attack report:\n")
-                        attack_report.run()
+                    # if report: # show attack report
+                    #     from ama.core.modules.auxiliary.hashes import HashesStatus
+                    #     attack_report = HashesStatus(hashes_file=hashes_file)
+                    #     print("\n Wordlist attack report:\n")
+                    #     attack_report.run()
 
             except Exception as error:
                 #cmd2.Cmd.pexcept(error)
@@ -304,7 +304,7 @@ class John(PasswordCracker):
             print_failure("Cracker {self.main_name} is disable")
 
 
-    def combination_attack(self,* , hashType, hashesFile, wordlists=[], slurm=None,
+    def combination_attack(self,* , hashType, hashesFile, wordlists=[], slurm,
                           combinedWordlist="combined.txt"):
         # John.checkAttackArgs(_hashType=hashType,
         #                      _hashFile=hashFile,
@@ -320,8 +320,8 @@ class John(PasswordCracker):
     #NOTE: John continue when the hash was cracked
     # debugged - date: Feb 28 2021
     def incremental_attack(self, *,
-                           hash_type: str, hashes_file: str, report: bool,
-                           slurm=None):
+                           hash_type: str, hashes_file: str,
+                           slurm):
         """
         Incemental attack using john submiting parallel tasks in a cluster with Slurm
 
@@ -377,12 +377,6 @@ class John(PasswordCracker):
                     )
                     Bash.exec(incremental_attack)
 
-                    if report: # show attack report
-                        from ama.core.modules.auxiliary.hashes import HashesStatus
-                        attack_report = HashesStatus(hashes_file=hashes_file)
-                        print("\n Incremental attack report:\n")
-                        attack_report.run()
-
             except Exception as error:
                 #cmd2.Cmd.pexcept(error)
                 print_failure(error)
@@ -394,7 +388,7 @@ class John(PasswordCracker):
 
     # debugged - date: Mar 1 2021
     def masks_attack(self, *,
-                     hash_type: str, hashes_file: str, masks_file: str, report: bool,
+                     hash_type: str, hashes_file: str, masks_file: str,
                      masks_attack_script: str, slurm):
         """
         Masks attack using john submiting parallel tasks in a cluster with Slurm
@@ -424,7 +418,6 @@ class John(PasswordCracker):
                                           slurm = slurm)
 
                     parallel_work = [f"python3 {masks_attack_script}"]
-                    # add attack report of report argument is True
                     slurm_script_name = slurm.gen_batch_script(parallel_work)
                     Bash.exec(f"sbatch {slurm_script_name}")
 
@@ -442,12 +435,6 @@ class John(PasswordCracker):
                                 Bash.exec(mask_attack)
                             else:
                                 break
-
-                    if report: # show attack report
-                        from ama.core.modules.auxiliary.hashes import HashesStatus
-                        attack_report = HashesStatus(hashes_file=hashes_file)
-                        print("\n Masks attack report:\n")
-                        attack_report.run()
 
             except Exception as error:
                 #cmd2.Cmd.pexcept(error)
@@ -534,8 +521,8 @@ with open({_masksFile}, 'r') as masks:
 
     # debugged - date: Mar 1 2021
     def single_attack(self, *,
-                      hash_type: str, hashes_file: str, report: bool,
-                      slurm=None):
+                      hash_type: str, hashes_file: str,
+                      slurm):
         """
         Single attack using john submiting parallel tasks in a cluster with Slurm
 
@@ -589,12 +576,6 @@ with open({_masksFile}, 'r') as masks:
                         f" {hashes_file}"
                     )
                     Bash.exec(single_attack)
-
-                    if report: # show attack report
-                        from ama.core.modules.auxiliary.hashes import HashesStatus
-                        attack_report = HashesStatus(hashes_file=hashes_file)
-                        print("\n Single attack report:\n")
-                        attack_report.run()
 
             except Exception as error:
                 #cmd2.Cmd.pexcept(error)

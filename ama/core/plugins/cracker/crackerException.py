@@ -64,6 +64,15 @@ class InvalidParallelJob(Exception):
 
 
 # exceptions for hashcat cracker (subclass of PaswordCracker class)
+class InvalidWordlistsNumber(Exception):
+    def __init__(self, wordlists):
+        self.warning = (
+            f"""
+            Only 2 wordlists needed to perform combination attack using hashcat.
+            Supplied wordlists: {wordlists}
+            """
+        )
+        super().__init__(self.warning)
 
 
 # exceptions for hydra cracker (subclass of PaswordCracker class)

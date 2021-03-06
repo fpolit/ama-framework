@@ -23,17 +23,21 @@ from ama.core.modules.attack.hashes import (
     JohnMasks,
     #JohnCombination,
     #JohnHybrid,
-    STH
 )
 
 # hashcat attacks imports
-# from ama.core.modules.attack.hashes import (
-#     #HashcatWordlist,
-#     #HashcatIncremental,
-#     #HashcatCombination,
-#     #HashcatHybrid,
-#     #HashcatMasks
-# )
+from ama.core.modules.attack.hashes import (
+    HashcatBenchmark,
+    HashcatWordlist,
+    HashcatCombination,
+    HashcatBruteForce,
+    HashcatIncremental,
+    HashcatMasks,
+    #HashcatHybrid
+)
+
+# sth
+from ama.core.modules.attack.hashes import STH
 
 ## attack/hashes modules imports
 # hydra attacks imports
@@ -86,12 +90,13 @@ attackModules = {
     #f"{JohnHybrid.MNAME}": JohnHybrid,
 
     # hashcat attacks
-    #f"{HashcatWordlist.MNAME}": HashcatWordlist,
-    #f"{HashcatIncremental.MNAME}": HashcatIncremental,
-    #f"{HashcatCombination.MNAME}": HashcatCombination,
-    #f"{HashcatHybrid.MNAME}": HashcatHybrid,
-    #f"{HashcatMasks.MNAME}": HashcatMasks,
-
+    f"{HashcatBenchmark.MNAME}": HashcatBenchmark,
+    f"{HashcatWordlist.MNAME}": HashcatWordlist,
+    f"{HashcatCombination.MNAME}": HashcatCombination,
+    f"{HashcatBruteForce.MNAME}": HashcatBruteForce,
+    f"{HashcatIncremental.MNAME}": HashcatIncremental,
+    f"{HashcatMasks.MNAME}": HashcatMasks,
+    #HashcatHybrid
 
     # sth
     f"{STH.MNAME}": STH,
