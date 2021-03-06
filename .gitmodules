@@ -1,15 +1,3 @@
 [submodule "docs/wiki"]
 	path = docs/wiki
 	url = https://github.com/fpolit/ama-framework.wiki.git
-[submodule "pipal"]
-	path = ama/core/auxiliary/analysis/pipal
-	url = https://github.com/fpolit/pipal.git
-[submodule "crunch"]
-	path = ama/core/auxiliary/wordlists/crunch
-	url = https://github.com/fpolit/crunch.git
-[submodule "cewl"]
-	path = ama/core/auxiliary/wordlists/cewl
-	url = https://github.com/fpolit/cewl.git
-[submodule "hate_crack"]
-	path = ama/core/auxiliary/hashes/hate_crack
-	url = https://github.com/fpolit/hate_crack.git
