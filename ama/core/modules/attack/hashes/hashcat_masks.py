@@ -6,6 +6,8 @@
 #
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
+import os
+
 # base  imports
 from ama.core.modules.base import (
     Attack,
@@ -43,10 +45,12 @@ class HashcatMasks(Attack):
         """
     )
 
+    REFERENCES=None
+
     def __init__(self, *,
                  hash_type: str = None, hashes_file: str = None,
                  masks_file:str = None,
-                 mask_attack_script:str = "mask_attack.py",
+                 masks_attack_script:str = "mask_attack.py",
                  slurm = None):
         """
         Initialization of wordlist attack using hashcat
@@ -55,7 +59,8 @@ class HashcatMasks(Attack):
         attack_options = {
             'hash_type': Argument(hash_type, True, "Hashcat hash type"),
             'hashes_file': Argument(hashes_file, True, "Hashes file"),
-            'mask_attack': Argument(mask_attack_script, True, "Generated mask attack script")
+            'masks_file': Argument(masks_file, True, "Masks file"),
+            'masks_attack': Argument(masks_attack_script, True, "Generated mask attack script")
         }
 
 
@@ -104,18 +109,35 @@ class HashcatMasks(Attack):
         }
         super().__init__(**init_options)
 
-    def attack(self):
+
+    #debugged - date: Mar 6 2021
+    def attack(self, local:bool):
         """
         Wordlist attack using Hashcat
+
+        Args:
+           local (bool): if local is True run attack localy otherwise
+                         submiting parallel tasks in a cluster using slurm
         """
+        #import pdb; pdb.set_trace()
+
         try:
             self.no_empty_required_options()
             hc = Hashcat()
-            print_status(f"Running {self.mname} module")
-            hc.masks_attack(hash_type = self.options['hash_type'].value,
-                            hashes_file = self.options['hashes_file'].value,
-                            masks_attack_script= self.options['incremental_attack'].value,
-                            slurm = self.slurm)
+
+            if local:
+                hc.masks_attack(hash_type = self.options['hash_type'].value,
+                                hashes_file = self.options['hashes_file'].value,
+                                masks_file = self.options['masks_file'].value,
+                                masks_attack_script= self.options['masks_attack'].value,
+                                slurm = None)
+
+            else:
+                hc.masks_attack(hash_type = self.options['hash_type'].value,
+                                hashes_file = self.options['hashes_file'].value,
+                                masks_file = self.options['masks_file'].value,
+                                masks_attack_script= self.options['masks_attack'].value,
+                                slurm = self.slurm)
 
         except Exception as error:
             print_failure(error)

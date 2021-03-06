@@ -5,6 +5,8 @@
 # date: Feb 21 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
+import os
+
 # base  imports
 from ama.core.modules.base import (
     Attack,
@@ -42,14 +44,16 @@ class HashcatWordlist(Attack):
         """
     )
 
+    REFERENCES=None
+
     def __init__(self, *,
-                 worslist:str = None, hash_type: str = None,
+                 wordlist:str = None, hash_type: str = None,
                  hashes_file: str = None, slurm = None):
         """
         Initialization of wordlist attack using hashcat
         """
 
-        attackOptions = {
+        attack_options = {
             'wordlist': Argument(wordlist, True, "Wordlist file"),
             'hash_type': Argument(hash_type, True, "Hashcat hash type"),
             'hashes_file': Argument(hashes_file, True, "Hashes file")
@@ -101,18 +105,32 @@ class HashcatWordlist(Attack):
         }
         super().__init__(**init_options)
 
-    def attack(self):
+    # debugged - date: Mar 6 2021
+    def attack(self, local:bool):
         """
         Wordlist attack using Hashcat
+
+        Args:
+           local (bool): if local is True run attack localy otherwise
+                         submiting parallel tasks in a cluster using slurm
         """
+
+        #import pdb; pdb.set_trace()
         try:
             self.no_empty_required_options()
             hc = Hashcat()
-            print_status(f"Running {self.mname} module")
-            hc.wordlist_attack(hash_type = self.options['hash_type'].value,
-                               hashes_file = self.options['hashes_file'].value,
-                               wordlist = self.options['wordlist'].value,
-                               slurm = self.slurm)
+
+            if local:
+                hc.wordlist_attack(hash_type = self.options['hash_type'].value,
+                                   hashes_file = self.options['hashes_file'].value,
+                                   wordlist = self.options['wordlist'].value,
+                                   slurm = None)
+
+            else:
+                hc.wordlist_attack(hash_type = self.options['hash_type'].value,
+                                   hashes_file = self.options['hashes_file'].value,
+                                   wordlist = self.options['wordlist'].value,
+                                   slurm = self.slurm)
 
         except Exception as error:
             print_failure(error)

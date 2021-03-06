@@ -96,15 +96,24 @@ class JohnBenchmark(Attack):
         super().__init__(**init_options)
 
 
-    def attack(self):
+    def attack(self, local:bool):
         """
         John the Ripper benchmark
+
+        Args:
+           local (bool): if local is True run attack localy otherwise
+                         submiting parallel tasks in a cluster using slurm
         """
         try:
             self.no_empty_required_options()
             jtr = John()
             print_status(f"Running {self.mname} module")
-            jtr.benchmark(slurm = self.slurm)
+
+            if local:
+                jtr.benchmark(slurm = None)
+
+            else:
+                jtr.benchmark(slurm = self.slurm)
 
         except Exception as error:
             print_failure(error)

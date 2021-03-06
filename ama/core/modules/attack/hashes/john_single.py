@@ -107,16 +107,26 @@ class JohnSingle(Attack):
         super().__init__(**init_options)
 
 
-    def attack(self):
+    def attack(self, local:bool):
         """
         Single attack using John the Ripper
+
+        Args:
+           local (bool): if local is True run attack localy otherwise
+                         submiting parallel tasks in a cluster using slurm
         """
         try:
-            self.no_empty_required_options()
+            self.no_empty_required_options(local)
             jtr = John()
-            jtr.single_attack(hash_type = self.options['hash_type'].value,
-                              hashes_file = self.options['hashes_file'].value,
-                              slurm = self.slurm)
+            print_status(f"Running {self.mname} module")
+            if local:
+                jtr.single_attack(hash_type = self.options['hash_type'].value,
+                                  hashes_file = self.options['hashes_file'].value,
+                                  slurm = None)
+            else:
+                jtr.single_attack(hash_type = self.options['hash_type'].value,
+                                  hashes_file = self.options['hashes_file'].value,
+                                  slurm = self.slurm)
 
         except Exception as error:
             print_failure(error)

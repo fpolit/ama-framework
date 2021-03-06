@@ -6,6 +6,8 @@
 #
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
+import os
+
 # base  imports
 from ama.core.modules.base import (
     Attack,
@@ -43,6 +45,8 @@ class HashcatIncremental(Attack):
         """
     )
 
+    REFERENCES=None
+
     def __init__(self, *,
                  hash_type: str = None, hashes_file: str = None,
                  incremental_attack_script:str = "incremental_attack.py",
@@ -57,7 +61,7 @@ class HashcatIncremental(Attack):
             'min_length': Argument(min_length, True, "minimum length of mask"),
             'max_length': Argument(max_length, True, "maximum length of mask"),
             'masks_file': Argument(masks_file, True, "File with generated masks to attack"),
-            'incremental_attack': Argument(incremental_attack_script, True, "Generated incremental attack script")
+            'incremental_attack': Argument(incremental_attack_script, True, "Generated incremental attack script"),
             'hash_type': Argument(hash_type, True, "Hashcat hash type"),
             'hashes_file': Argument(hashes_file, True, "Hashes file")
         }
@@ -108,21 +112,40 @@ class HashcatIncremental(Attack):
         }
         super().__init__(**init_options)
 
-    def attack(self):
+
+    # debugged - date: Mar 6 2021
+    def attack(self, local:bool):
         """
-        Wordlist attack using Hashcat
+        Incremental attack using Hashcat
+
+        Args:
+           local (bool): if local is True run attack localy otherwise
+                         submiting parallel tasks in a cluster using slurm
         """
+
+        import pdb; pdb.set_trace()
+
         try:
             self.no_empty_required_options()
             hc = Hashcat()
-            print_status(f"Running {self.mname} module")
-            hc.incremental_attack(hash_type = self.options['hash_type'].value,
-                                  hashes_file = self.options['hashes_file'].value,
-                                  incremental_attack_script= self.options['incremental_attack'].value,
-                                  min_length = self.options['min_length'].value,
-                                  max_length = self.options['max_length'].value,
-                                  masks_file = self.options['masks_file'].value,
-                                  slurm = self.slurm)
+
+            if local:
+                hc.incremental_attack(hash_type = self.options['hash_type'].value,
+                                      hashes_file = self.options['hashes_file'].value,
+                                      incremental_attack_script= self.options['incremental_attack'].value,
+                                      min_length = self.options['min_length'].value,
+                                      max_length = self.options['max_length'].value,
+                                      masks_file = self.options['masks_file'].value,
+                                      slurm = None)
+
+            else:
+                hc.incremental_attack(hash_type = self.options['hash_type'].value,
+                                      hashes_file = self.options['hashes_file'].value,
+                                      incremental_attack_script= self.options['incremental_attack'].value,
+                                      min_length = self.options['min_length'].value,
+                                      max_length = self.options['max_length'].value,
+                                      masks_file = self.options['masks_file'].value,
+                                      slurm = self.slurm)
 
         except Exception as error:
             print_failure(error)

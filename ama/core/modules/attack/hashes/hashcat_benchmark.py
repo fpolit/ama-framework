@@ -88,11 +88,11 @@ class HashcatBenchmark(Attack):
             slurm = Slurm(**slurm_options)
 
         init_options = {
-            'mname' : JohnBenchmark.MNAME,
-            'author': JohnBenchmark.AUTHOR,
-            'description': JohnBenchmark.DESCRIPTION,
-            'fulldescription':  JohnBenchmark.FULLDESCRIPTION,
-            'references': JohnBenchmark.REFERENCES,
+            'mname' : HashcatBenchmark.MNAME,
+            'author': HashcatBenchmark.AUTHOR,
+            'description': HashcatBenchmark.DESCRIPTION,
+            'fulldescription':  HashcatBenchmark.FULLDESCRIPTION,
+            'references': HashcatBenchmark.REFERENCES,
             'attack_options': attack_options,
             'slurm': slurm
         }
@@ -100,15 +100,26 @@ class HashcatBenchmark(Attack):
         super().__init__(**init_options)
 
 
-    def attack(self):
+    #debugged - date: Mar 6 2021
+    def attack(self, local:bool):
         """
         Hashcat benchmark
+
+        Args:
+           local (bool): if local is True run attack localy otherwise
+                         submiting parallel tasks in a cluster using slurm
         """
+
+        #import pdb; pdb.set_trace()
         try:
             self.no_empty_required_options()
             hc = Hashcat()
-            print_status(f"Running {self.mname} module")
-            hc.benchmark(slurm = self.slurm)
+
+            if local:
+                hc.benchmark(slurm = None)
+
+            else:
+                hc.benchmark(slurm = self.slurm)
 
         except Exception as error:
             print_failure(error)

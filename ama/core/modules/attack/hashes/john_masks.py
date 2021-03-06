@@ -121,6 +121,7 @@ class JohnMasks(Attack):
         try:
             self.no_empty_required_options(local)
             jtr = John()
+            print_status(f"Running {self.mname} module")
             if local:
                 jtr.masks_attack(hash_type = self.options['hash_type'].value,
                                  hashes_file = self.options['hashes_file'].value,

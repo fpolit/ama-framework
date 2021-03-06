@@ -63,6 +63,7 @@ class Hashcat(PasswordCracker):
         super().__init__(name=['hashcat', 'hc'], version="v6.1.1")
 
 
+    # debugged - date: Mar 6 2021
     @staticmethod
     def check_hash_type(hash_type):
         """
@@ -74,11 +75,11 @@ class Hashcat(PasswordCracker):
         Raises:
             InvalidHashType: Error if the hasType is an unsopported hash type of a cracker
         """
-
+        #import pdb; pdb.set_trace()
         if not (hash_type in Hashcat.HASHES):
             raise InvalidHashType(Hashcat, hash_type)
 
-
+    #debugged - date: Mar 6 2021
     @staticmethod
     def search_hash(pattern, *, sensitive=False):
         """
@@ -183,11 +184,12 @@ class Hashcat(PasswordCracker):
             #cmd2.Cmd.pexcept(error, "ERROR")
             print_failure(error)
 
-    def benchmark(self, slurm=None):
+    #debugged - date: Mar 6 2021
+    def benchmark(self, slurm):
         """
         Hashcat benchmark
         """
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         if self.enable:
             if slurm and slurm.partition:
                 parallel_job_type = slurm.parallel_job_parser()
@@ -213,7 +215,7 @@ class Hashcat(PasswordCracker):
             print_failure(f"Cracker {self.main_name} is disable")
 
 
-
+    # debugged - date: Mar 6 2021
     def wordlist_attack(self, *,
                         hash_type:int , hashes_file:str, wordlist:str,
                         slurm):
@@ -236,7 +238,7 @@ class Hashcat(PasswordCracker):
                 Hashcat.check_hash_type(hash_type)
 
                 #cmd2.Cmd.poutput(f"Attacking {hash_type} hashes in {hashesfile} file with {wordlist} wordlist.")
-                print_status(f"Attacking {hash_type} hashes in {hashes_file} file with {wordlist} wordlist")
+                print_status(f"Attacking {Hashcat.HASHES[hash_type]['Name']} hashes in {hashes_file} file with {wordlist} wordlist")
                 if slurm and slurm.partition:
                     parallel_job_type = slurm.parallel_job_parser()
                     if not  parallel_job_type in ["GPU"]:
@@ -269,6 +271,7 @@ class Hashcat(PasswordCracker):
             print_failure("Cracker {self.main_name} is disable")
 
 
+    # debugged - date: Mar 6 2021
     def combination_attack(self, *,
                            hash_type:str , hashes_file:str , wordlists: List[str],
                            slurm):
@@ -285,8 +288,9 @@ class Hashcat(PasswordCracker):
 
         #import pdb; pdb.set_trace()
         if self.enable:
-            attack_mode = 1
             try:
+                attack_mode = 1
+
                 if not len(wordlists) == 2:
                     raise InvalidWordlistsNumber(wordlists)
 
@@ -295,7 +299,7 @@ class Hashcat(PasswordCracker):
                 Hashcat.check_hash_type(hash_type)
 
                 #cmd2.Cmd.poutput(f"Attacking {hash_type} hashes in {hashesfile} file with {wordlist} wordlist.")
-                print_status(f"Attacking {hash_type} hashes in {hashes_file} file with {wordlist} wordlist")
+                print_status(f"Attacking {Hashcat.HASHES[hash_type]['Name']} hashes in {hashes_file} file with {wordlists} wordlists")
                 if slurm and slurm.partition:
                     parallel_job_type = slurm.parallel_job_parser()
                     if not  parallel_job_type in ["GPU"]:
@@ -327,6 +331,8 @@ class Hashcat(PasswordCracker):
             #cmd2.Cmd.pwarning("Cracker {self.main_name} is disable")
             print_failure("Cracker {self.main_name} is disable")
 
+
+    # debugged - date: Mar 6 2021
     def brute_force_attack(self, *,
                            hash_type:str , hashes_file:str , mask:str,
                            slurm):
@@ -343,16 +349,14 @@ class Hashcat(PasswordCracker):
 
         #import pdb; pdb.set_trace()
         if self.enable:
-            attack_mode = 3
             try:
-
+                attack_mode = 3
                 permission = [os.R_OK]
                 Mask.is_valid_mask(mask)
-                Path.access(permission, hashes_file, *wordlists)
+                Path.access(permission, hashes_file)
                 Hashcat.check_hash_type(hash_type)
 
-                #cmd2.Cmd.poutput(f"Attacking {hash_type} hashes in {hashesfile} file with {wordlist} wordlist.")
-                print_status(f"Attacking {hash_type} hashes in {hashes_file} file with {wordlist} wordlist")
+                print_status(f"Attacking {Hashcat.HASHES[hash_type]['Name']} hashes in {hashes_file} file with brute force attack")
                 if slurm and slurm.partition:
                     parallel_job_type = slurm.parallel_job_parser()
                     if not  parallel_job_type in ["GPU"]:
@@ -385,6 +389,7 @@ class Hashcat(PasswordCracker):
             print_failure("Cracker {self.main_name} is disable")
 
 
+    # debugged - date: Mar 6 2021
     def incremental_attack(self, *,
                            hash_type:int, hashes_file:str, incremental_attack_script:str,
                            min_length:int = 0, max_length:int = 0, masks_file:str = "incremental_masks.txt",
@@ -401,17 +406,19 @@ class Hashcat(PasswordCracker):
         slurm (Slurm): Instance of Slurm class
         """
 
+        import pdb; pdb.set_trace()
         masks = ['?a'*length for length in range(min_length, max_length+1)]
         with open(masks_file, 'w') as incremental_masks:
             for mask in masks:
                 incremental_masks.write(f"{mask}\n")
 
-        self.mask_attack(hash_type=hash_type,
-                         hashes_file=hashes_file,
-                         masks_file= masks_file,
-                         masks_attack_script=incremental_attack_script,
-                         slurm=slurm)
+        self.masks_attack(hash_type=hash_type,
+                          hashes_file=hashes_file,
+                          masks_file= masks_file,
+                          masks_attack_script=incremental_attack_script,
+                          slurm=slurm)
 
+    #debugged - date: Mar 6 2021
     def masks_attack(self,*,
                      hash_type:int, hashes_file:str, masks_file:str,
                      masks_attack_script: str, slurm):
@@ -426,14 +433,16 @@ class Hashcat(PasswordCracker):
         slurm (Slurm): Instance of Slurm class
         """
 
+        #import pdb; pdb.set_trace()
+
         if self.enable:
-            attackMode = 3
             try:
+                attack_mode = 3
                 permission = [os.R_OK]
                 Path.access(permission, hashes_file, masks_file)
                 Hashcat.check_hash_type(hash_type)
 
-                print_status(f"Attacking {hash_type} hashes in {hashes_file} file with {masks_file} masks file.")
+                print_status(f"Attacking {Hashcat.HASHES[hash_type]['Name']} hashes in {hashes_file} file with {masks_file} masks file.")
                 if slurm and slurm.partition:
                     Hashcat.gen_masks_attack(hash_type = hash_type,
                                              hashes_file = hashes_file,
@@ -454,7 +463,8 @@ class Hashcat(PasswordCracker):
                                     f"{self.main_exec} -a {attack_mode}"
                                     f" -m {hash_type} {hashes_file} {mask}"
                                 )
-                                print()
+
+                                print("\n\n")
                                 print_status(f"Running: {mask_attack}")
                                 Bash.exec(mask_attack)
                             else:
@@ -490,13 +500,13 @@ class Hashcat(PasswordCracker):
                 f"""
 #!/bin/env python3
 
-from ama.core.cracker import Hashcat
+from ama.core.plugins.cracker import Hashcat
 from sbash import Bash
 
 
 hc = Hashcat()
 
-with open({_masksFile}, 'r') as masks:
+with open({_masks_file}, 'r') as masks:
     while mask := masks.readline().rstrip():
         all_cracked = Hashcat.are_all_hashes_cracked({_hashes_file})
         if not all_cracked:
@@ -506,7 +516,7 @@ with open({_masksFile}, 'r') as masks:
             )
 
             header_attack = f"[*] Running: {_attack}"
-            Bash.exec(f"echo -e '\\n{_header_attack}'")
+            Bash.exec(f"echo -e '\\n\\n\\n{_header_attack}'")
             Bash.exec(attack)
                 """
             )

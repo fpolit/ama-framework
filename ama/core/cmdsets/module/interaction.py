@@ -84,7 +84,8 @@ class Interaction(CommandSet):
                     moduleType = moduleClass.MTYPE
                     moduleSubtype = moduleClass.MSUBTYPE
                     moduleName = moduleClass.NAME
-                    self._cmd.prompt = f"ama {moduleType}({moduleSubtype}/{moduleName}) > "
+                    subtype_name = ColorStr.ForeRED(f"{moduleSubtype}/{moduleName}")
+                    self._cmd.prompt = f"ama {moduleType}({subtype_name}) > "
                     break
 
 
@@ -268,8 +269,8 @@ class Interaction(CommandSet):
     attack_parser = argparse.ArgumentParser()
     attack_parser.add_argument('-l', '--local', action='store_true',
                                help="Try to perform the attack locally")
-    attack_parser.add_argument('-r', '--report', action='store_true',
-                               help="Show attack report")
+    # attack_parser.add_argument('-r', '--report', action='store_true',
+    #                            help="Show attack report")
 
     #debugged - data: feb 27 2021
     @with_argparser(attack_parser)
@@ -281,7 +282,7 @@ class Interaction(CommandSet):
         if selectedModule:
             if isinstance(selectedModule, Attack):
                 print_status(f"Running {selectedModule.MNAME} module")
-                selectedModule.attack(args.local, args.report)
+                selectedModule.attack(args.local)
             else: # selectedModule is an instance of Auxiliary
                 print_failure(f"No attack method for {selectedModule.MNAME} module")
         else:

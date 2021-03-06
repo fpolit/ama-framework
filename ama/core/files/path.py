@@ -25,6 +25,9 @@ class Path:
         Return True if all the paths have the necesary permissions otherwise return false
         """
         permissionCheck = True # True: all the paths have the necesary permissions
+        exist_all = True
+
+        no_exist_files = []
         invalidPermission = {'read': [], 'write':[], 'execution':[]}
         for permission in permissions:
             for path in paths:
@@ -49,10 +52,15 @@ class Path:
                     if path:
                         #cmd2.Cmd.pwarning(f"{path} path doesn't exist")
                         print_failure(f"{path} path doesn't exist")
-                        permissionCheck = False
+                        exist_all = False
+                        no_exist_files.append(path)
+
                     else: #path = None
                         #cmd2.Cmd.pwarning(f"No path supplied (path:None)")
                         print_failure(f"No path supplied (path:None)")
 
         if not permissionCheck:
             raise PermissionError(f"Permission Error: {invalidPermission}")
+
+        if not exist_all:
+            raise FileNotFoundError(f"Files that don't exist: {no_exist_files}")

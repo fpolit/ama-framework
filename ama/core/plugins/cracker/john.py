@@ -467,7 +467,7 @@ class John(PasswordCracker):
                 f"""
 #!/bin/env python3
 
-from ama.core.cracker import John
+from ama.core.plugins.cracker import John
 from sbash import Bash
 
 jtr = John()
@@ -483,23 +483,22 @@ with open({_masks_file}, 'r') as masks:
             )
 
             header_attack = f"[*] Running: {_attack}"
-            Bash.exec(f"echo -e '\\n{_header_attack}'")
+            Bash.exec(f"echo -e '\\n\\n\\n{_header_attack}'")
             Bash.exec(attack)
                 """
             )
 
         elif parallel_job_type == "OMP":
-            masks_attack = (
+                        masks_attack = (
                 f"""
 #!/bin/env python3
 
-from ama.core.cracker import John
+from ama.core.plugins.cracker import John
 from sbash import Bash
-
 
 jtr = John()
 
-with open({_masksFile}, 'r') as masks:
+with open({_masks_file}, 'r') as masks:
     while mask := masks.readline().rstrip():
         all_cracked = John.are_all_hashes_cracked({_hashes_file})
         if not all_cracked:
@@ -509,7 +508,7 @@ with open({_masksFile}, 'r') as masks:
             )
 
             header_attack = f"[*] Running: {_attack}"
-            Bash.exec(f"echo -e '\\n{_header_attack}'")
+            Bash.exec(f"echo -e '\\n\\n\\n{_header_attack}'")
             Bash.exec(attack)
                 """
             )

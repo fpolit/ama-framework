@@ -5,7 +5,7 @@ from fineprint.status import print_failure
 import string
 
 # base modules import
-from .MaskExceptions import MaskError
+from .maskExceptions import InvalidMaskError
 
 
 class Mask(str):
@@ -21,7 +21,7 @@ class Mask(str):
             if Mask.isMask(mask):
                 self.mask = mask
             else:
-                raise MaskError(mask)
+                raise InvalidMaskError(mask)
 
         except MaskError as error:
             print_failure(error)

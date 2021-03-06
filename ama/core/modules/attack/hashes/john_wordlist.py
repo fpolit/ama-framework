@@ -109,18 +109,30 @@ class JohnWordlist(Attack):
         super().__init__(**init_options)
 
 
-    def attack(self):
+    def attack(self, local:bool):
         """
         Wordlist attack using John the Ripper
+
+        Args:
+           local (bool): if local is True run attack localy otherwise
+                         submiting parallel tasks in a cluster using slurm
         """
         try:
-            self.no_empty_required_options()
+            self.no_empty_required_options(local)
             jtr = John()
             print_status(f"Running {self.mname} module")
-            jtr.wordlist_attack(hash_type = self.options['hash_type'].value,
-                                hashes_file = self.options['hashes_file'].value,
-                                wordlist = self.options['wordlist'].value,
-                                slurm = self.slurm)
+
+            if local:
+                jtr.wordlist_attack(hash_type = self.options['hash_type'].value,
+                                    hashes_file = self.options['hashes_file'].value,
+                                    wordlist = self.options['wordlist'].value,
+                                    slurm = None)
+
+            else:
+                jtr.wordlist_attack(hash_type = self.options['hash_type'].value,
+                                    hashes_file = self.options['hashes_file'].value,
+                                    wordlist = self.options['wordlist'].value,
+                                    slurm = self.slurm)
 
         except Exception as error:
             print_failure(error)

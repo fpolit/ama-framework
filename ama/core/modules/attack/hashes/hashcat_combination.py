@@ -6,6 +6,8 @@
 #
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
+import os
+
 # base  imports
 from ama.core.modules.base import (
     Attack,
@@ -44,6 +46,8 @@ class HashcatCombination(Attack):
         """
     )
 
+    REFERENCES=None
+
     def __init__(self, *,
                  wordlists:List[str] = None, hash_type: str = None,
                  hashes_file: str = None, slurm = None):
@@ -52,7 +56,7 @@ class HashcatCombination(Attack):
         """
 
         attack_options = {
-            'wordlists': Argument(wordlists, True, "Wordlists file"),
+            'wordlists': Argument(wordlists, True, "Wordlists file (format: wl1,wl2)"),
             'hash_type': Argument(hash_type, True, "Hashcat hash type"),
             'hashes_file': Argument(hashes_file, True, "Hashes file")
         }
@@ -103,18 +107,35 @@ class HashcatCombination(Attack):
         }
         super().__init__(**init_options)
 
-    def attack(self):
+
+    # debugged - date: Mar 6 2021
+    def attack(self, local:bool):
         """
-        Wordlist attack using Hashcat
+        Combination attack using Hashcat
+
+        Args:
+           local (bool): if local is True run attack localy otherwise
+                         submiting parallel tasks in a cluster using slurm
         """
+
+        import pdb; pdb.set_trace()
         try:
             self.no_empty_required_options()
             hc = Hashcat()
-            print_status(f"Running {self.mname} module")
-            hc.combination_attack(hash_type = self.options['hash_type'].value,
-                                  hashes_file = self.options['hashes_file'].value,
-                                  wordlists = self.options['wordlists'].value,
-                                  slurm = self.slurm)
+
+            wordlists = [wordlist.strip() for wordlist in self.options['wordlists'].value.split(',')]
+
+            if local:
+                hc.combination_attack(hash_type = self.options['hash_type'].value,
+                                      hashes_file = self.options['hashes_file'].value,
+                                      wordlists = wordlists,
+                                      slurm = None)
+
+            else:
+                hc.combination_attack(hash_type = self.options['hash_type'].value,
+                                      hashes_file = self.options['hashes_file'].value,
+                                      wordlists = wordlists,
+                                      slurm = self.slurm)
 
         except Exception as error:
             print_failure(error)
