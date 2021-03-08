@@ -45,6 +45,12 @@ class Attack(Module):
             'slurm': slurm
         }
 
+        self.selected_pre_attack = None # auxiliary module (pre attack) instance
+        self.selected_post_attack = None # auxiliary module (post attack) instance
+
+        self.available_pre_attack = []
+        self.available_post_attack = []
+
         super().__init__(**init_options)
 
     def attack(self, *args, **kwargs):

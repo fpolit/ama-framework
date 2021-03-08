@@ -2,11 +2,14 @@
 #
 # statsgen pack - auxiliary/analysis/pack_statsgen ama module
 #
-# date: Mar 5 2021
+# implemented - date: Mar 5 2021
+# debug - date: Mar 7 2021
+#
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
-# cmd2 import
 import cmd2
+from fineprint.status import print_failure
+from typing import List
 
 # module.base imports
 from ama.core.modules.base import (
@@ -14,92 +17,89 @@ from ama.core.modules.base import (
     Argument
 )
 
-# pack import
-# from ama.core.plugins.auxiliary.analysis import Pack
+from ama.core.plugins.auxiliary.analysis import Pack
 
 
-# class PackStatsgen(Auxiliary):
-#     """
-#     statsgen (pack) - Stats generator
-#     """
+class PackStatsgen(Auxiliary):
+    """
+    statsgen (pack) - Stats generator
+    """
 
-#     DESCRIPTION = "Password Statistical Analysis tool"
-#     MNAME = "auxiliary/analysis/pack_statsgen"
-#     AUTHOR = [
-#         "glozanoa <glozanoa@uni.pe>"
-#     ]
-#     FULLDESCRIPTION = (
-#         """
-#         Generate statistics of a wordlist and generate masks that will be used by maskgen to generate masks
-#         """
-#     )
+    DESCRIPTION = "Password Statistical Analysis tool"
+    MNAME = "auxiliary/analysis/pack_statsgen"
+    MTYPE, MSUBTYPE, NAME = MNAME.split("/")
+    AUTHOR = [
+        "glozanoa <glozanoa@uni.pe>"
+    ]
+    FULLDESCRIPTION = (
+        """
+        Generate statistics of a wordlist and generate masks that will be used by maskgen to generate masks
+        """
+    )
 
-#     REFERENCES = [
-#         "https://github.com/iphelix/pack"
-#     ]
+    REFERENCES = [
+        "https://github.com/iphelix/pack"
+    ]
 
-#     def __init__(self, *,
-#                  output: str = None,
-#                  minlength: int = None, maxlength: int = None,
-#                  mintime: int = None, maxtime: int = None,
-#                  mincomplexity: int = None, maxcomplexity: int = None,
-#                  minoccurrence: int = None, maxoccurrence: int= None,
-#                  optindex: bool = False, occurrence: bool = False, complexity: bool = False,
-#                  checkmasks: List[str] = None, checkmasksfile: str = None,
-#                  targettime: int = None, showmasks: bool = False, pps: int = None, quiet: bool = False):
+    def __init__(self, *,
+                 wordlist:str = None, output: str = None,
+                 minlength: int = None, maxlength: int = None,
+                 charsets: List[str] = None, simplemasks: List[str] = None,
+                 hiderare:int = 0, quiet: bool = True):
 
-#         self.banner = Pack.STATSGEN_BANNER
-#         auxiliary_options = {
-#             'output': output,
+        auxiliary_options = {
+            'wordlist': Argument(wordlist, True, "Wordlist to analyze"),
+            'output': Argument(output, False, "File name to save generated masks and occurrence"),
 
-#             # mask filters
-#             'min_length': minlength,
-#             'max_length': maxlength,
-#             'min_time': mintime,
-#             'max_time': maxtime,
-#             'min_complexity': mincomplexity,
-#             'max_complexity': maxcomplexity,
-#             'min_occurrence': minoccurrence,
-#             'max_occurrence': maxoccurrence,
+            # password filters
+            'min_length': Argument(minlength, False, "Minimum password length"),
+            'max_length': Argument(maxlength, False, "Maximum password length"),
+            'charsets': Argument(charsets, False, "Password charset filter (e.g. loweralpha,numeric)"),
+            'simple_masks': Argument(simplemasks, False, "Password mask filter (e.g.stringdigit,allspecial)"),
 
-#             # mask sorting
-#             'optindex': optindex,
-#             'occurrence': occurrence,
-#             'complexity': complexity,
-
-#             # mask coverage
-#             'check_masks': checkmasks,
-#             'check_masksfile': checkmasksfile,
-
-#             # miscellaneous
-#             'target_time': targettime,
-#             'show_masks': showmasks,
-#             'pps': pps,
-#             'quiet': quiet
-#         }
+            'hiderare': Argument(hiderare, True, "Hide statistics lower than the supplied percent"),
+            'quiet': Argument(quiet, True, "Don't show headers")
+        }
 
 
-#         init_options = {
-#             'mname': PackStatsgen.MNAME,
-#             'author': PackStatsgen.AUTHOR,
-#             'description': PackStatsgen.DESCRIPTION,
-#             'fulldescription':  PackStatsgen.FULLDESCRIPTION,
-#             'references': PackStatsgen.REFERENCES,
-#             'auxiliary_options': auxiliary_options,
-#             'slurm': None
-#         }
+        init_options = {
+            'mname': PackStatsgen.MNAME,
+            'author': PackStatsgen.AUTHOR,
+            'description': PackStatsgen.DESCRIPTION,
+            'fulldescription':  PackStatsgen.FULLDESCRIPTION,
+            'references': PackStatsgen.REFERENCES,
+            'auxiliary_options': auxiliary_options,
+            'slurm': None
+        }
 
-#         super().__init__(**init_options)
+        super().__init__(**init_options)
 
+    #debugged - date: Mar 7 2021
+    def run(self):
 
-#     def run(self):
-#         # Args.notNone(self.wordlist)
-#         # # Print program header
-#         # if not self.quiet:
-#         #     cmd2.Cmd.poutput(self.banner)
+        #import pdb; pdb.set_trace()
+        try:
 
-#         # cmd2.Cmd.poutput(f"[*] Analyzing passwords in {self.wordlist}")
+            self.no_empty_required_options()
 
-#         # statsgen = StatsGen(**self.auxiliary)
-#         # statsgen.generate_stats()
-#         # statsgen.print_stats()
+            if self.options['charsets'].value:
+                charsets = [charset for charset in self.options['charsets'].value.split(',')]
+            else:
+                charsets = None
+
+            if self.options['simple_masks'].value:
+                simple_masks = [simplemask for simplemask in self.options['simple_masks'].value.split(',')]
+            else:
+                simple_masks = None
+
+            Pack.statsgen(wordlist = self.options['wordlist'].value,
+                          min_length = self.options['min_length'].value,
+                          max_length = self.options['max_length'].value,
+                          charsets = charsets,
+                          simple_masks = simple_masks,
+                          output = self.options['output'].value,
+                          hiderare = self.options['hiderare'].value,
+                          quiet = self.options['quiet'].value)
+
+        except Exception as error:
+            print_failure(error)

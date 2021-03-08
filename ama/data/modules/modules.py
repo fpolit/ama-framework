@@ -66,11 +66,11 @@ from ama.core.modules.auxiliary.hashes import (
 
 
 ## auxiliary/analysis modules imports
-# pack auxiliary/analysis modules
-# from ama.core.modules.auxiliary.analysis import (
-#     PackStatsgen,
-#     PackMaskgen
-# )
+from ama.core.modules.auxiliary.analysis import (
+    PackStatsgen,
+    PackMaskgen,
+    PackPolicygen
+)
 
 
 amaModulesType = ["attack", "auxiliary"]
@@ -127,8 +127,9 @@ auxiliaryCombinatortModules = {}
 
 ## auxiliary/analysis modules
 auxiliaryAnalysisModules = {
-    # f"{PackStatsgen.mname}": PackStatsgen,
-    # f"{PackMaskgen.mname}": PackMaskgen
+    f"{PackStatsgen.MNAME}": PackStatsgen,
+    f"{PackMaskgen.MNAME}": PackMaskgen,
+    f"{PackPolicygen.MNAME}": PackPolicygen
 }
 
 

@@ -218,7 +218,13 @@ class Interaction(CommandSet):
     setv_parser.add_argument("option", help="Option to set value")
     setv_parser.add_argument("value", help="Value of option")
 
+    setv_parser.add_argument('--pre', action='store_true',
+                             help="set value to pre attack module option")
+    setv_parser.add_argument('--post', action='store_true',
+                             help="set value to post attack module option")
+
     #debugged - date: Feb 28 2021
+    # modify (pre and post module) - date Mar 6 2021
     @with_argparser(setv_parser)
     def do_setv(self, args):
         """
@@ -242,19 +248,58 @@ class Interaction(CommandSet):
                     else:
                         value = False
 
-            if selectedModule.isOption(option):
-                if selectedModule.isModuleOption(option): #option is a valid module option
-                    selectedModule.options[option].value = value
+            if args.pre:
+                if isinstance(selectedModule, Attack):
+                    if pre_attack_module := selectedModule.pre_attack:
+                        if pre_attack_module.isOption(option):
+                            if pre_attack_module.isModuleOption(option): #option is a valid module option
+                                pre_attack_module.options[option].value = value
 
-                else: #option is a valid slurm option
-                    argument = selectedModule.slurm.options.get(option)
-                    argument.value = value
-                    selectedModule.slurm.options[option] = argument
-                    setattr(selectedModule.slurm, option, value)
+                        else: #option is a valid slurm option
+                            argument = pre_attack_module.slurm.options.get(option)
+                            argument.value = value
+                            pre_attack_module.slurm.options[option] = argument
+                            setattr(pre_attack_module.slurm, option, value)
 
-                self._cmd.selectedModule = selectedModule
-            else:
-                print_failure(f"No {option.upper()} option in {selectedModule.mname} module")
+                        selectedModule.pre_attack = pre_attack_module
+                    else:
+                        print_failure("{selectedModule.MNAME} module hasn't selected a pre attack module")
+                else:
+                    print_failure("Auxiliary modules doesn't support pre attack modules")
+
+            elif args.post:
+                if isinstance(selectedModule, Attack):
+                    if post_attack_module := selectedModule.post_attack:
+                        if post_attack_module.isOption(option):
+                            if post_attack_module.isModuleOption(option): #option is a valid module option
+                                post_attack_module.options[option].value = value
+
+                        else: #option is a valid slurm option
+                            argument = post_attack_module.slurm.options.get(option)
+                            argument.value = value
+                            post_attack_module.slurm.options[option] = argument
+                            setattr(post_attack_module.slurm, option, value)
+
+                        selectedModule.post_attack = post_attack_module
+                    else:
+                        print_failure("{selectedModule.MNAME} module hasn't selected a post attack module")
+                else:
+                    print_failure("Auxiliary modules doesn't support post attack modules")
+
+            else: # set option of main attack module
+                if selectedModule.isOption(option):
+                    if selectedModule.isModuleOption(option): #option is a valid module option
+                        selectedModule.options[option].value = value
+
+                    else: #option is a valid slurm option
+                        argument = selectedModule.slurm.options.get(option)
+                        argument.value = value
+                        selectedModule.slurm.options[option] = argument
+                        setattr(selectedModule.slurm, option, value)
+
+                    self._cmd.selectedModule = selectedModule
+                else:
+                    print_failure(f"No {option.upper()} option in {selectedModule.mname} module")
 
         else:
             print_failure("No module selected")
@@ -281,8 +326,17 @@ class Interaction(CommandSet):
         selectedModule = self._cmd.selectedModule
         if selectedModule:
             if isinstance(selectedModule, Attack):
+                if pre_attack := selectedModule.selected_pre_attack:
+                    print_status(f"Running {pre_attack.MNAME} pre attack module")
+                    pre_attack.run()
+
                 print_status(f"Running {selectedModule.MNAME} module")
                 selectedModule.attack(args.local)
+
+                if post_attack := selectedModule.selected_post_attack:
+                    print_status(f"Running {post_attack.MNAME} post attack module")
+                    post_attack.run()
+
             else: # selectedModule is an instance of Auxiliary
                 print_failure(f"No attack method for {selectedModule.MNAME} module")
         else:
