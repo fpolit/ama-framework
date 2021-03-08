@@ -28,8 +28,8 @@ from cmd2 import (
 
 # data/modules imports
 from ama.data.modules import (
-    amaModulesType,
-    #amaModulesSubtype
+    amaModulesTypes,
+    amaModulesSubtypes
 )
 
 
@@ -44,10 +44,10 @@ class Search(CommandSet):
         super().__init__()
 
     search_parser = argparse.ArgumentParser()
-    search_parser.add_argument('-t', '--type', dest='moduleType', choices=amaModulesType, default=None,
+    search_parser.add_argument('-t', '--type', dest='moduleType', choices=amaModulesTypes, default=None,
                                help="Module type")
-    # search_parser.add_argument('-s', '--subtype', dest='moduleSubtype', choices=amaModulesSubtype, default=None,
-    #                            help="Module subtype")
+    search_parser.add_argument('-s', '--subtype', dest='moduleSubtype', choices=amaModulesSubtypes, default=None,
+                               help="Module subtype")
     search_parser.add_argument('pattern', nargs='?', default='',
                                help='Pattern to search availables modules')
 
@@ -63,13 +63,31 @@ class Search(CommandSet):
         #import pdb; pdb.set_trace()
         if pattern:
             moduleType = args.moduleType
-            if moduleType:
+            moduleSubtype = args.moduleSubtype
+
+            if moduleType and moduleSubtype:
+                for moduleName, moduleClass in self._cmd.modules.items():
+                    if moduleType == moduleClass.MTYPE and \
+                       moduleSubtype == moduleClass.MSUBTYPE and \
+                       re.search(pattern, moduleName, flags=re.IGNORECASE):
+                        filteredModules.append((idModule, moduleClass))
+                        idModule += 1
+
+            elif moduleType and (moduleSubtype is None):
                 for moduleName, moduleClass in self._cmd.modules.items():
                     if moduleType == moduleClass.MTYPE and \
                        re.search(pattern, moduleName, flags=re.IGNORECASE):
                         filteredModules.append((idModule, moduleClass))
                         idModule += 1
-            else:
+
+            elif moduleSubtype and (moduleType is None):
+                for moduleName, moduleClass in self._cmd.modules.items():
+                    if moduleSubtype == moduleClass.MSUBTYPE and \
+                       re.search(pattern, moduleName, flags=re.IGNORECASE):
+                        filteredModules.append((idModule, moduleClass))
+                        idModule += 1
+
+            else: # no moduleType or moduleSubtype were supplied
                 for moduleName, moduleClass in self._cmd.modules.items():
                     if re.search(pattern, moduleName, flags=re.IGNORECASE):
                         filteredModules.append((idModule, moduleClass))
@@ -77,16 +95,31 @@ class Search(CommandSet):
 
         else:
             moduleType = args.moduleType
-            if moduleType:
+            moduleSubtype = args.moduleSubtype
+
+            if moduleType and moduleSubtype:
+                for moduleName, moduleClass in self._cmd.modules.items():
+                    if moduleType == moduleClass.MTYPE and \
+                       moduleSubtype == moduleClass.MSUBTYPE:
+                        filteredModules.append((idModule, moduleClass))
+                        idModule += 1
+
+            elif moduleType and (moduleSubtype is None):
                 for moduleName, moduleClass in self._cmd.modules.items():
                     if moduleType == moduleClass.MTYPE:
                         filteredModules.append((idModule, moduleClass))
                         idModule += 1
-            else:
+
+            elif moduleSubtype and (moduleType is None):
+                for moduleName, moduleClass in self._cmd.modules.items():
+                    if moduleSubtype == moduleClass.MSUBTYPE:
+                        filteredModules.append((idModule, moduleClass))
+                        idModule += 1
+
+            else: # no moduleType or moduleSubtype were supplied
                 for moduleName, moduleClass in self._cmd.modules.items():
                     filteredModules.append((idModule, moduleClass))
                     idModule += 1
-
 
         self._cmd.filteredModules = filteredModules
 

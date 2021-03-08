@@ -10,7 +10,6 @@ from ama.data.modules import (
     attackModules,
     auxiliaryWordlistModules,
     auxiliaryHashesModules,
-    auxiliaryCombinatortModules,
     auxiliaryAnalysisModules
 )
 
@@ -29,7 +28,6 @@ class Banner:
                 Analysis Modules    : {len(auxiliaryAnalysisModules)}
                 Wordlists Modules   : {len(auxiliaryWordlistModules)}
                 Hashes Modules      : {len(auxiliaryHashesModules)}
-                Combinator Modules  : {len(auxiliaryCombinatortModules)}
         """
     )
     AMA_VERSION = get_version()

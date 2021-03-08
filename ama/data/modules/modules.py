@@ -62,9 +62,6 @@ from ama.core.modules.auxiliary.hashes import (
     NTH
 )
 
-## auxiliary/combinator modules imports
-
-
 ## auxiliary/analysis modules imports
 from ama.core.modules.auxiliary.analysis import (
     PackStatsgen,
@@ -73,8 +70,8 @@ from ama.core.modules.auxiliary.analysis import (
 )
 
 
-amaModulesType = ["attack", "auxiliary"]
-#amaModulesType = ["attack", "auxiliary"]
+amaModulesTypes = ["attack", "auxiliary"]
+amaModulesSubtypes = ["analysis", "wordlists", "hashes"]
 
 # attack modules (hashes and services)
 attackModules = {
@@ -122,8 +119,6 @@ auxiliaryHashesModules = {
     f"{HashID.MNAME}": HashID,
     f"{NTH.MNAME}": NTH
 }
-## auxiliary/combinator modules
-auxiliaryCombinatortModules = {}
 
 ## auxiliary/analysis modules
 auxiliaryAnalysisModules = {
@@ -143,9 +138,6 @@ amaModules = {
 
     ## auxiliary/hashes modules
     **auxiliaryHashesModules,
-
-    ## auxiliary/combinator modules
-    **auxiliaryCombinatortModules,
 
     ## auxiliary/analysis modules
     **auxiliaryAnalysisModules

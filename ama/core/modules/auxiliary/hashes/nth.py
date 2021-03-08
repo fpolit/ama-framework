@@ -58,7 +58,6 @@ class NTH(Auxiliary):
             'hashcat': Argument(hashcat, True, "Show corresponding Hashcat mode"),
             'john': Argument(john, True, "Show corresponding John hash format"),
             'base64': Argument(base64, True, "Decodes hashes in Base64 before identification"),
-            #'banner': Argument(banner, False, "Show fancy banner of nth")
         }
 
         init_options = {
@@ -93,7 +92,6 @@ class NTH(Auxiliary):
                      hashcat = self.options['hashcat'].value,
                      john = self.options['john'].value,
                      base64 = self.options['base64'].value,
-                     #banner = self.options['banner'].value,
                      most_likely = self.options['most_likely'].value)
 
         except Exception as error:
