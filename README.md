@@ -39,7 +39,7 @@ and then install `ama` and the developer packages.
     make installdev
 ```
 
-## Usage
+## Usage (COMMING SOON)
 Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can find useful documentation about `ama`.  
 
      Please do not use ama in military or secret service organizations,
