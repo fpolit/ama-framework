@@ -28,6 +28,9 @@ setup(
     license='GPL3',
     packages=find_packages(),
     include_package_data=True,
+    # package_data={
+    #     '': ["*.cfg"],
+    # },
     entry_points={
         'console_scripts':[
             'ama = ama.ama:main',

@@ -10,7 +10,7 @@ varname
 # auxiliary module packages
 
 ## auxiliary/hashes
-name-that-hash
+#name-that-hash
 #sth-ama
 search-that-hash
 hashid
