@@ -18,7 +18,7 @@ class CuppAlecto(Auxiliary):
     """
     Cupp - Alecto
     """
-    DESCRIPTION = "Cupp - Alecto"
+    DESCRIPTION = "Cupp - Alecto Database"
     MNAME = "auxiliary/wordlists/cupp_alecto"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
     AUTHOR = [
@@ -38,7 +38,9 @@ class CuppAlecto(Auxiliary):
         Initialization of Cupp - Alecto
         """
 
-        auxiliary_options = {}
+        auxiliary_options = {
+            'quiet': Argument(quiet, True, "Don't print cupp's fancy banner")
+        }
         init_options = {
             'mname': CuppAlecto.MNAME,
             'author': CuppAlecto.AUTHOR,
@@ -58,7 +60,7 @@ class CuppAlecto(Auxiliary):
         try:
             self.no_empty_required_options()
             cupp = Cupp()
-            cupp.alecto()
+            cupp.alectodb(quiet = self.options['quiet'].value)
 
         except Exception as error:
             print_failure(error)

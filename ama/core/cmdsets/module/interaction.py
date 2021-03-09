@@ -347,6 +347,7 @@ class Interaction(CommandSet):
         """
         Run the selected auxiliary module
         """
+        #import pdb; pdb.set_trace()
         selectedModule = self._cmd.selectedModule
         if selectedModule:
             if isinstance(selectedModule, Auxiliary):

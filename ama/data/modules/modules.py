@@ -66,7 +66,8 @@ from ama.core.modules.auxiliary.hashes import (
 from ama.core.modules.auxiliary.analysis import (
     PackStatsgen,
     PackMaskgen,
-    PackPolicygen
+    PackPolicygen,
+    PackWholegen
 )
 
 
@@ -124,7 +125,9 @@ auxiliaryHashesModules = {
 auxiliaryAnalysisModules = {
     f"{PackStatsgen.MNAME}": PackStatsgen,
     f"{PackMaskgen.MNAME}": PackMaskgen,
-    f"{PackPolicygen.MNAME}": PackPolicygen
+    f"{PackPolicygen.MNAME}": PackPolicygen,
+    f"{PackWholegen.MNAME}": PackWholegen
+
 }
 
 

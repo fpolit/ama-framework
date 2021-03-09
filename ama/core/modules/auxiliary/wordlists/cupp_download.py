@@ -18,13 +18,15 @@ class CuppDownload(Auxiliary):
     """
     Cupp - Download wordlists
     """
-    DESCRIPTION = "Cupp - download huge wordlists from repository"
+    DESCRIPTION = "Cupp - Download huge wordlists"
     MNAME = "auxiliary/wordlists/cupp_download"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
     AUTHOR = [
         "glozanoa <glozanoa@uni.pe>"
     ]
-    FULLDESCRIPTION = ""
+    FULLDESCRIPTION = """
+    Download a wordlist from http://ftp.funet.fi/pub/unix/security/passwd/crack/dictionaries/
+    """
     REFERENCES = [
         "https://www.hackingarticles.in/comprehensive-guide-on-cupp-a-wordlist-generating-tool/",
         "https://github.com/Mebus/cupp"
@@ -35,7 +37,9 @@ class CuppDownload(Auxiliary):
         Initialization of Cupp - Download wordlists
         """
 
-        auxiliary_options = {}
+        auxiliary_options = {
+            'quiet': Argument(quiet, True, "Don't print cupp's fancy banner")
+        }
         init_options = {
             'mname': CuppDownload.MNAME,
             'author': CuppDownload.AUTHOR,
@@ -55,7 +59,7 @@ class CuppDownload(Auxiliary):
         try:
             self.no_empty_required_options()
             cupp = Cupp()
-            cupp.download_wordlists()
+            cupp.download_wordlists(quiet = self.options['quiet'].value)
 
         except Exception as error:
             print_failure(error)

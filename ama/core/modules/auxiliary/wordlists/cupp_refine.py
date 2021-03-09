@@ -44,7 +44,8 @@ class CuppRefine(Auxiliary):
 
     def __init__(self, wordlist: str = None):
         auxiliary_options = {
-            'wordlist': Argument(wordlist, True, "Wordlist to refine")
+            'wordlist': Argument(wordlist, True, "Wordlist to refine"),
+            'quiet': Argument(quiet, True, "Don't print cupp's fancy banner")
         }
         init_options = {
             'mname': CuppRefine.MNAME,
@@ -67,9 +68,8 @@ class CuppRefine(Auxiliary):
         try:
             self.no_empty_required_options()
             cupp = Cupp()
-            cupp.refine(
-                self.options['wordlist'].value
-            )
+            cupp.improve_wordlist(wordlist= self.options['wordlist'].value,
+                                  quiet = self.options['quiet'].value)
 
         except Exception as error:
             print_failure(error)

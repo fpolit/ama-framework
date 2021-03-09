@@ -18,7 +18,7 @@ class CuppInteractive(Auxiliary):
     """
     Cupp - interactive mode
     """
-    DESCRIPTION = "Cupp - interactive mode"
+    DESCRIPTION = "Cupp - Interactive mode"
     MNAME = "auxiliary/wordlists/cupp_interactive"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
     AUTHOR = [
@@ -35,12 +35,15 @@ class CuppInteractive(Auxiliary):
         "https://github.com/Mebus/cupp"
     ]
 
-    def __init__(self):
+    def __init__(self, quiet=False):
         """
         Initialization of Cupp - interactive mode
         """
 
-        auxiliary_options = {}
+        auxiliary_options = {
+            'quiet': Argument(quiet, True, "Don't print cupp's fancy banner")
+        }
+
         init_options = {
             'mname': CuppInteractive.MNAME,
             'author': CuppInteractive.AUTHOR,
@@ -61,7 +64,7 @@ class CuppInteractive(Auxiliary):
         try:
             self.no_empty_required_options()
             cupp = Cupp()
-            cupp.interactive()
+            cupp.interactive(quiet = self.options['quiet'].value)
 
         except Exception as error:
             print_failure(error)
