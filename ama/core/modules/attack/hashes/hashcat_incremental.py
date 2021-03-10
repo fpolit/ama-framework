@@ -7,6 +7,7 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
+from typing import Any
 
 # base  imports
 from ama.core.modules.base import (
@@ -114,7 +115,7 @@ class HashcatIncremental(Attack):
 
 
     # debugged - date: Mar 6 2021
-    def attack(self, local:bool):
+    def attack(self, local:bool = False, pre_attack_output: Any = None):
         """
         Incremental attack using Hashcat
 

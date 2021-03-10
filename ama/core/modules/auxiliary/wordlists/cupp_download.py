@@ -11,7 +11,11 @@ from fineprint.status import print_failure
 from ama.core.plugins.auxiliary import Cupp
 
 # Auxliary base class
-from ama.core.modules.base import Auxiliary
+from ama.core.modules.base import (
+    Auxiliary,
+    Argument
+)
+
 
 # debugged - date: Mar 4 2021
 class CuppDownload(Auxiliary):
@@ -32,7 +36,7 @@ class CuppDownload(Auxiliary):
         "https://github.com/Mebus/cupp"
     ]
 
-    def __init__(self):
+    def __init__(self, *, quiet=False):
         """
         Initialization of Cupp - Download wordlists
         """

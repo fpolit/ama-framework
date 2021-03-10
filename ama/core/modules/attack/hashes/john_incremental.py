@@ -7,6 +7,7 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
+from typing import Any
 
 # base  imports
 from ama.core.modules.base import (
@@ -104,7 +105,7 @@ class JohnIncremental(Attack):
 
         super().__init__(**init_options)
 
-    def attack(self):
+    def attack(self, local:bool = False, pre_attack_output: Any = None):
         """
         Incremental attack using John the Ripper
         """

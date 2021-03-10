@@ -5,7 +5,7 @@
 # date: Feb 22 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
-from typing import List
+from typing import List, Any
 
 # base  imports
 from ama.core.modules.base import (
@@ -73,7 +73,7 @@ class JohnCombination(Attack):
         super().__init__(**initOptions)
 
 
-    def attack(self):
+    def attack(self, local:bool = False, pre_attack_output: Any = None):
         """
         Combination attack using John the Ripper
         """

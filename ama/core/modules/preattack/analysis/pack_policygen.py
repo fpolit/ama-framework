@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 #
+# pre attack
 # pack policygen - Analyze and Generate password masks according to a password policy
 #
 # date: Mar 5 2021
@@ -12,21 +13,21 @@ from fineprint.status import print_failure
 
 # module.base imports
 from ama.core.modules.base import (
-    Auxiliary,
+    PreAttack,
     Argument
 )
 
-# plugin imports
-from ama.core.plugins.auxiliary.analysis import Pack
+# pack_policygen auxiliary import
+from ama.core.modules.auxiliary.analysis import PackPolicygen as PackPolicygenAuxiliary
 
 
-class PackPolicygen(Auxiliary):
+class PackPolicygen(PreAttack):
     """
     policygen (pack) - Masks generator
     """
 
     DESCRIPTION = "Masks generator according to a password policy"
-    MNAME = "auxiliary/analysis/pack_policygen"
+    MNAME = "preattack/analysis/pack_policygen"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
     AUTHOR = [
         "glozanoa <glozanoa@uni.pe>"
@@ -49,7 +50,7 @@ class PackPolicygen(Auxiliary):
                  min_special:int = None, max_special:int = None,
                  show_masks:bool = False, quiet:bool = True):
 
-        auxiliary_options = {
+        preattack_options = {
             'output': Argument(output, True, "File to save generated masks"),
 
             # mask filters
@@ -77,7 +78,7 @@ class PackPolicygen(Auxiliary):
             'description': PackPolicygen.DESCRIPTION,
             'fulldescription':  PackPolicygen.FULLDESCRIPTION,
             'references': PackPolicygen.REFERENCES,
-            'auxiliary_options': auxiliary_options,
+            'preattack_options': preattack_options,
             'slurm': None
         }
 
@@ -87,26 +88,15 @@ class PackPolicygen(Auxiliary):
 
     def run(self, quiet=False):
 
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
 
         try:
             self.no_empty_required_options()
-            output = Pack.policygen(output = self.options['output'].value,
-                                    min_length = self.options['min_length'].value,
-                                    max_length = self.options['max_length'].value,
-                                    min_digit = self.options['min_digit'].value,
-                                    max_digit = self.options['max_digit'].value,
-                                    min_upper = self.options['min_upper'].value,
-                                    max_upper = self.options['max_upper'].value,
-                                    min_lower = self.options['min_lower'].value,
-                                    max_lower = self.options['max_lower'].value,
-                                    min_special = self.options['min_special'].value,
-                                    max_special = self.options['max_special'].value,
-                                    show_masks = self.options['show_masks'].value,
-                                    quiet = self.options['quiet'].value,
-                                    quietRun = quiet)
 
+            policygen = PackPolicygenAuxiliary(**self.preattack_options_values())
+            output = policygen.run(quiet=quiet)
 
             return output
+
         except Exception as error:
             print_failure(error)

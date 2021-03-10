@@ -159,11 +159,11 @@ class Pack(Auxiliary):
                min_length:int = None, max_length:int = None, min_digit:int = None, max_digit: int = None,
                min_upper:int = None, max_upper:int = None, min_lower:int = None, max_lower:int = None,
                min_special:int = None, max_special:int = None,
-               show_masks:bool = False, quiet:bool = True):
+                show_masks:bool = False, quiet:bool = True, quietRun:bool = False):
 
         #import pdb; pdb.set_trace()
         #Print program header
-        if not quiet:
+        if not (quiet or quietRun):
             print(policygen_banner())
 
         policygen = PolicyGen(output = output,
@@ -179,11 +179,13 @@ class Pack(Auxiliary):
                               max_special = max_special,
                               show_masks = show_masks)
 
-        print("[*] Generating masks.")
+        if not quietRun:
+            print("[*] Generating masks.")
         policygen.generate_masks()
-        if output:
+        if output and not quietRun:
             print("[*] Saving generated masks to [%s]" % output)
 
+        return output
 
     @staticmethod
     def wholegen(*,

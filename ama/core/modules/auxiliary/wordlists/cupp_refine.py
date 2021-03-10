@@ -42,7 +42,7 @@ class CuppRefine(Auxiliary):
         "https://github.com/Mebus/cupp"
     ]
 
-    def __init__(self, wordlist: str = None):
+    def __init__(self, wordlist: str = None, quiet:bool = False):
         auxiliary_options = {
             'wordlist': Argument(wordlist, True, "Wordlist to refine"),
             'quiet': Argument(quiet, True, "Don't print cupp's fancy banner")

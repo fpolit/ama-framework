@@ -6,6 +6,7 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
+from typing import Any
 
 # base  imports
 from ama.core.modules.base import (
@@ -23,6 +24,14 @@ from ama.core.slurm import Slurm
 from fineprint.status import (
     print_failure,
     print_status
+)
+
+## preattacks
+from ama.core.modules.preattack.hashes import (
+    Nth
+)
+from ama.core.modules.preattack.analysis import (
+    PackPolicygen
 )
 
 class JohnWordlist(Attack):
@@ -45,6 +54,15 @@ class JohnWordlist(Attack):
 
     REFERENCES = None
 
+    # {PRE_ATTACK_MNAME: PRE_ATTACK_CLASS, ...}
+    PRE_ATTACKS = {
+        f"{Nth.MNAME}": Nth,
+        f"{PackPolicygen.MNAME}": PackPolicygen
+    }
+
+    # {POST_ATTACK_MNAME: POST_ATTACK_CLASS, ...}
+    POST_ATTACKS = {}
+
     def __init__(self, *,
                  hash_type: str = None, hashes_file: str = None,
                  wordlist: str = None, slurm=None):
@@ -57,10 +75,13 @@ class JohnWordlist(Attack):
         wordlist (str): wordlist to attack
         slurm (Slurm): Instance of Slurm class
         """
+
         attack_options = {
             'wordlist': Argument(wordlist, True, "wordlist file"),
             'hash_type': Argument(hash_type, True, "John hash type"),
-            'hashes_file': Argument(hashes_file, True, "hashes file")
+            'hashes_file': Argument(hashes_file, True, "hashes file"),
+            'pre_attack': Argument(None, False, "Pre attack module"),
+            'post_attack': Argument(None, False, "Post attack module"),
         }
 
         if slurm is None:
@@ -109,7 +130,7 @@ class JohnWordlist(Attack):
         super().__init__(**init_options)
 
 
-    def attack(self, local:bool):
+    def attack(self, local:bool, pre_attack_output: Any = None):
         """
         Wordlist attack using John the Ripper
 
@@ -119,8 +140,10 @@ class JohnWordlist(Attack):
         """
         try:
             self.no_empty_required_options(local)
+
+            
+
             jtr = John()
-            print_status(f"Running {self.mname} module")
 
             if local:
                 jtr.wordlist_attack(hash_type = self.options['hash_type'].value,

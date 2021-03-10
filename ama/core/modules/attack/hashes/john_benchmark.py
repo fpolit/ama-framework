@@ -6,6 +6,7 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
+from typing import Any
 
 # base  imports
 from ama.core.modules.base import (
@@ -96,7 +97,7 @@ class JohnBenchmark(Attack):
         super().__init__(**init_options)
 
 
-    def attack(self, local:bool):
+    def attack(self, local:bool, pre_attack_output: Any = None):
         """
         John the Ripper benchmark
 

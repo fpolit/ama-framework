@@ -29,9 +29,11 @@ from cmd2 import (
 # data/modules imports
 from ama.data.modules import (
     amaModulesTypes,
-    amaModulesSubtypes
+    amaModulesSubtypes,
+    amaAttackAuxiliariesModules
 )
 
+from ama.core.modules.base import Attack
 
 @with_default_category(Category.MODULE)
 class Search(CommandSet):
@@ -48,6 +50,8 @@ class Search(CommandSet):
                                help="Module type")
     search_parser.add_argument('-s', '--subtype', dest='moduleSubtype', choices=amaModulesSubtypes, default=None,
                                help="Module subtype")
+    search_parser.add_argument('-p', '--previous', action='store_true',
+                               help="Show previous search")
     search_parser.add_argument('pattern', nargs='?', default='',
                                help='Pattern to search availables modules')
 
@@ -64,7 +68,6 @@ class Search(CommandSet):
         if pattern:
             moduleType = args.moduleType
             moduleSubtype = args.moduleSubtype
-
             if moduleType and moduleSubtype:
                 for moduleName, moduleClass in self._cmd.modules.items():
                     if moduleType == moduleClass.MTYPE and \
@@ -74,11 +77,27 @@ class Search(CommandSet):
                         idModule += 1
 
             elif moduleType and (moduleSubtype is None):
-                for moduleName, moduleClass in self._cmd.modules.items():
-                    if moduleType == moduleClass.MTYPE and \
-                       re.search(pattern, moduleName, flags=re.IGNORECASE):
-                        filteredModules.append((idModule, moduleClass))
-                        idModule += 1
+                if moduleType in amaAttackAuxiliariesModules:
+                    selectedModule = self._cmd.selectedModule
+                    if selectedModule and isinstance(selectedModule, Attack):
+                        attackAuxiliaries = {**selectedModule.PRE_ATTACKS, **selectedModule.POST_ATTACKS}
+                        for moduleName, moduleClass in attackAuxiliaries.items():
+                            if moduleType == moduleClass.MTYPE and \
+                            re.search(pattern, moduleName, flags=re.IGNORECASE):
+                                filteredModules.append((idModule, moduleClass))
+                                idModule += 1
+                    else:
+                        for moduleName, moduleClass in self._cmd.modules.items():
+                            if moduleType == moduleClass.MTYPE and \
+                               re.search(pattern, moduleName, flags=re.IGNORECASE):
+                                filteredModules.append((idModule, moduleClass))
+                                idModule += 1
+                else:
+                    for moduleName, moduleClass in self._cmd.modules.items():
+                        if moduleType == moduleClass.MTYPE and \
+                           re.search(pattern, moduleName, flags=re.IGNORECASE):
+                            filteredModules.append((idModule, moduleClass))
+                            idModule += 1
 
             elif moduleSubtype and (moduleType is None):
                 for moduleName, moduleClass in self._cmd.modules.items():
@@ -93,7 +112,7 @@ class Search(CommandSet):
                         filteredModules.append((idModule, moduleClass))
                         idModule += 1
 
-        else:
+        else: # no pattern supplied
             moduleType = args.moduleType
             moduleSubtype = args.moduleSubtype
 
@@ -105,10 +124,24 @@ class Search(CommandSet):
                         idModule += 1
 
             elif moduleType and (moduleSubtype is None):
-                for moduleName, moduleClass in self._cmd.modules.items():
-                    if moduleType == moduleClass.MTYPE:
-                        filteredModules.append((idModule, moduleClass))
-                        idModule += 1
+                if moduleType in amaAttackAuxiliariesModules:
+                    selectedModule = self._cmd.selectedModule
+                    if selectedModule and isinstance(selectedModule, Attack):
+                        attackAuxiliaries = {**selectedModule.PRE_ATTACKS, **selectedModule.POST_ATTACKS}
+                        for moduleName, moduleClass in attackAuxiliaries.items():
+                            if moduleType == moduleClass.MTYPE:
+                                filteredModules.append((idModule, moduleClass))
+                                idModule += 1
+                    else:
+                        for moduleName, moduleClass in self._cmd.modules.items():
+                            if moduleType == moduleClass.MTYPE:
+                                filteredModules.append((idModule, moduleClass))
+                                idModule += 1
+                else:
+                    for moduleName, moduleClass in self._cmd.modules.items():
+                        if moduleType == moduleClass.MTYPE:
+                            filteredModules.append((idModule, moduleClass))
+                            idModule += 1
 
             elif moduleSubtype and (moduleType is None):
                 for moduleName, moduleClass in self._cmd.modules.items():
@@ -117,9 +150,12 @@ class Search(CommandSet):
                         idModule += 1
 
             else: # no moduleType or moduleSubtype were supplied
-                for moduleName, moduleClass in self._cmd.modules.items():
-                    filteredModules.append((idModule, moduleClass))
-                    idModule += 1
+                if args.previous:
+                    filteredModules = self._cmd.filteredModules
+                else:
+                    for moduleName, moduleClass in self._cmd.modules.items():
+                        filteredModules.append((idModule, moduleClass))
+                        idModule += 1
 
         self._cmd.filteredModules = filteredModules
 

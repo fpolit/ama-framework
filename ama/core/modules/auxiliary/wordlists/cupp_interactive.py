@@ -11,7 +11,11 @@ from fineprint.status import print_failure
 from ama.core.plugins.auxiliary import Cupp
 
 # Auxliary base class
-from ama.core.modules.base import Auxiliary
+from ama.core.modules.base import (
+    Auxiliary,
+    Argument
+)
+
 
 # debugged - date: Mar 4 2021
 class CuppInteractive(Auxiliary):
@@ -61,6 +65,7 @@ class CuppInteractive(Auxiliary):
         Execution of Cupp interactive mode
         """
 
+        import pdb; pdb.set_trace()
         try:
             self.no_empty_required_options()
             cupp = Cupp()

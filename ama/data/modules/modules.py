@@ -39,10 +39,25 @@ from ama.core.modules.attack.hashes import (
 # sth
 from ama.core.modules.attack.hashes import STH
 
-## attack/hashes modules imports
+## attack/services modules imports
+
 # hydra attacks imports
 # from ama.core.modules.attack.services import (
 #     #HydraWordlist
+# )
+
+## pre_attack modules imports
+from ama.core.modules.preattack.hashes import (
+    Nth as NthPreAttack,
+)
+
+from ama.core.modules.preattack.analysis import (
+    PackPolicygen as PackPolicygenPreAttack
+)
+
+## post_attack modules imports
+# from ama.core.modules.postattack import (
+
 # )
 
 
@@ -59,19 +74,19 @@ from ama.core.modules.auxiliary.wordlists import (
 from ama.core.modules.auxiliary.hashes import (
     HashesStatus,
     HashID,
-    NTH
+    Nth as NthAuxiliary
 )
 
 ## auxiliary/analysis modules imports
 from ama.core.modules.auxiliary.analysis import (
     PackStatsgen,
     PackMaskgen,
-    PackPolicygen,
+    PackPolicygen as PackPolicyAuxiliary,
     PackWholegen
 )
 
-
-amaModulesTypes = ["attack", "auxiliary"]
+amaAttackAuxiliariesModules = ["preattack", "postattack"]
+amaModulesTypes = ["attack", "auxiliary", *amaAttackAuxiliariesModules]
 amaModulesSubtypes = ["analysis", "wordlists", "hashes"]
 
 # attack modules (hashes and services)
@@ -104,6 +119,13 @@ attackModules = {
     #f"{HydraWordlist.mname}": HydraWordlist,
 }
 
+preAttackModules = {
+    f"{NthPreAttack.MNAME}": NthPreAttack,
+    f"{PackPolicygenPreAttack.MNAME}": PackPolicygenPreAttack
+}
+
+postAttackModules = {}
+
 ### auxiliary modules
 
 ## auxiliary/wordlists modules
@@ -118,14 +140,14 @@ auxiliaryWordlistModules = {
 auxiliaryHashesModules = {
     f"{HashesStatus.MNAME}": HashesStatus,
     f"{HashID.MNAME}": HashID,
-    f"{NTH.MNAME}": NTH
+    f"{NthAuxiliary.MNAME}": NthAuxiliary
 }
 
 ## auxiliary/analysis modules
 auxiliaryAnalysisModules = {
     f"{PackStatsgen.MNAME}": PackStatsgen,
     f"{PackMaskgen.MNAME}": PackMaskgen,
-    f"{PackPolicygen.MNAME}": PackPolicygen,
+    f"{PackPolicyAuxiliary.MNAME}": PackPolicyAuxiliary,
     f"{PackWholegen.MNAME}": PackWholegen
 
 }
@@ -134,6 +156,10 @@ auxiliaryAnalysisModules = {
 amaModules = {
 ### attack modules
     **attackModules,
+
+### pre/post attacks modules
+    **preAttackModules,
+    **postAttackModules,
 
 ### auxiliary modules
     ## auxiliary/wordlists modules

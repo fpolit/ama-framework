@@ -7,8 +7,7 @@
 
 import os
 from fineprint.status import print_failure
-import cmd2
-from typing import List
+#from typing import List
 
 # module.base imports
 from ama.core.modules.base import (
@@ -17,18 +16,18 @@ from ama.core.modules.base import (
 )
 
 # plugins imports
-from ama.core.plugins.auxiliary.hashes import NTH as PluginNTH
+from ama.core.plugins.auxiliary.hashes import Nth as PluginNth
 
 # validator imports
-from ama.core.validator import Args
-from ama.core.files import Path
+#from ama.core.validator import Args
+#from ama.core.files import Path
 
 
-class NTH(Auxiliary):
+class Nth(Auxiliary):
     """
     hash identifier - nth
     """
-    DESCRIPTION = "NTH (name-that-hash) - hash identifier"
+    DESCRIPTION = "Nth (name-that-hash) - Hash Identifier"
     MNAME = "auxiliary/hashes/nth"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
     AUTHOR = [
@@ -53,7 +52,7 @@ class NTH(Auxiliary):
                  banner: bool = False, most_likely: bool = True):
 
         auxiliary_options = {
-            'hashes': Argument(hashes, True, "Hashes to identify (hash or hashes file)"),
+            'hashes': Argument(hashes, True, "Hashes to identify (hashes[split by commas] or hashes file)"),
             'most_likely': Argument(most_likely, True, "Show the most like hashes type"),
             'hashcat': Argument(hashcat, True, "Show corresponding Hashcat mode"),
             'john': Argument(john, True, "Show corresponding John hash format"),
@@ -61,38 +60,44 @@ class NTH(Auxiliary):
         }
 
         init_options = {
-            'mname': NTH.MNAME,
-            'author': NTH.AUTHOR,
-            'description': NTH.DESCRIPTION,
-            'fulldescription': NTH.FULLDESCRIPTION,
-            'references': NTH.REFERENCES,
+            'mname': Nth.MNAME,
+            'author': Nth.AUTHOR,
+            'description': Nth.DESCRIPTION,
+            'fulldescription': Nth.FULLDESCRIPTION,
+            'references': Nth.REFERENCES,
             'auxiliary_options': auxiliary_options,
             'slurm': None
         }
 
         super().__init__(**init_options)
 
-    def run(self):
+    def run(self, quiet=False):
         """
         Identify an hash or hashes in a file using hashid
         """
+        #import pdb; pdb.set_trace()
         try:
-            #import pdb; pdb.set_trace()
 
             self.no_empty_required_options()
-            nth = PluginNTH()
+            nth = PluginNth()
 
-            if os.path.isfile(self.options['hashes'].value):
-                identify = nth.identify_hashes
+            if os.path.isfile(self.options['hashes'].value) and \
+               os.access(self.options['hashes'].value, os.R_OK):
+                hashes_file = open(self.options['hashes'].value, 'r')
+                hashes = [query_hash.rstrip() for query_hash in hashes_file.readlines()]
 
             else: # HASHES option is a string (a simple hash)
-                identify = nth.identify_hash
+                hashes = self.options['hashes'].value.split(',')
 
-            identify(self.options['hashes'].value,
-                     hashcat = self.options['hashcat'].value,
-                     john = self.options['john'].value,
-                     base64 = self.options['base64'].value,
-                     most_likely = self.options['most_likely'].value)
+                hashes_identities = nth.identify_hashes(hashes,
+                                                        hashcat = self.options['hashcat'].value,
+                                                        john = self.options['john'].value,
+                                                        base64 = self.options['base64'].value,
+                                                        most_likely = self.options['most_likely'].value,
+                                                        quiet = quiet)
+
+
+            return hashes_identities
 
         except Exception as error:
             print_failure(error)

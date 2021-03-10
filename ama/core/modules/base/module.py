@@ -47,8 +47,27 @@ class Module:
         """
         Show information about the module
         """
-        info_msg = \
-            f"""
+        # module head
+        info_msg = self.info_head()
+
+        # module options
+        info_msg += self.available_options()
+
+        # module description
+        info_msg += self.fulldesciption_module()
+
+        # module references
+        info_msg += self.available_references()
+
+        return info_msg
+
+
+    def fulldesciption_module(self):
+        fulldescription = f"\n\nDescription:\n{self.fulldesciption}"
+        return fulldescription
+
+    def info_head(self):
+        head = f"""
    Name : {self.description}
  Module : {self.mname}
 License : GPLv3
@@ -56,17 +75,9 @@ License : GPLv3
   Author:
             """
         for author in self.author:
-            info_msg += f"{author}\n"
+            head += f"{author}\n"
 
-        info_msg += self.available_options()
-
-        # module description
-        info_msg += f"\n\nDescription:\n{self.fulldesciption}"
-
-        # module references
-        info_msg += self.available_references()
-
-        return info_msg
+        return head
 
 
     def available_references(self):
@@ -154,8 +165,7 @@ License : GPLv3
         return slurm_options_table
 
 
-    # debugged - date : Mar 1 2021
-    def no_empty_required_options(self, local=False):
+    def required_options(self, local=False):
         #import pdb; pdb.set_trace()
         required_module_args = {name: option
                                 for name, option in self.options.items() if option.required}
@@ -166,8 +176,15 @@ License : GPLv3
                 required_slurm_args = {name: option
                                        for name, option in self.slurm.options.items() if option.required}
 
-
         required_args = {**required_module_args, **required_slurm_args}
+
+        return required_args
+
+    # debugged - date : Mar 1 2021
+    def no_empty_required_options(self, local=False):
+        #import pdb; pdb.set_trace()
+
+        required_args = self.required_options()
 
         Args.no_empty_required_options(**required_args)
 

@@ -1,2 +1,2 @@
 from .hashid import HashID
-from .nth import NTH
+from .nth import Nth

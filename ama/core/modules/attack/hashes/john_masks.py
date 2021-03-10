@@ -6,6 +6,7 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
+from typing import Any
 
 # base  imports
 from ama.core.modules.base import (
@@ -111,7 +112,7 @@ class JohnMasks(Attack):
 
         super().__init__(**init_options)
 
-    def attack(self, local=False, report=True):
+    def attack(self, local=False, pre_attack_output: Any = None):
         """
         Masks attack using John the Ripper
         Args:

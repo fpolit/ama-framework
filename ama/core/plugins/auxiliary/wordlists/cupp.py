@@ -35,17 +35,20 @@ class Cupp(Auxiliary):
     """
 
     MAINNAME = "cupp"
-    CONFIG = cupp.read_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cupp.cfg"))
+
     def __init__(self):
+        self.CONFIG = cupp.read_config(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cupp.cfg"))
         super().__init__(["cupp"], version="v3.3.0", search_exec=False)
 
 
     # debugged - date: Mar 4 2021
-    def interactive(self, *, quiet=False, CONFIG=Cupp.CONFIG):
+    def interactive(self, *, quiet=False):
         """
         Cupp - interactive mode (Interactive questions for user password profiling)
         """
+        import pdb; pdb.set_trace()
         if self.enable:
+            CONFIG = self.CONFIG
             if not quiet:
                 cupp.print_cow()
             cupp.interactive()
@@ -53,12 +56,13 @@ class Cupp(Auxiliary):
             print_failure("Auxiliary application {self.main_name} is disable")
 
     # debugged - date: Mar 4 2021
-    def improve_wordlist(self, *, wordlist: str, quiet=False, CONFIG=Cupp.CONFIG):
+    def improve_wordlist(self, *, wordlist: str, quiet=False):
         """
         Cupp - improve a wordlist
         """
         #import pdb; pdb.set_trace()
         if self.enable:
+            CONFIG = self.CONFIG
             try:
                 permission = [os.R_OK]
                 Path.access(permission, wordlist)
@@ -73,11 +77,12 @@ class Cupp(Auxiliary):
         else:
             print_failure("Auxiliary application {self.main_name} is disable")
     # debugged - date: Mar 4 2021
-    def download_wordlists(self, *, quiet=False, CONFIG=Cupp.CONFIG):
+    def download_wordlists(self, *, quiet=False):
         """
         Cupp - download huge wordlists from repository
         """
         if self.enable:
+            CONFIG = self.CONFIG
             if not quiet:
                 cupp.print_cow()
             cupp.download_wordlist()
@@ -85,12 +90,13 @@ class Cupp(Auxiliary):
             print_failure("Auxiliary application {self.main_name} is disable")
 
     # debugged - date: Mar 4 2021
-    def alectodb(self, *,quiet=False, CONFIG=Cupp.CONFIG):
+    def alectodb(self, *,quiet=False):
         """
         Cupp - Parse default usernames and passwords directly from Alecto DB. Project Alecto uses purified
         databases of Phenoelit and CIRT which were merged and enhanced
         """
         if self.enable:
+            CONFIG = self.CONFIG
             if not quiet:
                 cupp.print_cow()
             cupp.alectodb_download()

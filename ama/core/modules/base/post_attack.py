@@ -5,7 +5,7 @@
 # date: Feb 20 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
-
+from typing import List
 from .auxiliary import Auxiliary
 
 
@@ -30,7 +30,7 @@ class PostAttack(Auxiliary):
 
         super().__init__(**init_options)
 
-        def run(self, *args, **kwargs):
+    def run(self):
         """
         Default method to run post attack module
         """
