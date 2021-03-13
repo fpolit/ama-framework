@@ -61,13 +61,6 @@ class Banner:
              888   888,888 Y88" 888o888   888,
              YMM   ""` MMM  M'  "MMMYMM   ""`
             """,
-            r"""
-               ,gggg,gg   ,ggg,,ggg,,ggg,     ,gggg,gg
-              dP"  "Y8I  ,8" "8P" "8P" "8,   dP"  "Y8I
-             i8'    ,8I  I8   8I   8I   8I  i8'    ,8I
-            ,d8,   ,d8b,,dP   8I   8I   Yb,,d8,   ,d8b,
-            P"Y8888P"`Y88P'   8I   8I   `Y8P"Y8888P"`Y8
-            """
         )
 
     @staticmethod

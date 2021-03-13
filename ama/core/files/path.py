@@ -24,6 +24,8 @@ class Path:
         Check if each path in paths have the permissions from permissions list
         Return True if all the paths have the necesary permissions otherwise return false
         """
+
+        #import pdb; pdb.set_trace()
         permissionCheck = True # True: all the paths have the necesary permissions
         exist_all = True
 

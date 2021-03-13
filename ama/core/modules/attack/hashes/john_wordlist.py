@@ -50,9 +50,13 @@ class JohnWordlist(Attack):
         Perform wordlists attacks against hashes
         with john submiting parallel tasks in a cluster using Slurm
         """
-        )
+    )
 
-    REFERENCES = None
+    REFERENCES = [
+        "https://www.hackingarticles.in/beginner-guide-john-the-ripper-part-1/",
+        "https://www.hackingarticles.in/beginners-guide-for-john-the-ripper-part-2/",
+        "https://github.com/openwall/john"
+    ]
 
     # {PRE_ATTACK_MNAME: PRE_ATTACK_CLASS, ...}
     PRE_ATTACKS = {
@@ -130,7 +134,7 @@ class JohnWordlist(Attack):
         super().__init__(**init_options)
 
 
-    def attack(self, local:bool, pre_attack_output: Any = None):
+    def attack(self, local:bool, pre_attack_output: Any = None, force=False):
         """
         Wordlist attack using John the Ripper
 
@@ -139,9 +143,11 @@ class JohnWordlist(Attack):
                          submiting parallel tasks in a cluster using slurm
         """
         try:
-            self.no_empty_required_options(local)
+            if not force:
+                self.no_empty_required_options(local)
 
-            
+            if self.selected_pre_attack:
+                pass
 
             jtr = John()
 

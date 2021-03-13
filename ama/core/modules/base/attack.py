@@ -25,6 +25,8 @@ from fineprint.status import (
     print_failure
 )
 
+# validator
+from ama.core.validator import Args
 
 class Attack(Module):
     """

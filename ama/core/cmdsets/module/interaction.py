@@ -232,7 +232,7 @@ class Interaction(CommandSet):
         """
         Set a value to an valid option
         """
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
 
         selectedModule = self._cmd.selectedModule
 

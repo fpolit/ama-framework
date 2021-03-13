@@ -41,10 +41,10 @@ from ama.core.modules.attack.hashes import STH
 
 ## attack/services modules imports
 
-# hydra attacks imports
-# from ama.core.modules.attack.services import (
-#     #HydraWordlist
-# )
+#hydra attacks imports
+from ama.core.modules.attack.services import (
+    HydraWordlist
+)
 
 ## pre_attack modules imports
 from ama.core.modules.preattack.hashes import (
@@ -116,7 +116,7 @@ attackModules = {
 
     ## attack/services modules
     # hydra attacks
-    #f"{HydraWordlist.mname}": HydraWordlist,
+    f"{HydraWordlist.MNAME}": HydraWordlist,
 }
 
 preAttackModules = {
