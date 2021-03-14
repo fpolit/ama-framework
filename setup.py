@@ -27,10 +27,10 @@ setup(
     url='https://github.com/fpolit/ama-framework',
     license='GPL3',
     packages=find_packages(),
+    package_data={
+        "ama.core.plugins.auxiliary.wordlists": ["cupp.cfg"],
+    },
     include_package_data=True,
-    # package_data={
-    #     '': ["*.cfg"],
-    # },
     entry_points={
         'console_scripts':[
             'ama = ama.ama:main',
