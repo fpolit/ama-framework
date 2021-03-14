@@ -164,6 +164,18 @@ License : GPLv3
 
         return slurm_options_table
 
+    def get_no_empty_options(self):
+
+        module_no_empty_options =  {name: argument.value
+                                    for name, argument in self.options.items() if argument.value is not None}
+
+        slurm_no_empty_options = {}
+        if self.slurm:
+            slurm_no_empty_options = {name: argument.value
+                                      for name,  argument in self.slurm.options.items() if argument.value is not None}
+
+        return {**module_no_empty_options, **slurm_no_empty_options}
+
 
     def required_options(self, local=False):
         #import pdb; pdb.set_trace()

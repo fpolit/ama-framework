@@ -102,7 +102,7 @@ class HashcatBenchmark(Attack):
 
 
     #debugged - date: Mar 6 2021
-    def attack(self, local:bool = False, pre_attack_output: Any = None):
+    def attack(self, local:bool = False, force:bool = False, pre_attack_output: Any = None):
         """
         Hashcat benchmark
 
@@ -113,7 +113,10 @@ class HashcatBenchmark(Attack):
 
         #import pdb; pdb.set_trace()
         try:
-            self.no_empty_required_options()
+            if not force:
+                self.no_empty_required_options()
+
+
             hc = Hashcat()
 
             if local:

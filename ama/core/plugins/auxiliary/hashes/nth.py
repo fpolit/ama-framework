@@ -56,7 +56,7 @@ class Nth(Auxiliary):
                 hashes_identities = name_that_hash.api_return_hashes_identity(hashes, args)
 
             else:
-                output, hashes_identities = NTH.hashes_identity(hashes, args)
+                output, hashes_identities = Nth.hashes_identity(hashes, args)
                 #import pdb; pdb.set_trace()
                 pretty_printer = name_that_hash.prettifier.Prettifier(args)
                 pretty_printer.pretty_print(output)

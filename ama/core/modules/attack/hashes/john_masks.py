@@ -112,7 +112,7 @@ class JohnMasks(Attack):
 
         super().__init__(**init_options)
 
-    def attack(self, local=False, pre_attack_output: Any = None):
+    def attack(self, local=False, force:bool = False, pre_attack_output: Any = None):
         """
         Masks attack using John the Ripper
         Args:
@@ -120,15 +120,16 @@ class JohnMasks(Attack):
         """
         #import pdb; pdb.set_trace()
         try:
-            self.no_empty_required_options(local)
+            if not force:
+                self.no_empty_required_options(local)
+
             jtr = John()
-            print_status(f"Running {self.mname} module")
+
             if local:
                 jtr.masks_attack(hash_type = self.options['hash_type'].value,
                                  hashes_file = self.options['hashes_file'].value,
                                  masks_file= self.options['masks_file'].value,
                                  masks_attack_script= self.options['masks_attack'].value,
-                                 report = report,
                                  slurm = None)
 
             else: #submit the attack in a cluster with slurm
@@ -136,7 +137,6 @@ class JohnMasks(Attack):
                                  hashes_file = self.options['hashes_file'].value,
                                  masks_file= self.options['masks_file'].value,
                                  masks_attack_script= self.options['masks_attack'].value,
-                                 report = report,
                                  slurm = self.slurm)
 
         except Exception as error:

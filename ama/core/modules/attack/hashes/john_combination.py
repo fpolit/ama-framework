@@ -53,7 +53,7 @@ class JohnCombination(Attack):
         slurm (Slurm): Instance of Slurm class
         """
         attackOptions = {
-            'hash_type': Argument(hashType, True, "Hashcat hash type"),
+            'hash_type': Argument(hashType, False, "Hashcat hash type"),
             'hashes_file': Argument(hashesFile, True, "Hashes file"),
             'wordlists': Argument(wordlists, True, "Hashes file"),
         }
@@ -77,8 +77,10 @@ class JohnCombination(Attack):
         """
         Combination attack using John the Ripper
         """
-        jtr = John()
-        jtr.combinationAttack(hashType = self.attackOpt['hash_type'],
-                              hashesFile = self.attackOpt['hashes_file'],
-                              wordlists = self.attackOpt['wordlists'],
-                              slurm = self.slurm)
+        pass
+
+        # jtr = John()
+        # jtr.combinationAttack(hashType = self.attackOpt['hash_type'],
+        #                       hashesFile = self.attackOpt['hashes_file'],
+        #                       wordlists = self.attackOpt['wordlists'],
+        #                       slurm = self.slurm)

@@ -23,7 +23,10 @@ from ama.core.plugins.cracker import John
 from ama.core.slurm import Slurm
 
 # fineprint imports
-from fineprint.status import print_failure
+from fineprint.status import (
+    print_failure,
+    print_status
+)
 
 
 class JohnSingle(Attack):
@@ -108,7 +111,7 @@ class JohnSingle(Attack):
         super().__init__(**init_options)
 
 
-    def attack(self, local:bool, pre_attack_output: Any = None):
+    def attack(self, local:bool = False, force:bool = False, pre_attack_output: Any = None):
         """
         Single attack using John the Ripper
 
@@ -116,10 +119,13 @@ class JohnSingle(Attack):
            local (bool): if local is True run attack localy otherwise
                          submiting parallel tasks in a cluster using slurm
         """
+        #import pdb; pdb.set_trace()
+
         try:
-            self.no_empty_required_options(local)
+            if not force:
+                self.no_empty_required_options(local)
+
             jtr = John()
-            print_status(f"Running {self.mname} module")
             if local:
                 jtr.single_attack(hash_type = self.options['hash_type'].value,
                                   hashes_file = self.options['hashes_file'].value,

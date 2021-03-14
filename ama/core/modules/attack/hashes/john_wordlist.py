@@ -134,7 +134,7 @@ class JohnWordlist(Attack):
         super().__init__(**init_options)
 
 
-    def attack(self, local:bool, pre_attack_output: Any = None, force=False):
+    def attack(self, local:bool = False, force: bool = False, pre_attack_output: Any = None):
         """
         Wordlist attack using John the Ripper
 
@@ -142,6 +142,8 @@ class JohnWordlist(Attack):
            local (bool): if local is True run attack localy otherwise
                          submiting parallel tasks in a cluster using slurm
         """
+
+        #import pdb; pdb.set_trace()
         try:
             if not force:
                 self.no_empty_required_options(local)

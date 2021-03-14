@@ -105,13 +105,16 @@ class JohnIncremental(Attack):
 
         super().__init__(**init_options)
 
-    def attack(self, local:bool = False, pre_attack_output: Any = None):
+    def attack(self, local:bool = False, force:bool = False, pre_attack_output: Any = None):
         """
         Incremental attack using John the Ripper
         """
 
+        #import pdb; pdb.set_trace()
         try:
-            self.no_empty_required_options()
+            if not force:
+                self.no_empty_required_options()
+
             jtr = John()
             jtr.incremental_attack(hash_type = self.options['hash_type'].value,
                                    hashes_file = self.options['hashes_file'].value,

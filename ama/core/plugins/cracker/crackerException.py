@@ -51,7 +51,7 @@
 
 class InvalidHashType(Exception):
     def __init__(self, cracker, hash_type):
-        cracker_name = cracker.main_name
+        cracker_name = cracker.MAINNAME
         self.warning = f"Invalid {cracker_name} hash Type: {hash_type}"
         super().__init__(self.warning)
 

@@ -11,7 +11,8 @@ import argparse
 
 from fineprint.status import (
     print_failure,
-    print_status
+    print_status,
+    print_successful
 )
 
 from fineprint.color import ColorStr
@@ -50,6 +51,78 @@ class Interaction(CommandSet):
     def __init__(self):
         super().__init__()
 
+
+
+    bkp_parser = argparse.ArgumentParser()
+    bkp_parser.add_argument('-o', '--output',
+                            help="Backup file")
+
+    bkp_options_type = bkp_parser.add_mutually_exclusive_group()
+    bkp_options_type.add_argument('-m', '--module', dest='only_module', action='store_true',
+                            help="Backup only module options")
+
+    bkp_options_type.add_argument('-s', '--slurm', dest='only_slurm', action='store_true',
+                            help="Backup only slurm options")
+
+    # debugged - date: Mar 13 2021
+    @with_argparser(bkp_parser)
+    def do_bkp(self, args):
+        """
+        Save all the commands used to set options of a module
+        """
+        #import pdb; pdb.set_trace()
+        if selectedModule := self._cmd.selectedModule:
+            print_status(f"Performing backup of {selectedModule.MNAME} module options")
+            output = None
+            if args.output:
+                output = open(args.output, 'w')
+
+            no_empty_options = selectedModule.get_no_empty_options()
+
+            only_module = args.only_module
+            only_slurm  = args.only_slurm
+
+            for name, value in no_empty_options.items():
+                if (selectedModule.isModuleOption(name) and only_module) or \
+                   (selectedModule.isSlurmOption(name) and only_slurm) or \
+                   (not only_module and not only_slurm):
+                    bkp_cmd = f"setv {name.upper()} {value}"
+                    if output:
+                        output.write(f"{bkp_cmd}\n")
+                    else:
+                        print(bkp_cmd)
+
+            if output is not None:
+                print_successful(f"Backup saved to {args.output} file")
+                output.close()
+
+        else:
+            print_failure("No module selected")
+
+
+    # read_parser = argparse.ArgumentParser()
+    # read_parser.add_argument('backup',
+    #                          help="Backup file to read")
+    # @with_argparser(read_parser)
+    # def do_read(self, args):
+    #     """
+    #     Read a backuo file a setv options of a module
+    #     """
+    #     import pdb; pdb.set_trace()
+    #     if selectedModule := self._cmd.selectedModule:
+    #         backup_file = args.backup
+    #         print_status(f"Reading {backup_file} backup file and setting {selectedModule.MNAME} module options")
+    #         with open(backup_file, 'r') as backup:
+    #             while setv_cmd := backup.readline():
+    #                 setv_cmd = setv_cmd.rstrip()
+    #                 setv, name, value = setv_cmd.split(' ')
+    #                 if not setv == 'setv':
+    #                     print_failure(f"Invalid setv command: {setv_cmd}")
+    #                 else:
+    #                     args = argparse.Namespace(**{'option': name.lower(), 'value': value, 'pre': False, 'post': False})
+    #                     #self.do_setv(args)
+    #     else:
+    #         print_failure("No module selected")
 
     use_parser = argparse.ArgumentParser()
     use_parser.add_argument('module', help="ama module")
@@ -347,6 +420,8 @@ class Interaction(CommandSet):
     attack_parser = argparse.ArgumentParser()
     attack_parser.add_argument('-l', '--local', action='store_true',
                                help="Try to perform the attack locally")
+    attack_parser.add_argument('-f', '--force', action='store_true',
+                               help="Force the attack")
     #debugged - data: feb 27 2021
     @with_argparser(attack_parser)
     def do_attack(self, args):
@@ -362,7 +437,7 @@ class Interaction(CommandSet):
                     pre_attack_output = pre_attack.run()
 
                 print_status(f"Running {selectedModule.MNAME} module")
-                attack_output = selectedModule.attack(args.local, pre_attack_output)
+                attack_output = selectedModule.attack(args.local, args.force, pre_attack_output)
 
                 if post_attack := selectedModule.selected_post_attack:
                     print_status(f"Running {post_attack.MNAME} module")

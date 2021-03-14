@@ -8,8 +8,8 @@
 import random
 from ama.data.modules import (
     attackModules,
-    preAttackModules,
-    postAttackModules,
+    #preAttackModules,
+    #postAttackModules,
     auxiliaryWordlistModules,
     auxiliaryHashesModules,
     auxiliaryAnalysisModules
@@ -27,10 +27,7 @@ class Banner:
         f"""
         Availables Modules:
 
-            Attack      : {len(attackModules)}
-            PreAttack   : {len(preAttackModules)}
-            PostAttack  : {len(postAttackModules)}
-
+            Attack    : {len(attackModules)}
             Auxiliary :
                   Analysis     : {len(auxiliaryAnalysisModules)}
                   Wordlists    : {len(auxiliaryWordlistModules)}

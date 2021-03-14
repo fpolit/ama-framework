@@ -47,13 +47,13 @@ from ama.core.modules.attack.services import (
 )
 
 ## pre_attack modules imports
-from ama.core.modules.preattack.hashes import (
-    Nth as NthPreAttack,
-)
+# from ama.core.modules.preattack.hashes import (
+#     Nth as NthPreAttack,
+# )
 
-from ama.core.modules.preattack.analysis import (
-    PackPolicygen as PackPolicygenPreAttack
-)
+# from ama.core.modules.preattack.analysis import (
+#     PackPolicygen as PackPolicygenPreAttack
+# )
 
 ## post_attack modules imports
 # from ama.core.modules.postattack import (
@@ -119,12 +119,12 @@ attackModules = {
     f"{HydraWordlist.MNAME}": HydraWordlist,
 }
 
-preAttackModules = {
-    f"{NthPreAttack.MNAME}": NthPreAttack,
-    f"{PackPolicygenPreAttack.MNAME}": PackPolicygenPreAttack
-}
+# preAttackModules = {
+#     f"{NthPreAttack.MNAME}": NthPreAttack,
+#     f"{PackPolicygenPreAttack.MNAME}": PackPolicygenPreAttack
+# }
 
-postAttackModules = {}
+# postAttackModules = {}
 
 ### auxiliary modules
 
@@ -158,8 +158,8 @@ amaModules = {
     **attackModules,
 
 ### pre/post attacks modules
-    **preAttackModules,
-    **postAttackModules,
+    # **preAttackModules,
+    # **postAttackModules,
 
 ### auxiliary modules
     ## auxiliary/wordlists modules

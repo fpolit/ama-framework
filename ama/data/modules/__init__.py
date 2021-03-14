@@ -1,7 +1,7 @@
 from .modules import (
     attackModules,
-    preAttackModules,
-    postAttackModules,
+    #preAttackModules,
+    #postAttackModules,
     auxiliaryWordlistModules,
     auxiliaryHashesModules,
     auxiliaryAnalysisModules

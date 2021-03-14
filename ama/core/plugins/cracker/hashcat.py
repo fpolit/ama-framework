@@ -197,18 +197,20 @@ class Hashcat(PasswordCracker):
                     raise InvalidParallelJob(parallel_job_type)
 
                 #core, extra = slurm.parameters()
-                parallel_work = [
-                        (
-                            f"srun {self.main_exec} -b"
-                        )
-                    ]
 
+                attack_cmd = f"srun {self.main_exec} -b"
+
+                header_attack = f"[*] Running: {attack_cmd}"
+                echo_attack_cmd = f"echo -e '\\n\\n\\n{header_attack}"
+
+                parallel_work = [echo_attack_cmd, attack_cmd]
                 batch_script_name = slurm.gen_batch_script(parallel_work)
 
                 Bash.exec(f"sbatch {batch_script_name}")
 
             else:
                 hashcat_benchmark = f"{self.main_exec} -b"
+                print_status(f"Running: {hashcat_benchmark}")
                 Bash.exec(hashcat_benchmark)
         else:
             #cmd2.Cmd.pwarning(f"Cracker {self.mainName} is disable")
@@ -217,7 +219,7 @@ class Hashcat(PasswordCracker):
 
     # debugged - date: Mar 6 2021
     def wordlist_attack(self, *,
-                        hash_type:int , hashes_file:str, wordlist:str,
+                        hash_type:int , hashes_file:str, wordlist:str, rules_file:str=None,
                         slurm):
 
         """
@@ -229,12 +231,14 @@ class Hashcat(PasswordCracker):
         wordlist (str): wordlist to attack
         slurm (Slurm): Instance of Slurm class
         """
+
         #import pdb; pdb.set_trace()
         if self.enable:
             attack_mode = 0
             try:
                 permission = [os.R_OK]
                 Path.access(permission, hashes_file, wordlist)
+
                 Hashcat.check_hash_type(hash_type)
 
                 #cmd2.Cmd.poutput(f"Attacking {hash_type} hashes in {hashesfile} file with {wordlist} wordlist.")
@@ -244,23 +248,38 @@ class Hashcat(PasswordCracker):
                     if not  parallel_job_type in ["GPU"]:
                         raise InvalidParallelJob(parallel_job_type)
 
-                    parallel_work = [
-                            (
-                                f"srun {self.main_exec} -a {attack_mode} -m {hash_type}"
-                                f" {hashes_file} {wordlist}"
-                            )
-                        ]
+                    attack_cmd = (
+                        f"srun {self.main_exec}"
+                        f" -a {attack_mode}"
+                        f" -m {hash_type}"
+                        f" {hashes_file} {wordlist}"
+                    )
 
+                    if rules_file:
+                        Path.access(permission, rules_file)
+                        attack_cmd += f" -r {rules_file}"
+
+                    header_attack = f"[*] Running: {attack_cmd}"
+                    echo_attack_cmd = f"echo -e '\\n\\n\\n{header_attack}"
+
+                    parallel_work = [echo_attack_cmd, attack_cmd]
                     slurm_script_name = slurm.gen_batch_script(parallel_work)
                     Bash.exec(f"sbatch {slurm_script_name}")
 
                 else:
-                    wordlist_attack = (
-                        f"srun {self.main_exec} -a {attack_mode} -m {hash_type}"
+                    attack_cmd = (
+                        f"{self.main_exec}"
+                        f" -a {attack_mode}"
+                        f" -m {hash_type}"
                         f" {hashes_file} {wordlist}"
                     )
 
-                    Bash.exec(wordlist_attack)
+                    if rules_file:
+                        Path.access(permission, rules_file)
+                        attack_cmd += f" -r {rules_file}"
+
+                    print_status(f"Running: {attack_cmd}")
+                    Bash.exec(attack_cmd)
 
             except Exception as error:
                 #cmd2.Cmd.pexcept(error)
@@ -305,22 +324,29 @@ class Hashcat(PasswordCracker):
                     if not  parallel_job_type in ["GPU"]:
                         raise InvalidParallelJob(parallel_job_type)
 
-                    parallel_work = [
-                            (
-                                f"srun {self.main_exec} -a {attack_mode} -m {hash_type}"
-                                f" {hashes_file} {wordlists[0]} {wordlists[1]}"
-                            )
-                        ]
+                    attack_cmd = (
+                        f"srun {self.main_exec}"
+                        f" -a {attack_mode}"
+                        f" -m {hash_type}"
+                        f" {hashes_file} {wordlists[0]} {wordlists[1]}"
+                    )
 
+                    header_attack = f"[*] Running: {attack_cmd}"
+                    echo_attack_cmd = f"echo -e '\\n\\n\\n{header_attack}"
+
+                    parallel_work = [echo_attack_cmd, attack_cmd]
                     slurm_script_name = slurm.gen_batch_script(parallel_work)
                     Bash.exec(f"sbatch {slurm_script_name}")
 
                 else:
                     combination_attack = (
-                        f"srun {self.main_exec} -a {attack_mode} -m {hash_type}"
+                        f"srun {self.main_exec}"
+                        f" -a {attack_mode}"
+                        f" -m {hash_type}"
                         f" {hashes_file} {wordlists[0]} {wordlists[1]}"
                     )
 
+                    print_status(f"Running: {combination_attack}")
                     Bash.exec(combination_attack)
 
             except Exception as error:
@@ -362,22 +388,29 @@ class Hashcat(PasswordCracker):
                     if not  parallel_job_type in ["GPU"]:
                         raise InvalidParallelJob(parallel_job_type)
 
-                    parallel_work = [
-                            (
-                                f"srun {self.main_exec} -a {attack_mode} -m {hash_type}"
-                                f" {hashes_file} {mask}"
-                            )
-                        ]
+                    attack_cmd = (
+                        f"srun {self.main_exec}"
+                        f" -a {attack_mode}"
+                        f" -m {hash_type}"
+                        f" {hashes_file} {mask}"
+                    )
 
+                    header_attack = f"[*] Running: {attack_cmd}"
+                    echo_attack_cmd = f"echo -e '\\n\\n\\n{header_attack}"
+
+                    parallel_work = [echo_attack_cmd, attack_cmd]
                     slurm_script_name = slurm.gen_batch_script(parallel_work)
                     Bash.exec(f"sbatch {slurm_script_name}")
 
                 else:
                     brute_force_attack = (
-                        f"srun {self.main_exec} -a {attack_mode} -m {hash_type}"
+                        f"{self.main_exec}"
+                        f" -a {attack_mode}"
+                        f" -m {hash_type}"
                         f" {hashes_file} {mask}"
                     )
 
+                    print_status(f"Running: {brute_force_attack}")
                     Bash.exec(brute_force_attack)
 
             except Exception as error:
@@ -406,7 +439,7 @@ class Hashcat(PasswordCracker):
         slurm (Slurm): Instance of Slurm class
         """
 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         masks = ['?a'*length for length in range(min_length, max_length+1)]
         with open(masks_file, 'w') as incremental_masks:
             for mask in masks:
@@ -460,8 +493,10 @@ class Hashcat(PasswordCracker):
                             all_cracked = Hashcat.are_all_hashes_cracked(hashes_file)
                             if not all_cracked:
                                 mask_attack =  (
-                                    f"{self.main_exec} -a {attack_mode}"
-                                    f" -m {hash_type} {hashes_file} {mask}"
+                                    f"{self.main_exec}"
+                                    f" -a {attack_mode}"
+                                    f" -m {hash_type}"
+                                    f" {hashes_file} {mask}"
                                 )
 
                                 print("\n\n")
@@ -484,42 +519,51 @@ class Hashcat(PasswordCracker):
     def gen_masks_attack(*,
                          hash_type: str, hashes_file: str, masks_file: str,
                          masks_attack_script: str, slurm):
-        _mask = "{mask}"
-        _hc_main_exec = "{hc.main_exec}"
-        _masks_file = f"'{masks_file}'"
-        _hashes_file = f"'{hashes_file}'"
-        _header_attack = "{header_attack}"
-        _attack = "{attack}"
 
         parallel_job_type = slurm.parallel_job_parser()
         if not  parallel_job_type in ["GPU"]:
             raise InvalidParallelJob(parallel_job_type)
 
+        _hc_main_exec = "{hc.main_exec}"
+        _mask = "{mask}"
+        _hash_type = "{hash_type}"
+        _hashes_file = "{hashes_file}"
+        _attack = "{attack}"
+        _mask_attack = "{mask_attack}"
+        _header_attack = "{header_attack}"
+
+        #__hash_type = f"'{hash_type}'"
+        __hashes_file = f"'{hashes_file}'"
+        __masks_file = f"'{masks_file}'"
+
 
         masks_attack = (
-                f"""
+            f"""
 #!/bin/env python3
 
 from ama.core.plugins.cracker import Hashcat
 from sbash import Bash
 
+hash_type = {hash_type}
+hashes_file = {__hashes_file}
+masks_file = {__masks_file}
 
 hc = Hashcat()
 
-with open({_masks_file}, 'r') as masks:
+with open(masks_file, 'r') as masks:
     while mask := masks.readline().rstrip():
-        all_cracked = Hashcat.are_all_hashes_cracked({_hashes_file})
+        all_cracked = Hashcat.are_all_hashes_cracked(hashes_file)
         if not all_cracked:
-            attack =  (
+            attack = (
                 f"srun {_hc_main_exec} -a 3"
-                f" -m {hash_type} {hashes_file} {_mask}"
+                f" -m {_hash_type} {_hashes_file} {_mask}"
             )
 
             header_attack = f"[*] Running: {_attack}"
             Bash.exec(f"echo -e '\\n\\n\\n{_header_attack}'")
             Bash.exec(attack)
-                """
-            )
+            """
+        )
 
         with open(masks_attack_script, 'w') as attack:
             attack.write(masks_attack)
