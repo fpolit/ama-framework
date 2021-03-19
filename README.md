@@ -5,7 +5,6 @@ Also many ama's attack modules can be submitted in a cluster using Slurm, other 
 
 
 ## Dependences
-* Postgresql
 * Hashcat
 * Hydra
 * pmix
