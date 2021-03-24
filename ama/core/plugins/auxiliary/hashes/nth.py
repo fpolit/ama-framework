@@ -22,7 +22,7 @@ from ama.core.plugins.auxiliary import Auxiliary
 from ama.core.files import Path
 
 # name_that_hash imports
-import name_that_hash
+import name_that_hash as nth
 
 class Nth(Auxiliary):
     """
@@ -33,7 +33,7 @@ class Nth(Auxiliary):
     def __init__(self):
         super().__init__(["name_that_hash", "nth"], version="v3.1.4", search_exec=False)
 
-    def identify_hashes(self, hashes: List[str], *,
+    def hashes_identify(self, hashes: List[str], *,
                         hashcat: bool = True, john: bool = True,
                         base64: bool = False,
                         most_likely: bool = True, quiet=False):
@@ -53,12 +53,12 @@ class Nth(Auxiliary):
             }
 
             if quiet:
-                hashes_identities = name_that_hash.api_return_hashes_identity(hashes, args)
+                hashes_identities = nth.hashes_identity_nth_api(hashes, args)
 
             else:
-                output, hashes_identities = Nth.hashes_identity(hashes, args)
+                output, hashes_identities = Nth.hashes_identity_nth_api(hashes, args)
                 #import pdb; pdb.set_trace()
-                pretty_printer = name_that_hash.prettifier.Prettifier(args)
+                pretty_printer = nth.prettifier.Prettifier(args)
                 pretty_printer.pretty_print(output)
 
             return hashes_identities
@@ -69,7 +69,7 @@ class Nth(Auxiliary):
 
 
     @staticmethod
-    def hashes_identity(chash: [str], args: dict = {}):
+    def hashes_identity_nth_api(chash: [str], args: dict = {}):
         """
         Using name-that-hash as an API? Call this function!
 
@@ -80,8 +80,8 @@ class Nth(Auxiliary):
         # nth = the object which names the hash types
 
         #import pdb; pdb.set_trace()
-        nth = name_that_hash.hash_namer.Name_That_Hash(name_that_hash.hashes.prototypes)
-        hashChecker = name_that_hash.check_hashes.HashChecker(args, nth)
+        nth_obj = nth.hash_namer.Name_That_Hash(nth.hashes.prototypes)
+        hashChecker = nth.check_hashes.HashChecker(args, nth_obj)
 
         for i in chash:
             hashChecker.single_hash(i)

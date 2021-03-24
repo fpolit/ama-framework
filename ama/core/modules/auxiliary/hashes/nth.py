@@ -85,6 +85,7 @@ class Nth(Auxiliary):
                os.access(self.options['hashes'].value, os.R_OK):
                 hashes_file = open(self.options['hashes'].value, 'r')
                 hashes = [query_hash.rstrip() for query_hash in hashes_file.readlines()]
+                hashes_file.close()
 
             else: # HASHES option is a string (a simple hash)
                 hashes = self.options['hashes'].value.split(',')

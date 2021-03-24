@@ -78,19 +78,23 @@ class HashID(Auxiliary):
             #import pdb; pdb.set_trace()
 
             self.no_empty_required_options()
-            hashid = PLuginHashID()
 
-            if os.path.isfile(self.options['hashes'].value):
-                identify = hashid.identify_hashes
 
-            else: # HASHES option is a string (a simple hash)
-                identify = hashid.identify_hash
+            if os.path.isfile(self.options['hashes'].value) and \
+               os.access(self.options['hashes'].value, os.R_OK):
+                hashes_file = open(self.options['hashes'].value, 'r')
+                hashes = [query_hash.rstrip() for query_hash in hashes_file.readlines()]
+                hashes_file.close()
 
-            identify(self.options['hashes'].value,
-                     hashcat = self.options['hashcat'].value,
-                     john = self.options['john'].value,
-                     extended = self.options['extended'].value,
-                     output = self.options['output'].value)
+            else:
+                hashes = self.options['hashes'].value.split(',')
+
+            phid = PLuginHashID()
+            phid.identify_hashes(hashes,
+                                 hashcat = self.options['hashcat'].value,
+                                 john = self.options['john'].value,
+                                 extended = self.options['extended'].value,
+                                 output = self.options['output'].value)
 
         except Exception as error:
             print_failure(error)

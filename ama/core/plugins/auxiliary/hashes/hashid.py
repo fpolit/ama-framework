@@ -9,7 +9,9 @@
 #
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
+from typing import List
 import os
+import sys
 
 from sbash import Bash
 from fineprint.status import (
@@ -27,6 +29,12 @@ from ama.core.files import Path
 # validator
 from ama.core.validator import Args
 
+# hashid package imports
+from hashid import (
+    HashID as _HashID,
+    writeResult
+)
+
 class HashID(Auxiliary):
     """
     Identify the different types of hashes
@@ -34,83 +42,53 @@ class HashID(Auxiliary):
 
     MAINNAME = "hashid"
     def __init__(self):
-        super().__init__(["hashid"], version="v3.1.4")
+        super().__init__(["hashid"], version="v3.1.4", search_exec=False)
 
 
-    def identify_hash(self, query_hash: str = None, *,
-                      hashcat: bool = True, john: bool = True, extended: bool = True,
-                      output: str = None):
-        """
-        Identify the type of the supplied hashe
-        """
-        #import pdb; pdb.set_trace()
-
-        if self.enable:
-            #Args.some_not_none(query_hash, hashes_file)
-
-            if query_hash: #identify the supplied hash
-                hashid_cmd = f"{self.main_exec}"
-
-                if hashcat:
-                    hashid_cmd += f" -m"
-
-                if john:
-                    hashid_cmd += f" -j"
-
-                if extended:
-                    hashid_cmd += f" -e"
-
-                if output:
-                    hashid_cmd += f" -o {output}"
-
-                hashid_cmd += f" {query_hash}"
-
-                print_status(f"Identifying {query_hash} hash")
-                Bash.exec(hashid_cmd)
-
-                if output:
-                    print_successful(f"Possible valid hashes types saved in {output}")
-                else:
-                    print()
-
-        else:
-            print_failure("Auxliary plugin {self.main_name} is disable")
-
-
-
-    def identify_hashes(self, hashes_file: str = None,  *,
+    def identify_hashes(self, query_hashes: List[str] = None, *,
                         hashcat: bool = True, john: bool = True, extended: bool = True,
-                        output: str = None):
+                        output: str = None, quiet: bool = False):
         """
-        Identify the type of the hashes in a file
-        """
+        Identify the type of the supplied hashes
 
+        return {hash: [POSIBLE_IDENTITIES, ...], ...}
+        """
         #import pdb; pdb.set_trace()
 
-        if self.enable:
-            hashid_cmd = f"{self.main_exec}"
+        try:
 
-            if hashcat:
-                hashid_cmd += f" -m"
+            identities = {} # {hash: [POSIBLE_IDENTITIES, ...], ...}
+            hid = _HashID()
+            for qhash in query_hashes:
+                if qhash not in identities:
+                    identities[qhash] = []
+                    identified_modes = hid.identifyHash(qhash)
+                    for hash_info in identified_modes:
+                        if not hash_info.extended or extended:
+                            identities[qhash].append(hash_info)
 
-            if john:
-                hashid_cmd += f" -j"
 
-            if extended:
-                hashid_cmd += f" -e"
 
-            if output:
-                hashid_cmd += f" -o {output}"
+            if not quiet:
+                if output is None:
+                    output = sys.stdout
+                else:
+                    output = open(output, 'w')
 
-            hashid_cmd += f" {hashes_file}"
+                for qhash, modes in identities.items():
+                    output.write(f"\nAnalizing hash: {qhash}\n")
+                    writeResult(modes, output,
+                                hashcatMode=hashcat, johnFormat=john,
+                                extended=extended)
 
-            print_status(f"Identifying hashes in {hashes_file} file")
-            Bash.exec(hashid_cmd)
+            return identities
 
-            if output:
-                print_successful(f"Possible valid hashes types saved in {output}")
-            else:
-                print()
+        except Exception as error:
+            print_failure(error)
 
-        else:
-            print_failure("Auxliary plugin {self.main_name} is disable")
+        finally:
+            if output is not None and \
+               output != sys.stdout and \
+                not isinstance(output, str):
+                print_successful(f"Posible hashes identities saved in: {output.name}")
+                output.close()
