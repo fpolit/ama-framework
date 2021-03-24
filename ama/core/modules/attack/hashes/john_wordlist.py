@@ -26,12 +26,11 @@ from fineprint.status import (
     print_status
 )
 
-## preattacks
-from ama.core.modules.preattack.hashes import (
+# pre attack import
+## auxiliary/hashes
+from ama.core.modules.auxiliary.hashes import (
+    HashID,
     Nth
-)
-from ama.core.modules.preattack.analysis import (
-    PackPolicygen
 )
 
 class JohnWordlist(Attack):
@@ -60,8 +59,9 @@ class JohnWordlist(Attack):
 
     # {PRE_ATTACK_MNAME: PRE_ATTACK_CLASS, ...}
     PRE_ATTACKS = {
+        # auxiliary/hashes
         f"{Nth.MNAME}": Nth,
-        f"{PackPolicygen.MNAME}": PackPolicygen
+        f"{HashID.MNAME}": HashID,
     }
 
     # {POST_ATTACK_MNAME: POST_ATTACK_CLASS, ...}

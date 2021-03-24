@@ -18,3 +18,6 @@ from .hashcat_masks import HashcatMasks
 
 # sth attack import
 from .sth import STH
+
+# full attacks (preattack + attack + postattack)
+from .fullattacks.hashid_john_wordlist__ import HashId_JohnWordlist__

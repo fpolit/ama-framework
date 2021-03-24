@@ -70,7 +70,7 @@ class HashID(Auxiliary):
 
         super().__init__(**init_options)
 
-    def run(self):
+    def run(self, quiet: bool = False):
         """
         Identify an hash or hashes in a file using hashid
         """
@@ -90,11 +90,14 @@ class HashID(Auxiliary):
                 hashes = self.options['hashes'].value.split(',')
 
             phid = PLuginHashID()
-            phid.identify_hashes(hashes,
-                                 hashcat = self.options['hashcat'].value,
-                                 john = self.options['john'].value,
-                                 extended = self.options['extended'].value,
-                                 output = self.options['output'].value)
+            identities = phid.identify_hashes(hashes,
+                                              hashcat = self.options['hashcat'].value,
+                                              john = self.options['john'].value,
+                                              extended = self.options['extended'].value,
+                                              output = self.options['output'].value,
+                                              quiet= quiet)
+
+            return identities
 
         except Exception as error:
             print_failure(error)

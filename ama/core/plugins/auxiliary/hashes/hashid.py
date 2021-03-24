@@ -90,5 +90,5 @@ class HashID(Auxiliary):
             if output is not None and \
                output != sys.stdout and \
                 not isinstance(output, str):
-                print_successful(f"Posible hashes identities saved in: {output.name}")
+                print_successful(f"Possible hashes identities saved in: {output.name}")
                 output.close()

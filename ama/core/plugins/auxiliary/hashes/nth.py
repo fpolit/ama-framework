@@ -23,6 +23,9 @@ from ama.core.files import Path
 
 # name_that_hash imports
 import name_that_hash as nth
+from name_that_hash.runner import (
+    api_return_hashes_as_dict
+)
 
 class Nth(Auxiliary):
     """
@@ -53,7 +56,7 @@ class Nth(Auxiliary):
             }
 
             if quiet:
-                hashes_identities = nth.hashes_identity_nth_api(hashes, args)
+                hashes_identities = api_return_hashes_as_dict(hashes, args)
 
             else:
                 output, hashes_identities = Nth.hashes_identity_nth_api(hashes, args)

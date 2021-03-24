@@ -51,6 +51,8 @@ class Attack(Module):
             'slurm': slurm
         }
 
+        self.init_options = init_options
+
         super().__init__(**init_options)
 
     def attack(self, *args, **kwargs):
@@ -59,6 +61,11 @@ class Attack(Module):
         """
         pass
 
+    def get_init_options(self):
+        init_options = self.init_options.copy()
+        init_options['attack_options'] = init_options['options']
+        del init_options['options']
+        return init_options
 
     def no_empty_required_options(self, local=False):
         #import pdb; pdb.set_trace()
@@ -95,13 +102,13 @@ class Attack(Module):
         # module options
         info_msg += self.available_options()
 
-        # pre attack module options
-        if selected_pre_attack := self.selected_pre_attack:
-            info_msg += selected_pre_attack.available_options()
+        # # pre attack module options
+        # if selected_pre_attack := self.selected_pre_attack:
+        #     info_msg += selected_pre_attack.available_options()
 
-        # post attack module options
-        if selected_post_attack := self.selected_post_attack:
-            info_msg += selected_post_attack.available_options()
+        # # post attack module options
+        # if selected_post_attack := self.selected_post_attack:
+        #     info_msg += selected_post_attack.available_options()
 
         # module description
         info_msg += self.fulldesciption_module()

@@ -56,8 +56,7 @@ class Information(CommandSet):
         module = args.module
 
         if module is None:
-            selectedModule = self._cmd.selectedModule
-            if selectedModule:
+            if selectedModule := self._cmd.selectedModule:
                 print(selectedModule.info())
                 #cmd2.Cmd.poutput(moduleInstance.infoMsg())
             else:
@@ -100,11 +99,10 @@ class Information(CommandSet):
         module = args.module
 
         if module is None:
-            selectedModule = self._cmd.selectedModule
-            if selectedModule:
+            if selectedModule := self._cmd.selectedModule:
                 print(selectedModule.available_options(required=args.required,
-                                                       only_slurm = args.only_slurm,
-                                                       only_module = args.only_module))
+                                                           only_slurm = args.only_slurm,
+                                                           only_module = args.only_module))
             else:
                 print_failure("No module selected")
 

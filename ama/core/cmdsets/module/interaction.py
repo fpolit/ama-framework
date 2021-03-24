@@ -34,9 +34,11 @@ from cmd2 import (
 from ama.core.modules.base import (
     Attack,
     Auxiliary,
-    PreAttack,
-    PostAttack
+    #PreAttack,
+    #PostAttack
 )
+
+from ama.data.modules import Glue
 
 # slurm import
 from ama.core.slurm import Slurm
@@ -72,10 +74,12 @@ class Interaction(CommandSet):
         """
         #import pdb; pdb.set_trace()
         if selectedModule := self._cmd.selectedModule:
-            print_status(f"Performing backup of {selectedModule.MNAME} module options")
+            print_status(f"Performing backup of {selectedModule.mname} options")
             output = None
             if args.output:
                 output = open(args.output, 'w')
+            else:
+                output = sys.stdout
 
             no_empty_options = selectedModule.get_no_empty_options()
 
@@ -87,12 +91,28 @@ class Interaction(CommandSet):
                    (selectedModule.isSlurmOption(name) and only_slurm) or \
                    (not only_module and not only_slurm):
                     bkp_cmd = f"setv {name.upper()} {value}"
-                    if output:
-                        output.write(f"{bkp_cmd}\n")
-                    else:
-                        print(bkp_cmd)
+                    output.write(f"{bkp_cmd}\n")
 
-            if output is not None:
+            if pre_attack_module := selectedModule.selected_pre_attack:
+                no_empty_pre_attack_options = pre_attack_module.get_no_empty_options()
+                for name, value in no_empty_pre_attack_options.items():
+                    if (selectedModule.isModuleOption(name) and only_module) or \
+                       (selectedModule.isSlurmOption(name) and only_slurm) or \
+                       (not only_module and not only_slurm):
+                        bkp_cmd = f"setv --pre {name.upper()} {value}"
+                        output.write(f"{bkp_cmd}\n")
+
+            if post_attack_module := selectedModule.selected_post_attack:
+                no_empty_post_attack_options = post_attack_module.get_no_empty_options()
+                for name, value in no_empty_post_attack_options.items():
+                    if (selectedModule.isModuleOption(name) and only_module) or \
+                       (selectedModule.isSlurmOption(name) and only_slurm) or \
+                       (not only_module and not only_slurm):
+                        bkp_cmd = f"setv --pre {name.upper()} {value}"
+                        output.write(f"{bkp_cmd}\n")
+
+
+            if args.output:
                 print_successful(f"Backup saved to {args.output} file")
                 output.close()
 
@@ -337,6 +357,7 @@ class Interaction(CommandSet):
                             setattr(pre_attack_module.slurm, option, value)
 
                         selectedModule.pre_attack = pre_attack_module
+                        print(f"(preattack) {option.upper()} => {value}")
                     else:
                         print_failure("{selectedModule.MNAME} module hasn't selected a pre attack module")
                 else:
@@ -356,6 +377,7 @@ class Interaction(CommandSet):
                             setattr(post_attack_module.slurm, option, value)
 
                         selectedModule.post_attack = post_attack_module
+                        print(f"(postattack) {option.upper()} => {value}")
                     else:
                         print_failure("{selectedModule.MNAME} module hasn't selected a post attack module")
                 else:
@@ -368,13 +390,29 @@ class Interaction(CommandSet):
                             filteredModules = self._cmd.filteredModules
                             for module_id, module_class in filteredModules:
                                 if value == module_id or value == module_class.MNAME:
-                                    if option == "pre_attack" and issubclass(module_class, PreAttack):
-                                        selectedModule.options[option].value = module_class.MNAME
+                                    selectedModule.options[option].value = module_class.MNAME
+                                    value = module_class.MNAME # only for report purposes
+                                    if option == "pre_attack":
                                         selectedModule.selected_pre_attack = module_class()
 
-                                    elif option == "post_attack" and issubclass(module_class, PostAttack):
-                                        selectedModule.options[option].value = module_class.MNAME
+                                        if full_attack_class := Glue.get_full_attack(preattack=module_class,
+                                                                               attack=selectedModule,
+                                                                               postattack=selectedModule.selected_post_attack):
+                                            init_options = selectedModule.get_init_options()
+                                            full_attack = full_attack_class(init_options)
+                                            full_attack.selected_pre_attack = module_class()
+                                            selectedModule = full_attack
+
+                                    elif option == "post_attack":
                                         selectedModule.selected_post_attack = module_class()
+
+                                        if full_attack_class := Glue.get_full_attack(preattack=selectedModule.selected_pre_attack,
+                                                                                     attack=selectedModule,
+                                                                                     postattack=module_class):
+                                            init_options = selectedModule.get_init_options()
+                                            full_attack = full_attack_class(init_options)
+                                            full_attack.selected_post_attack = module_class()
+                                            selectedModule = full_attack
 
                                     else: # wrong selection (selecting a pre attack to post attack option)
                                         print_failure(f"Invalid selection: option={option.upper()}, module={module_class.MNAME}")
@@ -404,6 +442,8 @@ class Interaction(CommandSet):
                         setattr(selectedModule.slurm, option, value)
 
                     self._cmd.selectedModule = selectedModule
+                    print(f"{option.upper()} => {value}")
+
                 else:
                     print_failure(f"No {option.upper()} option in {selectedModule.mname} module")
 
@@ -422,25 +462,28 @@ class Interaction(CommandSet):
                                help="Try to perform the attack locally")
     attack_parser.add_argument('-f', '--force', action='store_true',
                                help="Force the attack")
+    attack_parser.add_argument('-q', '--quiet', action='store_true',
+                               help="Run quietly")
     #debugged - data: feb 27 2021
     @with_argparser(attack_parser)
     def do_attack(self, args):
         """
         Perform an attack with the selected module
         """
-        selectedModule = self._cmd.selectedModule
-        if selectedModule:
+        import pdb; pdb.set_trace()
+
+        if selectedModule := self._cmd.selectedModule:
             if isinstance(selectedModule, Attack):
                 pre_attack_output = None
                 if pre_attack := selectedModule.selected_pre_attack:
-                    print_status(f"Running {pre_attack.MNAME} module")
-                    pre_attack_output = pre_attack.run()
+                    print_status(f"Running {pre_attack.mname} preattack module")
+                    pre_attack_output = pre_attack.run(args.quiet)
 
-                print_status(f"Running {selectedModule.MNAME} module")
+                print_status(f"Running {selectedModule.mname} attack module")
                 attack_output = selectedModule.attack(args.local, args.force, pre_attack_output)
 
                 if post_attack := selectedModule.selected_post_attack:
-                    print_status(f"Running {post_attack.MNAME} module")
+                    print_status(f"Running {post_attack.mname} posattack module")
                     post_attack.run(attack_output)
 
             else: # selectedModule is an instance of Auxiliary

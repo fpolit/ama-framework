@@ -1,3 +1,4 @@
+from .glue import Glue
 from .modules import (
     attackModules,
     #preAttackModules,

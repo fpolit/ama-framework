@@ -82,8 +82,7 @@ class Search(CommandSet):
                     if selectedModule and isinstance(selectedModule, Attack):
                         attackAuxiliaries = {**selectedModule.PRE_ATTACKS, **selectedModule.POST_ATTACKS}
                         for moduleName, moduleClass in attackAuxiliaries.items():
-                            if moduleType == moduleClass.MTYPE and \
-                            re.search(pattern, moduleName, flags=re.IGNORECASE):
+                            if re.search(pattern, moduleName, flags=re.IGNORECASE):
                                 filteredModules.append((idModule, moduleClass))
                                 idModule += 1
                     else:
@@ -129,9 +128,9 @@ class Search(CommandSet):
                     if selectedModule and isinstance(selectedModule, Attack):
                         attackAuxiliaries = {**selectedModule.PRE_ATTACKS, **selectedModule.POST_ATTACKS}
                         for moduleName, moduleClass in attackAuxiliaries.items():
-                            if moduleType == moduleClass.MTYPE:
-                                filteredModules.append((idModule, moduleClass))
-                                idModule += 1
+                            #if moduleType == moduleClass.MTYPE:
+                            filteredModules.append((idModule, moduleClass))
+                            idModule += 1
                     else:
                         for moduleName, moduleClass in self._cmd.modules.items():
                             if moduleType == moduleClass.MTYPE:
