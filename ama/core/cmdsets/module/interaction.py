@@ -388,8 +388,11 @@ class Interaction(CommandSet):
                     if selectedModule.isModuleOption(option): #option is a valid module option
                         if option in ["pre_attack", "post_attack"]:
                             filteredModules = self._cmd.filteredModules
+                            filteredModules += [(None, pre_attack_class)
+                                                for pre_attack_class in selectedModule.PRE_ATTACKS.values()]
                             for module_id, module_class in filteredModules:
-                                if value == module_id or value == module_class.MNAME:
+                                if (value == module_id or value == module_class.MNAME) and \
+                                   module_class.MNAME in selectedModule.PRE_ATTACKS:
                                     selectedModule.options[option].value = module_class.MNAME
                                     value = module_class.MNAME # only for report purposes
                                     if option == "pre_attack":
@@ -470,7 +473,7 @@ class Interaction(CommandSet):
         """
         Perform an attack with the selected module
         """
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
 
         if selectedModule := self._cmd.selectedModule:
             if isinstance(selectedModule, Attack):

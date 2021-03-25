@@ -47,13 +47,12 @@ class HashId_JohnWordlist__(Attack):
                          submiting parallel tasks in a cluster using slurm
         """
 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         try:
             if not force:
                 self.no_empty_required_options(local)
 
             jtr = John()
-
 
             hashes_identities = self.most_probably_hash_identities(pre_attack_output)
             for hash_identity in hashes_identities:
