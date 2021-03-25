@@ -20,4 +20,6 @@ from .hashcat_masks import HashcatMasks
 from .sth import STH
 
 # full attacks (preattack + attack + postattack)
-from .fullattacks.hashid_john_wordlist__ import HashId_JohnWordlist__
+from .fullattacks.hashid_john_wordlist__ import HashID_JohnWordlist__
+from .fullattacks.hashid_john_wordlist_hashesStatus import HashID_JohnWordlist_HashesStatus
+from .fullattacks.__johnWordlist_hashesStatus import  __JohnWordlist_HashesStatus

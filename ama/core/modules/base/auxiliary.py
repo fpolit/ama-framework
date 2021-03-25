@@ -43,7 +43,7 @@ class Auxiliary(Module):
 
         super().__init__(**init_options)
 
-    def run(self, *args, **kwargs):
+    def run(self, quiet, attack_output):
         """
         Default method to run auxiliary module
         """

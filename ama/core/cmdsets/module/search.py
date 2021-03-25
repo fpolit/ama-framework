@@ -123,19 +123,24 @@ class Search(CommandSet):
                         idModule += 1
 
             elif moduleType and (moduleSubtype is None):
-                if moduleType in amaAttackAuxiliariesModules:
+                if moduleType in amaAttackAuxiliariesModules: #moduleType is preattack or postattack
                     selectedModule = self._cmd.selectedModule
                     if selectedModule and isinstance(selectedModule, Attack):
-                        attackAuxiliaries = {**selectedModule.PRE_ATTACKS, **selectedModule.POST_ATTACKS}
+                        if moduleType == "preattack":
+                            attackAuxiliaries = {**selectedModule.PRE_ATTACKS}
+                        elif moduleType == "postattack":
+                            attackAuxiliaries =  {**selectedModule.POST_ATTACKS}
+
                         for moduleName, moduleClass in attackAuxiliaries.items():
                             #if moduleType == moduleClass.MTYPE:
                             filteredModules.append((idModule, moduleClass))
                             idModule += 1
                     else:
-                        for moduleName, moduleClass in self._cmd.modules.items():
-                            if moduleType == moduleClass.MTYPE:
-                                filteredModules.append((idModule, moduleClass))
-                                idModule += 1
+                        print(f"{moduleClass.MTYPE} has not preattack or postattacj modules")
+                        # for moduleName, moduleClass in self._cmd.modules.items():
+                        #     if moduleType == moduleClass.MTYPE:
+                        #         filteredModules.append((idModule, moduleClass))
+                        #         idModule += 1
                 else:
                     for moduleName, moduleClass in self._cmd.modules.items():
                         if moduleType == moduleClass.MTYPE:

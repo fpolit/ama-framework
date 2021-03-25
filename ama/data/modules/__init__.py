@@ -1,8 +1,6 @@
 from .glue import Glue
 from .modules import (
     attackModules,
-    #preAttackModules,
-    #postAttackModules,
     auxiliaryWordlistModules,
     auxiliaryHashesModules,
     auxiliaryAnalysisModules

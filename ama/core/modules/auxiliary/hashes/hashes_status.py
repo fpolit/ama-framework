@@ -7,7 +7,7 @@
 
 import os
 from tabulate import tabulate
-
+from typing import Any
 
 #fineprint imports
 from fineprint.status import (
@@ -25,7 +25,8 @@ from ama.core.modules.base import (
 # cracker import
 from ama.core.plugins.cracker import (
     Hashcat,
-    John
+    John,
+    get_availables_crackers
 )
 
 # validator imports
@@ -81,13 +82,13 @@ class HashesStatus(Auxiliary):
 
 
     # debugged - date: Mar 1 2021
-    def run(self):
+    def run(self, quiet:bool = False, attack_output: Any = None):
         """
         Execution of auxiliary/hashes/hashes_status ama module
         """
         #import pdb; pdb.set_trace()
 
-        crackers = [John, Hashcat]
+        crackers = get_availables_crackers()
         hashes_status = {'cracked': [], 'uncracked': []}
 
         try:

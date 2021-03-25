@@ -27,8 +27,8 @@ class Banner:
         f"""
         Availables Modules:
 
-            Attack    : {len(attackModules)}
-            Auxiliary :
+            Attacks     : {len(attackModules)}
+            Auxiliaries :
                   Analysis     : {len(auxiliaryAnalysisModules)}
                   Wordlists    : {len(auxiliaryWordlistModules)}
                   Hashes       : {len(auxiliaryHashesModules)}

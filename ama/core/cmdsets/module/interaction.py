@@ -6,7 +6,7 @@
 # date: Feb 20 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
-
+import sys
 import argparse
 
 from fineprint.status import (
@@ -108,7 +108,7 @@ class Interaction(CommandSet):
                     if (selectedModule.isModuleOption(name) and only_module) or \
                        (selectedModule.isSlurmOption(name) and only_slurm) or \
                        (not only_module and not only_slurm):
-                        bkp_cmd = f"setv --pre {name.upper()} {value}"
+                        bkp_cmd = f"setv --post {name.upper()} {value}"
                         output.write(f"{bkp_cmd}\n")
 
 
@@ -388,25 +388,30 @@ class Interaction(CommandSet):
                     if selectedModule.isModuleOption(option): #option is a valid module option
                         if option in ["pre_attack", "post_attack"]:
                             filteredModules = self._cmd.filteredModules
-                            filteredModules += [(None, pre_attack_class)
-                                                for pre_attack_class in selectedModule.PRE_ATTACKS.values()]
+                            if option == "pre_attack":
+                                filteredModules += [(None, pre_attack_class)
+                                                    for pre_attack_class in selectedModule.PRE_ATTACKS.values()]
+                            else: # option == "post_attack"
+                                filteredModules += [(None, post_attack_class)
+                                                    for post_attack_class in selectedModule.POST_ATTACKS.values()]
+
                             for module_id, module_class in filteredModules:
-                                if (value == module_id or value == module_class.MNAME) and \
-                                   module_class.MNAME in selectedModule.PRE_ATTACKS:
+                                if value == module_id or value == module_class.MNAME :
                                     selectedModule.options[option].value = module_class.MNAME
                                     value = module_class.MNAME # only for report purposes
-                                    if option == "pre_attack":
+                                    import pdb;pdb.set_trace()
+                                    if option == "pre_attack" and module_class.MNAME in selectedModule.PRE_ATTACKS:
                                         selectedModule.selected_pre_attack = module_class()
 
                                         if full_attack_class := Glue.get_full_attack(preattack=module_class,
-                                                                               attack=selectedModule,
-                                                                               postattack=selectedModule.selected_post_attack):
+                                                                                     attack=selectedModule,
+                                                                                     postattack=selectedModule.selected_post_attack):
                                             init_options = selectedModule.get_init_options()
                                             full_attack = full_attack_class(init_options)
                                             full_attack.selected_pre_attack = module_class()
                                             selectedModule = full_attack
 
-                                    elif option == "post_attack":
+                                    elif option == "post_attack" and module_class.MNAME in selectedModule.POST_ATTACKS:
                                         selectedModule.selected_post_attack = module_class()
 
                                         if full_attack_class := Glue.get_full_attack(preattack=selectedModule.selected_pre_attack,
@@ -480,14 +485,14 @@ class Interaction(CommandSet):
                 pre_attack_output = None
                 if pre_attack := selectedModule.selected_pre_attack:
                     print_status(f"Running {pre_attack.mname} preattack module")
-                    pre_attack_output = pre_attack.run(args.quiet)
+                    pre_attack_output = pre_attack.run(quiet=args.quiet)
 
                 print_status(f"Running {selectedModule.mname} attack module")
                 attack_output = selectedModule.attack(args.local, args.force, pre_attack_output)
 
                 if post_attack := selectedModule.selected_post_attack:
                     print_status(f"Running {post_attack.mname} posattack module")
-                    post_attack.run(attack_output)
+                    post_attack.run(quiet=args.quiet, attack_output=attack_output)
 
             else: # selectedModule is an instance of Auxiliary
                 print_failure(f"No attack method for {selectedModule.MNAME} module")

@@ -7,7 +7,7 @@
 
 from typing import Any
 
-from ama.core.modules.base import Attack
+from ..john_wordlist import JohnWordlist
 
 # cracker imports
 from ama.core.plugins.cracker import John
@@ -25,17 +25,17 @@ from fineprint.status import (
 # name format: PREATTACK_ATTACK_POSTATTACK
 # (if pre/post attack is null then _ replace its name)
 # Here HashId_JohnWordlist__ means: preattack: HashId, attack: JohnWordlist, postattack: null
-class HashId_JohnWordlist__(Attack):
+class HashID_JohnWordlist__(JohnWordlist):
     def __init__(self, init_options):
-        init_options['attack_options']['hash_type'].required = False
-        init_options['fulldescription'] = (
+        super().__init__(**init_options)
+        self.options['hash_type'].required = False
+        self.fulldescription = (
             """
             Perform wordlists attacks against hashes
             with john using the most likely john hashes type parsed by hashid,
             also this parallel task can be submited in a cluster using Slurm
             """
         )
-        super().__init__(**init_options)
 
     # preattack output format:  {hash: [POSIBLE_IDENTITIES, ...], ...}
     def attack(self, local:bool = False, force: bool = False, pre_attack_output: Any = None):
@@ -46,7 +46,6 @@ class HashId_JohnWordlist__(Attack):
            local (bool): if local is True run attack localy otherwise
                          submiting parallel tasks in a cluster using slurm
         """
-
         #import pdb; pdb.set_trace()
         try:
             if not force:
@@ -56,6 +55,7 @@ class HashId_JohnWordlist__(Attack):
 
             hashes_identities = self.most_probably_hash_identities(pre_attack_output)
             for hash_identity in hashes_identities:
+                print("\n")
                 jtr.wordlist_attack(hash_type = hash_identity,
                                     hashes_file = self.options['hashes_file'].value,
                                     wordlist = self.options['wordlist'].value,
@@ -75,7 +75,7 @@ class HashId_JohnWordlist__(Attack):
 
 
     def most_probably_hash_identities(self, preattack_output):
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         hash_type_frequency = {} # {john the ripper hash type: frequency, ...}
         for qhash, modes in preattack_output.items():
             for hash_info in modes:

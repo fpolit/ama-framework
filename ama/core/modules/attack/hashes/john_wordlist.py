@@ -33,6 +33,12 @@ from ama.core.modules.auxiliary.hashes import (
     Nth
 )
 
+# post attack import
+## auxiliary/hashes
+from ama.core.modules.auxiliary.hashes import (
+    HashesStatus
+)
+
 class JohnWordlist(Attack):
     """
     Wordlist Attack using john cracker
@@ -65,11 +71,15 @@ class JohnWordlist(Attack):
     }
 
     # {POST_ATTACK_MNAME: POST_ATTACK_CLASS, ...}
-    POST_ATTACKS = {}
+    POST_ATTACKS = {
+        # auxiliary/hashes
+        f"{HashesStatus.MNAME}": HashesStatus,
+    }
 
     def __init__(self, *,
                  hash_type: str = None, hashes_file: str = None,
-                 wordlist: str = None, slurm=None):
+                 wordlist: str = None, slurm=None,
+                 pre_attack = None, post_attack = None):
         """
         Initialization of John  wordlist attack
 
@@ -78,14 +88,20 @@ class JohnWordlist(Attack):
         hashesFile (str): Hashes file to attack
         wordlist (str): wordlist to attack
         slurm (Slurm): Instance of Slurm class
+
+        pre_attack (Auxiliary): Instance of a pre attack (auxiliary module)
+        post_attack (Auxiliary): Instance of a post attack (auxiliary module)
         """
+
+        pre_attack_name = pre_attack.mname if pre_attack else None
+        post_attack_name = post_attack.mname if post_attack else None
 
         attack_options = {
             'wordlist': Argument(wordlist, True, "wordlist file"),
             'hash_type': Argument(hash_type, True, "John hash type"),
             'hashes_file': Argument(hashes_file, True, "hashes file"),
-            'pre_attack': Argument(None, False, "Pre attack module"),
-            'post_attack': Argument(None, False, "Post attack module"),
+            'pre_attack': Argument(pre_attack_name, False, "Pre attack module"),
+            'post_attack': Argument(post_attack_name, False, "Post attack module"),
         }
 
         if slurm is None:
@@ -127,12 +143,28 @@ class JohnWordlist(Attack):
             'description': JohnWordlist.DESCRIPTION,
             'fulldescription':  JohnWordlist.FULLDESCRIPTION,
             'references': JohnWordlist.REFERENCES,
+            'pre_attack': pre_attack,
             'attack_options': attack_options,
+            'post_attack': post_attack,
             'slurm': slurm
         }
 
         super().__init__(**init_options)
 
+        self.selected_pre_attack = pre_attack
+        self.selected_post_attack = post_attack
+
+    def get_init_options(self):
+        init_options = {
+            "hash_type": self.options['hash_type'].value,
+            "hashes_file": self.options['hashes_file'].value,
+            "wordlist": self.options['wordlist'].value,
+            "slurm": self.slurm,
+            "pre_attack": self.selected_pre_attack,
+            "post_attack": self.selected_post_attack
+        }
+
+        return init_options
 
     def attack(self, local:bool = False, force: bool = False, pre_attack_output: Any = None):
         """

@@ -35,11 +35,12 @@ class Attack(Module):
     def __init__(self, *,
                  mname: str, author: List[str],
                  description: str, fulldescription: str, references: List[str],
-                 attack_options: dict, slurm):
+                 attack_options: dict, slurm,
+                 pre_attack, post_attack):
 
 
-        self.selected_pre_attack = None # Instance of selected pre attack class
-        self.selected_post_attack = None # Instance of selected post attack class
+        self.selected_pre_attack = pre_attack # Instance of selected pre attack class
+        self.selected_post_attack = post_attack # Instance of selected post attack class
 
         init_options = {
             'mname': mname,
@@ -61,11 +62,11 @@ class Attack(Module):
         """
         pass
 
-    def get_init_options(self):
-        init_options = self.init_options.copy()
-        init_options['attack_options'] = init_options['options']
-        del init_options['options']
-        return init_options
+    # def get_init_options(self):
+    #     init_options = self.init_options.copy()
+    #     init_options['attack_options'] = init_options['options']
+    #     del init_options['options']
+    #     return init_options
 
     def no_empty_required_options(self, local=False):
         #import pdb; pdb.set_trace()
@@ -122,6 +123,8 @@ class Attack(Module):
         """
         Show available options of a module
         """
+
+        import pdb; pdb.set_trace()
 
         options = (
             f"""
