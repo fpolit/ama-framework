@@ -1,6 +1,6 @@
 # ama - Attack Manager
 
-Ama is a specialized environment for the password cracking process. It contains several modules (attacks and auxiliaries) that make the password cracking process efficient.
+Ama is a specialized environment for the password cracking process. It contains several modules (attacks and auxiliaries) that make the password cracking process efficient (using auxiliary modules as helper modules of attacks).
 Also ama's attack modules can be submitted in a cluster using `Slurm`, other important feature is that ama is easy extensible so you can write your own modules.
 
 ## Dependences
@@ -39,7 +39,6 @@ and then install `ama` and the developer packages.
 
 ## Usage
 Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can find useful documentation about `ama`.  
-
 
 
 
