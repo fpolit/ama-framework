@@ -19,9 +19,9 @@ Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can fi
 
 ```bash
     # Download some release (stable code)
-    cd DOWNLOADED_AMA_RELEASE
+    $ cd DOWNLOADED_AMA_RELEASE
     # I suggest you install ama in a python virtual enviroment
-    make install
+    $ make install
 ```
 
 * Developers
@@ -30,11 +30,11 @@ If you want to contribute to `ama-framework` you are welcome.
 As developer you will first create a python virtual enviroment 
 and then install `ama` and the developer packages.
 ```bash
-    git clone https://github.com/fpolit/ama-framework.git ama
-    cd ama
-    make virtualenv
-    source env/bin/activate
-    make installdev
+    $ git clone https://github.com/fpolit/ama-framework.git ama
+    $ cd ama
+    $ make virtualenv
+    $ source env/bin/activate
+    $ make installdev
 ```
 
 ## Usage
@@ -42,8 +42,11 @@ Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can fi
 
 
 
+
      Please do not use ama in military or secret service organizations,
                       or for illegal purposes.
 
+
+
 Good luck!  
-         glozanoa
+            glozanoa
