@@ -18,8 +18,8 @@ Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can fi
 * Users
 
 ```bash
-    git clone https://github.com/fpolit/ama-framework.git ama
-    cd ama
+    # Download some release (stable code)
+    cd DOWNLOADED_AMA_RELEASE
     # I suggest you install ama in a python virtual enviroment
     make install
 ```
