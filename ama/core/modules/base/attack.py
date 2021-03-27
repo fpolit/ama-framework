@@ -124,7 +124,7 @@ class Attack(Module):
         Show available options of a module
         """
 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
 
         options = (
             f"""

@@ -44,7 +44,7 @@ class JohnBenchmark(Attack):
 
     REFERENCES = None
 
-    def __init__(self, slurm=None):
+    def __init__(self, slurm=None, pre_attack=None, post_attack=None):
         """
         Initialization of John benchmark class
         """
@@ -90,7 +90,9 @@ class JohnBenchmark(Attack):
             'description': JohnBenchmark.DESCRIPTION,
             'fulldescription':  JohnBenchmark.FULLDESCRIPTION,
             'references': JohnBenchmark.REFERENCES,
+            'pre_attack': pre_attack,
             'attack_options': attack_options,
+            'post_attack': post_attack,
             'slurm': slurm
         }
 
@@ -106,7 +108,6 @@ class JohnBenchmark(Attack):
                          submiting parallel tasks in a cluster using slurm
         """
         #import pdb; pdb.set_trace()
-        
         try:
             if not force:
                 self.no_empty_required_options()

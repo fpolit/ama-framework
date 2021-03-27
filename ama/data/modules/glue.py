@@ -67,6 +67,24 @@ fullAttack = namedtuple('fullAttack', ["preattack", "attack", "postattack"])
 
 class Glue:
     full_attacks = {
+
+        # None + hash cracker + None
+        fullAttack(preattack=None,
+                   attack=JohnBenchmark,
+                   postattack=None): JohnBenchmark,
+
+        fullAttack(preattack=None,
+                   attack=JohnWordlist,
+                   postattack=None): JohnWordlist,
+
+        fullAttack(preattack=None,
+                   attack=JohnSingle,
+                   postattack=None): JohnSingle,
+
+        fullAttack(preattack=None,
+                   attack=JohnMasks,
+                   postattack=None): JohnMasks,
+
         # HashID + hash cracker + None
         fullAttack(preattack=HashID,
                    attack=JohnWordlist,
