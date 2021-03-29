@@ -195,8 +195,10 @@ class Slurm:
 
             whiteLine = "\n"
             batch_script.write(whiteLine)
-            for task in parallel_work:
-                batch_script.write(f"{task}\n")
+            for block in parallel_work:
+                batch_script.write(whiteLine)
+                for task in block:
+                    batch_script.write(f"{task}\n")
 
 
         print_successful(f"Batch script generated: {batch_script_name}")

@@ -31,7 +31,7 @@ class HydraWordlist(Attack):
     """
 
     DESCRIPTION = "Wordlist attack using Hydra"
-    MNAME = "attack/hashes/hydra_wordlist"
+    MNAME = "attack/services/hydra_wordlist"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
     AUTHOR = [
         "glozanoa <glozanoa@uni.pe>"

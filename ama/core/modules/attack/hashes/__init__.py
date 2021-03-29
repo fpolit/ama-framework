@@ -21,5 +21,10 @@ from .sth import STH
 
 # full attacks (preattack + attack + postattack)
 from .fullattacks.hashid_john_wordlist__ import HashID_JohnWordlist__
-from .fullattacks.hashid_john_wordlist_hashesStatus import HashID_JohnWordlist_HashesStatus
+from .fullattacks.nth_john_wordlist__ import Nth_JohnWordlist__
+from .fullattacks.packMaskgen_johnMask__ import PackMaskgen_JohnMasks__
+
 from .fullattacks.__johnWordlist_hashesStatus import  __JohnWordlist_HashesStatus
+
+from .fullattacks.hashid_john_wordlist_hashesStatus import HashID_JohnWordlist_HashesStatus
+from .fullattacks.nth_johnWordlist_hashesStatus import Nth_JohnWordlist_HashesStatus

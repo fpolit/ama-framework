@@ -110,7 +110,7 @@ class JohnBenchmark(Attack):
         #import pdb; pdb.set_trace()
         try:
             if not force:
-                self.no_empty_required_options()
+                self.no_empty_required_options(local)
 
             jtr = John()
             #print_status(f"Running {self.mname} module")

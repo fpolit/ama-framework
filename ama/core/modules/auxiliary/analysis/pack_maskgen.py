@@ -123,6 +123,8 @@ class PackMaskgen(Auxiliary):
                          show_masks = self.options['show_masks'].value,
                          quiet = self.options['quiet'].value)
 
+            output = self.options['output'].value
+            return output
 
         except Exception as error:
             print_failure(error)

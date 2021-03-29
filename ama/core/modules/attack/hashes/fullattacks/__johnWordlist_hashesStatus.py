@@ -21,3 +21,10 @@ class __JohnWordlist_HashesStatus(JohnWordlist):
             with john and at the end report the status of the hashes (cracked or not)
             """
         )
+
+        # pre attack options
+
+        # post attack options
+        if self.selected_post_attack and 'hashes_file' in self.selected_post_attack.options:
+            self.selected_post_attack.options['hashes_file'].value = self.options['hashes_file'].value
+

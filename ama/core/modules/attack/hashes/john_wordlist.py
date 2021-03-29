@@ -100,8 +100,6 @@ class JohnWordlist(Attack):
             'wordlist': Argument(wordlist, True, "wordlist file"),
             'hash_type': Argument(hash_type, True, "John hash type"),
             'hashes_file': Argument(hashes_file, True, "hashes file"),
-            'pre_attack': Argument(pre_attack_name, False, "Pre attack module"),
-            'post_attack': Argument(post_attack_name, False, "Post attack module"),
         }
 
         if slurm is None:
@@ -151,9 +149,6 @@ class JohnWordlist(Attack):
 
         super().__init__(**init_options)
 
-        self.selected_pre_attack = pre_attack
-        self.selected_post_attack = post_attack
-
     def get_init_options(self):
         init_options = {
             "hash_type": self.options['hash_type'].value,
@@ -185,18 +180,11 @@ class JohnWordlist(Attack):
 
             jtr = John()
 
-            if local:
-                jtr.wordlist_attack(hash_type = self.options['hash_type'].value,
-                                    hashes_file = self.options['hashes_file'].value,
-                                    wordlist = self.options['wordlist'].value,
-                                    slurm = None)
-
-            else:
-                jtr.wordlist_attack(hash_type = self.options['hash_type'].value,
-                                    hashes_file = self.options['hashes_file'].value,
-                                    wordlist = self.options['wordlist'].value,
-                                    slurm = self.slurm)
+            jtr.wordlist_attack(hash_types = [self.options['hash_type'].value],
+                                hashes_file = self.options['hashes_file'].value,
+                                wordlist = self.options['wordlist'].value,
+                                slurm = self.slurm,
+                                local = local)
 
         except Exception as error:
             print_failure(error)
-

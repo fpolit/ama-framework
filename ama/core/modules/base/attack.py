@@ -13,6 +13,7 @@ from typing import (
 )
 
 # base imports
+from .argFormat import Argument
 from ama.core.modules.base import Module
 
 # table formation imports
@@ -42,6 +43,14 @@ class Attack(Module):
         self.selected_pre_attack = pre_attack # Instance of selected pre attack class
         self.selected_post_attack = post_attack # Instance of selected post attack class
 
+        pre_attack_name = pre_attack.mname if isinstance(pre_attack, Module) else None
+        post_attack_name = post_attack.mname if isinstance(post_attack, Module) else None
+
+        self.helper_modules = {
+            'pre_attack': Argument(pre_attack_name, False, "Pre attack module"),
+            'post_attack': Argument(post_attack_name, False, "Post attack module")
+        }
+
         init_options = {
             'mname': mname,
             'author': author,
@@ -55,6 +64,12 @@ class Attack(Module):
         self.init_options = init_options
 
         super().__init__(**init_options)
+
+    def __repr__(self):
+        pre_attack = self.selected_pre_attack
+        post_attack = self.selected_post_attack
+
+        return f"Attack(preattack={pre_attack}, attack={type(self)}, postattack={post_attack})"
 
     def attack(self, *args, **kwargs):
         """
@@ -97,6 +112,8 @@ class Attack(Module):
         """
         Show information about the module
         """
+        import pdb; pdb.set_trace()
+
         # module head
         info_msg = self.info_head()
 
@@ -118,6 +135,12 @@ class Attack(Module):
         info_msg += self.available_references()
 
         return info_msg
+
+    def helper_modules_options(self):
+        helper_module_table = [[name.upper(), *option.get_attributes()]
+                               for name, option in self.helper_modules.items()]
+
+        return helper_module_table
 
     def available_options(self, *, required=False, only_slurm=None, only_module=None):
         """
@@ -164,6 +187,8 @@ class Attack(Module):
                 slurm_options_table = tabulate(slurm_options_table, headers=options_header)
                 options += f"\n\nSlurm Options:\n{slurm_options_table}"
 
+        options += f"\n\n Helper Modules:"
+        options += tabulate(self.helper_modules_options(), headers=options_header, tablefmt="fancy_grid")
 
         # pre attack options
         if selected_pre_attack := self.selected_pre_attack:

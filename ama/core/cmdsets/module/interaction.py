@@ -146,6 +146,11 @@ class Interaction(CommandSet):
 
     use_parser = argparse.ArgumentParser()
     use_parser.add_argument('module', help="ama module")
+    attack_helper = use_parser.add_mutually_exclusive_group(required=False)
+    attack_helper.add_argument('-pre', '--preattack', action='store_true',
+                               help='Enable selection of preattack modules')
+    attack_helper.add_argument('-post', '--postattack', action='store_true',
+                               help='Enable selection of postattack modules')
 
     # debugged - date: Feb 28 2021
     @with_argparser(use_parser)
@@ -157,55 +162,123 @@ class Interaction(CommandSet):
         selected = False
         module = args.module
 
+        moduleId = moduleName = None
+
         try:
-            module = int(module)
+            try:
+                moduleId = int(module)
 
-            for moduleId, moduleClass in self._cmd.filteredModules:
-                if moduleId == module:
-                    selected = True
-                    self._cmd.selectedModule = moduleClass()
-                    moduleType = moduleClass.MTYPE
-                    moduleSubtype = moduleClass.MSUBTYPE
-                    moduleName = moduleClass.NAME
-                    subtype_name = ColorStr.ForeRED(f"{moduleSubtype}/{moduleName}")
-                    self._cmd.prompt = f"ama {moduleType}({subtype_name}) > "
-                    break
+            except ValueError: # module is a string
+                moduleName = module
 
-        except ValueError: # module is a string
-            for moduleName, moduleClass in self._cmd.modules.items():
-                if module == moduleClass.MNAME:
-                    selected = True
-                    self._cmd.selectedModule = moduleClass()
-                    moduleType = moduleClass.MTYPE
-                    moduleSubtype = moduleClass.MSUBTYPE
-                    moduleName = moduleClass.NAME
-                    subtype_name = ColorStr.ForeRED(f"{moduleSubtype}/{moduleName}")
-                    self._cmd.prompt = f"ama {moduleType}({subtype_name}) > "
-                    break
+            import pdb; pdb.set_trace()
 
+            if args.preattack:
+                if selectedModule := self._cmd.selectedModule:
+                    possible_preattacks = self._cmd.filteredModules + [(None, pre_attack_class)
+                                                                       for pre_attack_class in selectedModule.PRE_ATTACKS.values()]
+                    for module_id, module_class in possible_preattacks:
+                        if moduleId == module_id or moduleName == module_class.MNAME :
+                            import pdb;pdb.set_trace()
+                            if module_class.MNAME not in selectedModule.PRE_ATTACKS:
+                                raise Exception(f"Selected {module_class.MNAME} isn't a preattack module")
 
-        if not selected:
-            if isinstance(module, int):
-                print_failure(f"No module available with id:  {module}")
-            else: # if module string or other type
-                print_failure(f"No module available:  {module}")
+                            selectedModule.options[option].value = module_class.MNAME
+                            selectedModule.selected_pre_attack = module_class()
 
-        else: #initialization of selectedModule's options with the global options' values
-            selectedModule = self._cmd.selectedModule
-            for option, value in self._cmd.gvalues.items():
-                if selectedModule.isOption(option):
-                    if selectedModule.isModuleOption(option):
-                        argument = selectedModule.options.get(option)
-                        argument.value = value
-                        selectedModule.options[option] = argument
-                    else:
-                        if selectedModule.slurm:
-                            argument = selectedModule.slurm.options.get(option)
-                            argument.value = value
-                            selectedModule.slurm.options[option] = argument
-                            setattr(selectedModule.slurm, option, value)
+                            if attack_class := Glue.get_full_attack(preattack=module_class,
+                                                                    attack=selectedModule,
+                                                                    postattack=selectedModule.selected_post_attack):
+                                import pdb; pdb.set_trace()
+                                init_options = selectedModule.get_init_options()
+                                attack = attack_class(init_options)
+                                #attack.selected_pre_attack = module_class()
+                                self._cmd.selectedModule = attack
+                                print_successful(f"Selected preattack module: {module_class.MNAME}")
 
-            self._cmd.selectedModule = selectedModule
+                            else:
+                                preattack_name = module_class.MNAME
+                                postattack_name = selectedModule.selected_pre_attack.mname if selectedModule.selected_pre_attack else None
+                                attack_name = selectedModule.mname
+
+                                raise Exception(f"Invalid full attack combination: fullAttack(preattack={preattack_name}, attack={attack_name}, postattack={posattack_name})")
+
+                else:
+                    raise Exception("No attack module selected")
+
+            elif args.postattack:
+                if selectedModule := self._cmd.selectedModule:
+                    possibles_postattacks = self._cmd.filteredModules + [(None, post_attack_class)
+                                                                         for post_attack_class in selectedModule.POST_ATTACKS.values()]
+                    for module_id, module_class in possibles_postattacks:
+                        if moduleId == module_id or moduleName == module_class.MNAME :
+                            import pdb;pdb.set_trace()
+                            if module_class.MNAME not in selectedModule.POST_ATTACKS:
+                                raise Exception(f"Selected {module_class.MNAME} isn't a postattack module")
+
+                            selectedModule.options[option].value = module_class.MNAME
+                            selectedModule.selected_post_attack = module_class()
+
+                            if attack_class := Glue.get_full_attack(preattack=selectedModule.selected_pre_attack,
+                                                                    attack=selectedModule,
+                                                                    postattack=module_class):
+                                import pdb; pdb.set_trace()
+                                init_options = selectedModule.get_init_options()
+                                attack = attack_class(init_options)
+                                #attack.selected_pre_attack = module_class()
+                                self._cmd.selectedModule = attack
+                                print_successful(f"Selected postattack module: {module_class.MNAME}")
+
+                            else:
+                                preattack_name = selectedModule.selected_post_attack.mname if selectedModule.selected_post_attack else None
+                                postattack_name = module_class.MNAME
+                                attack_name = selectedModule.mname
+
+                                raise Exception(f"Invalid full attack combination: fullAttack(preattack={preattack_name}, attack={attack_name}, postattack={posattack_name})")
+
+                else:
+                    raise Exception("No attack module selected")
+
+            else:
+                available_modules = self._cmd.filteredModules + list(self._cmd.modules.items())
+
+                for module_id, moduleClass in available_modules:
+                    if moduleId == module_id or moduleName == moduleClass.MNAME:
+                        import pdb;pdb.set_trace()
+                        selected = True
+                        self._cmd.selectedModule = moduleClass()
+                        moduleType = moduleClass.MTYPE
+                        moduleSubtype = moduleClass.MSUBTYPE
+                        moduleName = moduleClass.NAME
+                        subtype_name = ColorStr.ForeRED(f"{moduleSubtype}/{moduleName}")
+                        self._cmd.prompt = f"ama {moduleType}({subtype_name}) > "
+                        break
+
+                if not selected:
+                    if isinstance(module, int):
+                        print_failure(f"No module available with id:  {module}")
+                    else: # if module is string or other type
+                        print_failure(f"No module available:  {module}")
+
+        except Exception as error:
+            print_failure(error)
+
+        # else: #initialization of selectedModule's options with the global options' values
+        #     selectedModule = self._cmd.selectedModule
+        #     for option, value in self._cmd.gvalues.items():
+        #         if selectedModule.isOption(option):
+        #             if selectedModule.isModuleOption(option):
+        #                 argument = selectedModule.options.get(option)
+        #                 argument.value = value
+        #                 selectedModule.options[option] = argument
+        #             else:
+        #                 if selectedModule.slurm:
+        #                     argument = selectedModule.slurm.options.get(option)
+        #                     argument.value = value
+        #                     selectedModule.slurm.options[option] = argument
+        #                     setattr(selectedModule.slurm, option, value)
+
+        #     self._cmd.selectedModule = selectedModule
 
     unset_parser = argparse.ArgumentParser()
     unset_parser.add_argument('option', help='Option to unset value')
@@ -329,134 +402,83 @@ class Interaction(CommandSet):
 
         selectedModule = self._cmd.selectedModule
 
-        if selectedModule:
-            option = args.option.lower()
-            value = args.value
+        try:
+            if selectedModule:
+                option = args.option.lower()
+                value = args.value
 
-            try:
-                value = int(value)
+                try:
+                    value = int(value)
 
-            except ValueError: # value is a string
-                if value in ["True", "False"]:
-                    if value == "True":
-                        value = True
+                except ValueError: # value is a string
+                    if value in ["True", "False"]:
+                        if value == "True":
+                            value = True
                     else:
                         value = False
 
-            if args.pre:
-                if isinstance(selectedModule, Attack):
-                    if pre_attack_module := selectedModule.selected_pre_attack:
-                        if pre_attack_module.isOption(option):
-                            if pre_attack_module.isModuleOption(option): #option is a valid module option
-                                pre_attack_module.options[option].value = value
+                if args.pre:
+                    if isinstance(selectedModule, Attack):
+                        if pre_attack_module := selectedModule.selected_pre_attack:
+                            if pre_attack_module.isOption(option):
+                                if pre_attack_module.isModuleOption(option): #option is a valid module option
+                                    pre_attack_module.options[option].value = value
 
-                        else: #option is a valid slurm option
-                            argument = pre_attack_module.slurm.options.get(option)
-                            argument.value = value
-                            pre_attack_module.slurm.options[option] = argument
-                            setattr(pre_attack_module.slurm, option, value)
+                            else: #option is a valid slurm option
+                                argument = pre_attack_module.slurm.options.get(option)
+                                argument.value = value
+                                pre_attack_module.slurm.options[option] = argument
+                                setattr(pre_attack_module.slurm, option, value)
 
-                        selectedModule.pre_attack = pre_attack_module
-                        print(f"(preattack) {option.upper()} => {value}")
-                    else:
-                        print_failure("{selectedModule.MNAME} module hasn't selected a pre attack module")
-                else:
-                    print_failure("Auxiliary modules doesn't support pre attack modules")
-
-            elif args.post:
-                if isinstance(selectedModule, Attack):
-                    if post_attack_module := selectedModule.selected_post_attack:
-                        if post_attack_module.isOption(option):
-                            if post_attack_module.isModuleOption(option): #option is a valid module option
-                                post_attack_module.options[option].value = value
-
-                        else: #option is a valid slurm option
-                            argument = post_attack_module.slurm.options.get(option)
-                            argument.value = value
-                            post_attack_module.slurm.options[option] = argument
-                            setattr(post_attack_module.slurm, option, value)
-
-                        selectedModule.post_attack = post_attack_module
-                        print(f"(postattack) {option.upper()} => {value}")
-                    else:
-                        print_failure("{selectedModule.MNAME} module hasn't selected a post attack module")
-                else:
-                    print_failure("Auxiliary modules doesn't support post attack modules")
-
-            else: # set option of main attack module
-                if selectedModule.isOption(option):
-                    if selectedModule.isModuleOption(option): #option is a valid module option
-                        if option in ["pre_attack", "post_attack"]:
-                            filteredModules = self._cmd.filteredModules
-                            if option == "pre_attack":
-                                filteredModules += [(None, pre_attack_class)
-                                                    for pre_attack_class in selectedModule.PRE_ATTACKS.values()]
-                            else: # option == "post_attack"
-                                filteredModules += [(None, post_attack_class)
-                                                    for post_attack_class in selectedModule.POST_ATTACKS.values()]
-
-                            for module_id, module_class in filteredModules:
-                                if value == module_id or value == module_class.MNAME :
-                                    selectedModule.options[option].value = module_class.MNAME
-                                    value = module_class.MNAME # only for report purposes
-                                    import pdb;pdb.set_trace()
-                                    if option == "pre_attack" and module_class.MNAME in selectedModule.PRE_ATTACKS:
-                                        selectedModule.selected_pre_attack = module_class()
-
-                                        if full_attack_class := Glue.get_full_attack(preattack=module_class,
-                                                                                     attack=selectedModule,
-                                                                                     postattack=selectedModule.selected_post_attack):
-                                            init_options = selectedModule.get_init_options()
-                                            full_attack = full_attack_class(init_options)
-                                            full_attack.selected_pre_attack = module_class()
-                                            selectedModule = full_attack
-
-                                    elif option == "post_attack" and module_class.MNAME in selectedModule.POST_ATTACKS:
-                                        selectedModule.selected_post_attack = module_class()
-
-                                        if full_attack_class := Glue.get_full_attack(preattack=selectedModule.selected_pre_attack,
-                                                                                     attack=selectedModule,
-                                                                                     postattack=module_class):
-                                            init_options = selectedModule.get_init_options()
-                                            full_attack = full_attack_class(init_options)
-                                            full_attack.selected_post_attack = module_class()
-                                            selectedModule = full_attack
-
-                                    else: # wrong selection (selecting a pre attack to post attack option)
-                                        print_failure(f"Invalid selection: option={option.upper()}, module={module_class.MNAME}")
-                                    break
-
-                            # else: # value is a string
-                            #     for module_id, module_class in filteredModules:
-                            #         if value == module_class.MNAME:
-                            #             if option == "pre_attack" and issubclass(module_class, PreAttack):
-                            #                 selectedModule.options[option].value = module_class.MNAME
-                            #                 selectedModule.selected_pre_attack = module_class()
-
-                            #             elif option == "post_attack" and issubclass(module_class, PostAttack):
-                            #                 selectedModule.options[option].value = module_class.MNAME
-                            #                 selectedModule.selected_post_attack = module_class()
-
-                            #             else: # wrong selection (selecting a pre attack to post attack option)
-                            #                     print_failure(f"Invalid selection: option={option.upper()}, module={module_class.MNAME}")
-                            #             break
+                            selectedModule.pre_attack = pre_attack_module
+                            print(f"(preattack) {option.upper()} => {value}")
                         else:
+                            raise Exception(f"{selectedModule.MNAME} module hasn't selected a pre attack module yet")
+                    else:
+                        raise Exception("Auxiliary modules doesn't support pre attack modules")
+
+                elif args.post:
+                    if isinstance(selectedModule, Attack):
+                        if post_attack_module := selectedModule.selected_post_attack:
+                            if post_attack_module.isOption(option):
+                                if post_attack_module.isModuleOption(option): #option is a valid module option
+                                    post_attack_module.options[option].value = value
+
+                            else: #option is a valid slurm option
+                                argument = post_attack_module.slurm.options.get(option)
+                                argument.value = value
+                                post_attack_module.slurm.options[option] = argument
+                                setattr(post_attack_module.slurm, option, value)
+
+                            selectedModule.post_attack = post_attack_module
+                            print(f"(postattack) {option.upper()} => {value}")
+                        else:
+                            raise Exception(f"{selectedModule.MNAME} module hasn't selected a post attack module yet")
+                    else:
+                        raise Exception("Auxiliary modules doesn't support post attack modules")
+
+                else: # set option of main attack module
+                    if selectedModule.isOption(option):
+                        if selectedModule.isModuleOption(option): #option is a valid module option
                             selectedModule.options[option].value = value
 
-                    else: #option is a valid slurm option
-                        argument = selectedModule.slurm.options.get(option)
-                        argument.value = value
-                        selectedModule.slurm.options[option] = argument
-                        setattr(selectedModule.slurm, option, value)
+                        else: #option is a valid slurm option
+                            argument = selectedModule.slurm.options.get(option)
+                            argument.value = value
+                            selectedModule.slurm.options[option] = argument
+                            setattr(selectedModule.slurm, option, value)
 
-                    self._cmd.selectedModule = selectedModule
-                    print(f"{option.upper()} => {value}")
+                        self._cmd.selectedModule = selectedModule
+                        print(f"{option.upper()} => {value}")
 
-                else:
-                    print_failure(f"No {option.upper()} option in {selectedModule.mname} module")
+                    else:
+                        raise Exception(f"No {option.upper()} option in {selectedModule.mname} module")
 
-        else:
-            print_failure("No module selected")
+            else:
+                raise Exception("No module selected")
+
+        except Exception as error:
+            print_failure(error)
 
     def do_back(self, args):
         """
@@ -472,7 +494,8 @@ class Interaction(CommandSet):
                                help="Force the attack")
     attack_parser.add_argument('-q', '--quiet', action='store_true',
                                help="Run quietly")
-    #debugged - data: feb 27 2021
+
+    #debugged - date: feb 27 2021
     @with_argparser(attack_parser)
     def do_attack(self, args):
         """
@@ -490,6 +513,7 @@ class Interaction(CommandSet):
                 print_status(f"Running {selectedModule.mname} attack module")
                 attack_output = selectedModule.attack(args.local, args.force, pre_attack_output)
 
+                #import pdb; pdb.set_trace()
                 if post_attack := selectedModule.selected_post_attack:
                     print_status(f"Running {post_attack.mname} posattack module")
                     post_attack.run(quiet=args.quiet, attack_output=attack_output)

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 #
-# wordlist attack using john with hashid as pre attack module
+# wordlist attack using john with nth as pre attack module
 #
-# date: Feb 22 2021
+# date: Mar 29 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 from typing import Any
@@ -25,22 +25,28 @@ from fineprint.status import (
 # name format: PREATTACK_ATTACK_POSTATTACK
 # (if pre/post attack is null then _ replace its name)
 # Here HashId_JohnWordlist__ means: preattack: HashId, attack: JohnWordlist, postattack: null
-class HashID_JohnWordlist__(JohnWordlist):
+class Nth_JohnWordlist__(JohnWordlist):
     def __init__(self, init_options):
+        #import pdb; pdb.set_trace()
         super().__init__(**init_options)
+
         self.options['hash_type'].required = False
         self.fulldescription = (
             """
             Perform wordlists attacks against hashes
-            with john using the most likely john hashes type parsed by hashid,
+            with john using the most likely john hashes type parsed by name-that-hash,
             also this parallel task can be submited in a cluster using Slurm
             """
         )
 
         # pre attack options
-        self.selected_pre_attack.options['hashes'].value = self.options['hashes_file'].value
+        if self.selected_pre_attack and 'hashes' in self.selected_pre_attack.options:
+            self.selected_pre_attack.options['hashes'].value = self.options['hashes_file'].value
 
-    # preattack output format:  {hash: [POSIBLE_IDENTITIES, ...], ...}
+        # post attack options
+        if self.selected_post_attack and 'hashes' in self.selected_post_attack.options:
+            self.selected_post_attack.options['hashes'].value = self.options['hashes_file'].value
+
     def attack(self, local:bool = False, force: bool = False, pre_attack_output: Any = None):
         """
         Wordlist attack using John the Ripper with HashId as pre attack module
@@ -57,6 +63,7 @@ class HashID_JohnWordlist__(JohnWordlist):
             jtr = John()
 
             hashes_identities = self.most_probably_hash_identities(pre_attack_output)
+            #import pdb; pdb.set_trace()
             jtr.wordlist_attack(hash_types = hashes_identities,
                                 hashes_file = self.options['hashes_file'].value,
                                 wordlist = self.options['wordlist'].value,
@@ -66,18 +73,24 @@ class HashID_JohnWordlist__(JohnWordlist):
         except Exception as error:
             print_failure(error)
 
+
     # helper function to hashid preattack
+    #preattacK_output format: [{QUERY_HASH : [{POSIBLE_HASH_IDENTITY}, ...]}, ...]
     def most_probably_hash_identities(self, preattack_output):
         #import pdb; pdb.set_trace()
         hash_type_frequency = {} # {john the ripper hash type: frequency, ...}
-        for qhash, modes in preattack_output.items():
-            for hash_info in modes:
-                jtr_hash_type = hash_info.john
-                if jtr_hash_type:
-                    if jtr_hash_type in hash_type_frequency:
-                        hash_type_frequency[jtr_hash_type] += 1
-                    else:
-                        hash_type_frequency[jtr_hash_type] = 0
+        for hashes_identities in preattack_output:
+            for qhash, identities in hashes_identities.items():
+                for identity in identities:
+                    jtr_hash_type = identity['john']
+                    if jtr_hash_type:
+                        if jtr_hash_type in hash_type_frequency:
+                            hash_type_frequency[jtr_hash_type] += 1
+                        else:
+                            hash_type_frequency[jtr_hash_type] = 0
 
+        #import pdb; pdb.set_trace()
+        #print(hash_type_frequency)
         most_likely_identities = sorted(hash_type_frequency.items(), key=lambda x: x[1], reverse=True)
         return [identity for identity, frequency in most_likely_identities]
+

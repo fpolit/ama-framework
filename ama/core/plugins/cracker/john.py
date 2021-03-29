@@ -26,7 +26,7 @@ import os
 import re
 from tabulate import tabulate
 from sbash import Bash
-
+from typing import List
 
 # fineprint imports
 from fineprint.status import (
@@ -71,7 +71,7 @@ class John(PasswordCracker):
         super().__init__(["john", "jtr"], version="1.9.0-jumbo-1 MPI + OMP")
 
     @staticmethod
-    def check_hash_type(hash_type):
+    def check_hash_type(hash_types: List[str]):
         """
         Check if hash_type is a valid hash type
 
@@ -82,10 +82,15 @@ class John(PasswordCracker):
             InvalidHashType: Error if the hasType is an unsopported hash type of a cracker
         """
 
-        hash_type = hash_type.lower()
-        if not (hash_type in John.HASHES):
-            raise InvalidHashType(John, hash_type)
+        any_valid_hash_type = False
+        for htype in hash_types:
+            htype = htype.lower()
+            if htype in John.HASHES:
+                any_valid_hash_type = True
+                break
 
+        if not any_valid_hash_type:
+            raise InvalidHashType(John, htype)
 
     # debugged - date: Mar 1 2021
     @staticmethod
@@ -145,11 +150,13 @@ class John(PasswordCracker):
             #cmd2.Cmd.pexcept(error)
             print_failure(error)
 
-    def are_all_hashes_cracked(hashes_file: str, potfile: str = None):
+    def are_all_hashes_cracked(self, hashes_file: str, potfile: str = None):
         """
         Check if all hashes are cracked
         return True if all hashes were cracked otherwise return False
         """
+
+        #import pdb; pdb.set_trace()
         all_cracked = True
         with open(hashes_file, 'r') as hashes:
             while query_hash := hashes.readline().rstrip():
@@ -234,9 +241,9 @@ class John(PasswordCracker):
 
     # debugged - date: Feb 28 2021
     def wordlist_attack(self , *,
-                        hash_type: str = None , hashes_file: str, wordlist: str,
+                        hash_types: List[str] = None , hashes_file: str, wordlist: str,
                         rules:str = None, rules_file:str = None,
-                        slurm):
+                        slurm, local:bool = False):
         """
         Wordlist attack using john submiting parallel tasks in a cluster with Slurm
 
@@ -253,55 +260,65 @@ class John(PasswordCracker):
                 permission = [os.R_OK]
                 Path.access(permission, hashes_file, wordlist)
 
-                if hash_type:
-                    John.check_hash_type(hash_type)
+                if hash_types:
+                    John.check_hash_type(hash_types)
+
+                if rules and rules_file:
+                    Path.access(permission, rules_file)
 
                 #cmd2.Cmd.poutput(f"Attacking {hash_type} hashes in {hashesfile} file with {wordlist} wordlist.")
-                print_status(f"Attacking {hash_type} hashes in {hashes_file} file with {wordlist} wordlist")
+                print_status(f"Attacking hashes in {hashes_file} file with {wordlist} wordlist")
+                print_status(f"Possible hashes identities: {hash_types}")
 
-                attack_cmd = f"{self.main_exec} --wordlist={wordlist}"
-                if slurm and slurm.partition:
+                if (not local) and slurm and slurm.partition:
                     parallel_job_type = slurm.parallel_job_parser()
                     if not  parallel_job_type in ["MPI", "OMP"]:
                         raise InvalidParallelJob(parallel_job_type)
 
-                    if parallel_job_type == "MPI":
-                        attack_cmd = f"srun --mpi={slurm.pmix} "  + attack_cmd
+                    parallel_work = []
+                    for hash_type in hash_types:
+                        attack_cmd = f"{self.main_exec} --wordlist={wordlist}"
+                        if parallel_job_type == "MPI":
+                            attack_cmd = f"srun --mpi={slurm.pmix} "  + attack_cmd
 
 
-                    elif parallel_job_type == "OMP":
-                        attack_cmd = f"srun "  + attack_cmd
+                        elif parallel_job_type == "OMP":
+                            attack_cmd = f"srun "  + attack_cmd
 
-                    if hash_type:
-                        attack_cmd += f" --format={hash_type}"
+                        if hash_type:
+                            attack_cmd += f" --format={hash_type}"
 
-                    if rules and rules_file:
-                        Path.access(permission, rules_file)
-                        attack_cmd += f" --rules={rules} {rules_file}"
+                        if rules and rules_file:
+                            attack_cmd += f" --rules={rules} {rules_file}"
 
-                    attack_cmd += f" {hashes_file}"
+                        attack_cmd += f" {hashes_file}"
 
-                    parallel_work = [attack_cmd]
+                        header_attack = f"echo -e '\\n\\n[*] Running: {attack_cmd}'"
+
+                        parallel_work.append((header_attack, attack_cmd))
+
                     slurm_script_name = slurm.gen_batch_script(parallel_work)
                     Bash.exec(f"sbatch {slurm_script_name}")
 
                 else:
-                    if hash_type:
-                        attack_cmd += f" --format={hash_type}"
+                    for hash_type in hash_types:
+                        attack_cmd = f"{self.main_exec} --wordlist={wordlist}"
+                        if hash_type:
+                            attack_cmd += f" --format={hash_type}"
 
-                    if rules and rules_file:
-                        Path.access(permission, rules_file)
-                        attack_cmd += f" --rules={rules} {rules_file}"
+                        if rules and rules_file:
+                            attack_cmd += f" --rules={rules} {rules_file}"
 
-                    attack_cmd += f" {hashes_file}"
+                        attack_cmd += f" {hashes_file}"
 
-                    Bash.exec(attack_cmd)
+                        if are_all_hashes_cracked := self.are_all_hashes_cracked(hashes_file):
+                            print_successful(f"Hashes in {hashes_file} were cracked")
+                            break
 
-                    # if report: # show attack report
-                    #     from ama.core.modules.auxiliary.hashes import HashesStatus
-                    #     attack_report = HashesStatus(hashes_file=hashes_file)
-                    #     print("\n Wordlist attack report:\n")
-                    #     attack_report.run()
+                        else: # some hash isn't cracked yet
+                            print()
+                            print_status(f"Running: {attack_cmd}")
+                            Bash.exec(attack_cmd)
 
             except Exception as error:
                 #cmd2.Cmd.pexcept(error)
@@ -391,8 +408,8 @@ class John(PasswordCracker):
 
     # debugged - date: Mar 1 2021
     def masks_attack(self, *,
-                     hash_type: str = None, hashes_file: str, masks_file: str,
-                     masks_attack_script: str, slurm):
+                     hash_types: List[str] = None, hashes_file: str, masks_file: str,
+                     masks_attack_script: str, slurm, local: bool = False):
         """
         Masks attack using john submiting parallel tasks in a cluster with Slurm
 
@@ -414,7 +431,7 @@ class John(PasswordCracker):
                     John.check_hash_type(hash_type)
 
                 print_status(f"Attacking {hash_type} hashes in {hashes_file} file with {masks_file} mask file.")
-                if slurm and slurm.partition:
+                if (not local) and slurm and slurm.partition:
                     John.gen_masks_attack(hash_type = hash_type,
                                           hashes_file = hashes_file,
                                           masks_file = masks_file,
@@ -603,3 +620,5 @@ with open(masks_file, 'r') as masks:
                             hashFile = hashFile,
                             wordlist = hybridWordlist,
                             hpc = hpc)
+
+

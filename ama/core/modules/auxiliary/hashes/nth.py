@@ -90,15 +90,15 @@ class Nth(Auxiliary):
             else: # HASHES option is a string (a simple hash)
                 hashes = self.options['hashes'].value.split(',')
 
-                hashes_identities = nth.identify_hashes(hashes,
-                                                        hashcat = self.options['hashcat'].value,
-                                                        john = self.options['john'].value,
-                                                        base64 = self.options['base64'].value,
-                                                        most_likely = self.options['most_likely'].value,
-                                                        quiet = quiet)
+            hashes_identity = nth.hashes_identify(hashes,
+                                                  hashcat = self.options['hashcat'].value,
+                                                  john = self.options['john'].value,
+                                                  base64 = self.options['base64'].value,
+                                                  most_likely = self.options['most_likely'].value,
+                                                  quiet = quiet)
 
 
-            return hashes_identities
+            return hashes_identity
 
         except Exception as error:
             print_failure(error)

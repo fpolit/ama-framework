@@ -25,6 +25,14 @@ from ama.core.slurm import Slurm
 # fineprint imports
 from fineprint.status import print_failure
 
+# pre/post attack modules
+from ama.core.modules.auxiliary.analysis import (
+    PackMaskgen,
+    PackWholegen
+)
+
+from ama.core.modules.auxiliary.hashes import HashesStatus
+
 
 class JohnMasks(Attack):
     """
@@ -46,10 +54,25 @@ class JohnMasks(Attack):
 
     REFERENCES = None
 
+    # {PRE_ATTACK_MNAME: PRE_ATTACK_CLASS, ...}
+    PRE_ATTACKS = {
+        # auxiliary/analysis
+        f"{PackMaskgen.MNAME}": PackMaskgen,
+        f"{PackWholegen.MNAME}": PackWholegen
+    }
+
+    # {POST_ATTACK_MNAME: POST_ATTACK_CLASS, ...}
+    POST_ATTACKS = {
+        # auxiliary/hashes
+        f"{HashesStatus.MNAME}": HashesStatus,
+    }
+
+
     def __init__(self, *,
                  hash_type:str = None, hashes_file:str = None,
                  masks_file: str = None, masks_attack: str = "masks_attack.py",
-                 slurm=None):
+                 slurm=None,
+                 pre_attack = None, post_attack = None):
         """
         Initialization of John masks attack
 
@@ -60,12 +83,20 @@ class JohnMasks(Attack):
         masks_attack (str): Generated masks attack script
         slurm (Slurm): Instance of Slurm class
         """
+
+        pre_attack_name = pre_attack.mname if pre_attack else None
+        post_attack_name = post_attack.mname if post_attack else None
+
         attack_options = {
-            'hash_type': Argument(hash_type, True, "John hash type"),
+            'hash_type': Argument(hash_type, True, "John hash types(split by commas)"),
             'hashes_file': Argument(hashes_file, True, "Hashes file"),
             'masks_file': Argument(masks_file, True, "Masks file"),
-            'masks_attack': Argument(masks_attack, True, "Generated masks attack script")
+            'masks_attack': Argument(masks_attack, True, "Generated masks attack script"),
+            'pre_attack': Argument(pre_attack_name, False, "Pre attack module"),
+            'post_attack': Argument(post_attack_name, False, "Post attack module"),
         }
+
+
 
         if slurm is None:
             slurm_options = {
@@ -106,11 +137,32 @@ class JohnMasks(Attack):
             'description': JohnMasks.DESCRIPTION,
             'fulldescription':  JohnMasks.FULLDESCRIPTION,
             'references': JohnMasks.REFERENCES,
+            'pre_attack': pre_attack,
             'attack_options': attack_options,
+            'post_attack': post_attack,
             'slurm': slurm
         }
 
         super().__init__(**init_options)
+
+        self.selected_pre_attack = pre_attack
+        self.selected_post_attack = post_attack
+
+
+    def get_init_options(self):
+
+        init_options = {
+            "hash_type": self.options['hash_type'].value,
+            "hashes_file": self.options['hashes_file'].value,
+            "masks_file": self.options['masks_file'].value,
+            "masks_attack": self.slurm.options['masks_attack'].value,
+            "slurm": self.slurm,
+            "pre_attack": self.selected_pre_attack,
+            "post_attack": self.selected_post_attack
+        }
+
+        return init_options
+
 
     def attack(self, local=False, force:bool = False, pre_attack_output: Any = None):
         """
@@ -125,19 +177,15 @@ class JohnMasks(Attack):
 
             jtr = John()
 
-            if local:
-                jtr.masks_attack(hash_type = self.options['hash_type'].value,
-                                 hashes_file = self.options['hashes_file'].value,
-                                 masks_file= self.options['masks_file'].value,
-                                 masks_attack_script= self.options['masks_attack'].value,
-                                 slurm = None)
+            hash_types  = self.options['hash_type'].value.split(',')
 
-            else: #submit the attack in a cluster with slurm
-                jtr.masks_attack(hash_type = self.options['hash_type'].value,
-                                 hashes_file = self.options['hashes_file'].value,
-                                 masks_file= self.options['masks_file'].value,
-                                 masks_attack_script= self.options['masks_attack'].value,
-                                 slurm = self.slurm)
+
+            jtr.masks_attack(hash_types = hash_types,
+                             hashes_file = self.options['hashes_file'].value,
+                             masks_file= self.options['masks_file'].value,
+                             masks_attack_script= self.options['masks_attack'].value,
+                             slurm = self.slurm,
+                             local = local)
 
         except Exception as error:
             print_failure(error)
