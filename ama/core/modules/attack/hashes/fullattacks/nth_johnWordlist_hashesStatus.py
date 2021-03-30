@@ -8,6 +8,8 @@
 from typing import Any
 
 from .nth_john_wordlist__ import Nth_JohnWordlist__
+from ama.core.modules.auxiliary.hashes import Nth
+from ama.core.modules.auxiliary.hashes import HashesStatus
 
 # cracker imports
 from ama.core.plugins.cracker import John
@@ -26,7 +28,14 @@ from fineprint.status import (
 # (if pre/post attack is null then _ replace its name)
 # Here HashId_JohnWordlist__ means: preattack: HashId, attack: JohnWordlist, postattack: null
 class Nth_JohnWordlist_HashesStatus(Nth_JohnWordlist__):
-    def __init__(self, init_options):
+    def __init__(self, init_options = None):
+
+        if init_options is None:
+            init_options = {
+                "pre_attack": Nth(),
+                "post_attack": HashesStatus()
+            }
+
         super().__init__(init_options)
         self.fulldescription = (
             """
@@ -50,10 +59,12 @@ class Nth_JohnWordlist_HashesStatus(Nth_JohnWordlist__):
 
         # attack -> post atack
         if option == "hashes_file":
-            if self.selected_post_attack and not (pre_attack or post_attack):
+            if self.selected_post_attack and not (pre_attack or post_attack): # and \
+               #self.options['hashes_file'].value is not None:
                 self.selected_post_attack.options['hashes_file'].value = self.options['hashes_file'].value
 
         # post atack -> attack
         if option == "hashes_file":
-            if self.selected_pre_attack and post_attack:
+            if self.selected_pre_attack and post_attack: # and \
+               #self.selected_post_attack.options['hashes_file'].value is not None:
                 self.options['hashes_file'].value = self.selected_post_attack.options['hashes_file'].value

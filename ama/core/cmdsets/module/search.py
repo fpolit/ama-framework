@@ -56,8 +56,8 @@ class Search(CommandSet):
     full_attack_parser.add_argument('-post', '--postattack', default=None,
                                     help='Postattack name pattern')
 
-    full_attack_parser.add_argument('-s', '--select',
-                                    help='Select a full attack')
+    # full_attack_parser.add_argument('-s', '--select',
+    #                                 help='Select a full attack')
 
     # full_attack_parser.add_argument('-p', '--previous', action='store_true',
     #                                 help='Show previous search')
@@ -70,36 +70,39 @@ class Search(CommandSet):
         """
         search by availables full attack  given preattack, attack and postattack patterns
         """
-        filtered_fullAttacks = [] #[[PRE_ATTACK_NAME, ATTACK_NAME, POSR_ATTACK_NAME]]
-
         fullAttackId = 0
-        for fullAttack in Glue.full_attacks:
+        filtered_fullAttacks = [] #[(id, fullAttackClass), ...]
+        fullAttacksTable = []
+
+        #import pdb;pdb.set_trace()
+        for fullAttack, fullAttackClass in Glue.full_attacks.items():
             preattack_name = fullAttack.preattack.MNAME if fullAttack.preattack else None
             attack_name = fullAttack.attack.MNAME if fullAttack.attack else None
             postattack_name = fullAttack.postattack.MNAME if fullAttack.postattack else None
 
-            if args.preattack or args.attack or args.postattack: # some pattern was supplied
+            #if args.preattack or args.attack or args.postattack: # some pattern was supplied
 
-                preattack_filter = ((preattack_name is None and args.preattack is None) or \
-                                    (preattack_name is not None and args.preattack is not None and re.search(args.preattack, preattack_name)))
+            preattack_filter = args.preattack is None or \
+                 (preattack_name is not None and args.preattack is not None and re.search(args.preattack, preattack_name))
 
-                attack_filter = ((attack_name is None and args.attack is None) or \
-                                 (attack_name is not None and args.attack is not None and re.search(args.attack, attack_name)))
+            attack_filter = args.attack is None or \
+                (attack_name is not None and args.attack is not None and re.search(args.attack, attack_name))
 
-                postattack_filter = ((postattack_name is None and args.postattack is None) or \
-                                     (postattack_name is not None and args.postattack is not None and re.search(args.postattack, postattack_name)))
+            postattack_filter = args.postattack is None or \
+                 (postattack_name is not None and args.postattack is not None and re.search(args.postattack, postattack_name))
 
-                import pdb;pdb.set_trace()
-                if  preattack_filter and attack_filter and  postattack_filter:
-
-                    filtered_fullAttacks.append((fullAttackId ,preattack_name, attack_name, postattack_name))
-                    fullAttackId += 1
-            else: # no patterns was supplied
-                filtered_fullAttacks.append((fullAttackId ,preattack_name, attack_name, postattack_name))
+            if  preattack_filter and attack_filter and  postattack_filter:
+                filtered_fullAttacks.append((fullAttackId, fullAttackClass))
+                fullAttacksTable.append((fullAttackId, preattack_name, attack_name, postattack_name))
                 fullAttackId += 1
+            # else: #no patterns was supplied
+            #     filtered_fullAttacks.append((fullAttackId, fullAttackClass))
+            #     fullAttacksTable.append((fullAttackId, preattack_name, attack_name, postattack_name))
+            #     fullAttackId += 1
 
         self._cmd.filteredModules = filtered_fullAttacks
-        print(tabulate(filtered_fullAttacks, headers=["#", "PreAttack", "Attack", "PostAttack"]))
+        print(tabulate(fullAttacksTable, headers=["#", "PreAttack", "Attack", "PostAttack"]))
+
 
     search_parser = argparse.ArgumentParser()
     search_parser.add_argument('-t', '--type', dest='moduleType', choices=amaModulesTypes, default=None,

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 #
-# mask attack using john with pack policygen as pre attack module
+# mask attack using john with pack maskgen as pre attack module
 #
-#
+# date: Mar 24 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 from typing import Any
@@ -17,14 +17,13 @@ from ama.core.plugins.cracker import John
 
 from ..john_masks import JohnMasks
 
-from ama.core.modules.auxiliary.analysis import PackPolicygen
 
-class PackPolicygen_JohnMasks__(JohnMasks):
+class PackMaskgen_JohnMasks__(JohnMasks):
     def __init__(self, init_options = None):
 
         if init_options is None:
             init_options = {
-                "pre_attack": PackPolicygen(),
+                "pre_attack": PackWholegen(),
                 "post_attack": None
             }
 
@@ -33,7 +32,7 @@ class PackPolicygen_JohnMasks__(JohnMasks):
         self.fulldescription = (
             """
             Perform masks attacks against hashes
-            with john using the generated masks by Pack-policygen,
+            with john using the generated masks by Pack-maskgen,
             also this parallel task can be submited in a cluster using Slurm
             """
         )
@@ -78,11 +77,13 @@ class PackPolicygen_JohnMasks__(JohnMasks):
 
         # attack -> pre atack
         if option == "masks_file":
-            if self.selected_pre_attack and not (pre_attack or post_attack):
+            if self.selected_pre_attack and not (pre_attack or post_attack): # and \
+               #self.options['masks_file'].value is not None:
                 self.selected_pre_attack.options['output'].value = self.options['masks_file'].value
 
         # pre atack -> attack
         if option == "output":
-            if self.selected_pre_attack and pre_attack:
+            if self.selected_pre_attack and pre_attack: # and \
+               #self.selected_pre_attack.options['output'].value is not None:
                 self.options['masks_file'].value = self.selected_pre_attack.options['output'].value
 

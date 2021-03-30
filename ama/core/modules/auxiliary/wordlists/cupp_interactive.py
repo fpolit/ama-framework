@@ -39,13 +39,13 @@ class CuppInteractive(Auxiliary):
         "https://github.com/Mebus/cupp"
     ]
 
-    def __init__(self, quiet=False):
+    def __init__(self):
         """
         Initialization of Cupp - interactive mode
         """
 
         auxiliary_options = {
-            'quiet': Argument(quiet, True, "Don't print cupp's fancy banner")
+            #'wordlist': Argument(wordlist, True, "Name of generated wordlist")
         }
 
         init_options = {
@@ -60,16 +60,18 @@ class CuppInteractive(Auxiliary):
 
         super().__init__(**init_options)
 
-    def run(self):
+    def run(self, quiet:bool = False):
         """
         Execution of Cupp interactive mode
         """
 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         try:
             self.no_empty_required_options()
             cupp = Cupp()
-            cupp.interactive(quiet = self.options['quiet'].value)
+            generated_wordlist = cupp.interactive(quiet = quiet)
+
+            return generated_wordlist
 
         except Exception as error:
             print_failure(error)

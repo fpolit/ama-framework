@@ -46,14 +46,16 @@ class Cupp(Auxiliary):
         """
         Cupp - interactive mode (Interactive questions for user password profiling)
         """
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         if self.enable:
             CONFIG = self.CONFIG
             if not quiet:
                 cupp.print_cow()
-            cupp.interactive()
+            generated_wordlist = cupp.interactive()
+            return generated_wordlist
         else:
             print_failure("Auxiliary application {self.main_name} is disable")
+            return None
 
     # debugged - date: Mar 4 2021
     def improve_wordlist(self, *, wordlist: str, quiet=False):
@@ -69,13 +71,17 @@ class Cupp(Auxiliary):
 
                 if not quiet:
                     cupp.print_cow()
-                cupp.improve(wordlist)
+                improved_wordlist = cupp.improve_dictionary(wordlist)
+
+                return improved_wordlist
 
             except Exception as error:
                 print_failure(error)
 
         else:
             print_failure("Auxiliary application {self.main_name} is disable")
+            return None
+
     # debugged - date: Mar 4 2021
     def download_wordlists(self, *, quiet=False):
         """

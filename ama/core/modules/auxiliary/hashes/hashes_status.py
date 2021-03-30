@@ -11,7 +11,8 @@ from typing import Any
 
 #fineprint imports
 from fineprint.status import (
-    print_failure
+    print_failure,
+    print_status
 )
 # cmd2 imports
 import cmd2
@@ -112,7 +113,11 @@ class HashesStatus(Auxiliary):
             if uncracked_hashes := self.options.get('uncracked_hashes', Argument.get_empty()).value:
                 with open(uncracked_hashes, 'w') as uncracked_hashes_file:
                     for uhash in hashes_status['uncracked']:
-                        uncracked_hashes_file.write(f"{uhash[0]}\n") #hashes_status['uncracked'] struct is [[UNCRACKED_HASH], [OTHER_UNCRACKED_HASH], ...]
+                        #hashes_status['uncracked'] struct is [[UNCRACKED_HASH], [OTHER_UNCRACKED_HASH], ...]
+                        uncracked_hashes_file.write(f"{uhash[0]}\n")
+
+                print_status(f"Uncracked hashes have written to {uncracked_hashes} file")
+
 
             # print status of hashes in hashesFile
             status_hashes_table = (

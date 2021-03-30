@@ -29,7 +29,8 @@ from fineprint.status import print_failure
 # pre/post attack modules
 from ama.core.modules.auxiliary.analysis import (
     PackMaskgen,
-    PackWholegen
+    PackWholegen,
+    PackPolicygen
 )
 
 from ama.core.modules.auxiliary.hashes import HashesStatus
@@ -59,7 +60,8 @@ class JohnMasks(Attack):
     PRE_ATTACKS = {
         # auxiliary/analysis
         f"{PackMaskgen.MNAME}": PackMaskgen,
-        f"{PackWholegen.MNAME}": PackWholegen
+        f"{PackWholegen.MNAME}": PackWholegen,
+        f"{PackPolicygen.MNAME}": PackPolicygen
     }
 
     # {POST_ATTACK_MNAME: POST_ATTACK_CLASS, ...}

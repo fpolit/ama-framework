@@ -45,7 +45,7 @@ class CuppRefine(Auxiliary):
     def __init__(self, wordlist: str = None, quiet:bool = False):
         auxiliary_options = {
             'wordlist': Argument(wordlist, True, "Wordlist to refine"),
-            'quiet': Argument(quiet, True, "Don't print cupp's fancy banner")
+            #'quiet': Argument(quiet, True, "Don't print cupp's fancy banner")
         }
         init_options = {
             'mname': CuppRefine.MNAME,
@@ -60,16 +60,18 @@ class CuppRefine(Auxiliary):
         super().__init__(**init_options)
 
 
-    def run(self):
+    def run(self, quiet: bool = False):
         """
         Refine a wordlist
         """
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         try:
             self.no_empty_required_options()
             cupp = Cupp()
-            cupp.improve_wordlist(wordlist= self.options['wordlist'].value,
-                                  quiet = self.options['quiet'].value)
+            improved_wordlist = cupp.improve_wordlist(wordlist= self.options['wordlist'].value,
+                                                      quiet = quiet)
+
+            return improved_wordlist
 
         except Exception as error:
             print_failure(error)

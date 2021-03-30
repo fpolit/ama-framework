@@ -16,10 +16,18 @@ from ama.core.plugins.cracker import John
 
 
 from ..john_masks import JohnMasks
+from ama.core.modules.auxiliary.analysis import PackWholegen
 
 
 class PackWholegen_JohnMasks__(JohnMasks):
-    def __init__(self, init_options):
+    def __init__(self, init_options = None):
+
+        if init_options is None:
+            init_options = {
+                "pre_attack": PackWholegen(),
+                "post_attack": None
+            }
+
         super().__init__(**init_options)
         self.options['masks_file'].required = False
         self.fulldescription = (

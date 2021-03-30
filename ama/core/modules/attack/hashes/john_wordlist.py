@@ -39,6 +39,10 @@ from ama.core.modules.auxiliary.hashes import (
 from ama.core.modules.auxiliary.hashes import (
     HashesStatus
 )
+## auxiliary/wordlist
+from ama.core.modules.auxiliary.wordlists import (
+    CuppInteractive
+)
 
 class JohnWordlist(Attack):
     """
@@ -75,6 +79,7 @@ class JohnWordlist(Attack):
     POST_ATTACKS = {
         # auxiliary/hashes
         f"{HashesStatus.MNAME}": HashesStatus,
+        f"{CuppInteractive.MNAME}": CuppInteractive
     }
 
     def __init__(self, *,
@@ -99,7 +104,7 @@ class JohnWordlist(Attack):
 
         attack_options = {
             'wordlist': Argument(wordlist, True, "wordlist file"),
-            'hash_type': Argument(hash_type, True, "John hash type"),
+            'hash_type': Argument(hash_type, True, "John hash types (split by commas)"),
             'hashes_file': Argument(hashes_file, True, "hashes file"),
         }
 
@@ -162,6 +167,18 @@ class JohnWordlist(Attack):
 
         return init_options
 
+    def get_init_options(self):
+        init_options = {
+            "hash_type": self.options['hash_type'].value,
+            "hashes_file": self.options['hashes_file'].value,
+            "wordlist": self.options['wordlist'].value,
+            "slurm": self.slurm,
+            "pre_attack": self.selected_pre_attack,
+            "post_attack": self.selected_post_attack
+        }
+
+        return init_options
+
     def attack(self, local:bool = False, force: bool = False, pre_attack_output: Any = None):
         """
         Wordlist attack using John the Ripper
@@ -181,7 +198,9 @@ class JohnWordlist(Attack):
 
             jtr = John()
 
-            jtr.wordlist_attack(hash_types = [self.options['hash_type'].value],
+            hash_types = self.options['hash_type'].value.split(',')
+
+            jtr.wordlist_attack(hash_types = hash_types,
                                 hashes_file = self.options['hashes_file'].value,
                                 wordlist = self.options['wordlist'].value,
                                 slurm = self.slurm,

@@ -21,11 +21,21 @@ from fineprint.status import (
     print_status
 )
 
+from ama.core.modules.auxiliary.analysis import PackPolicygen
+from ama.core.modules.auxiliary.hashes import HashesStatus
 
 # name format: PREATTACK_ATTACK_POSTATTACK
 # (if pre/post attack is null then _ replace its name)
 class PackPolicygen_JohnMasks_HashesStatus(PackPolicygen_JohnMasks__):
-    def __init__(self, init_options):
+    def __init__(self, init_options = None):
+
+        if init_options is None:
+            init_options = {
+                "pre_attack": PackPolicygen(),
+                "post_attack": HashesStatus()
+            }
+
+
         super().__init__(init_options)
         self.fulldescription = (
             """

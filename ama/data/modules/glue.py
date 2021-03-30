@@ -62,7 +62,11 @@ from ama.core.modules.attack.hashes import (
     PackMaskgen_JohnMasks__,
     PackWholegen_JohnMasks__,
     PackPolicygen_JohnMasks__,
+    CuppInteractive_JohnWordlist__,
+    CuppRefine_JohnWordlist__,
     __JohnWordlist_HashesStatus as None_JohnWordlist_HashesStatus,
+    CuppInteractive_JohnWordlist_HashesStatus,
+    CuppRefine_JohnWordlist_HashesStatus,
     HashID_JohnWordlist_HashesStatus,
     Nth_JohnWordlist_HashesStatus,
     PackMaskgen_JohnMasks_HashesStatus,
@@ -76,21 +80,21 @@ fullAttack = namedtuple('fullAttack', ["preattack", "attack", "postattack"])
 class Glue:
     full_attacks = {
         # None + hash cracker + None
-        fullAttack(preattack=None,
-                   attack=JohnBenchmark,
-                   postattack=None): JohnBenchmark,
+        # fullAttack(preattack=None,
+        #            attack=JohnBenchmark,
+        #            postattack=None): JohnBenchmark,
 
-        fullAttack(preattack=None,
-                   attack=JohnWordlist,
-                   postattack=None): JohnWordlist,
+        # fullAttack(preattack=None,
+        #            attack=JohnWordlist,
+        #            postattack=None): JohnWordlist,
 
-        fullAttack(preattack=None,
-                   attack=JohnSingle,
-                   postattack=None): JohnSingle,
+        # fullAttack(preattack=None,
+        #            attack=JohnSingle,
+        #            postattack=None): JohnSingle,
 
-        fullAttack(preattack=None,
-                   attack=JohnMasks,
-                   postattack=None): JohnMasks,
+        # fullAttack(preattack=None,
+        #            attack=JohnMasks,
+        #            postattack=None): JohnMasks,
 
         # None + hash cracker + HashesStatus
         fullAttack(preattack=None,
@@ -198,10 +202,21 @@ class Glue:
         #            postattack=HashesStatus): None,
 
         # Cupp + hash cracker + None
-        ## CuppInteractive + hash cracker + None
-        # fullAttack(preattack=CuppInteractive,
-        #            attack=JohnWordlist,
-        #            postattack=None): None,
+        fullAttack(preattack=CuppInteractive,
+                   attack=JohnWordlist,
+                   postattack=None): CuppInteractive_JohnWordlist__, # debugged - date: Mar 30 2021
+
+        fullAttack(preattack=CuppRefine,
+                   attack=JohnWordlist,
+                   postattack=None): CuppRefine_JohnWordlist__, # debugged - date: Mar 30 2021
+
+        fullAttack(preattack=CuppInteractive,
+                   attack=JohnWordlist,
+                   postattack=HashesStatus): CuppInteractive_JohnWordlist_HashesStatus, # debugged - date: Mar 30 2021
+
+        fullAttack(preattack=CuppRefine,
+                   attack=JohnWordlist,
+                   postattack=HashesStatus): CuppRefine_JohnWordlist_HashesStatus, # debugged - date: Mar 30 2021
 
         # fullAttack(preattack=CuppInteractive,
         #            attack=JohnSingle,
