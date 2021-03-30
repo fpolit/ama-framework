@@ -1,29 +1,38 @@
 #!/usr/bin/env python3
 #
-# mask attack using john with pack maskgen as pre attack module
+# mask attack using john with pack wholegen as pre attack module
 #
-# date: Mar 24 2021
+# debugged - date: Mar 30 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 from typing import Any
+from fineprint.status import (
+    print_status,
+    print_failure,
+    print_successful
+)
+
+from ama.core.plugins.cracker import John
+
 
 from ..john_masks import JohnMasks
 
 
-class PackMaskgen_JohnMasks__(JohnMasks):
+class PackWholegen_JohnMasks__(JohnMasks):
     def __init__(self, init_options):
         super().__init__(**init_options)
         self.options['masks_file'].required = False
         self.fulldescription = (
             """
             Perform masks attacks against hashes
-            with john using the generated masks by Pack-maskgen,
+            with john using the generated masks by Pack-wholegen,
             also this parallel task can be submited in a cluster using Slurm
             """
         )
 
         # pre attack options
-        #self.selected_pre_attack.options['output'].value = self.options['masks_file'].value
+        # if self.selected_pre_attack:
+        #     self.selected_pre_attack['output'].value = self.options['masks_file'].value
 
 
     def attack(self, local=False, force:bool = False, pre_attack_output: Any = None):
@@ -32,6 +41,7 @@ class PackMaskgen_JohnMasks__(JohnMasks):
         Args:
           local (bool): try to perform the attack locally
         """
+        import pdb;pdb.set_trace()
         try:
             if not force:
                 self.no_empty_required_options(local)
@@ -51,4 +61,20 @@ class PackMaskgen_JohnMasks__(JohnMasks):
 
         except Exception as error:
             print_failure(error)
+
+    def setv(self, option, value, *, pre_attack: bool = False, post_attack: bool = False):
+        #import pdb; pdb.set_trace()
+        super().setv(option, value, pre_attack = pre_attack, post_attack = post_attack)
+
+        option = option.lower()
+
+        # attack -> pre atack
+        if option == "masks_file":
+            if self.selected_pre_attack and not (pre_attack or post_attack):
+                self.selected_pre_attack.options['output'].value = self.options['masks_file'].value
+
+        # pre atack -> attack
+        if option == "output":
+            if self.selected_pre_attack and pre_attack:
+                self.options['masks_file'].value = self.selected_pre_attack.options['output'].value
 

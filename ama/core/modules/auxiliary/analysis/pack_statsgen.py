@@ -58,7 +58,6 @@ class PackStatsgen(Auxiliary):
             'simple_masks': Argument(simplemasks, False, "Password mask filter (e.g.stringdigit,allspecial)"),
 
             'hiderare': Argument(hiderare, True, "Hide statistics lower than the supplied percent"),
-            'quiet': Argument(quiet, True, "Don't show headers")
         }
 
 
@@ -75,7 +74,7 @@ class PackStatsgen(Auxiliary):
         super().__init__(**init_options)
 
     #debugged - date: Mar 7 2021
-    def run(self):
+    def run(self, quiet:bool = False):
 
         #import pdb; pdb.set_trace()
         try:
@@ -99,7 +98,7 @@ class PackStatsgen(Auxiliary):
                           simple_masks = simple_masks,
                           output = self.options['output'].value,
                           hiderare = self.options['hiderare'].value,
-                          quiet = self.options['quiet'].value)
+                          quiet = quiet)
 
         except Exception as error:
             print_failure(error)

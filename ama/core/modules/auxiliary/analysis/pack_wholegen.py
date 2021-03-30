@@ -84,7 +84,6 @@ class PackWholegen(Auxiliary):
             'sorting': Argument(sorting, True, "Mask sorting (<optindex|occurrence|complexity>)"),
             'hiderare': Argument(hiderare, True, "Hide statistics lower than the supplied percent"),
             'show_masks': Argument(show_masks, True, "Show matching mask"),
-            'quiet': Argument(quiet, True, "Don't show headers")
         }
 
         init_options = {
@@ -100,7 +99,7 @@ class PackWholegen(Auxiliary):
         super().__init__(**init_options)
 
 
-    def run(self):
+    def run(self, quiet:bool = False):
         """
         Run auxiliary/analysis/PackWholegen module
         """
@@ -143,8 +142,10 @@ class PackWholegen(Auxiliary):
                           sorting = self.options['sorting'].value,
                           hiderare = self.options['hiderare'].value,
                           showmasks = self.options['show_masks'].value,
-                          quiet = self.options['quiet'].value)
+                          quiet = quiet)
 
+            output = self.options['output'].value
+            return output
 
         except Exception as error:
             print_failure(error)

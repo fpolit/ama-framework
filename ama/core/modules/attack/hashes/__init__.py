@@ -20,11 +20,16 @@ from .hashcat_masks import HashcatMasks
 from .sth import STH
 
 # full attacks (preattack + attack + postattack)
+from .fullattacks.__johnWordlist_hashesStatus import  __JohnWordlist_HashesStatus
+
 from .fullattacks.hashid_john_wordlist__ import HashID_JohnWordlist__
 from .fullattacks.nth_john_wordlist__ import Nth_JohnWordlist__
-from .fullattacks.packMaskgen_johnMask__ import PackMaskgen_JohnMasks__
-
-from .fullattacks.__johnWordlist_hashesStatus import  __JohnWordlist_HashesStatus
+from .fullattacks.packMaskgen_johnMasks__ import PackMaskgen_JohnMasks__
+from .fullattacks.packWholegen_johnMasks__ import PackWholegen_JohnMasks__
+from .fullattacks.packPolicygen_johnMasks__ import PackPolicygen_JohnMasks__
 
 from .fullattacks.hashid_john_wordlist_hashesStatus import HashID_JohnWordlist_HashesStatus
 from .fullattacks.nth_johnWordlist_hashesStatus import Nth_JohnWordlist_HashesStatus
+from .fullattacks.packMaskgen_johnMask_hashesStatus import PackMaskgen_JohnMasks_HashesStatus
+from .fullattacks.packWholegen_johnMask_hashesStatus import PackWholegen_JohnMasks_HashesStatus
+from .fullattacks.packPolicygen_johnMasks_hashesStatus import PackPolicygen_JohnMasks_HashesStatus

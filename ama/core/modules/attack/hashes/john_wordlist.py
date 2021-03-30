@@ -13,6 +13,7 @@ from ama.core.modules.base import (
     Attack,
     Argument
 )
+from ama.core.modules.base.auxiliary import Auxiliary
 
 # cracker imports
 from ama.core.plugins.cracker import John
@@ -93,8 +94,8 @@ class JohnWordlist(Attack):
         post_attack (Auxiliary): Instance of a post attack (auxiliary module)
         """
 
-        pre_attack_name = pre_attack.mname if pre_attack else None
-        post_attack_name = post_attack.mname if post_attack else None
+        pre_attack_name = pre_attack.mname if isinstance(pre_attack, Auxiliary) else None
+        post_attack_name = post_attack.mname if isinstance(post_attack, Auxiliary) else None
 
         attack_options = {
             'wordlist': Argument(wordlist, True, "wordlist file"),
@@ -112,7 +113,7 @@ class JohnWordlist(Attack):
                 "cluster" : Argument(None, False, "Cluster Name"),
                 "distribution": Argument('block', True, "Distribution methods for remote processes (<block|cyclic|plane|arbitrary>)"),
                 "mail_type": Argument(None, False, "Event types to notify user by email(<BEGIN|END|FAIL|REQUEUE|ALL|TIME_LIMIT_PP>)"),
-                "main_user": Argument(None, False, "User email"),
+                "mail_user": Argument(None, False, "User email"),
                 "mem": Argument(None, False, "Memory per node (<size[units]>)"),
                 "mem_per_cpu": Argument(None, False, "Minimum memory required per allocated CPU (<size[units]>)"),
                 "cpus_per_task": Argument(1, True, "Number of processors per task"),

@@ -94,3 +94,18 @@ class Nth_JohnWordlist__(JohnWordlist):
         most_likely_identities = sorted(hash_type_frequency.items(), key=lambda x: x[1], reverse=True)
         return [identity for identity, frequency in most_likely_identities]
 
+    def setv(self, option, value, *, pre_attack: bool = False, post_attack: bool = False):
+        #import pdb; pdb.set_trace()
+        super().setv(option, value, pre_attack = pre_attack, post_attack = post_attack)
+
+        option = option.lower()
+        # attack -> pre atack
+        if option == "hashes_file":
+            if self.selected_pre_attack:
+                self.selected_pre_attack.options['hashes'].value = self.options['hashes_file'].value
+
+        # pre atack -> attack
+        if option == "hashes":
+            if self.selected_pre_attack:
+                self.options['hashes_file'].value = self.selected_pre_attack.options['hashes'].value
+

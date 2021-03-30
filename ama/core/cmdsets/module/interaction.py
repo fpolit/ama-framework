@@ -147,10 +147,10 @@ class Interaction(CommandSet):
     use_parser = argparse.ArgumentParser()
     use_parser.add_argument('module', help="ama module")
     attack_helper = use_parser.add_mutually_exclusive_group(required=False)
-    attack_helper.add_argument('-pre', '--preattack', action='store_true',
-                               help='Enable selection of preattack modules')
-    attack_helper.add_argument('-post', '--postattack', action='store_true',
-                               help='Enable selection of postattack modules')
+    attack_helper.add_argument('--preattack', action='store_true',
+                               help='Enable selection of preattack module')
+    attack_helper.add_argument('--postattack', action='store_true',
+                               help='Enable selection of postattack module')
 
     # debugged - date: Feb 28 2021
     @with_argparser(use_parser)
@@ -171,7 +171,7 @@ class Interaction(CommandSet):
             except ValueError: # module is a string
                 moduleName = module
 
-            import pdb; pdb.set_trace()
+            #import pdb; pdb.set_trace()
 
             if args.preattack:
                 if selectedModule := self._cmd.selectedModule:
@@ -179,17 +179,16 @@ class Interaction(CommandSet):
                                                                        for pre_attack_class in selectedModule.PRE_ATTACKS.values()]
                     for module_id, module_class in possible_preattacks:
                         if moduleId == module_id or moduleName == module_class.MNAME :
-                            import pdb;pdb.set_trace()
+                            #import pdb;pdb.set_trace()
                             if module_class.MNAME not in selectedModule.PRE_ATTACKS:
                                 raise Exception(f"Selected {module_class.MNAME} isn't a preattack module")
-
-                            selectedModule.options[option].value = module_class.MNAME
-                            selectedModule.selected_pre_attack = module_class()
 
                             if attack_class := Glue.get_full_attack(preattack=module_class,
                                                                     attack=selectedModule,
                                                                     postattack=selectedModule.selected_post_attack):
-                                import pdb; pdb.set_trace()
+                                #import pdb; pdb.set_trace()
+                                selectedModule.helper_modules['pre_attack'].value = module_class.MNAME
+                                selectedModule.selected_pre_attack = module_class()
                                 init_options = selectedModule.get_init_options()
                                 attack = attack_class(init_options)
                                 #attack.selected_pre_attack = module_class()
@@ -198,10 +197,10 @@ class Interaction(CommandSet):
 
                             else:
                                 preattack_name = module_class.MNAME
-                                postattack_name = selectedModule.selected_pre_attack.mname if selectedModule.selected_pre_attack else None
+                                postattack_name = selectedModule.selected_post_attack.mname if selectedModule.selected_post_attack else None
                                 attack_name = selectedModule.mname
 
-                                raise Exception(f"Invalid full attack combination: fullAttack(preattack={preattack_name}, attack={attack_name}, postattack={posattack_name})")
+                                raise Exception(f"Invalid full attack combination: fullAttack(preattack={preattack_name}, attack={attack_name}, postattack={postattack_name})")
 
                 else:
                     raise Exception("No attack module selected")
@@ -212,17 +211,16 @@ class Interaction(CommandSet):
                                                                          for post_attack_class in selectedModule.POST_ATTACKS.values()]
                     for module_id, module_class in possibles_postattacks:
                         if moduleId == module_id or moduleName == module_class.MNAME :
-                            import pdb;pdb.set_trace()
+                            #import pdb;pdb.set_trace()
                             if module_class.MNAME not in selectedModule.POST_ATTACKS:
                                 raise Exception(f"Selected {module_class.MNAME} isn't a postattack module")
-
-                            selectedModule.options[option].value = module_class.MNAME
-                            selectedModule.selected_post_attack = module_class()
 
                             if attack_class := Glue.get_full_attack(preattack=selectedModule.selected_pre_attack,
                                                                     attack=selectedModule,
                                                                     postattack=module_class):
-                                import pdb; pdb.set_trace()
+                                #import pdb; pdb.set_trace()
+                                selectedModule.helper_modules['post_attack'].value = module_class.MNAME
+                                selectedModule.selected_post_attack = module_class()
                                 init_options = selectedModule.get_init_options()
                                 attack = attack_class(init_options)
                                 #attack.selected_pre_attack = module_class()
@@ -234,7 +232,7 @@ class Interaction(CommandSet):
                                 postattack_name = module_class.MNAME
                                 attack_name = selectedModule.mname
 
-                                raise Exception(f"Invalid full attack combination: fullAttack(preattack={preattack_name}, attack={attack_name}, postattack={posattack_name})")
+                                raise Exception(f"Invalid full attack combination: fullAttack(preattack={preattack_name}, attack={attack_name}, postattack={postattack_name})")
 
                 else:
                     raise Exception("No attack module selected")
@@ -244,7 +242,7 @@ class Interaction(CommandSet):
 
                 for module_id, moduleClass in available_modules:
                     if moduleId == module_id or moduleName == moduleClass.MNAME:
-                        import pdb;pdb.set_trace()
+                        #import pdb;pdb.set_trace()
                         selected = True
                         self._cmd.selectedModule = moduleClass()
                         moduleType = moduleClass.MTYPE
@@ -386,13 +384,14 @@ class Interaction(CommandSet):
     setv_parser.add_argument("option", help="Option to set value")
     setv_parser.add_argument("value", help="Value of option")
 
-    setv_parser.add_argument('--pre', action='store_true',
-                             help="set value to pre attack module option")
-    setv_parser.add_argument('--post', action='store_true',
-                             help="set value to post attack module option")
+    setv_parser.add_argument('--preattack', action='store_true',
+                             help="Set value to pre attack module option")
+    setv_parser.add_argument('--postattack', action='store_true',
+                             help="Set value to post attack module option")
 
     #debugged - date: Feb 28 2021
     # modify (pre and post module) - date Mar 6 2021
+    # NOTA: implement setv function in module base class to enable specialization of setv cmd by modules
     @with_argparser(setv_parser)
     def do_setv(self, args):
         """
@@ -400,84 +399,32 @@ class Interaction(CommandSet):
         """
         #import pdb; pdb.set_trace()
 
-        selectedModule = self._cmd.selectedModule
-
         try:
-            if selectedModule:
-                option = args.option.lower()
-                value = args.value
+            option = args.option
+            value = args.value
 
-                try:
-                    value = int(value)
-
-                except ValueError: # value is a string
-                    if value in ["True", "False"]:
-                        if value == "True":
-                            value = True
-                    else:
-                        value = False
-
-                if args.pre:
+            if selectedModule := self._cmd.selectedModule:
+                if args.preattack:
                     if isinstance(selectedModule, Attack):
-                        if pre_attack_module := selectedModule.selected_pre_attack:
-                            if pre_attack_module.isOption(option):
-                                if pre_attack_module.isModuleOption(option): #option is a valid module option
-                                    pre_attack_module.options[option].value = value
-
-                            else: #option is a valid slurm option
-                                argument = pre_attack_module.slurm.options.get(option)
-                                argument.value = value
-                                pre_attack_module.slurm.options[option] = argument
-                                setattr(pre_attack_module.slurm, option, value)
-
-                            selectedModule.pre_attack = pre_attack_module
-                            print(f"(preattack) {option.upper()} => {value}")
-                        else:
-                            raise Exception(f"{selectedModule.MNAME} module hasn't selected a pre attack module yet")
+                        #print(selectedModule)
+                        selectedModule.setv(option, value, pre_attack=True)
                     else:
                         raise Exception("Auxiliary modules doesn't support pre attack modules")
 
-                elif args.post:
+                elif args.postattack:
                     if isinstance(selectedModule, Attack):
-                        if post_attack_module := selectedModule.selected_post_attack:
-                            if post_attack_module.isOption(option):
-                                if post_attack_module.isModuleOption(option): #option is a valid module option
-                                    post_attack_module.options[option].value = value
-
-                            else: #option is a valid slurm option
-                                argument = post_attack_module.slurm.options.get(option)
-                                argument.value = value
-                                post_attack_module.slurm.options[option] = argument
-                                setattr(post_attack_module.slurm, option, value)
-
-                            selectedModule.post_attack = post_attack_module
-                            print(f"(postattack) {option.upper()} => {value}")
-                        else:
-                            raise Exception(f"{selectedModule.MNAME} module hasn't selected a post attack module yet")
+                        selectedModule.setv(option, value, post_attack=True)
                     else:
                         raise Exception("Auxiliary modules doesn't support post attack modules")
 
-                else: # set option of main attack module
-                    if selectedModule.isOption(option):
-                        if selectedModule.isModuleOption(option): #option is a valid module option
-                            selectedModule.options[option].value = value
-
-                        else: #option is a valid slurm option
-                            argument = selectedModule.slurm.options.get(option)
-                            argument.value = value
-                            selectedModule.slurm.options[option] = argument
-                            setattr(selectedModule.slurm, option, value)
-
-                        self._cmd.selectedModule = selectedModule
-                        print(f"{option.upper()} => {value}")
-
-                    else:
-                        raise Exception(f"No {option.upper()} option in {selectedModule.mname} module")
+                else: # set option of main module
+                    selectedModule.setv(option, value)
 
             else:
                 raise Exception("No module selected")
 
         except Exception as error:
+            import pdb;pdb.set_trace()
             print_failure(error)
 
     def do_back(self, args):

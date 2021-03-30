@@ -14,6 +14,7 @@ from typing import (
 
 # base imports
 from .argFormat import Argument
+from .auxiliary import Auxiliary
 from ama.core.modules.base import Module
 
 # table formation imports
@@ -39,12 +40,14 @@ class Attack(Module):
                  attack_options: dict, slurm,
                  pre_attack, post_attack):
 
+        # Instance of selected pre attack class
+        self.selected_pre_attack = pre_attack if isinstance(pre_attack, Auxiliary) else None
 
-        self.selected_pre_attack = pre_attack # Instance of selected pre attack class
-        self.selected_post_attack = post_attack # Instance of selected post attack class
+        # Instance of selected post attack class
+        self.selected_post_attack = post_attack if isinstance(post_attack, Auxiliary) else None
 
-        pre_attack_name = pre_attack.mname if isinstance(pre_attack, Module) else None
-        post_attack_name = post_attack.mname if isinstance(post_attack, Module) else None
+        pre_attack_name = pre_attack.mname if isinstance(pre_attack, Auxiliary) else None
+        post_attack_name = post_attack.mname if isinstance(post_attack, Auxiliary) else None
 
         self.helper_modules = {
             'pre_attack': Argument(pre_attack_name, False, "Pre attack module"),
@@ -64,6 +67,34 @@ class Attack(Module):
         self.init_options = init_options
 
         super().__init__(**init_options)
+
+
+    def setv(self, option, value, *, pre_attack: bool = False, post_attack: bool = False):
+        """
+        set option of attack module with supplied value
+        """
+        #import pdb; pdb.set_trace()
+        try:
+            if pre_attack:
+                if pre_attack_module := self.selected_pre_attack:
+                    pre_attack_module.setv(option, value, quiet=True)
+                    print(f"(preattack) {option.upper()} => {value}")
+                else:
+                    raise Exception(f"{selectedModule.MNAME} module hasn't selected a pre attack module yet")
+
+            elif post_attack:
+                if post_attack_module := self.selected_post_attack:
+                    post_attack_module.setv(option, value, quiet=True)
+                    print(f"(postattack) {option.upper()} => {value}")
+                else:
+                    raise Exception(f"{selectedModule.MNAME} module hasn't selected a post attack module yet")
+            else: # set option of attack module
+                super().setv(option, value)
+
+        except Exception as error:
+            print_failure(error)
+
+
 
     def __repr__(self):
         pre_attack = self.selected_pre_attack
@@ -187,8 +218,8 @@ class Attack(Module):
                 slurm_options_table = tabulate(slurm_options_table, headers=options_header)
                 options += f"\n\nSlurm Options:\n{slurm_options_table}"
 
-        options += f"\n\n Helper Modules:"
-        options += tabulate(self.helper_modules_options(), headers=options_header, tablefmt="fancy_grid")
+        options += f"\n\n Helper Modules:\n"
+        options += tabulate(self.helper_modules_options(), headers=options_header, tablefmt="pretty")
 
         # pre attack options
         if selected_pre_attack := self.selected_pre_attack:

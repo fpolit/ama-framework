@@ -35,3 +35,23 @@ class HashID_JohnWordlist_HashesStatus(HashID_JohnWordlist__):
             also this parallel task can be submited in a cluster using Slurm
             """
         )
+
+        # post attack options
+        if self.selected_post_attack:
+            self.selected_post_attack.options['hashes_file'].value = self.options['hashes_file'].value
+
+    def setv(self, option, value, *, pre_attack: bool = False, post_attack: bool = False):
+        #import pdb; pdb.set_trace()
+        super().setv(option, value, pre_attack = pre_attack, post_attack = post_attack)
+
+        option = option.lower()
+
+        # attack -> post atack
+        if option == "hashes_file":
+            if self.selected_post_attack and not (pre_attack or post_attack):
+                self.selected_post_attack.options['hashes_file'].value = self.options['hashes_file'].value
+
+        # post atack -> attack
+        if option == "hashes_file":
+            if self.selected_pre_attack and post_attack:
+                self.options['hashes_file'].value = self.selected_post_attack.options['hashes_file'].value

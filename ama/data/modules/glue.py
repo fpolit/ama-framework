@@ -60,9 +60,14 @@ from ama.core.modules.attack.hashes import (
     HashID_JohnWordlist__,
     Nth_JohnWordlist__,
     PackMaskgen_JohnMasks__,
+    PackWholegen_JohnMasks__,
+    PackPolicygen_JohnMasks__,
     __JohnWordlist_HashesStatus as None_JohnWordlist_HashesStatus,
     HashID_JohnWordlist_HashesStatus,
     Nth_JohnWordlist_HashesStatus,
+    PackMaskgen_JohnMasks_HashesStatus,
+    PackWholegen_JohnMasks_HashesStatus,
+    PackPolicygen_JohnMasks_HashesStatus,
 )
 
 
@@ -87,10 +92,32 @@ class Glue:
                    attack=JohnMasks,
                    postattack=None): JohnMasks,
 
+        # None + hash cracker + HashesStatus
+        fullAttack(preattack=None,
+                   attack=JohnWordlist,
+                   postattack=HashesStatus): None_JohnWordlist_HashesStatus, # debugged - date: Mar 30 2021
+
+        # fullAttack(preattack=None,
+        #            attack=JohnSingle,
+        #            postattack=HashesStatus): None,
+
+        # fullAttack(preattack=None,
+        #            attack=JohnIncremental,
+        #            postattack=HashesStatus): None,
+
+        # fullAttack(preattack=None,
+        #            attack=JohnMasks,
+        #            postattack=HashesStatus): None,
+
+        # fullAttack(preattack=None,
+        #            attack=JohnHybrid,
+        #            postattack=HashesStatus): None,
+
+
         # HashID + hash cracker + None
         fullAttack(preattack=HashID,
                    attack=JohnWordlist,
-                   postattack=None): HashID_JohnWordlist__,
+                   postattack=None): HashID_JohnWordlist__, # debugged - date: Mar 30 2021
 
         # fullAttack(preattack=HashID,
         #            attack=JohnSingle,
@@ -108,32 +135,10 @@ class Glue:
         #            attack=JohnHybrid,
         #            postattack=None): None,
 
-        # None + hash cracker + HashesStatus
-        fullAttack(preattack=None,
-                   attack=JohnWordlist,
-                   postattack=HashesStatus): None_JohnWordlist_HashesStatus,
-
-        # fullAttack(preattack=None,
-        #            attack=JohnSingle,
-        #            postattack=HashesStatus): None,
-
-        # fullAttack(preattack=None,
-        #            attack=JohnIncremental,
-        #            postattack=HashesStatus): None,
-
-        # fullAttack(preattack=None,
-        #            attack=JohnMasks,
-        #            postattack=HashesStatus): None,
-
-        # fullAttack(preattack=None,
-        #            attack=JohnHybrid,
-        #            postattack=HashesStatus): None,
-
-
         # HashID + hash cracker + HashesStatus
         fullAttack(preattack=HashID,
                    attack=JohnWordlist,
-                   postattack=HashesStatus): HashID_JohnWordlist_HashesStatus,
+                   postattack=HashesStatus): HashID_JohnWordlist_HashesStatus, # debugged - date: Mar 30 2021
 
         # fullAttack(preattack=HashID,
         #            attack=JohnSingle,
@@ -153,7 +158,7 @@ class Glue:
 
         # Nth + hash cracker + None
         fullAttack(preattack=Nth,
-                   attack=JohnWordlist, postattack=None): Nth_JohnWordlist__,
+                   attack=JohnWordlist, postattack=None): Nth_JohnWordlist__, # debugged - date: Mar 30 2021
 
         # fullAttack(preattack=Nth,
         #            attack=JohnSingle,
@@ -174,7 +179,7 @@ class Glue:
         # Nth + hash cracker + HashesStatus
         fullAttack(preattack=Nth,
                    attack=JohnWordlist,
-                   postattack=HashesStatus): Nth_JohnWordlist_HashesStatus,
+                   postattack=HashesStatus): Nth_JohnWordlist_HashesStatus, # debugged - date: Mar 30 2021
 
         # fullAttack(preattack=Nth,
         #            attack=JohnSingle,
@@ -214,10 +219,30 @@ class Glue:
         #            attack=JohnHybrid,
         #            postattack=None): None,
 
-        # Pack-maskgen + hash cracker + None
+        # Pack + hash cracker + None
         fullAttack(preattack=PackMaskgen,
                    attack=JohnMasks,
-                   postattack=None): PackMaskgen_JohnMasks__,
+                   postattack=None): PackMaskgen_JohnMasks__, # debugged - date: Mar 30 2021
+
+        fullAttack(preattack=PackWholegen,
+                   attack=JohnMasks,
+                   postattack=None): PackWholegen_JohnMasks__, # debugged - date: Mar 30 2021
+
+        fullAttack(preattack=PackPolicygen,
+                   attack=JohnMasks,
+                   postattack=None): PackPolicygen_JohnMasks__,
+
+        fullAttack(preattack=PackMaskgen,
+                   attack=JohnMasks,
+                   postattack=HashesStatus): PackMaskgen_JohnMasks_HashesStatus,
+
+        fullAttack(preattack=PackWholegen,
+                   attack=JohnMasks,
+                   postattack=HashesStatus): PackWholegen_JohnMasks_HashesStatus,
+
+        fullAttack(preattack=PackPolicygen,
+                   attack=JohnMasks,
+                   postattack=HashesStatus): PackPolicygen_JohnMasks_HashesStatus,
     }
 
     @staticmethod

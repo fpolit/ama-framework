@@ -421,18 +421,19 @@ class John(PasswordCracker):
         slurm (Slurm): Instance of Slurm class
         """
 
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
 
         if self.enable:
             try:
                 permission = [os.R_OK]
                 Path.access(permission, hashes_file, masks_file)
-                if hash_type:
-                    John.check_hash_type(hash_type)
+                if hash_types:
+                    John.check_hash_type(hash_types)
 
-                print_status(f"Attacking {hash_type} hashes in {hashes_file} file with {masks_file} mask file.")
+                print_status(f"Attacking hashes in {hashes_file} file with {masks_file} masks file.")
+                print_status(f"Possible hashes identities: {hash_types}")
                 if (not local) and slurm and slurm.partition:
-                    John.gen_masks_attack(hash_type = hash_type,
+                    John.gen_masks_attack(hash_types = hash_types,
                                           hashes_file = hashes_file,
                                           masks_file = masks_file,
                                           masks_attack_script = masks_attack_script,
@@ -443,21 +444,22 @@ class John(PasswordCracker):
                     Bash.exec(f"sbatch {slurm_script_name}")
 
                 else:
-                    with open(masks_file, 'r') as masks:
-                        while mask := masks.readline().rstrip():
-                            all_cracked = John.are_all_hashes_cracked(hashes_file)
-                            if not all_cracked:
-                                mask_attack = f"{self.main_exec} --mask={mask}"
+                    for hash_type in hash_types:
+                        with open(masks_file, 'r') as masks:
+                            while mask := masks.readline().rstrip():
+                                all_cracked = self.are_all_hashes_cracked(hashes_file)
+                                if not all_cracked:
+                                    mask_attack = f"{self.main_exec} --mask={mask}"
 
-                                if hash_type:
-                                    mask_attack += f" --format={hash_type}"
-                                mask_attack += f" {hashes_file}"
+                                    if hash_type:
+                                        mask_attack += f" --format={hash_type}"
+                                    mask_attack += f" {hashes_file}"
 
-                                print()
-                                print_status(f"Running: {mask_attack}")
-                                Bash.exec(mask_attack)
-                            else:
-                                break
+                                    print()
+                                    print_status(f"Running: {mask_attack}")
+                                    Bash.exec(mask_attack)
+                                else:
+                                    break
 
             except Exception as error:
                 #cmd2.Cmd.pexcept(error)
@@ -491,39 +493,40 @@ class John(PasswordCracker):
         __parallel_job_type = f"'{parallel_job_type}'"
 
         masks_attack = (
-                f"""
+                    f"""
 #!/bin/env python3
 
 from ama.core.plugins.cracker import John
 from sbash import Bash
 
-hash_type = {__hash_type if hash_type else None}
+hash_types = {hash_type if hash_type else None}
 hashes_file = {__hashes_file}
 masks_file = {__masks_file}
 parallel_job_type = {__parallel_job_type}
 
 jtr = John()
 
-with open(masks_file, 'r') as masks:
-    while mask := masks.readline().rstrip():
-        all_cracked = John.are_all_hashes_cracked(hashes_file)
-        if not all_cracked:
-            mask_attack = f"{_jtr_main_exec} --mask={_mask}"
+for hash_type in hash_types:
+    with open(masks_file, 'r') as masks:
+        while mask := masks.readline().rstrip():
+            all_cracked = John.are_all_hashes_cracked(hashes_file)
+            if not all_cracked:
+                mask_attack = f"{_jtr_main_exec} --mask={_mask}"
 
-            if parallel_job_type == "MPI":
-                mask_attack = f"srun --mpi={slurm.pmix} " + mask_attack
+                if parallel_job_type == "MPI":
+                    mask_attack = f"srun --mpi={slurm.pmix} " + mask_attack
 
-            elif parallel_job_type == "OMP":
-                mask_attack = f"srun " + mask_attack
+                elif parallel_job_type == "OMP":
+                    mask_attack = f"srun " + mask_attack
 
-            if hash_type:
-                mask_attack += f" --format={_hash_type}"
+                if hash_type:
+                    mask_attack += f" --format={_hash_type}"
 
-            mask_attack += f" {_hashes_file}"
+                mask_attack += f" {_hashes_file}"
 
-            header_attack = f"[*] Running: {_mask_attack}"
-            Bash.exec(f"echo -e '\\n\\n\\n{_header_attack}'")
-            Bash.exec(mask_attack)
+                header_attack = f"[*] Running: {_mask_attack}"
+                Bash.exec(f"echo -e '\\n\\n\\n{_header_attack}'")
+                Bash.exec(mask_attack)
                 """
             )
 

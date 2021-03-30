@@ -14,7 +14,7 @@ from fineprint.status import (
 )
 
 # base imports
-from ama.core.modules.base import Argument
+from ama.core.modules.base.argFormat import Argument
 
 class Slurm:
     """

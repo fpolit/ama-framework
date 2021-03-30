@@ -34,6 +34,8 @@ from ama.data.modules import (
 )
 
 from ama.core.modules.base import Attack
+from ama.data.modules import Glue
+
 
 @with_default_category(Category.MODULE)
 class Search(CommandSet):
@@ -45,6 +47,60 @@ class Search(CommandSet):
     def __init__(self):
         super().__init__()
 
+
+    full_attack_parser = argparse.ArgumentParser()
+    full_attack_parser.add_argument('-pre', '--preattack', default=None,
+                                    help='Preattack name pattern')
+    full_attack_parser.add_argument('-a', '--attack', default=None,
+                                    help='Attack name pattern')
+    full_attack_parser.add_argument('-post', '--postattack', default=None,
+                                    help='Postattack name pattern')
+
+    full_attack_parser.add_argument('-s', '--select',
+                                    help='Select a full attack')
+
+    # full_attack_parser.add_argument('-p', '--previous', action='store_true',
+    #                                 help='Show previous search')
+
+    # full_attack_parser.add_argument('--all', dest='allFullAttacks', action='store_true',
+    #                                 help='Show all availables full attacks')
+
+    @with_argparser(full_attack_parser)
+    def do_fullattack(self, args):
+        """
+        search by availables full attack  given preattack, attack and postattack patterns
+        """
+        filtered_fullAttacks = [] #[[PRE_ATTACK_NAME, ATTACK_NAME, POSR_ATTACK_NAME]]
+
+        fullAttackId = 0
+        for fullAttack in Glue.full_attacks:
+            preattack_name = fullAttack.preattack.MNAME if fullAttack.preattack else None
+            attack_name = fullAttack.attack.MNAME if fullAttack.attack else None
+            postattack_name = fullAttack.postattack.MNAME if fullAttack.postattack else None
+
+            if args.preattack or args.attack or args.postattack: # some pattern was supplied
+
+                preattack_filter = ((preattack_name is None and args.preattack is None) or \
+                                    (preattack_name is not None and args.preattack is not None and re.search(args.preattack, preattack_name)))
+
+                attack_filter = ((attack_name is None and args.attack is None) or \
+                                 (attack_name is not None and args.attack is not None and re.search(args.attack, attack_name)))
+
+                postattack_filter = ((postattack_name is None and args.postattack is None) or \
+                                     (postattack_name is not None and args.postattack is not None and re.search(args.postattack, postattack_name)))
+
+                import pdb;pdb.set_trace()
+                if  preattack_filter and attack_filter and  postattack_filter:
+
+                    filtered_fullAttacks.append((fullAttackId ,preattack_name, attack_name, postattack_name))
+                    fullAttackId += 1
+            else: # no patterns was supplied
+                filtered_fullAttacks.append((fullAttackId ,preattack_name, attack_name, postattack_name))
+                fullAttackId += 1
+
+        self._cmd.filteredModules = filtered_fullAttacks
+        print(tabulate(filtered_fullAttacks, headers=["#", "PreAttack", "Attack", "PostAttack"]))
+
     search_parser = argparse.ArgumentParser()
     search_parser.add_argument('-t', '--type', dest='moduleType', choices=amaModulesTypes, default=None,
                                help="Module type")
@@ -52,6 +108,8 @@ class Search(CommandSet):
                                help="Module subtype")
     search_parser.add_argument('-p', '--previous', action='store_true',
                                help="Show previous search")
+    # search_parser.add_argument('-full', '--fullattack', action='store_true',
+    #                            help="Show full attack combination")
     search_parser.add_argument('pattern', nargs='?', default='',
                                help='Pattern to search availables modules')
 

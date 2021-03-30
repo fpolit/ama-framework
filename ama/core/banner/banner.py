@@ -8,11 +8,10 @@
 import random
 from ama.data.modules import (
     attackModules,
-    #preAttackModules,
-    #postAttackModules,
     auxiliaryWordlistModules,
     auxiliaryHashesModules,
-    auxiliaryAnalysisModules
+    auxiliaryAnalysisModules,
+    Glue,
 )
 
 from ama.core.version import get_version
@@ -32,6 +31,8 @@ class Banner:
                   Analysis     : {len(auxiliaryAnalysisModules)}
                   Wordlists    : {len(auxiliaryWordlistModules)}
                   Hashes       : {len(auxiliaryHashesModules)}
+
+        Full Attack Modules (Pre Attack + Attack + Post Attack): {len(Glue.full_attacks)}
         """
     )
     AMA_VERSION = get_version()

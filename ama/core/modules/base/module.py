@@ -24,6 +24,8 @@ from fineprint.status import (
 # validator import
 from ama.core.validator import Args
 
+from ama.core.slurm import Slurm
+
 class Module:
     """
     base class to build ama modules
@@ -41,6 +43,46 @@ class Module:
         self.options = options
         self.references = references
         self.slurm = slurm
+
+
+    def setv(self, option, value, quiet: bool = False):
+        """
+        set option of a module with supplied value
+        """
+        try:
+            option = option.lower()
+
+            try:
+                value = int(value)
+
+            except ValueError: # value is a string
+                if value in ["True", "False"]:
+                    if value == "True":
+                        value = True
+                    else:
+                        value = False
+
+            #import pdb; pdb.set_trace()
+            if self.isOption(option):
+                if self.isModuleOption(option):
+                    self.options[option].value = value
+
+                else: # option is a slurm option
+                    if isinstance(self.slurm, Slurm):
+                        argument = self.slurm.options.get(option)
+                        argument.value = value
+                        self.slurm.options[option] = argument
+                        setattr(self.slurm, option, value)
+                    else:
+                        raise Exception(f"{self.mname} doesn't support slurm")
+
+                if not quiet:
+                    print(f"{option.upper()} => {value}")
+            else:
+                raise Exception(f"{self.mname} module hasn't {option.upper()} option.")
+
+        except Exception as error:
+            print_failure(error)
 
 
     def info(self):

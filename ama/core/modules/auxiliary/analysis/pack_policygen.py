@@ -67,7 +67,6 @@ class PackPolicygen(Auxiliary):
 
             # miscellaneous
             'show_masks': Argument(show_masks, True, "Show matching mask"),
-            'quiet': Argument(quiet, True, "Don't show headers")
         }
 
 
@@ -103,10 +102,10 @@ class PackPolicygen(Auxiliary):
                                     min_special = self.options['min_special'].value,
                                     max_special = self.options['max_special'].value,
                                     show_masks = self.options['show_masks'].value,
-                                    quiet = self.options['quiet'].value,
                                     quietRun = quiet)
 
 
             return output
+
         except Exception as error:
             print_failure(error)

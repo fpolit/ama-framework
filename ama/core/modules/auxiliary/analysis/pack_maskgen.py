@@ -72,7 +72,6 @@ class PackMaskgen(Auxiliary):
             'check_masks_file': Argument(check_masks_file, False, "Check mask coverage in a file"),
 
             'show_masks': Argument(show_masks, True, "Show matching mask"),
-            'quiet': Argument(quiet, True, "Don't show headers")
         }
 
 
@@ -89,9 +88,9 @@ class PackMaskgen(Auxiliary):
         super().__init__(**init_options)
 
     #debugged - date: Mar 7 2021
-    def run(self):
+    def run(self, *, quiet:bool = False):
 
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         try:
 
             self.no_empty_required_options()
@@ -121,7 +120,7 @@ class PackMaskgen(Auxiliary):
                          check_masks = checkmasks,
                          check_masks_file = self.options['check_masks'].value,
                          show_masks = self.options['show_masks'].value,
-                         quiet = self.options['quiet'].value)
+                         quiet = quiet)
 
             output = self.options['output'].value
             return output
