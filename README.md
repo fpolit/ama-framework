@@ -9,7 +9,7 @@ Also ama's attack modules can be submitted in a cluster of computers using `Slur
 * pmix
 * Openmpi (with slurm and pmix support)
 * John The Ripper (with MPI support) (only if you are going to perform attacks against hashes using CPU power)
-* HPC Cluster (only if you are going to submit attacks in a cluster of computers with ```Slurm`)
+* HPC Cluster (only if you are going to submit attacks in a cluster of computers with `Slurm`)
 
 Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can find guides to install them properly.
 
