@@ -1,15 +1,15 @@
 # ama - Attack Manager
 
-Ama is a specialized environment for the password cracking process. It contains several modules (attacks and auxiliaries) that make the password cracking process efficient (using auxiliary modules as helper modules of attacks).
-Also ama's attack modules can be submitted in a cluster using `Slurm`, other important feature is that ama is easy extensible so you can write your own modules.
+Ama is a specialized environment for the password cracking process. It contains several modules (attacks and auxiliaries), so we can combine them (`auxiliaries` modules as `preattack` or `postattack` of an `attack` module - we call them `fullattacks`: `preattack` + `attack` + `postattack`) to make the password cracking process efficient.
+Also ama's attack modules can be submitted in a cluster of computers using `Slurm`, so you can perform **large** attacks, other important feature is that ama is easy extensible, so you can write your own modules.
 
 ## Dependences
-* Hashcat
-* Hydra
+* Hashcat (only if you want to perform attacks against hashes using GPU power)
+* Hydra (only if you want to perform attacks against services)
 * pmix
 * Openmpi (with slurm and pmix support)
-* John The Ripper (with MPI support)
-* HPC Cluster (needed to submit parallel tasks with slurm)
+* John The Ripper (with MPI support) (only if you want to perform attacks against hashes using CPU power)
+* HPC Cluster (only if you want to submit attacks in a cluster of computers with `Slurm`)
 
 Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can find guides to install them properly.
 
