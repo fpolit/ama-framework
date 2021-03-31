@@ -73,7 +73,7 @@ class Attack(Module):
         """
         set option of attack module with supplied value
         """
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         try:
             if pre_attack:
                 if pre_attack_module := self.selected_pre_attack:

@@ -111,13 +111,15 @@ class Cewl(Auxiliary):
                         debug = self.options['debug'].value,
                         )
 
+            return self.options['write'].value
+
         except Exception as error:
             print_failure(error)
 
 
-    def setv(self, option, value):
+    def setv(self, option, value, quiet:bool = False):
         #import pdb; pdb.set_trace()
-        super().setv(option, value)
+        super().setv(option, value, quiet=quiet)
 
         option = option.lower()
         if option  == "meta" and self.options["meta"].value:

@@ -29,6 +29,7 @@ from .fullattacks.packWholegen_johnMasks__ import PackWholegen_JohnMasks__
 from .fullattacks.packPolicygen_johnMasks__ import PackPolicygen_JohnMasks__
 from .fullattacks.cuppInteractive_johnWordlist__ import CuppInteractive_JohnWordlist__
 from .fullattacks.cuppRefine_johnWordlist__ import CuppRefine_JohnWordlist__
+from .fullattacks.cewl_johnWordlist__ import Cewl_JohnWordlist__
 
 from .fullattacks.cuppInteractive_johnWordlist_hashesStatus import CuppInteractive_JohnWordlist_HashesStatus
 from .fullattacks.cuppRefine_johnWordlist_hashesStatus import CuppRefine_JohnWordlist_HashesStatus

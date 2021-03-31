@@ -54,7 +54,6 @@ class Cewl(Auxiliary):
                 cewl_cmd += f" --allowed {allowed}"
 
             if write:
-                Path.access(permission, write)
                 cewl_cmd += f" --write {write}"
 
             if lowercase:

@@ -147,9 +147,9 @@ class Interaction(CommandSet):
     use_parser = argparse.ArgumentParser()
     use_parser.add_argument('module', help="ama module")
     attack_helper = use_parser.add_mutually_exclusive_group(required=False)
-    attack_helper.add_argument('--preattack', action='store_true',
+    attack_helper.add_argument('-pre', '--preattack', action='store_true',
                                help='Enable selection of preattack module')
-    attack_helper.add_argument('--postattack', action='store_true',
+    attack_helper.add_argument('-post', '--postattack', action='store_true',
                                help='Enable selection of postattack module')
 
     # debugged - date: Feb 28 2021
@@ -384,9 +384,9 @@ class Interaction(CommandSet):
     setv_parser.add_argument("option", help="Option to set value")
     setv_parser.add_argument("value", help="Value of option")
 
-    setv_parser.add_argument('--preattack', action='store_true',
+    setv_parser.add_argument('-pre', '--preattack', action='store_true',
                              help="Set value to pre attack module option")
-    setv_parser.add_argument('--postattack', action='store_true',
+    setv_parser.add_argument('-post', '--postattack', action='store_true',
                              help="Set value to post attack module option")
 
     #debugged - date: Feb 28 2021
@@ -429,7 +429,7 @@ class Interaction(CommandSet):
 
     def do_back(self, args):
         """
-        Stop interaction with selected module and go back to main ama-framework console
+        Stop interaction with selected module
         """
         self._cmd.selectedModule = None
         self._cmd.prompt = "ama > "

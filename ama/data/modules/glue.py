@@ -51,6 +51,7 @@ from ama.core.modules.auxiliary.wordlists import (
     CuppRefine,
     CuppDownload,
     CuppAlecto,
+    Cewl
 )
 
 # full attacks
@@ -63,6 +64,7 @@ from ama.core.modules.attack.hashes import (
     PackWholegen_JohnMasks__,
     PackPolicygen_JohnMasks__,
     CuppInteractive_JohnWordlist__,
+    Cewl_JohnWordlist__,
     CuppRefine_JohnWordlist__,
     __JohnWordlist_HashesStatus as None_JohnWordlist_HashesStatus,
     CuppInteractive_JohnWordlist_HashesStatus,
@@ -258,6 +260,11 @@ class Glue:
         fullAttack(preattack=PackPolicygen,
                    attack=JohnMasks,
                    postattack=HashesStatus): PackPolicygen_JohnMasks_HashesStatus,
+
+        # cewl + hash cracker + None
+        fullAttack(preattack=Cewl,
+                   attack=JohnWordlist,
+                   postattack=None): Cewl_JohnWordlist__,
     }
 
     @staticmethod

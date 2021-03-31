@@ -77,7 +77,7 @@ class Workspace(CommandSet):
     @with_argparser(workspace_parser)
     def do_workspace(self, args):
         """
-        Manager of ama-framework workspaces
+        Manager of workspaces
         """
         if self._cmd.db_conn is None:
             #cmd2.Cmd.pwarning("Database not connected")

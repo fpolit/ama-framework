@@ -86,7 +86,7 @@ class Connection(CommandSet):
     @with_argparser(db_connect_parser)
     def do_db_connect(self, args):
         """
-        Connect to ama-framework database
+        Connect to database
         """
         #import pdb; pdb.set_trace()
         self._cmd.db_conn = None
@@ -122,7 +122,7 @@ class Connection(CommandSet):
 
     def do_db_disconnect(self, args):
         """
-        Disconnect ama-framework database
+        Disconnect database
         """
         try:
             self._cmd.db_conn.close()
@@ -138,7 +138,7 @@ class Connection(CommandSet):
 
     def do_db_status(self, args):
         """
-        Report status of ama-framework database connection
+        Report status of database connection
         """
         if self._cmd.db_conn:
             dbName = self._cmd.db_creds['database']
