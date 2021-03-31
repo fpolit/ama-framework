@@ -46,28 +46,14 @@ from ama.core.modules.attack.services import (
     HydraWordlist
 )
 
-## pre_attack modules imports
-# from ama.core.modules.preattack.hashes import (
-#     Nth as NthPreAttack,
-# )
-
-# from ama.core.modules.preattack.analysis import (
-#     PackPolicygen as PackPolicygenPreAttack
-# )
-
-## post_attack modules imports
-# from ama.core.modules.postattack import (
-
-# )
-
-
 ### auxiliary modules imports
 ## auxiliary/wordlists modules imports
 from ama.core.modules.auxiliary.wordlists import (
     CuppInteractive,
     CuppRefine,
     CuppDownload,
-    CuppAlecto
+    CuppAlecto,
+    Cewl
 )
 
 ## auxiliary/hashes modules imports
@@ -119,13 +105,6 @@ attackModules = {
     f"{HydraWordlist.MNAME}": HydraWordlist,
 }
 
-# preAttackModules = {
-#     f"{NthPreAttack.MNAME}": NthPreAttack,
-#     f"{PackPolicygenPreAttack.MNAME}": PackPolicygenPreAttack
-# }
-
-# postAttackModules = {}
-
 ### auxiliary modules
 
 ## auxiliary/wordlists modules
@@ -133,7 +112,8 @@ auxiliaryWordlistModules = {
     f"{CuppInteractive.MNAME}": CuppInteractive,
     f"{CuppRefine.MNAME}": CuppRefine,
     f"{CuppDownload.MNAME}": CuppDownload,
-    f"{CuppAlecto.MNAME}": CuppAlecto
+    f"{CuppAlecto.MNAME}": CuppAlecto,
+    f"{Cewl.MNAME}": Cewl
 }
 
 ## auxiliary/hashes modules

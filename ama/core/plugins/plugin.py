@@ -19,7 +19,9 @@ from typing import List
 
 
 class Plugin:
-    def __init__(self, name, *, version=None, main_exec=None, search_exec=True):
+    def __init__(self, name: List[str], *, version=None, main_exec=None, search_exec=True):
+        #import pdb;pdb.set_trace()
+
         self.name = name #it can be a list of name (e.g. ["hashcat", "hc"])
         self.main_name = name[0] if isinstance(name, list) else name
         self.version = version

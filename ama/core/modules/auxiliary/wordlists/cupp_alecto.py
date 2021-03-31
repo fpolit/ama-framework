@@ -8,7 +8,7 @@
 from fineprint.status import print_failure
 
 # Cupp plugin
-from ama.core.plugins.auxiliary import Cupp
+from ama.core.plugins.auxiliary.wordlists import Cupp
 
 
 # Auxliary base class

@@ -76,7 +76,7 @@ class CuppRefine_JohnWordlist__(JohnWordlist):
             print_failure(error)
 
     def setv(self, option, value, *, pre_attack: bool = False, post_attack: bool = False):
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         super().setv(option, value, pre_attack = pre_attack, post_attack = post_attack)
 
         option = option.lower()

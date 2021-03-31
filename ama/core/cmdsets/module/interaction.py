@@ -424,7 +424,7 @@ class Interaction(CommandSet):
                 raise Exception("No module selected")
 
         except Exception as error:
-            import pdb;pdb.set_trace()
+            #import pdb;pdb.set_trace()
             print_failure(error)
 
     def do_back(self, args):
