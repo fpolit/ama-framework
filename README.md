@@ -4,6 +4,7 @@ Ama is a specialized environment for the password cracking process. It contains 
 Also ama's attack modules can be submitted in a cluster of computers using `Slurm`, so you can perform **large** attacks, other important feature is that ama is easy extensible, so you can write your own modules.
 
 ## Dependences
+* Postgres (only if you want to use ama database) 
 * Hashcat (only if you want to perform attacks against hashes using GPU power)
 * Hydra (only if you want to perform attacks against services)
 * pmix
