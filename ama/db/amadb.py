@@ -34,6 +34,8 @@ from ama.core.validator import Answer
 
 from ama.config import AMA_HOME
 from ama.core.files import Path
+#from ama.core.modules.auxiliary.hashes.hashes_status import HashesStatus
+
 
 class AmaDB:
     @staticmethod
@@ -72,7 +74,6 @@ class AmaDB:
             print_status(f"Creating database: {dbName}")
             Bash.exec(f"psql -U {roleName} -c \"CREATE DATABASE {dbName} OWNER {roleName}\"", quiet=True)
             #cmd2.Cmd.poutput("Database {dbName} has been created")
-            print_successful(f"Database {dbName} has been created")
 
             # creation workspaces table
             dbCredential = {'host':'localhost', 'database': dbName, 'user': roleName, 'password': password}
@@ -84,6 +85,7 @@ class AmaDB:
                 name VARCHAR (100) UNIQUE NOT NULL
                 )
                 """,
+
                 f"""
                 CREATE TABLE IF NOT EXISTS hashes_{workspace} (
                 hash VARCHAR (128) UNIQUE NOT NULL,
@@ -92,6 +94,7 @@ class AmaDB:
                 password VARCHAR (32) NOT NULL
                 )
                 """,
+
                 f"""
                 CREATE TABLE IF NOT EXISTS services_{workspace} (
                 service VARCHAR (20) NOT NULL,
@@ -121,8 +124,9 @@ class AmaDB:
             cur.execute(valueInsert, (workspace ,))
             conn.commit()
             cur.close()
+            print_successful(f"Database {dbName} has been created")
 
-            import pdb; pdb.set_trace()
+            #import pdb; pdb.set_trace()
             # writing credential to AMA_HOME/db/database.json file
             database_json_file = Path.joinpath(AMA_HOME, 'db/database.json')
             with open(database_json_file, 'w') as db_credentials:
@@ -153,4 +157,3 @@ class AmaDB:
         else:
             #cmd2.Cmd.pwarning("No database was selected to delete")
             print_failure("No database was selected to delete")
-

@@ -111,7 +111,7 @@ class Loot(CommandSet):
 
             cur.execute(queryHashes)
 
-            hashesTableHeaders = ["Hash", "Type", "Cracker", "Password"]
+            hashesTableHeaders = ["Hash", "Type", "Password", "Cracker"]
 
             hashesTable = [crackedHash for crackedHash in cur.fetchall()]
             cur.close()

@@ -17,7 +17,8 @@ from ama.core.modules.base import (
 )
 
 # cracker imports
-from ama.core.plugins.cracker import Hashcat
+#from ama.core.plugins.cracker import Hashcat
+from ama.core.plugins.cracker.hashcat import Hashcat
 
 # slurm import
 from ama.core.slurm import Slurm

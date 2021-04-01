@@ -31,6 +31,8 @@
 import os
 from ama.core.files import Path
 
+from fineprint.status import print_successful
+
 class FilesStruct:
     def __init__(self, name, base_path,
                  inside_dirs = [],  # list of inside directories (strings)
@@ -91,3 +93,4 @@ def create_ama_home(base_path: Path = USER_HOME):
 
     ama_home.filesStructs = [ama_db, ama_logs, ama_data, ama_modules, ama_plugins]
     ama_home.create()
+    print_successful(f"Ama home directory has been created at {ama_home.path}")

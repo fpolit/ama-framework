@@ -24,9 +24,7 @@ from ama.core.modules.base import (
 )
 
 # cracker import
-from ama.core.plugins.cracker import (
-    Hashcat,
-    John,
+from ama.core.plugins.cracker.availables import (
     get_availables_crackers
 )
 
@@ -120,19 +118,22 @@ class HashesStatus(Auxiliary):
 
 
             # print status of hashes in hashesFile
-            status_hashes_table = (
-                f"""
-    Cracked Hashes:
+            if not quiet:
+                status_hashes_table = (
+                    f"""
+        Cracked Hashes:
 
 {tabulate(hashes_status["cracked"],headers = ["Hash", "Type", "Password", "Cracker"])}
 
-    Uncracked Hashes:
+        Uncracked Hashes:
 
 {tabulate(hashes_status["uncracked"],headers = ["Hash"])}
                 """
-            )
+                )
 
-            print(status_hashes_table)
+                print(status_hashes_table)
+
+            return hashes_status
 
         except Exception as error:
             #cmd2.Cmd.pexcept(error)

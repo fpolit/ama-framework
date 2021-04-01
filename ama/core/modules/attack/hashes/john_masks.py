@@ -17,6 +17,7 @@ from ama.core.modules.base.auxiliary import Auxiliary
 
 # cracker imports
 from ama.core.plugins.cracker import John
+
 # cracker imports
 #from ama.core.cracker import John
 

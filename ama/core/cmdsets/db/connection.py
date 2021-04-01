@@ -153,7 +153,9 @@ class Connection(CommandSet):
     @staticmethod
     def dbCreds(dbconfig):
         try:
+            import pdb;pdb.set_trace()
             dbconfig_file = Path(dbconfig)
+            dbconfig_file = dbconfig_file.expanduser()
             permission = [os.R_OK]
             Path.access(permission, dbconfig_file)
 

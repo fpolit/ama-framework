@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 #
 # Wordlist attack using Hydra Cracker
@@ -22,7 +23,7 @@ from ama.core.modules.base import (
 from ama.core.slurm import Slurm
 
 # cracker imports
-from ama.core.plugins.cracker import Hydra
+from ama.core.plugins.cracker.hydra import Hydra
 
 
 class HydraWordlist(Attack):
