@@ -5,6 +5,7 @@
 # Date: Feb 18 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
+import json
 
 # cmd2 imports
 import cmd2
@@ -31,6 +32,8 @@ import psycopg2
 # core/validator imports
 from ama.core.validator import Answer
 
+from ama.config import AMA_HOME
+from ama.core.files import Path
 
 class AmaDB:
     @staticmethod
@@ -40,11 +43,10 @@ class AmaDB:
         (creation of database, role, and initialization of default workspace)
         """
         try:
-            #import pdb; pdb.set_trace()
             #cmd2.Cmd.poutput(f"Creating {roleName} role")
             print_status(f"Creating role:  {roleName}")
 
-            password = getpass(prompt=f"Password for {roleName} role (empty for ramdon generation): ")
+            password = getpass(prompt=f"Password for {roleName} role (empty for random generation): ")
             randomPasswd = False
             if not password:
                 passwd = PasswordGenerator()
@@ -119,6 +121,14 @@ class AmaDB:
             cur.execute(valueInsert, (workspace ,))
             conn.commit()
             cur.close()
+
+            import pdb; pdb.set_trace()
+            # writing credential to AMA_HOME/db/database.json file
+            database_json_file = Path.joinpath(AMA_HOME, 'db/database.json')
+            with open(database_json_file, 'w') as db_credentials:
+                json.dump(dbCredential, db_credentials, indent=4)
+
+            del dbCredential
 
         except (Exception, psycopg2.DatabaseError) as error:
             #cmd2.Cmd.pexcept(error)

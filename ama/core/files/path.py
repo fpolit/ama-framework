@@ -2,22 +2,20 @@
 #
 # class to check properties of files and directories paths
 #
-# date: feb 22 2021
+# date: Mar 31 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 
 import os
-
-# cmd2 imports
-import cmd2
-
 # fineprint imports
 from fineprint.status import (
     print_status,
     print_failure
 )
 
-class Path:
+from pathlib import PosixPath
+
+class Path(PosixPath):
     @staticmethod
     def access(permissions=[], *paths):
         """

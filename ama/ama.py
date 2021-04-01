@@ -1,71 +1,84 @@
 #!/usr/bin/env python3
 #
-# ama-framework interactor
+# ama-framework's database and home directory interactor
 #
-# date: Feb 18 2021
+# date: mar 31 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
-import sys
+import os
 import argparse
-
-# cmdsets imports
-from .core.cmdsets.db import (
-     Workspace,
-     Connection,
-     Loot
+# fineprint imports
+from fineprint.status import (
+    print_failure,
+    print_status
 )
 
-from .core.cmdsets.module import (
-    Search,
-    Information,
-    Interaction
-)
+from ama.db import AmaDB
+from ama.config import create_ama_home, AMA_HOME
+from ama.amaconsole import main as amaconsoleMain
+from ama.core.files import Path
 
-from.core.cmdsets.core import (
-    Core
-)
+def init(args):
+    base_path = Path(args.base_path)
+    create_ama_home(base_path)
+    AmaDB.initDB(args.dbName, args.roleName)
 
-# cmd2 imports
-import cmd2
-from cmd2 import Cmd
+def reinit(args):
+    pass
 
-# banner imports
-from .core.banner import Banner
+def delete(args):
+    AmaDB.deleteDB(args.dbName, args.roleName)
 
-# cmdset categories
-from .core.cmdsets import CmdsetCategory as Category
 
-# import ama version
-from ama.core.version import get_version
-
-# import ama availables modules
-from ama.data.modules import amaModules
-
-class Ama(Cmd):
+def amaConsoleParser():
     """
-    CLI App to interact with ama-framework
+    Parse amaconsole options and return the supplied arguments
     """
-    # CORE_CATEGORY = Category.CORE
-    # MODULE_CATEGORY = Category.MODULE
-    # DB_CATEGORY = Category.DB
-    # SLURM_CATEGORY = Category.SLURM
 
-    def __init__(self):
-        super().__init__(use_ipython=True)
+    amaconsole_parser = argparse.ArgumentParser(prog='ama', description="Ama console")
+    db_parser = amaconsole_parser.add_argument_group("Database")
+    db_parser.add_argument('--ama-db', dest="dbName", default='ama',
+                            help="Database name")
+    db_parser.add_argument('--ama-role', dest="roleName", default='attacker',
+                            help="Role name")
 
-        self.debug = True
-        self.intro = Banner.random()
-        self.prompt = "ama > "
-        self.continuation_prompt = "> "
-        self.default_category = Category.CORE
-        self.db_conn = None
-        self.workspace = "default" # selected workspace
-        self.modules = amaModules # format {NAME: MODULE_CLASS, ....}
-        self.selectedModule = None # selected module with use command (Instance of the module)
-        self.filteredModules = [] # filtered modules by a search (format: [(#, MODULE_CLASS), ...])
-        #self.filteredFullAttacks = [] # filtered full attacks by a search (format: [(#, MODULE_CLASS), ...])
-        self.gvalues = {} # global values set by setvg (format {OPTION_NAME: OPTION_VALUE, ...})
+    home_dir_parser = amaconsole_parser.add_argument_group("Home directory")
+    home_dir_parser.add_argument('--base-path', dest="base_path", default=Path.home(),
+                                 help="Base path of ama home directory")
 
-def main(argv=sys.argv[1:]):
-    ama = Ama()
-    sys.exit(ama.cmdloop())
+    amaconsole_subparser = amaconsole_parser.add_subparsers()
+
+    init_parser = amaconsole_subparser.add_parser('init', description="Init ama database and home directory")
+    init_parser.add_argument('-f', '--force', action='store_true',
+                             help='Force init (overwrite database and home directory)')
+    init_parser.set_defaults(func=init)
+
+    reinit_parser = amaconsole_subparser.add_parser('reinit', description="Reinit ama database and home directory")
+    reinit_parser.set_defaults(func=reinit)
+
+    delete_parser = amaconsole_subparser.add_parser('delete', description="Delete ama database and home directory")
+    delete_parser.set_defaults(func=delete)
+
+    return amaconsole_parser
+
+
+def main():
+    """
+    Execute the selected action from the parsed arguments
+    """
+    #import pdb; pdb.set_trace()
+    amaconsole_parser = amaConsoleParser()
+    try:
+        args = amaconsole_parser.parse_args()
+        if 'func' in args:
+            args.func(args)
+        else:
+            amaconsoleMain()
+
+    except Exception as error:
+        print_failure(error)
+        #amaconsole_parser.print_help()
+
+
+#if __name__=="__main__":
+#    main()

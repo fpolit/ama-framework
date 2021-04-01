@@ -15,6 +15,8 @@
 #
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
+import json
+import os
 import re
 import argparse
 from argparse import RawTextHelpFormatter
@@ -45,6 +47,7 @@ from cmd2 import (
     with_argparser
 )
 
+from ama.core.files import Path
 
 class NoDatabaseCredentialsSupplied(Exception):
     """
@@ -111,9 +114,11 @@ class Connection(CommandSet):
             if  self._cmd.db_creds:
                 self._cmd.db_conn =  psycopg2.connect(**self._cmd.db_creds)
                 dbName = self._cmd.db_creds['database']
-                #cmd2.Cmd.poutput(f"Connected to {dbName} database")
                 print_successful(f"Connected to {dbName} database")
                 del self._cmd.db_creds['password']
+
+            else:
+                raise Exception("No database credential supplied")
 
         except (Exception, psycopg2.DatabaseError) as error:
             #cmd2.Cmd.pexcept(error)
@@ -128,7 +133,6 @@ class Connection(CommandSet):
             self._cmd.db_conn.close()
             self._cmd.db_conn = None
             dbName = self._cmd.db_creds['database']
-            #cmd2.Cmd.poutput(f"Database {dbName} disconnected")
             print_status(f"Database {dbName} disconnected")
             del self._cmd.db_creds
 
@@ -142,28 +146,22 @@ class Connection(CommandSet):
         """
         if self._cmd.db_conn:
             dbName = self._cmd.db_creds['database']
-            #cmd2.Cmd.poutput(f"Connected to {dbName} database")
             print_successful(f"Connected to {dbName} database")
         else:
-            #cmd2.Cmd.poutput(f"Database not connected")
             print_failure(f"Database not connected")
 
     @staticmethod
-    def dbCreds(dbconfig, section='postgresql'):
-        db_parser = ConfigParser()
-        db_parser.read(dbconfig)
+    def dbCreds(dbconfig):
+        try:
+            dbconfig_file = Path(dbconfig)
+            permission = [os.R_OK]
+            Path.access(permission, dbconfig_file)
 
-        db_creds = {}
+            db_credentials = None
+            with open(dbconfig_file, 'r') as credentials_json:
+                db_credentials = json.load(credentials_json)
 
-        if db_parser.has_section(section):
-            params = db_parser.items(section)
-            for key, value in params:
-                db_creds[key] = value
-            password = getpass("Password: ")
-            db_creds['password'] = password
+            return db_credentials
 
-        else:
-            #cmd2.Cmd.pwarning(f"Section {section} not found in {dbconfig} file")
-            print_failure(f"Section {section} not found in {dbconfig} file")
-
-        return db_creds
+        except Exception as error:
+            print_failure(error)

@@ -1,4 +1,4 @@
-from .ama import Ama
+from .amaconsole import Ama
 
 ### PLUGINS
 
