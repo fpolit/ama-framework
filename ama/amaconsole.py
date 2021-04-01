@@ -65,6 +65,7 @@ class Ama(Cmd):
         self.default_category = Category.CORE
         self.db_conn = None
         self.workspace = "default" # selected workspace
+        self.database_credentials_file = Path.joinpath(AMA_HOME, 'db/database.json')
         self.modules = amaModules # format {NAME: MODULE_CLASS, ....}
         self.selectedModule = None # selected module with use command (Instance of the module)
         self.filteredModules = [] # filtered modules by a search (format: [(#, MODULE_CLASS), ...])

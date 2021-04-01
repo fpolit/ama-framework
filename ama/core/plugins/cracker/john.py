@@ -27,6 +27,7 @@ import re
 from tabulate import tabulate
 from sbash import Bash
 from typing import List
+import psycopg2
 
 # fineprint imports
 from fineprint.status import (
@@ -56,6 +57,8 @@ from .crackerException import (
     InvalidParallelJob,
     InvalidHashType
 )
+
+from ama.core.cmdsets.db import Connection
 
 class John(PasswordCracker):
     """
@@ -168,7 +171,7 @@ class John(PasswordCracker):
 
 
     @staticmethod
-    def hashes_file_status(query_hashes_file, potfile=None):
+    def hashes_file_status(hashes_file: Path, potfile:Path = None):
         """
         Check the status (broken by John or not) of hashes in query_hashes_file
         and return the cracked and uncracked hashes
@@ -177,27 +180,61 @@ class John(PasswordCracker):
         hashes_status = {'cracked': [], "uncracked": []}
 
         if potfile is None:
-            HOME = os.path.expanduser("~")
-            potfile = os.path.join(HOME, ".john/john.pot")
+            HOME = Path.home()
+            potfile = Path.joinpath(HOME, ".john/john.pot")
 
         try:
             permission = [os.R_OK]
             Path.access(permission, potfile, query_hashes_file)
 
 
-            with open(query_hashes_file, 'r') as hashes_file:
-                while query_hash := hashes_file.readline().rsplit():
+            with open(hashes_file, 'r') as hashes:
+                while query_hash := hashes.readline().rsplit():
                     query_hash = query_hash[0]
                     if cracker_hash := John.hash_status(query_hash):
-                        hashes_status['cracked'].append(cracker_hash.getAttributes())
+                        hashes_status['cracked'].append(cracker_hash.get_loot())
                     else: #crackedHash is uncracked
                         hashes_status['uncracked'].append([query_hash])
 
             return hashes_status
 
         except Exception as error:
-            #cmd2.Cmd.pexcept(error, "ERROR")
             print_failure(error)
+
+
+    @staticmethod
+    def insert_hashes_to_db(hashes_file: Path, workspace: str, creds_file: Path):
+        cur = db_conn = None
+        try:
+            import pdb;pdb.set_trace()
+            hashes_status = John.hashes_file_status(hashes_file)
+            cracked_hashes = hashes_status['cracked']
+
+            db_credentials = Connection.dbCreds(creds_file)
+            db_conn = psycopg2.connect(**db_credentials)
+
+            insert_cracked_hash = (
+                f"""
+                INSERT INTO hashes_{workspace} (hash, type, cracker, password)
+                VALUES (%s, %s, %s, %s)
+                """
+            )
+
+            cur = db_conn.cursor()
+            cur.executemany(insert_cracked_hash, cracked_hashes)
+            db_conn.commit()
+            cur.close()
+
+        except Exception as error:
+            print_failure(error)
+
+        finally:
+            if cur is not None:
+                cur.close()
+
+            if db_conn is not None:
+                db_conn.close()
+
 
     # debugged - date: Feb 28 2021
     def benchmark(self,  slurm=None):
@@ -243,7 +280,8 @@ class John(PasswordCracker):
     def wordlist_attack(self , *,
                         hash_types: List[str] = None , hashes_file: str, wordlist: str,
                         rules:str = None, rules_file:str = None,
-                        slurm, local:bool = False):
+                        slurm, local:bool = False,
+                        workspace:str = None, db_credential_file: Path = None):
         """
         Wordlist attack using john submiting parallel tasks in a cluster with Slurm
 
@@ -295,7 +333,14 @@ class John(PasswordCracker):
 
                         header_attack = f"echo -e '\\n\\n[*] Running: {attack_cmd}'"
 
-                        parallel_work.append((header_attack, attack_cmd))
+                        if workspace and db_credential_file:
+                            insert_cracked_hashes = (
+                                f"amadb -c {db_credential_file} -w {workspace} -j {hashes_file}"
+                            )
+
+                            parallel_work.append((header_attack, attack_cmd, insert_cracked_hashes))
+                        else:
+                            parallel_work.append((header_attack, attack_cmd))
 
                     slurm_script_name = slurm.gen_batch_script(parallel_work)
                     Bash.exec(f"sbatch {slurm_script_name}")
@@ -319,6 +364,8 @@ class John(PasswordCracker):
                             print()
                             print_status(f"Running: {attack_cmd}")
                             Bash.exec(attack_cmd)
+
+                    John.insert_hashes_to_db(hashes_file)
 
             except Exception as error:
                 #cmd2.Cmd.pexcept(error)

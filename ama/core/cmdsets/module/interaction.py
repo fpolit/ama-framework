@@ -458,7 +458,8 @@ class Interaction(CommandSet):
                     pre_attack_output = pre_attack.run(quiet=args.quiet)
 
                 print_status(f"Running {selectedModule.mname} attack module")
-                attack_output = selectedModule.attack(args.local, args.force, pre_attack_output)
+                attack_output = selectedModule.attack(args.local, args.force, pre_attack_output,
+                                                      self._cmd.workspace, self._cmd.database_credentials_file)
 
                 #import pdb; pdb.set_trace()
                 if post_attack := selectedModule.selected_post_attack:

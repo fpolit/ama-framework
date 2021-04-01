@@ -12,7 +12,7 @@ import os
 import re
 from tabulate import tabulate
 from sbash import Bash
-
+import psycopg2
 from typing import List
 
 # fineprint imports
@@ -150,6 +150,39 @@ class Hashcat(PasswordCracker):
                     break
 
         return all_cracked
+
+    @staticmethod
+    def insert_hashes_to_db(hashes_file: Path, workspace: str, creds_file: Path):
+        cur = db_conn = None
+        try:
+            import pdb;pdb.set_trace()
+            hashes_status = Hashcat.hashes_file_status(hashes_file)
+            cracked_hashes = hashes_status['cracked']
+
+            db_credentials = Connection.dbCreds(creds_file)
+            db_conn = psycopg2.connect(**db_credentials)
+
+            insert_cracked_hash = (
+                f"""
+                INSERT INTO hashes_{workspace} (hash, type, cracker, password)
+                VALUES (%s, %s, %s, %s)
+                """
+            )
+
+            cur = db_conn.cursor()
+            cur.executemany(insert_cracked_hash, cracked_hashes)
+            db_conn.commit()
+            cur.close()
+
+        except Exception as error:
+            print_failure(error)
+
+        finally:
+            if cur is not None:
+                cur.close()
+
+            if db_conn is not None:
+                db_conn.close()
 
 
     @staticmethod

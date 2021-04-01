@@ -35,6 +35,7 @@ class Hydra(PasswordCracker):
                 "s7-300", "sip", "smb", "smtp", "smtps", "smtp-enum", "snmp", "socks5", "ssh",
                 "sshkey", "svn", "teamspeak", "telnet", "telnets", "vmauthd", "vnc", "xmpp")
 
+    MAINNAME = "hydra"
     def __init__(self):
         """
         Hydra password cracker

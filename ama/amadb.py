@@ -13,10 +13,11 @@ from fineprint.status import (
 )
 
 from ama.core.files import Path
-from ama.db.interaction import (
-    insert_hashes
+from ama.core.plugins.cracker import (
+    John,
+    Hashcat,
+    get_availables_crackers
 )
-
 
 def amadb_parser():
     amadb_parser = argparse.ArgumentParser(prog='amadb', description="Ama database manager")
@@ -26,10 +27,14 @@ def amadb_parser():
     amadb_parser.add_argument('-w', '--workspace', dest='workspace', required=True,
                               help='Ama workspace')
 
+    available_crackers = get_availables_crackers()
+    available_cracker_names = [cracker.MAINNAME for cracker in available_crackers]
+    amadb_parser.add_argument('--cracker', required=True, choices=available_cracker_names,
+                              help="Password Cracker")
     insert_parser = amadb_parser.add_mutually_exclusive_group(required=True)
     insert_parser.add_argument('-j', '--insert-hashes', dest='insert_hashes', metavar="HASHES_FILE",
                               help='Insert cracked hashes to ama database')
-    insert_parser.add_argument('-s', '--insert-services', dest='insert_services',
+    insert_parser.add_argument('-s', '--insert-services', dest='insert_services', metavar="TARGET_SERVICE",
                               help='Insert cracked services to ama database')
 
     return amadb_parser
@@ -40,12 +45,19 @@ def main():
         args = parser.parse_args()
         workspace = args.workspace
         credentials_file = Path(args.creds_file)
-        if args.insert_hashes:
+        cracker = args.cracker
+        if args.insert_hashes and cracker in [John.MAINNAME, Hashcat.MAINNAME]:
             hashes_file = Path(args.insert_hashes)
-            insert_hashes(hashes_file, workspace, credentials_file)
+            if cracker == John.MAINNAME:
+                John.insert_hashes_to_db(hashes_file, workspace, credentials_file)
+            elif cracker == Hashcat.MAINNAME:
+                Hashcat.insert_hashes_to_db(hashes_file, workspace, credentials_file)
+
+        elif args.insert_hashes and cracker not in [John.MAINNAME, Hashcat.MAINNAME]:
+            raise Exception(f"Cracker {args.cracker} doesn't crack hashes")
 
         if args.insert_services:
-            pass
+            print_status("Please, implement me")
             #services_file = Path(args.insert_hashes)
 
 

@@ -179,7 +179,8 @@ class JohnWordlist(Attack):
 
         return init_options
 
-    def attack(self, local:bool = False, force: bool = False, pre_attack_output: Any = None):
+    def attack(self, local:bool = False, force: bool = False, pre_attack_output: Any = None,
+               workspace:str = None, db_credential_file: Path = None):
         """
         Wordlist attack using John the Ripper
 
@@ -193,9 +194,6 @@ class JohnWordlist(Attack):
             if not force:
                 self.no_empty_required_options(local)
 
-            if self.selected_pre_attack:
-                pass
-
             jtr = John()
 
             hash_types = self.options['hash_type'].value.split(',')
@@ -204,7 +202,9 @@ class JohnWordlist(Attack):
                                 hashes_file = self.options['hashes_file'].value,
                                 wordlist = self.options['wordlist'].value,
                                 slurm = self.slurm,
-                                local = local)
+                                local = local,
+                                workspace= workspace,
+                                db_credential_file=db_credential_file)
 
         except Exception as error:
             print_failure(error)
