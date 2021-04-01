@@ -14,12 +14,12 @@ from fineprint.status import (
 )
 
 from ama.db import AmaDB
-from ama.config import create_ama_home, AMA_HOME
+from ama.config import create_ama_home, AMA_HOME, USER_HOME
 from ama.amaconsole import main as amaconsoleMain
 from ama.core.files import Path
 
 def init(args):
-    base_path = Path(args.base_path)
+    base_path = USER_HOME
     create_ama_home(base_path)
     AmaDB.initDB(args.dbName, args.roleName)
 
@@ -42,9 +42,9 @@ def amaConsoleParser():
     db_parser.add_argument('--ama-role', dest="roleName", default='attacker',
                             help="Role name")
 
-    home_dir_parser = amaconsole_parser.add_argument_group("Home directory")
-    home_dir_parser.add_argument('--base-path', dest="base_path", default=Path.home(),
-                                 help="Base path of ama home directory")
+    # home_dir_parser = amaconsole_parser.add_argument_group("Home directory")
+    # home_dir_parser.add_argument('--base-path', dest="base_path", default=Path.home(),
+    #                              help="Base path of ama home directory")
 
     amaconsole_subparser = amaconsole_parser.add_subparsers()
 

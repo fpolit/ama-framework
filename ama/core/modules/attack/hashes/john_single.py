@@ -6,12 +6,13 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
-from typing import Any
+from typing import Any, List
 
 # base  imports
 from ama.core.modules.base import (
     Attack,
-    Argument
+    Argument,
+    Auxiliary
 )
 
 # cracker imports
@@ -29,6 +30,7 @@ from fineprint.status import (
     print_status
 )
 
+from ama.core.files import Path
 
 class JohnSingle(Attack):
     """
@@ -51,18 +53,22 @@ class JohnSingle(Attack):
 
     REFERENCES = None
 
-    def __init__(self, *, hash_type=None, hashes_file=None, slurm=None):
+    def __init__(self, *, hash_types: List[str] =None, hashes_file:Path=None, slurm: Slurm=None,
+                 pre_attack: Auxiliary = None, post_attack: Auxiliary = None):
         """
         Initialization of John single attack
 
         Args:
-        hash_type (str): Jonh's hash type
+        hash_types List(str): Jonh's hash type
         hashes_file (str): Hashes file to attack
         slurm (Slurm): Instance of Slurm class
         """
 
+        pre_attack_name = pre_attack.mname if isinstance(pre_attack, Auxiliary) else None
+        post_attack_name = post_attack.mname if isinstance(post_attack, Auxiliary) else None
+
         attack_options = {
-            'hash_type': Argument(hash_type, True, "John hash type"),
+            'hash_type': Argument(hash_types, True, "John hash type"),
             'hashes_file': Argument(hashes_file, True, "Hashes file")
         }
 
@@ -105,14 +111,17 @@ class JohnSingle(Attack):
             'description': JohnSingle.DESCRIPTION,
             'fulldescription':  JohnSingle.FULLDESCRIPTION,
             'references': JohnSingle.REFERENCES,
+            'pre_attack': pre_attack,
             'attack_options': attack_options,
+            'post_attack': post_attack,
             'slurm': slurm
         }
 
         super().__init__(**init_options)
 
 
-    def attack(self, local:bool = False, force:bool = False, pre_attack_output: Any = None):
+    def attack(self, *, local:bool = False, force:bool = False, pre_attack_output: Any = None,
+               workspace:str = None, db_credential_file: Path = None):
         """
         Single attack using John the Ripper
 
@@ -127,14 +136,16 @@ class JohnSingle(Attack):
                 self.no_empty_required_options(local)
 
             jtr = John()
-            if local:
-                jtr.single_attack(hash_type = self.options['hash_type'].value,
-                                  hashes_file = self.options['hashes_file'].value,
-                                  slurm = None)
-            else:
-                jtr.single_attack(hash_type = self.options['hash_type'].value,
-                                  hashes_file = self.options['hashes_file'].value,
-                                  slurm = self.slurm)
+
+            hash_types = self.options['hash_type'].value.split(',')
+
+            jtr.single_attack(hash_types = hash_types,
+                              hashes_file = self.options['hashes_file'].value,
+                              slurm = self.slurm,
+                              local = local,
+                              db_status= db_status,
+                              workspace = workspace,
+                              db_credential_file = db_credential_file)
 
         except Exception as error:
             print_failure(error)

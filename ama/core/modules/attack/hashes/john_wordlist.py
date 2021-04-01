@@ -8,6 +8,8 @@
 import os
 from typing import Any
 
+from ama.core.files import Path
+
 # base  imports
 from ama.core.modules.base import (
     Attack,
@@ -85,7 +87,7 @@ class JohnWordlist(Attack):
     def __init__(self, *,
                  hash_type: str = None, hashes_file: str = None,
                  wordlist: str = None, slurm=None,
-                 pre_attack = None, post_attack = None):
+                 pre_attack: Auxiliary = None, post_attack: Auxiliary = None):
         """
         Initialization of John  wordlist attack
 
@@ -179,8 +181,8 @@ class JohnWordlist(Attack):
 
         return init_options
 
-    def attack(self, local:bool = False, force: bool = False, pre_attack_output: Any = None,
-               workspace:str = None, db_credential_file: Path = None):
+    def attack(self, *, local:bool = False, force: bool = False, pre_attack_output: Any = None,
+               db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
         """
         Wordlist attack using John the Ripper
 
@@ -203,6 +205,7 @@ class JohnWordlist(Attack):
                                 wordlist = self.options['wordlist'].value,
                                 slurm = self.slurm,
                                 local = local,
+                                db_status= db_status,
                                 workspace= workspace,
                                 db_credential_file=db_credential_file)
 

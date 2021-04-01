@@ -22,6 +22,7 @@ from fineprint.status import (
     print_failure,
     print_successful
 )
+from fineprint.color import ColorStr
 
 # random-password-generator imports
 from password_generator import PasswordGenerator
@@ -46,9 +47,9 @@ class AmaDB:
         """
         try:
             #cmd2.Cmd.poutput(f"Creating {roleName} role")
-            print_status(f"Creating role:  {roleName}")
+            print_status(f"Creating role:  {ColorStr(roleName).StyleBRIGHT}")
 
-            password = getpass(prompt=f"Password for {roleName} role (empty for random generation): ")
+            password = getpass(prompt=f"Password for {ColorStr(roleName).StyleBRIGHT} role (empty for random generation): ")
             randomPasswd = False
             if not password:
                 passwd = PasswordGenerator()
@@ -64,14 +65,14 @@ class AmaDB:
             Bash.exec(f"psql -U postgres -c \"CREATE ROLE {roleName} WITH LOGIN CREATEDB PASSWORD '{password}'\"", quiet=True)
             Bash.exec(f"psql -U postgres -c \"CREATE DATABASE {roleName} OWNER {roleName}\"", quiet=True)
             #cmd2.Cmd.poutput(f"Role {roleName} has been created")
-            print_successful(f"Role {roleName} has been created")
+            print_successful(f"Role {ColorStr(roleName).StyleBRIGHT} has been created")
 
             if randomPasswd:
                 #cmd2.Cmd.poutput(f"Password {roleName} role: {password}")
-                print_successful(f"Password {roleName} role: {password}")
+                print_successful(f"Password {ColorStr(roleName).StyleBRIGHT} role: {ColorStr(password).StyleBRIGHT}")
 
             #cmd2.Cmd.poutput(f"Creating {dbName} database")
-            print_status(f"Creating database: {dbName}")
+            print_status(f"Creating {ColorStr(dbName).StyleBRIGHT} database")
             Bash.exec(f"psql -U {roleName} -c \"CREATE DATABASE {dbName} OWNER {roleName}\"", quiet=True)
             #cmd2.Cmd.poutput("Database {dbName} has been created")
 
@@ -124,7 +125,7 @@ class AmaDB:
             cur.execute(valueInsert, (workspace ,))
             conn.commit()
             cur.close()
-            print_successful(f"Database {dbName} has been created")
+            print_successful(f"Database {ColorStr(dbName).StyleBRIGHT} has been created")
 
             #import pdb; pdb.set_trace()
             # writing credential to AMA_HOME/db/database.json file
@@ -145,7 +146,7 @@ class AmaDB:
         Delete ama-framework database
         """
         if dbName:
-            if Answer.shortAnwser(f"Do you really want to delete the {dbName} database(y/n)? "):
+            if Answer.shortAnwser(f"Do you really want to delete the {ColorStr(dbName).StyleBRIGHT} database(y/n)? "):
                 if roleName:
                     Bash.exec(f"psql -U {roleName} -c \"DROP DATABASE {dbName}\"")
                 else:

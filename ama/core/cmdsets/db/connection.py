@@ -27,6 +27,7 @@ from fineprint.status import (
     print_failure,
     print_successful
 )
+from fineprint.color import ColorStr
 
 # import db connection modules
 from configparser import ConfigParser
@@ -114,7 +115,7 @@ class Connection(CommandSet):
             if  self._cmd.db_creds:
                 self._cmd.db_conn =  psycopg2.connect(**self._cmd.db_creds)
                 dbName = self._cmd.db_creds['database']
-                print_successful(f"Connected to {dbName} database")
+                print_successful(f"Connected to {ColorStr(dbName).StyleBRIGHT} database")
                 del self._cmd.db_creds['password']
 
             else:
@@ -133,7 +134,7 @@ class Connection(CommandSet):
             self._cmd.db_conn.close()
             self._cmd.db_conn = None
             dbName = self._cmd.db_creds['database']
-            print_status(f"Database {dbName} disconnected")
+            print_status(f"Database {ColorStr(dbName).StyleBRIGHT} disconnected")
             del self._cmd.db_creds
 
         except (Exception, psycopg2.DatabaseError) as error:
@@ -146,14 +147,14 @@ class Connection(CommandSet):
         """
         if self._cmd.db_conn:
             dbName = self._cmd.db_creds['database']
-            print_successful(f"Connected to {dbName} database")
+            print_successful(f"Connected to {ColorStr(dbName).StyleBRIGHT} database")
         else:
             print_failure(f"Database not connected")
 
     @staticmethod
     def dbCreds(dbconfig):
         try:
-            import pdb;pdb.set_trace()
+            #import pdb;pdb.set_trace()
             dbconfig_file = Path(dbconfig)
             dbconfig_file = dbconfig_file.expanduser()
             permission = [os.R_OK]

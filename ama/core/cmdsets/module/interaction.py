@@ -33,15 +33,16 @@ from cmd2 import (
 # modules.base import
 from ama.core.modules.base import (
     Attack,
-    Auxiliary,
-    #PreAttack,
-    #PostAttack
+    Auxiliary
 )
 
 from ama.data.modules import Glue
 
 # slurm import
 from ama.core.slurm import Slurm
+
+
+from ama.core.files import Path
 
 @with_default_category(Category.MODULE)
 class Interaction(CommandSet):
@@ -59,6 +60,9 @@ class Interaction(CommandSet):
     bkp_parser.add_argument('-o', '--output',
                             help="Backup file")
 
+    bkp_parser.add_argument('-r', '--required', action='store_true',
+                                  help="Backup only required options")
+
     bkp_options_type = bkp_parser.add_mutually_exclusive_group()
     bkp_options_type.add_argument('-m', '--module', dest='only_module', action='store_true',
                             help="Backup only module options")
@@ -73,76 +77,129 @@ class Interaction(CommandSet):
         Save all the commands used to set options of a module
         """
         #import pdb; pdb.set_trace()
-        if selectedModule := self._cmd.selectedModule:
-            print_status(f"Performing backup of {selectedModule.mname} options")
-            output = None
-            if args.output:
-                output = open(args.output, 'w')
+        output = None
+        try:
+            if selectedModule := self._cmd.selectedModule:
+                if args.required and args.only_module:
+                    print_status(f"Performing backup of {ColorStr(selectedModule.mname).StyleBRIGHT} require module options")
+                elif (not args.required) and args.only_module:
+                    print_status(f"Performing backup of {ColorStr(selectedModule.mname).StyleBRIGHT} module options")
+
+                elif args.required and args.only_slurm:
+                    if isinstance(selectedModule, Auxiliary):
+                        raise Exception("Auxiliary modules have not slurm options")
+                    else: # selectedModule is an Attack
+                        print_status(f"Performing backup of {ColorStr(selectedModule.mname).StyleBRIGHT} required slurm options")
+
+                elif (not args.required) and args.only_slurm:
+                    if isinstance(selectedModule, Auxiliary):
+                        raise Exception("Auxiliary modules have not slurm options")
+                    else:
+                        print_status(f"Performing backup of {ColorStr(selectedModule.mname).StyleBRIGHT} slurm options")
+
+                elif args.required and not (args.only_module or  args.only_slurm):
+                    print_status(f"Performing backup of {ColorStr(selectedModule.mname).StyleBRIGHT} required options")
+                elif not (args.required or args.only_module or  args.only_slurm):
+                    print_status(f"Performing backup of {ColorStr(selectedModule.mname).StyleBRIGHT} options")
+
+                if args.output:
+                    output = open(args.output, 'w')
+                else:
+                    output = sys.stdout
+
+                no_empty_options = selectedModule.get_no_empty_options(args.required)
+
+                only_module = args.only_module
+                only_slurm  = args.only_slurm
+
+                for name, value in no_empty_options.items():
+                    if (selectedModule.isModuleOption(name) and only_module) or \
+                       (selectedModule.isSlurmOption(name) and only_slurm) or \
+                       (not only_module and not only_slurm):
+                        bkp_cmd = f"setv {name.upper()} {value}"
+                        output.write(f"{bkp_cmd}\n")
+
+                if isinstance(selectedModule, Attack):
+                    if pre_attack_module := selectedModule.selected_pre_attack:
+                        no_empty_pre_attack_options = pre_attack_module.get_no_empty_options()
+                        for name, value in no_empty_pre_attack_options.items():
+                            if (selectedModule.isModuleOption(name) and only_module) or \
+                               (selectedModule.isSlurmOption(name) and only_slurm) or \
+                               (not only_module and not only_slurm):
+                                bkp_cmd = f"setv --pre {name.upper()} {value}"
+                                output.write(f"{bkp_cmd}\n")
+
+                    if post_attack_module := selectedModule.selected_post_attack:
+                        no_empty_post_attack_options = post_attack_module.get_no_empty_options()
+                        for name, value in no_empty_post_attack_options.items():
+                            if (selectedModule.isModuleOption(name) and only_module) or \
+                               (selectedModule.isSlurmOption(name) and only_slurm) or \
+                               (not only_module and not only_slurm):
+                                bkp_cmd = f"setv --post {name.upper()} {value}"
+                                output.write(f"{bkp_cmd}\n")
+
             else:
-                output = sys.stdout
+                raise Exception("No module selected")
 
-            no_empty_options = selectedModule.get_no_empty_options()
+        except Exception as error:
+            print_failure(error)
 
-            only_module = args.only_module
-            only_slurm  = args.only_slurm
-
-            for name, value in no_empty_options.items():
-                if (selectedModule.isModuleOption(name) and only_module) or \
-                   (selectedModule.isSlurmOption(name) and only_slurm) or \
-                   (not only_module and not only_slurm):
-                    bkp_cmd = f"setv {name.upper()} {value}"
-                    output.write(f"{bkp_cmd}\n")
-
-            if pre_attack_module := selectedModule.selected_pre_attack:
-                no_empty_pre_attack_options = pre_attack_module.get_no_empty_options()
-                for name, value in no_empty_pre_attack_options.items():
-                    if (selectedModule.isModuleOption(name) and only_module) or \
-                       (selectedModule.isSlurmOption(name) and only_slurm) or \
-                       (not only_module and not only_slurm):
-                        bkp_cmd = f"setv --pre {name.upper()} {value}"
-                        output.write(f"{bkp_cmd}\n")
-
-            if post_attack_module := selectedModule.selected_post_attack:
-                no_empty_post_attack_options = post_attack_module.get_no_empty_options()
-                for name, value in no_empty_post_attack_options.items():
-                    if (selectedModule.isModuleOption(name) and only_module) or \
-                       (selectedModule.isSlurmOption(name) and only_slurm) or \
-                       (not only_module and not only_slurm):
-                        bkp_cmd = f"setv --post {name.upper()} {value}"
-                        output.write(f"{bkp_cmd}\n")
-
-
+        finally:
             if args.output:
-                print_successful(f"Backup saved to {args.output} file")
+                print_successful(f"Backup saved to {ColorStr(args.output).StyleBRIGHT} file")
                 output.close()
 
-        else:
-            print_failure("No module selected")
 
+    read_parser = argparse.ArgumentParser()
+    read_parser.add_argument('backup',
+                             help="Backup file to read")
+    @with_argparser(read_parser)
+    def do_read(self, args):
+        """
+        Read a backuo file a setv options of a module
+        """
+        import pdb; pdb.set_trace()
+        try:
+            selectedModule = self._cmd.selectedModule
 
-    # read_parser = argparse.ArgumentParser()
-    # read_parser.add_argument('backup',
-    #                          help="Backup file to read")
-    # @with_argparser(read_parser)
-    # def do_read(self, args):
-    #     """
-    #     Read a backuo file a setv options of a module
-    #     """
-    #     import pdb; pdb.set_trace()
-    #     if selectedModule := self._cmd.selectedModule:
-    #         backup_file = args.backup
-    #         print_status(f"Reading {backup_file} backup file and setting {selectedModule.MNAME} module options")
-    #         with open(backup_file, 'r') as backup:
-    #             while setv_cmd := backup.readline():
-    #                 setv_cmd = setv_cmd.rstrip()
-    #                 setv, name, value = setv_cmd.split(' ')
-    #                 if not setv == 'setv':
-    #                     print_failure(f"Invalid setv command: {setv_cmd}")
-    #                 else:
-    #                     args = argparse.Namespace(**{'option': name.lower(), 'value': value, 'pre': False, 'post': False})
-    #                     #self.do_setv(args)
-    #     else:
-    #         print_failure("No module selected")
+            if not selectedModule:
+                raise Exception("No module selected")
+
+            backup_file = Path(args.backup)
+            permission = [os.R_OK]
+            Path.access(permission, backup_file)
+
+            print_status(f"Reading {ColorStr(backup_file).StyleBRIGHT} backup file and setting {ColorStr(selectedModule.MNAME).StyleBRIGHT} module options")
+
+            with open(backup_file, 'r') as backup:
+                while setv_cmd := backup.readline():
+                    setv_cmd = setv_cmd.rstrip()
+                    split_setv_cmd = setv_cmd.split(' ')
+
+                    if len(split_setv_cmd) == 4: # this options is of a pre/post attack module
+                        setv, helper, option, value = split_setv_cmd
+                        if helper in ["-pre", "--preattack"]:
+                            if isinstance(selectedModule, Attack):
+                                selectedModule.setv(option, value, pre_attack=True)
+                            else:
+                                print_failure(f"Unable to run {setv_cmd} command. Auxiliary modules have not PreAttack modules")
+
+                        elif helper in ["-post", "--postattack"]:
+                            if isinstance(selectedModule, Attack):
+                                selectedModule.setv(option, value, post_attack=True)
+                            else:
+                                print_failure(f"Unable to run {setv_cmd} command. Auxiliary modules have not PostAttack modules")
+                        else:
+                            print_failure("Unknown helper module")
+
+                    elif len(split_setv_cmd) == 3: # this options is of the main module
+                        setv, option, value = split_setv_cmd
+                        selectedModule.setv(option, value)
+                    else:
+                        print_failure(f"Invalid command : {setv_cmd}")
+
+        except Exception as error:
+            print_failure(error)
 
     use_parser = argparse.ArgumentParser()
     use_parser.add_argument('module', help="ama module")
@@ -454,20 +511,25 @@ class Interaction(CommandSet):
             if isinstance(selectedModule, Attack):
                 pre_attack_output = None
                 if pre_attack := selectedModule.selected_pre_attack:
-                    print_status(f"Running {pre_attack.mname} preattack module")
+                    print_status(f"Running {ColorStr(pre_attack.mname).StyleBRIGHT} preattack module")
                     pre_attack_output = pre_attack.run(quiet=args.quiet)
 
-                print_status(f"Running {selectedModule.mname} attack module")
-                attack_output = selectedModule.attack(args.local, args.force, pre_attack_output,
-                                                      self._cmd.workspace, self._cmd.database_credentials_file)
+                print_status(f"Running {ColorStr(selectedModule.mname).StyleBRIGHT} attack module")
+                db_status = True if self._cmd.db_conn else False
+                attack_output = selectedModule.attack(local = args.local,
+                                                      force = args.force,
+                                                      pre_attack_output = pre_attack_output,
+                                                      db_status = db_status,
+                                                      workspace = self._cmd.workspace,
+                                                      db_credential_file = self._cmd.database_credentials_file)
 
                 #import pdb; pdb.set_trace()
                 if post_attack := selectedModule.selected_post_attack:
-                    print_status(f"Running {post_attack.mname} posattack module")
+                    print_status(f"Running {ColorStr(post_attack.mname).StyleBRIGHT} posattack module")
                     post_attack.run(quiet=args.quiet, attack_output=attack_output)
 
             else: # selectedModule is an instance of Auxiliary
-                print_failure(f"No attack method for {selectedModule.MNAME} module")
+                print_failure(f"No attack method for {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
         else:
             print_failure("No module selected")
 
@@ -480,9 +542,9 @@ class Interaction(CommandSet):
         selectedModule = self._cmd.selectedModule
         if selectedModule:
             if isinstance(selectedModule, Auxiliary):
-                print_status(f"Running {selectedModule.MNAME} module")
+                print_status(f"Running {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
                 selectedModule.run()
             else: # selectedModule is an instance of Attack
-                print_failure(f"No run method for {selectedModule.MNAME} module")
+                print_failure(f"No run method for {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
         else:
             print_failure("No module selected")

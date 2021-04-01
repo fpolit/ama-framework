@@ -82,6 +82,9 @@ class Loot(CommandSet):
         cur = None
 
         try:
+            if self._cmd.db_conn is None:
+                raise Exception("Database not connected")
+
             cur = self._cmd.db_conn.cursor()
             workspace = self._cmd.workspace
             # validate the argument columns to query for specific columns
@@ -145,6 +148,9 @@ class Loot(CommandSet):
 
         cur = None
         try:
+            if self._cmd.db_conn is None:
+                raise Exception("Database not connected")
+
             cur = self._cmd.db_conn.cursor()
             workspace = self._cmd.workspace
             # validate the argument columns to query for specific columns
