@@ -71,8 +71,9 @@ class Banner:
 
         return (
         f"""
-    {Banner.AMA_INFO}
         {randomBanner}
+    {Banner.AMA_INFO}
+        
         VERSION: {Banner.AMA_VERSION}
         {Banner.AMA_MODULES_INFO}
         """

@@ -6,6 +6,7 @@
 # date: Feb 20 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
+import os
 import sys
 import argparse
 
@@ -156,7 +157,7 @@ class Interaction(CommandSet):
     @with_argparser(read_parser)
     def do_read(self, args):
         """
-        Read a backuo file a setv options of a module
+        Read a backup file and set options of a module
         """
         import pdb; pdb.set_trace()
         try:
@@ -169,7 +170,7 @@ class Interaction(CommandSet):
             permission = [os.R_OK]
             Path.access(permission, backup_file)
 
-            print_status(f"Reading {ColorStr(backup_file).StyleBRIGHT} backup file and setting {ColorStr(selectedModule.MNAME).StyleBRIGHT} module options")
+            print_status(f"Reading {ColorStr(backup_file).StyleBRIGHT} backup file and setting {ColorStr(selectedModule.MNAME).StyleBRIGHT} options")
 
             with open(backup_file, 'r') as backup:
                 while setv_cmd := backup.readline():

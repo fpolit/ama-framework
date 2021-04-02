@@ -74,6 +74,7 @@ class John(PasswordCracker):
     def __init__(self):
         super().__init__(["john", "jtr"], version="1.9.0-jumbo-1 MPI + OMP")
 
+    # debugged - date: Apr 2 2021
     @staticmethod
     def check_hash_type(hash_types: List[str]):
         """
@@ -117,8 +118,9 @@ class John(PasswordCracker):
         print(tabulate(filtered_hashes, headers=["#", "Name"]))
 
 
+    # debugged - date: Apr 2 2021
     @staticmethod
-    def hash_status(query_hash: str, potfile: str = None):
+    def hash_status(query_hash: str, potfile: Path = None):
         """
         Check the status (broken by John or not) of query hash
 
@@ -129,8 +131,8 @@ class John(PasswordCracker):
         #import pdb;pdb.set_trace()
 
         if potfile is None:
-            HOME = os.path.expanduser("~")
-            potfile = os.path.join(HOME, ".john/john.pot")
+            HOME = Path.home()
+            potfile = Path.joinpath(HOME, ".john/john.pot")
 
         try:
             permission = [os.R_OK]
@@ -154,7 +156,9 @@ class John(PasswordCracker):
             #cmd2.Cmd.pexcept(error)
             print_failure(error)
 
-    def are_all_hashes_cracked(self, hashes_file: str, potfile: str = None):
+    # debugged - date Apr 2 2021
+    @staticmethod
+    def are_all_hashes_cracked(hashes_file: Path, potfile: Path = None):
         """
         Check if all hashes are cracked
         return True if all hashes were cracked otherwise return False
@@ -162,15 +166,28 @@ class John(PasswordCracker):
 
         #import pdb; pdb.set_trace()
         all_cracked = True
+        query_hash_pattern = re.compile(r"(\w*|\w*|.*):?(\w*|\w*|.*)") #parser to analize: NAME:HASH hashes
         with open(hashes_file, 'r') as hashes:
-            while query_hash := hashes.readline().rstrip():
-                if John.hash_status(query_hash, potfile) is None: # query_hash isn't cracked yet
+            while qhash := hashes.readline().rstrip():
+                if parser_hash := query_hash_pattern.fullmatch(qhash):
+                    query_hash = None
+                    if parser_hash.group(2):
+                        query_hash = parser_hash.group(2)
+                    else:
+                        query_hash = parser_hash.group(1)
+
+                    cracked_hash = John.hash_status(query_hash, potfile)
+                    if cracked_hash is None: # query_hash isn't cracked yet
+                        all_cracked = False
+                        break
+                else:
                     all_cracked = False
                     break
 
         return all_cracked
 
 
+    # debugged - date Apr 2 2021
     @staticmethod
     def hashes_file_status(hashes_file: Path, potfile:Path = None):
         """
@@ -190,12 +207,21 @@ class John(PasswordCracker):
 
 
             with open(hashes_file, 'r') as hashes:
-                while query_hash := hashes.readline().rsplit():
-                    query_hash = query_hash[0]
-                    if cracker_hash := John.hash_status(query_hash):
-                        hashes_status['cracked'].append(cracker_hash.get_loot())
-                    else: #crackedHash is uncracked
-                        hashes_status['uncracked'].append([query_hash])
+                while qhash := hashes.readline().rstrip():
+                    query_hash_pattern = re.compile(r"(\w*|\w*|.*):?(\w*|\w*|.*)") #parser to analize: NAME:HASH hashes
+                    if parser_hash := query_hash_pattern.fullmatch(qhash):
+                        query_hash = None
+                        if parser_hash.group(2):
+                            query_hash = parser_hash.group(2)
+                        else:
+                            query_hash = parser_hash.group(1)
+
+                        if cracker_hash := John.hash_status(query_hash):
+                            hashes_status['cracked'].append(cracker_hash.get_loot())
+                        else: #crackedHash is uncracked
+                            hashes_status['uncracked'].append([query_hash])
+                    else:
+                        hashes_status['uncracked'].append([qhash])
 
             return hashes_status
 
@@ -203,6 +229,7 @@ class John(PasswordCracker):
             print_failure(error)
 
 
+    # debugged - date: Apr 2 2021
     @staticmethod
     def insert_hashes_to_db(hashes_file: Path, workspace: str, creds_file: Path):
         cur = db_conn = None
@@ -366,7 +393,7 @@ class John(PasswordCracker):
 
                 else:
                     for hash_type in hash_types:
-                        are_all_hashes_cracked = self.are_all_hashes_cracked(hashes_file)
+                        are_all_hashes_cracked = John.are_all_hashes_cracked(hashes_file)
                         if  not are_all_hashes_cracked: # some hash isn't cracked yet
                             attack_cmd = f"{self.main_exec} --wordlist={wordlist}"
                             if hash_type:
@@ -410,7 +437,7 @@ class John(PasswordCracker):
                             wordlist=combinedWordlist)
 
     #NOTE: John continue when the hash was cracked
-    # modify - date: Apr 1 2021
+    # modify - date: Apr 1 2021 (debugged - date Apr 2 2021)
     def incremental_attack(self, *,
                            hash_types: List[str] = None, hashes_file: str,
                            slurm: Slurm , local:bool = False,
@@ -424,7 +451,7 @@ class John(PasswordCracker):
         slurm (Slurm): Instance of Slurm class
         """
 
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
 
         if self.enable:
             try:
@@ -436,7 +463,7 @@ class John(PasswordCracker):
                 print_status(f"Attacking hashes in {ColorStr(hashes_file).StyleBRIGHT} file in incremental mode")
                 print_status(f"Possible hashes identities: {ColorStr(hash_types).StyleBRIGHT}")
 
-                if slurm and slurm.partition:
+                if (not local) and slurm and slurm.partition:
                     parallel_job_type = slurm.parallel_job_parser()
                     if not  parallel_job_type in ["MPI", "OMP"]:
                         raise InvalidParallelJob(parallel_job_type)
@@ -471,7 +498,7 @@ class John(PasswordCracker):
                         Bash.exec(f"sbatch {slurm_script_name}")
 
                 else:
-                    import pdb;pdb.set_trace()
+                    #import pdb;pdb.set_trace()
                     for hash_type in hash_types:
                         attack_cmd = f"{self.main_exec} --incremental"
                         if hash_type:
@@ -479,7 +506,7 @@ class John(PasswordCracker):
 
                         attack_cmd += f" {hashes_file}"
 
-                        if are_all_hashes_cracked := self.are_all_hashes_cracked(hashes_file):
+                        if are_all_hashes_cracked := John.are_all_hashes_cracked(hashes_file):
                             print_successful(f"Hashes in {ColorStr(hashes_file).StyleBRIGHT} were cracked")
                             break
 
@@ -499,10 +526,10 @@ class John(PasswordCracker):
             print_failure(f"Cracker {ColorStr(self.main_name).StyleBRIGHT} is disable")
 
 
-    # modify - date: Apr 1 2021
+    # modify - date: Apr 1 2021 ()
     def masks_attack(self, *,
-                     hash_types: List[str] = None, hashes_file: Path, masks_file: Path,
-                     masks_attack_script: Path,
+                     hash_types: List[str] = None, hashes_file: str, masks_file: str,
+                     masks_attack_script: str,
                      slurm: Slurm, local: bool = False,
                      db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
         """
@@ -534,34 +561,40 @@ class John(PasswordCracker):
                                           masks_file = masks_file,
                                           masks_attack_script = masks_attack_script,
                                           slurm = slurm,
+                                          db_status = db_status,
                                           workspace = workspace,
                                           db_credential_file = db_credential_file)
 
-                    parallel_work = [f"python3 {masks_attack_script}"]
+                    parallel_work = [(f"python3 {masks_attack_script}",)]
                     slurm_script_name = slurm.gen_batch_script(parallel_work)
+                    import pdb; pdb.set_trace()
                     Bash.exec(f"sbatch {slurm_script_name}")
 
                 else:
+                    all_cracked = False
                     for hash_type in hash_types:
                         with open(masks_file, 'r') as masks:
                             while mask := masks.readline().rstrip():
-                                all_cracked = self.are_all_hashes_cracked(hashes_file)
+                                all_cracked = John.are_all_hashes_cracked(hashes_file)
                                 if not all_cracked:
-                                    mask_attack = f"{self.main_exec} --mask={mask}"
+                                    attack_cmd = f"{self.main_exec} --mask={mask}"
 
                                     if hash_type:
-                                        mask_attack += f" --format={hash_type}"
-                                    mask_attack += f" {hashes_file}"
+                                        attack_cmd += f" --format={hash_type}"
+                                    attack_cmd += f" {hashes_file}"
 
                                     print()
                                     print_status(f"Running: {ColorStr(attack_cmd).StyleBRIGHT}")
                                     Bash.exec(attack_cmd)
 
                                 else:
-                                    print_successful(f"Hashes in {ColorStr(hashes_file).StyleBRIGHT} were cracked")
                                     break
 
-                    if workspace and db_credential_file:
+                        if all_cracked := John.are_all_hashes_cracked(hashes_file):
+                            print_successful(f"Hashes in {ColorStr(hashes_file).StyleBRIGHT} were cracked")
+                            break
+
+                    if db_status and workspace and db_credential_file:
                         John.insert_hashes_to_db(hashes_file, workspace, db_credential_file)
 
             except Exception as error:
@@ -574,9 +607,11 @@ class John(PasswordCracker):
     #debugged - date: Mar 1 2021 (modify - date: Apr 1 2021)
     @staticmethod
     def gen_masks_attack(*,
-                         hash_type: str, hashes_file: str, masks_file: str,
-                         masks_attack_script: str, slurm,
-                         workspace:str, db_credential_file: Path):
+                         hash_types: List[str], hashes_file: Path, masks_file: Path,
+                         masks_attack_script: Path, slurm: Slurm,
+                         db_status:bool, workspace:str, db_credential_file: Path):
+
+        #import pdb; pdb.set_trace()
 
         parallel_job_type = slurm.parallel_job_parser()
         if not  parallel_job_type in ["MPI", "OMP"]:
@@ -585,32 +620,41 @@ class John(PasswordCracker):
         _jtr_main_exec = "{jtr.main_exec}"
         _mask = "{mask}"
         _hash_type = "{hash_type}"
+        _hashes_file = "{hashes_file}"
+        _hashes_file_bright = "{ColorStr(hashes_file).StyleBRIGHT}"
         _mask_attack = "{mask_attack}"
         _header_attack = "{header_attack}"
+        _workspace_bright = "{ColorStr(workspace).StyleBRIGHT}"
 
-
-        __hash_type = f"'{hash_type}'"
+        __hash_types = f"'{hash_types}'"
         __hashes_file = f"'{hashes_file}'"
         __masks_file = f"'{masks_file}'"
         __parallel_job_type = f"'{parallel_job_type}'"
+        __workspace = f"'{workspace}'"
+        __db_credential_file = f"'{db_credential_file}'"
 
         masks_attack = (
                     f"""
 #!/bin/env python3
 
+from sbash import Bash
+from fineprint.color import ColorStr
+
 from ama.core.plugins.cracker import John
 from ama.core.files import Path
-from sbash import Bash
 
 
-hash_types = {hash_type if hash_type else None}
+hash_types = {hash_types if hash_types else None}
 hashes_file = {__hashes_file}
 masks_file = {__masks_file}
 parallel_job_type = {__parallel_job_type}
-workspace = {workspace if workspace else None}
-db_credential_file = {Path(db_credential_file.path) if db_credential_file else None}
+db_status = {db_status}
+workspace = {__workspace if workspace else None}
+db_credential_file = {__db_credential_file if db_credential_file else None}
 
 jtr = John()
+
+all_cracked = False
 
 for hash_type in hash_types:
     with open(masks_file, 'r') as masks:
@@ -634,7 +678,15 @@ for hash_type in hash_types:
                 Bash.exec(f"echo -e '\\n\\n\\n{_header_attack}'")
                 Bash.exec(mask_attack)
 
-if workspace and db_credential_file:
+            else:
+                break
+
+    if all_cracked := John.are_all_hashes_cracked(hashes_file):
+        print(f"\\n[*] Hashes in {_hashes_file_bright} were cracked")
+        break
+
+if db_status and workspace and db_credential_file:
+    print(f"\\n[*] Saving cracked hashes to {_workspace_bright} workspace")
     John.insert_hashes_to_db(hashes_file, workspace, db_credential_file)
                 """
             )
@@ -644,7 +696,7 @@ if workspace and db_credential_file:
 
         print_successful(f"Masks attack script generated: {ColorStr(masks_attack_script).StyleBRIGHT}")
 
-    # modify - date: Apr 1 2021
+    # modify - date: Apr 1 2021 (debugged - date: Apr 2 2021)
     def single_attack(self, *,
                       hash_types: str, hashes_file: str,
                       slurm: Slurm, local: bool = False,
@@ -669,7 +721,7 @@ if workspace and db_credential_file:
                 print_status(f"Attacking hashes in {ColorStr(hashes_file).StyleBRIGHT} file in single attack mode")
                 print_status(f"Possible hashes identities: {ColorStr(hash_types).StyleBRIGHT}")
 
-                if slurm and slurm.partition:
+                if (not local) and slurm and slurm.partition:
                     parallel_job_type = slurm.parallel_job_parser()
                     if not  parallel_job_type in ["MPI", "OMP"]:
                         raise InvalidParallelJob(parallel_job_type)
@@ -703,10 +755,10 @@ if workspace and db_credential_file:
                         Bash.exec(f"sbatch {slurm_script_name}")
 
                 else:
-                    import pdb; pdb.set_trace()
+                    #import pdb; pdb.set_trace()
                     for hash_type in hash_types:
                         attack_cmd = f"{self.main_exec} --single"
-                        are_all_hashes_cracked = self.are_all_hashes_cracked(hashes_file)
+                        are_all_hashes_cracked = John.are_all_hashes_cracked(hashes_file)
                         if  not are_all_hashes_cracked: # some hash isn't cracked yet
                             if hash_type:
                                 attack_cmd += f" --format={hash_type}"

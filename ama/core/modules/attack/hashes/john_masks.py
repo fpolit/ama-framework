@@ -7,25 +7,18 @@
 
 import os
 from typing import Any
+from fineprint.status import print_failure
 
-# base  imports
+
+
 from ama.core.modules.base import (
     Attack,
     Argument
 )
 from ama.core.modules.base.auxiliary import Auxiliary
-
-# cracker imports
 from ama.core.plugins.cracker import John
-
-# cracker imports
-#from ama.core.cracker import John
-
-# slurm import
 from ama.core.slurm import Slurm
-
-# fineprint imports
-from fineprint.status import print_failure
+from ama.core.files import Path
 
 # pre/post attack modules
 from ama.core.modules.auxiliary.analysis import (
@@ -35,7 +28,6 @@ from ama.core.modules.auxiliary.analysis import (
 )
 
 from ama.core.modules.auxiliary.hashes import HashesStatus
-
 
 class JohnMasks(Attack):
     """
@@ -162,7 +154,8 @@ class JohnMasks(Attack):
         return init_options
 
 
-    def attack(self, local=False, force:bool = False, pre_attack_output: Any = None):
+    def attack(self, local=False, force:bool = False, pre_attack_output: Any = None,
+               db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
         """
         Masks attack using John the Ripper
         Args:
@@ -183,7 +176,10 @@ class JohnMasks(Attack):
                              masks_file= self.options['masks_file'].value,
                              masks_attack_script= self.options['masks_attack'].value,
                              slurm = self.slurm,
-                             local = local)
+                             local = local,
+                             db_status= db_status,
+                             workspace= workspace,
+                             db_credential_file=db_credential_file)
 
         except Exception as error:
             print_failure(error)

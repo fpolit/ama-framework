@@ -121,7 +121,7 @@ class JohnSingle(Attack):
 
 
     def attack(self, *, local:bool = False, force:bool = False, pre_attack_output: Any = None,
-               workspace:str = None, db_credential_file: Path = None):
+               db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
         """
         Single attack using John the Ripper
 

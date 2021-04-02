@@ -8,11 +8,13 @@
 
 import os
 from typing import Any
+from ama.core.files import Path
 
 # base  imports
 from ama.core.modules.base import (
     Attack,
-    Argument
+    Argument,
+    Auxiliary
 )
 
 # cracker imports
@@ -46,7 +48,8 @@ class JohnIncremental(Attack):
 
     REFERENCES = None
 
-    def __init__(self, *, hash_type=None, hashes_file=None, slurm=None):
+    def __init__(self, *, hash_type=None, hashes_file=None, slurm=None,
+                 pre_attack: Auxiliary = None, post_attack: Auxiliary = None):
         """
         Initialization of John incremental attack
 
@@ -55,6 +58,9 @@ class JohnIncremental(Attack):
         hashes_file (str): Hash file to attack
         slurm (Slurm): Instance of Slurm class
         """
+
+        pre_attack_name = pre_attack.mname if isinstance(pre_attack, Auxiliary) else None
+        post_attack_name = post_attack.mname if isinstance(post_attack, Auxiliary) else None
 
         attack_options = {
             'hash_type': Argument(hash_type, True, "John hash type"),
@@ -100,13 +106,16 @@ class JohnIncremental(Attack):
             'description': JohnIncremental.DESCRIPTION,
             'fulldescription':  JohnIncremental.FULLDESCRIPTION,
             'references': JohnIncremental.REFERENCES,
+            'pre_attack': pre_attack,
             'attack_options': attack_options,
+            'post_attack': post_attack,
             'slurm': slurm
         }
 
         super().__init__(**init_options)
 
-    def attack(self, local:bool = False, force:bool = False, pre_attack_output: Any = None):
+    def attack(self, *, local:bool = False, force:bool = False, pre_attack_output: Any = None,
+               db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
         """
         Incremental attack using John the Ripper
         """
@@ -114,12 +123,18 @@ class JohnIncremental(Attack):
         #import pdb; pdb.set_trace()
         try:
             if not force:
-                self.no_empty_required_options()
+                self.no_empty_required_options(local)
 
             jtr = John()
-            jtr.incremental_attack(hash_type = self.options['hash_type'].value,
+            hash_types = self.options['hash_type'].value.split(',')
+
+            jtr.incremental_attack(hash_types = hash_types,
                                    hashes_file = self.options['hashes_file'].value,
-                                   slurm = self.slurm)
+                                   slurm = self.slurm,
+                                   local = local,
+                                   db_status= db_status,
+                                   workspace= workspace,
+                                   db_credential_file=db_credential_file)
 
         except Exception as error:
             print_failure(error)
