@@ -7,27 +7,42 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
-from typing import Any
-
-# base  imports
-from ama.core.modules.base import (
-    Attack,
-    Argument
+from typing import (
+    List,
+    Any
 )
-
-# cracker imports
-from ama.core.plugins.cracker import Hashcat
-
-# slurm import
-from ama.core.slurm import Slurm
-
-#fineprint status
 from fineprint.status import (
     print_failure,
     print_status
 )
 
-from typing import List
+
+from ama.core.modules.base import (
+    Attack,
+    Argument,
+    Auxiliary
+)
+from ama.core.plugins.cracker import Hashcat
+from ama.core.slurm import Slurm
+from ama.core.files import Path
+
+# pre attack import
+## auxiliary/hashes
+from ama.core.modules.auxiliary.hashes import (
+    HashID,
+    Nth
+)
+## auxiliary/wordlist
+from ama.core.modules.auxiliary.wordlists import (
+    CuppInteractive
+)
+
+# post attack import
+## auxiliary/hashes
+from ama.core.modules.auxiliary.hashes import (
+    HashesStatus
+)
+
 
 class HashcatCombination(Attack):
     """
@@ -49,9 +64,29 @@ class HashcatCombination(Attack):
 
     REFERENCES=None
 
+
+    # {PRE_ATTACK_MNAME: PRE_ATTACK_CLASS, ...}
+    PRE_ATTACKS = {
+        # auxiliary/hashes
+        f"{Nth.MNAME}": Nth,
+        f"{HashID.MNAME}": HashID,
+
+        ## auxiliary/wordlist
+        f"{CuppInteractive.MNAME}": CuppInteractive
+    }
+
+    # {POST_ATTACK_MNAME: POST_ATTACK_CLASS, ...}
+    POST_ATTACKS = {
+        # auxiliary/hashes
+        f"{HashesStatus.MNAME}": HashesStatus,
+    }
+
+
     def __init__(self, *,
                  wordlists:List[str] = None, hash_type: str = None,
-                 hashes_file: str = None, slurm = None):
+                 hashes_file: str = None,
+                 slurm:Slurm = None,
+                 pre_attack = None, post_attack = None):
         """
         Initialization of wordlist attack using hashcat
         """
@@ -103,14 +138,18 @@ class HashcatCombination(Attack):
             'description': HashcatCombination.DESCRIPTION,
             'fulldescription':  HashcatCombination.FULLDESCRIPTION,
             'references': HashcatCombination.REFERENCES,
+            'pre_attack': pre_attack,
             'attack_options': attack_options,
+            'post_attack': post_attack,
             'slurm': slurm
         }
         super().__init__(**init_options)
 
 
     # debugged - date: Mar 6 2021
-    def attack(self, local:bool = False, force:bool = False, pre_attack_output: Any = None):
+    def attack(self, *,
+               local:bool = False, force:bool = False, pre_attack_output: Any = None,
+               db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
         """
         Combination attack using Hashcat
 
@@ -123,24 +162,29 @@ class HashcatCombination(Attack):
         try:
 
             if not force:
-                self.no_empty_required_options()
+                self.no_empty_required_options(local)
 
 
             hc = Hashcat()
 
+            hash_type = None
+            if isinstance(self.options['hash_type'].value, int):
+                hash_types = [self.options['hash_type'].value]
+            elif isinstance(self.options['hash_type'].value, str):
+                hash_types = [int(hash_type) for hash_type in self.options['hash_type'].value.split(',')]
+            else:
+                raise TypeError(f"Invalid type hash_type: {type(hash_type)}")
+
             wordlists = [wordlist.strip() for wordlist in self.options['wordlists'].value.split(',')]
 
-            if local:
-                hc.combination_attack(hash_type = self.options['hash_type'].value,
-                                      hashes_file = self.options['hashes_file'].value,
-                                      wordlists = wordlists,
-                                      slurm = None)
-
-            else:
-                hc.combination_attack(hash_type = self.options['hash_type'].value,
-                                      hashes_file = self.options['hashes_file'].value,
-                                      wordlists = wordlists,
-                                      slurm = self.slurm)
+            hc.combination_attack(hash_types = hash_types,
+                                  hashes_file = self.options['hashes_file'].value,
+                                  wordlists = wordlists,
+                                  slurm = self.slurm,
+                                  local = local,
+                                  db_status= db_status,
+                                  workspace= workspace,
+                                  db_credential_file=db_credential_file)
 
         except Exception as error:
             print_failure(error)

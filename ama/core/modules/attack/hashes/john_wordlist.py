@@ -35,15 +35,15 @@ from ama.core.modules.auxiliary.hashes import (
     HashID,
     Nth
 )
+## auxiliary/wordlist
+from ama.core.modules.auxiliary.wordlists import (
+    CuppInteractive
+)
 
 # post attack import
 ## auxiliary/hashes
 from ama.core.modules.auxiliary.hashes import (
     HashesStatus
-)
-## auxiliary/wordlist
-from ama.core.modules.auxiliary.wordlists import (
-    CuppInteractive
 )
 
 class JohnWordlist(Attack):
@@ -75,18 +75,20 @@ class JohnWordlist(Attack):
         # auxiliary/hashes
         f"{Nth.MNAME}": Nth,
         f"{HashID.MNAME}": HashID,
+
+        ## auxiliary/wordlist
+        f"{CuppInteractive.MNAME}": CuppInteractive
     }
 
     # {POST_ATTACK_MNAME: POST_ATTACK_CLASS, ...}
     POST_ATTACKS = {
         # auxiliary/hashes
         f"{HashesStatus.MNAME}": HashesStatus,
-        f"{CuppInteractive.MNAME}": CuppInteractive
     }
 
     def __init__(self, *,
                  hash_type: str = None, hashes_file: str = None,
-                 wordlist: str = None, slurm=None,
+                 wordlist: str = None, slurm: Slurm=None,
                  pre_attack: Auxiliary = None, post_attack: Auxiliary = None):
         """
         Initialization of John  wordlist attack
@@ -100,9 +102,6 @@ class JohnWordlist(Attack):
         pre_attack (Auxiliary): Instance of a pre attack (auxiliary module)
         post_attack (Auxiliary): Instance of a post attack (auxiliary module)
         """
-
-        pre_attack_name = pre_attack.mname if isinstance(pre_attack, Auxiliary) else None
-        post_attack_name = post_attack.mname if isinstance(post_attack, Auxiliary) else None
 
         attack_options = {
             'wordlist': Argument(wordlist, True, "wordlist file"),
@@ -156,18 +155,6 @@ class JohnWordlist(Attack):
         }
 
         super().__init__(**init_options)
-
-    def get_init_options(self):
-        init_options = {
-            "hash_type": self.options['hash_type'].value,
-            "hashes_file": self.options['hashes_file'].value,
-            "wordlist": self.options['wordlist'].value,
-            "slurm": self.slurm,
-            "pre_attack": self.selected_pre_attack,
-            "post_attack": self.selected_post_attack
-        }
-
-        return init_options
 
     def get_init_options(self):
         init_options = {

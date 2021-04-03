@@ -159,7 +159,7 @@ class Interaction(CommandSet):
         """
         Read a backup file and set options of a module
         """
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         try:
             selectedModule = self._cmd.selectedModule
 

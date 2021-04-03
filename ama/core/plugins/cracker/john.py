@@ -56,7 +56,7 @@ from ...files import Path
 # cracker exceptions imports
 from .crackerException import (
     InvalidParallelJob,
-    InvalidHashType
+    NoValidHashType
 )
 
 from ama.core.cmdsets.db import Connection
@@ -95,7 +95,7 @@ class John(PasswordCracker):
                 break
 
         if not any_valid_hash_type:
-            raise InvalidHashType(John, htype)
+            NoValidHashType(John, hash_types)
 
     # debugged - date: Mar 1 2021
     @staticmethod
@@ -166,7 +166,7 @@ class John(PasswordCracker):
 
         #import pdb; pdb.set_trace()
         all_cracked = True
-        query_hash_pattern = re.compile(r"(\w*|\w*|.*):?(\w*|\w*|.*)") #parser to analize: NAME:HASH hashes
+        #query_hash_pattern = re.compile(r"(\w*|\w*|.*):?(\w*|\w*|.*)") #parser to analize: NAME:HASH hashes
         with open(hashes_file, 'r') as hashes:
             while qhash := hashes.readline().rstrip():
                 if parser_hash := query_hash_pattern.fullmatch(qhash):
@@ -295,29 +295,25 @@ class John(PasswordCracker):
                 if not  parallel_job_type in ["MPI", "OMP"]:
                     raise InvalidParallelJob(parallel_job_type)
 
-                #core, extra = slurm.parameters()
+                attack_cmd = f"{self.main_exec} --test"
                 if parallel_job_type == "MPI":
-                    parallel_work = [
-                        (
-                            f"srun --mpi={slurm.pmix}"
-                            f" {self.main_exec} --test"
-                        )
-                    ]
+                    attack_cmd = f"srun --mpi={slurm.pmix} "  + attack_cmd
+
 
                 elif parallel_job_type == "OMP":
-                    parallel_work = [
-                            f"{self.main_exec} --test"
-                    ]
+                    attack_cmd = f"srun "  + attack_cmd
 
+                header_attack = f"echo -e '\\n\\n[*] Running: {attack_cmd}'"
 
+                parallel_work = [(header_attack, attack_cmd)]
                 batch_script_name = slurm.gen_batch_script(parallel_work)
 
                 Bash.exec(f"sbatch {batch_script_name}")
 
             else:
-                john_benchmark = f"{self.main_exec} --test"
-                print_status("Running: {ColorStr(john_benchmark).StyleBRIGHT}")
-                Bash.exec(john_benchmark)
+                attack_cmd = f"{self.main_exec} --test"
+                print_status("Running: {ColorStr(attack_cmd).StyleBRIGHT}")
+                Bash.exec(attack_cmd)
         else:
             print_failure(f"Cracker {ColorStr(self.main_name).StyleBRIGHT} is disable")
 
@@ -388,8 +384,8 @@ class John(PasswordCracker):
                         else:
                             parallel_work.append((header_attack, attack_cmd))
 
-                        slurm_script_name = slurm.gen_batch_script(parallel_work)
-                        Bash.exec(f"sbatch {slurm_script_name}")
+                    slurm_script_name = slurm.gen_batch_script(parallel_work)
+                    Bash.exec(f"sbatch {slurm_script_name}")
 
                 else:
                     for hash_type in hash_types:
@@ -451,7 +447,7 @@ class John(PasswordCracker):
         slurm (Slurm): Instance of Slurm class
         """
 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
 
         if self.enable:
             try:
@@ -526,7 +522,7 @@ class John(PasswordCracker):
             print_failure(f"Cracker {ColorStr(self.main_name).StyleBRIGHT} is disable")
 
 
-    # modify - date: Apr 1 2021 ()
+    #modify - date: Apr 1 2021 (debugged - date: Apr 2 2021)
     def masks_attack(self, *,
                      hash_types: List[str] = None, hashes_file: str, masks_file: str,
                      masks_attack_script: str,
@@ -604,7 +600,7 @@ class John(PasswordCracker):
             print_failure(f"Cracker {ColorStr(self.main_name).StyleBRIGHT} is disable")
 
 
-    #debugged - date: Mar 1 2021 (modify - date: Apr 1 2021)
+    #modify - date: Apr 1 2021 (debugged - date: Apr 2 2021)
     @staticmethod
     def gen_masks_attack(*,
                          hash_types: List[str], hashes_file: Path, masks_file: Path,
@@ -621,10 +617,9 @@ class John(PasswordCracker):
         _mask = "{mask}"
         _hash_type = "{hash_type}"
         _hashes_file = "{hashes_file}"
-        _hashes_file_bright = "{ColorStr(hashes_file).StyleBRIGHT}"
         _mask_attack = "{mask_attack}"
         _header_attack = "{header_attack}"
-        _workspace_bright = "{ColorStr(workspace).StyleBRIGHT}"
+        _workspace = "{workspace}"
 
         __hash_types = f"'{hash_types}'"
         __hashes_file = f"'{hashes_file}'"
@@ -638,10 +633,8 @@ class John(PasswordCracker):
 #!/bin/env python3
 
 from sbash import Bash
-from fineprint.color import ColorStr
 
 from ama.core.plugins.cracker import John
-from ama.core.files import Path
 
 
 hash_types = {hash_types if hash_types else None}
@@ -682,11 +675,11 @@ for hash_type in hash_types:
                 break
 
     if all_cracked := John.are_all_hashes_cracked(hashes_file):
-        print(f"\\n[*] Hashes in {_hashes_file_bright} were cracked")
+        print(f"\\n[*] Hashes in {_hashes_file} were cracked")
         break
 
 if db_status and workspace and db_credential_file:
-    print(f"\\n[*] Saving cracked hashes to {_workspace_bright} workspace")
+    print(f"\\n[*] Saving cracked hashes to {_workspace} workspace")
     John.insert_hashes_to_db(hashes_file, workspace, db_credential_file)
                 """
             )

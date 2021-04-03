@@ -20,13 +20,26 @@ from ama.core.plugins.cracker import John
 from ama.core.slurm import Slurm
 from ama.core.files import Path
 
-# pre/post attack modules
+# pre attack modules
+## auxiliary/hashes
+from ama.core.modules.auxiliary.hashes import (
+    HashID,
+    Nth
+)
+
+## auxiliary/wordlist
+from ama.core.modules.auxiliary.wordlists import (
+    CuppInteractive
+)
+
+## auxiliary/analysis
 from ama.core.modules.auxiliary.analysis import (
     PackMaskgen,
     PackWholegen,
     PackPolicygen
 )
 
+# post attack import
 from ama.core.modules.auxiliary.hashes import HashesStatus
 
 class JohnMasks(Attack):
@@ -51,10 +64,17 @@ class JohnMasks(Attack):
 
     # {PRE_ATTACK_MNAME: PRE_ATTACK_CLASS, ...}
     PRE_ATTACKS = {
+        # auxiliary/hashes
+        f"{Nth.MNAME}": Nth,
+        f"{HashID.MNAME}": HashID,
+
         # auxiliary/analysis
         f"{PackMaskgen.MNAME}": PackMaskgen,
         f"{PackWholegen.MNAME}": PackWholegen,
-        f"{PackPolicygen.MNAME}": PackPolicygen
+        f"{PackPolicygen.MNAME}": PackPolicygen,
+
+        # auxiliary/wordlist
+        f"{CuppInteractive.MNAME}": CuppInteractive,
     }
 
     # {POST_ATTACK_MNAME: POST_ATTACK_CLASS, ...}
@@ -67,7 +87,7 @@ class JohnMasks(Attack):
     def __init__(self, *,
                  hash_type:str = None, hashes_file:str = None,
                  masks_file: str = None, masks_attack: str = "masks_attack.py",
-                 slurm=None,
+                 slurm: Slurm=None,
                  pre_attack = None, post_attack = None):
         """
         Initialization of John masks attack
@@ -79,9 +99,6 @@ class JohnMasks(Attack):
         masks_attack (str): Generated masks attack script
         slurm (Slurm): Instance of Slurm class
         """
-
-        pre_attack_name = pre_attack.mname if isinstance(pre_attack, Auxiliary) else None
-        post_attack_name = post_attack.mname if isinstance(post_attack, Auxiliary) else None
 
         attack_options = {
             'hash_type': Argument(hash_type, True, "John hash types(split by commas)"),

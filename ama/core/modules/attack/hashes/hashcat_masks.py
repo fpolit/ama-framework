@@ -8,25 +8,43 @@
 
 import os
 from typing import Any
-
-# base  imports
-from ama.core.modules.base import (
-    Attack,
-    Argument
-)
-
-# cracker imports
-from ama.core.plugins.cracker import Hashcat
-
-# slurm import
-from ama.core.slurm import Slurm
-
-#fineprint status
 from fineprint.status import (
     print_failure,
     print_status
 )
 
+
+# base  imports
+from ama.core.modules.base import (
+    Attack,
+    Argument,
+    Auxiliary
+)
+from ama.core.plugins.cracker import Hashcat
+from ama.core.slurm import Slurm
+from ama.core.files import Path
+
+# pre attack modules
+## auxiliary/hashes
+from ama.core.modules.auxiliary.hashes import (
+    HashID,
+    Nth
+)
+
+## auxiliary/wordlist
+from ama.core.modules.auxiliary.wordlists import (
+    CuppInteractive
+)
+
+## auxiliary/analysis
+from ama.core.modules.auxiliary.analysis import (
+    PackMaskgen,
+    PackWholegen,
+    PackPolicygen
+)
+
+# post attack import
+from ama.core.modules.auxiliary.hashes import HashesStatus
 
 class HashcatMasks(Attack):
     """
@@ -48,11 +66,34 @@ class HashcatMasks(Attack):
 
     REFERENCES=None
 
+
+    # {PRE_ATTACK_MNAME: PRE_ATTACK_CLASS, ...}
+    PRE_ATTACKS = {
+        # auxiliary/hashes
+        f"{Nth.MNAME}": Nth,
+        f"{HashID.MNAME}": HashID,
+
+        # auxiliary/analysis
+        f"{PackMaskgen.MNAME}": PackMaskgen,
+        f"{PackWholegen.MNAME}": PackWholegen,
+        f"{PackPolicygen.MNAME}": PackPolicygen,
+
+        # auxiliary/wordlist
+        f"{CuppInteractive.MNAME}": CuppInteractive,
+    }
+
+    # {POST_ATTACK_MNAME: POST_ATTACK_CLASS, ...}
+    POST_ATTACKS = {
+        # auxiliary/hashes
+        f"{HashesStatus.MNAME}": HashesStatus,
+    }
+
     def __init__(self, *,
                  hash_type: str = None, hashes_file: str = None,
                  masks_file:str = None,
-                 masks_attack_script:str = "mask_attack.py",
-                 slurm = None):
+                 masks_attack:str = "mask_attack.py",
+                 slurm: Slurm = None,
+                 pre_attack = None, post_attack = None):
         """
         Initialization of wordlist attack using hashcat
         """
@@ -61,7 +102,7 @@ class HashcatMasks(Attack):
             'hash_type': Argument(hash_type, True, "Hashcat hash type"),
             'hashes_file': Argument(hashes_file, True, "Hashes file"),
             'masks_file': Argument(masks_file, True, "Masks file"),
-            'masks_attack': Argument(masks_attack_script, True, "Generated mask attack script")
+            'masks_attack': Argument(masks_attack, True, "Generated mask attack script")
         }
 
 
@@ -105,14 +146,33 @@ class HashcatMasks(Attack):
             'description': HashcatMasks.DESCRIPTION,
             'fulldescription':  HashcatMasks.FULLDESCRIPTION,
             'references': HashcatMasks.REFERENCES,
+            'pre_attack': pre_attack,
             'attack_options': attack_options,
+            'post_attack': post_attack,
             'slurm': slurm
         }
         super().__init__(**init_options)
 
 
+    def get_init_options(self):
+
+        init_options = {
+            "hash_type": self.options['hash_type'].value,
+            "hashes_file": self.options['hashes_file'].value,
+            "masks_file": self.options['masks_file'].value,
+            "masks_attack": self.options['masks_attack'].value,
+            "slurm": self.slurm,
+            "pre_attack": self.selected_pre_attack,
+            "post_attack": self.selected_post_attack
+        }
+
+        return init_options
+
+
     #debugged - date: Mar 6 2021
-    def attack(self, local:bool = False, force:bool = False, pre_attack_output: Any = None):
+    def attack(self, *,
+               local:bool = False, force:bool = False, pre_attack_output: Any = None,
+               db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
         """
         Wordlist attack using Hashcat
 
@@ -124,23 +184,29 @@ class HashcatMasks(Attack):
 
         try:
             if not force:
-                self.no_empty_required_options()
+                self.no_empty_required_options(local)
 
             hc = Hashcat()
 
-            if local:
-                hc.masks_attack(hash_type = self.options['hash_type'].value,
-                                hashes_file = self.options['hashes_file'].value,
-                                masks_file = self.options['masks_file'].value,
-                                masks_attack_script= self.options['masks_attack'].value,
-                                slurm = None)
 
+            hash_type = None
+            if isinstance(self.options['hash_type'].value, int):
+                hash_types = [self.options['hash_type'].value]
+            elif isinstance(self.options['hash_type'].value, str):
+                hash_types = [int(hash_type) for hash_type in self.options['hash_type'].value.split(',')]
             else:
-                hc.masks_attack(hash_type = self.options['hash_type'].value,
-                                hashes_file = self.options['hashes_file'].value,
-                                masks_file = self.options['masks_file'].value,
-                                masks_attack_script= self.options['masks_attack'].value,
-                                slurm = self.slurm)
+                raise TypeError(f"Invalid type hash_type: {type(hash_type)}")
+
+
+            hc.masks_attack(hash_types = hash_types,
+                            hashes_file = self.options['hashes_file'].value,
+                            masks_file = self.options['masks_file'].value,
+                            masks_attack_script= self.options['masks_attack'].value,
+                            slurm = self.slurm,
+                            local = local,
+                            db_status= db_status,
+                            workspace= workspace,
+                            db_credential_file=db_credential_file)
 
         except Exception as error:
             print_failure(error)

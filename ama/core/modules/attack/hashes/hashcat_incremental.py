@@ -8,23 +8,32 @@
 
 import os
 from typing import Any
-
-# base  imports
-from ama.core.modules.base import (
-    Attack,
-    Argument
-)
-
-# cracker imports
-from ama.core.plugins.cracker import Hashcat
-
-# slurm import
-from ama.core.slurm import Slurm
-
-#fineprint status
 from fineprint.status import (
     print_failure,
     print_status
+)
+
+
+from ama.core.modules.base import (
+    Attack,
+    Argument,
+    Auxiliary
+)
+from ama.core.plugins.cracker import Hashcat
+from ama.core.slurm import Slurm
+from ama.core.files import Path
+
+# pre attack import
+## auxiliary/hashes
+from ama.core.modules.auxiliary.hashes import (
+    HashID,
+    Nth
+)
+
+# post attack import
+## auxiliary/hashes
+from ama.core.modules.auxiliary.hashes import (
+    HashesStatus
 )
 
 
@@ -48,21 +57,37 @@ class HashcatIncremental(Attack):
 
     REFERENCES=None
 
+    # {PRE_ATTACK_MNAME: PRE_ATTACK_CLASS, ...}
+    PRE_ATTACKS = {
+        # auxiliary/hashes
+        f"{Nth.MNAME}": Nth,
+        f"{HashID.MNAME}": HashID,
+    }
+
+    # {POST_ATTACK_MNAME: POST_ATTACK_CLASS, ...}
+    POST_ATTACKS = {
+        # auxiliary/hashes
+        f"{HashesStatus.MNAME}": HashesStatus,
+    }
+
+
     def __init__(self, *,
                  hash_type: str = None, hashes_file: str = None,
-                 incremental_attack_script:str = "incremental_attack.py",
-                 min_length:int = None, max_length:int = None,
+                 incremental_attack:str = "incremental_attack.py",
+                 charset:str = '?a', min_length:int = None, max_length:int = None,
                  masks_file:str = "incremental_masks.txt",
-                 slurm = None):
+                 slurm:Slurm = None,
+                 pre_attack: Auxiliary = None, post_attack: Auxiliary = None):
         """
         Initialization of wordlist attack using hashcat
         """
 
         attack_options = {
-            'min_length': Argument(min_length, True, "minimum length of mask"),
-            'max_length': Argument(max_length, True, "maximum length of mask"),
+            'charset': Argument(charset, True, "Charset type"),
+            'min_length': Argument(min_length, True, "Minimum length of mask"),
+            'max_length': Argument(max_length, True, "Maximum length of mask"),
             'masks_file': Argument(masks_file, True, "File with generated masks to attack"),
-            'incremental_attack': Argument(incremental_attack_script, True, "Generated incremental attack script"),
+            'incremental_attack': Argument(incremental_attack, True, "Generated incremental attack script"),
             'hash_type': Argument(hash_type, True, "Hashcat hash type"),
             'hashes_file': Argument(hashes_file, True, "Hashes file")
         }
@@ -108,14 +133,34 @@ class HashcatIncremental(Attack):
             'description': HashcatIncremental.DESCRIPTION,
             'fulldescription':  HashcatIncremental.FULLDESCRIPTION,
             'references': HashcatIncremental.REFERENCES,
+            'pre_attack': pre_attack,
             'attack_options': attack_options,
+            'post_attack': post_attack,
             'slurm': slurm
         }
         super().__init__(**init_options)
 
 
-    # debugged - date: Mar 6 2021
-    def attack(self, local:bool = False, force:bool = False, pre_attack_output: Any = None):
+    def get_init_options(self):
+        init_options = {
+            "hash_type": self.options['hash_type'].value,
+            "hashes_file": self.options['hashes_file'].value,
+            "incremental_attack": self.options['incremental_attack'].value,
+            "charset": self.options['charset'].value,
+            "min_length": self.options['min_length'].value,
+            "max_length": self.options['max_length'].value,
+            "masks_file": self.options['masks_file'].value,
+            "slurm": self.slurm,
+            "pre_attack": self.selected_pre_attack,
+            "post_attack": self.selected_post_attack
+        }
+
+        return init_options
+
+
+    def attack(self, *,
+               local:bool = False, force:bool = False, pre_attack_output: Any = None,
+               db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
         """
         Incremental attack using Hashcat
 
@@ -128,27 +173,32 @@ class HashcatIncremental(Attack):
 
         try:
             if not force:
-                self.no_empty_required_options()
+                self.no_empty_required_options(local)
 
             hc = Hashcat()
 
-            if local:
-                hc.incremental_attack(hash_type = self.options['hash_type'].value,
-                                      hashes_file = self.options['hashes_file'].value,
-                                      incremental_attack_script= self.options['incremental_attack'].value,
-                                      min_length = self.options['min_length'].value,
-                                      max_length = self.options['max_length'].value,
-                                      masks_file = self.options['masks_file'].value,
-                                      slurm = None)
 
+            hash_type = None
+            if isinstance(self.options['hash_type'].value, int):
+                hash_types = [self.options['hash_type'].value]
+            elif isinstance(self.options['hash_type'].value, str):
+                hash_types = [int(hash_type) for hash_type in self.options['hash_type'].value.split(',')]
             else:
-                hc.incremental_attack(hash_type = self.options['hash_type'].value,
-                                      hashes_file = self.options['hashes_file'].value,
-                                      incremental_attack_script= self.options['incremental_attack'].value,
-                                      min_length = self.options['min_length'].value,
-                                      max_length = self.options['max_length'].value,
-                                      masks_file = self.options['masks_file'].value,
-                                      slurm = self.slurm)
+                raise TypeError(f"Invalid type hash_type: {type(hash_type)}")
+
+
+            hc.incremental_attack(hash_types = hash_types,
+                                  hashes_file = self.options['hashes_file'].value,
+                                  incremental_attack_script= self.options['incremental_attack'].value,
+                                  charset=self.options['charset'].value,
+                                  min_length = self.options['min_length'].value,
+                                  max_length = self.options['max_length'].value,
+                                  masks_file = self.options['masks_file'].value,
+                                  slurm = self.slurm,
+                                  local = local,
+                                  db_status= db_status,
+                                  workspace= workspace,
+                                  db_credential_file=db_credential_file)
 
         except Exception as error:
             print_failure(error)

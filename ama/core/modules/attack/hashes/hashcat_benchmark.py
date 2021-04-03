@@ -9,25 +9,19 @@
 
 import os
 from typing import Any
-
-# base  imports
-from ama.core.modules.base import (
-    Attack,
-    Argument
-)
-
-# cracker imports
-#from ama.core.plugins.cracker import Hashcat
-from ama.core.plugins.cracker.hashcat import Hashcat
-
-# slurm import
-from ama.core.slurm import Slurm
-
-# fineprint imports
 from fineprint.status import (
     print_failure,
     print_status
 )
+
+from ama.core.modules.base import (
+    Attack,
+    Argument,
+    Auxiliary
+)
+from ama.core.plugins.cracker.hashcat import Hashcat
+from ama.core.files import Path
+from ama.core.slurm import Slurm
 
 class HashcatBenchmark(Attack):
     """
@@ -48,10 +42,15 @@ class HashcatBenchmark(Attack):
 
     REFERENCES = None
 
-    def __init__(self, slurm=None):
+    def __init__(self, slurm:Slurm = None,
+                 pre_attack: Auxiliary = None, post_attack: Auxiliary = None):
         """
         Initialization of Hashcat benchmark class
         """
+
+        pre_attack_name = pre_attack.mname if isinstance(pre_attack, Auxiliary) else None
+        post_attack_name = post_attack.mname if isinstance(post_attack, Auxiliary) else None
+
         attack_options = {}
 
         if slurm is None:
@@ -95,7 +94,9 @@ class HashcatBenchmark(Attack):
             'description': HashcatBenchmark.DESCRIPTION,
             'fulldescription':  HashcatBenchmark.FULLDESCRIPTION,
             'references': HashcatBenchmark.REFERENCES,
+            'pre_attack': pre_attack,
             'attack_options': attack_options,
+            'post_attack': post_attack,
             'slurm': slurm
         }
 
@@ -103,7 +104,9 @@ class HashcatBenchmark(Attack):
 
 
     #debugged - date: Mar 6 2021
-    def attack(self, local:bool = False, force:bool = False, pre_attack_output: Any = None):
+    def attack(self, *,
+               local:bool = False, force:bool = False, pre_attack_output: Any = None,
+               db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
         """
         Hashcat benchmark
 
@@ -115,16 +118,12 @@ class HashcatBenchmark(Attack):
         #import pdb; pdb.set_trace()
         try:
             if not force:
-                self.no_empty_required_options()
+                self.no_empty_required_options(local)
 
 
             hc = Hashcat()
 
-            if local:
-                hc.benchmark(slurm = None)
-
-            else:
-                hc.benchmark(slurm = self.slurm)
+            hc.benchmark(slurm = self.slurm)
 
         except Exception as error:
             print_failure(error)

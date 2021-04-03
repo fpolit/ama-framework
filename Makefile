@@ -14,10 +14,10 @@ virtualenv:
 	@echo "VirtualENV Setup Complete. Now run: source env/bin/activate"
 	@echo
 
-pkg:
+require:
 	python3 -m pip install -r requirements.txt
 
-pkgdev:
+requiredev:
 	python3 -m pip install -r requirements-dev.txt
 
 install:
@@ -26,6 +26,9 @@ install:
 	
 installdev:
 	python3 -m pip install --upgrade -r requirements-dev.txt
+	python3 -m pip install . --verbose
+
+pkgdev:
 	python3 -m pip install . --verbose
 
 test:

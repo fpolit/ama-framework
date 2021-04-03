@@ -49,5 +49,18 @@ class Mask(str):
             if not mask_symbol in Mask.charset:
                 raise InvalidMaskError(mask)
 
+    @staticmethod
+    def is_mask(mask):
+        for mask_symbol in Mask._genIterMask(mask):
+            if not mask_symbol in Mask.charset:
+                return False
+        return True
+
+
+    def is_valid_charset(charset):
+        if charset in Mask.charset:
+            return True
+        return False
+
     def __len__(self):
         return ceil(len(self.mask)/2)

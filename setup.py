@@ -34,7 +34,7 @@ setup(
     entry_points={
         'console_scripts':[
             'ama = ama.ama:main',
-            'amadb = ama.amadb:main'
+            'amadb = ama.amadb:main',
         ],
     }
 )

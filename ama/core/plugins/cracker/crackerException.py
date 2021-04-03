@@ -49,10 +49,10 @@
 #         super().__init__(self.warningMsg)
 
 
-class InvalidHashType(Exception):
+class NoValidHashType(Exception):
     def __init__(self, cracker, hash_type):
         cracker_name = cracker.MAINNAME
-        self.warning = f"Invalid {cracker_name} hash Type: {hash_type}"
+        self.warning = f"No valid {cracker_name} hash Types: {hash_type}"
         super().__init__(self.warning)
 
 

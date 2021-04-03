@@ -7,24 +7,24 @@
 
 import os
 from typing import Any
-
-# base  imports
-from ama.core.modules.base import (
-    Attack,
-    Argument
-)
-
-# cracker imports
-from ama.core.plugins.cracker import Hashcat
-
-# slurm import
-from ama.core.slurm import Slurm
-
-#fineprint status
 from fineprint.status import (
     print_failure,
     print_status
 )
+
+from ama.core.modules.base import (
+    Attack,
+    Argument,
+    Auxiliary
+)
+from ama.core.plugins.cracker import Hashcat
+from ama.core.files import Path
+from ama.core.slurm import Slurm
+
+# pre attack modules
+
+# post attack import
+from ama.core.modules.auxiliary.hashes import HashesStatus
 
 
 class HashcatBruteForce(Attack):
@@ -47,9 +47,20 @@ class HashcatBruteForce(Attack):
 
     REFERENCES=None
 
+    # {PRE_ATTACK_MNAME: PRE_ATTACK_CLASS, ...}
+    PRE_ATTACKS = {}
+
+    # {POST_ATTACK_MNAME: POST_ATTACK_CLASS, ...}
+    POST_ATTACKS = {
+        # auxiliary/hashes
+        f"{HashesStatus.MNAME}": HashesStatus,
+    }
+
+
     def __init__(self, *,
                  hash_type: str = None, hashes_file: str = None, mask:str = None,
-                 slurm = None):
+                 slurm:Slurm = None,
+                 pre_attack = None, post_attack = None):
         """
         Initialization of wordlist attack using hashcat
         """
@@ -102,13 +113,18 @@ class HashcatBruteForce(Attack):
             'fulldescription':  HashcatBruteForce.FULLDESCRIPTION,
             'references': HashcatBruteForce.REFERENCES,
             'attack_options': attack_options,
-            'slurm': slurm
+            'slurm': slurm,
+            'pre_attack': pre_attack,
+            'attack_options': attack_options,
+            'post_attack': post_attack,
         }
         super().__init__(**init_options)
 
 
     # debugged - date: Mar 6 2021
-    def attack(self, local:bool = False, force:bool = False, pre_attack_output: Any = None):
+    def attack(self, *,
+               local:bool = False, force:bool = False, pre_attack_output: Any = None,
+               db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
         """
         Wordlist attack using Hashcat
 
@@ -120,21 +136,27 @@ class HashcatBruteForce(Attack):
 
         try:
             if not force:
-                self.no_empty_required_options()
+                self.no_empty_required_options(local)
 
             hc = Hashcat()
 
-            if local:
-                hc.brute_force_attack(hash_type = self.options['hash_type'].value,
-                                      hashes_file = self.options['hashes_file'].value,
-                                      mask = self.options['mask'].value,
-                                      slurm = None)
 
+            hash_type = None
+            if isinstance(self.options['hash_type'].value, int):
+                hash_types = [self.options['hash_type'].value]
+            elif isinstance(self.options['hash_type'].value, str):
+                hash_types = [int(hash_type) for hash_type in self.options['hash_type'].value.split(',')]
             else:
-                hc.brute_force_attack(hash_type = self.options['hash_type'].value,
-                                      hashes_file = self.options['hashes_file'].value,
-                                      mask = self.options['mask'].value,
-                                      slurm = self.slurm)
+                raise TypeError(f"Invalid type hash_type: {type(hash_type)}")
+
+            hc.brute_force_attack(hash_types = hash_types,
+                                  hashes_file = self.options['hashes_file'].value,
+                                  mask = self.options['mask'].value,
+                                  slurm = self.slurm,
+                                  local = local,
+                                  db_status= db_status,
+                                  workspace= workspace,
+                                  db_credential_file=db_credential_file)
 
         except Exception as error:
             print_failure(error)
