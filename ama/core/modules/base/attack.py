@@ -143,7 +143,7 @@ class Attack(Module):
         """
         Show information about the module
         """
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
 
         # module head
         info_msg = self.info_head()

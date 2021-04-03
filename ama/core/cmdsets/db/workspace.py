@@ -218,15 +218,11 @@ class Workspace(CommandSet):
                 else:
                     raise WorkspaceExistsError(workspace)
 
-                #self._cmd.workspace = switchWorkspace
-                #cmd2.Cmd.poutput(f"Workspace: {switchWorkspace}")
-                print_status(f"Current workspace: {workspace}")
+                print_status(f"Current workspace: {ColorStr(workspace).StyleBRIGHT}")
 
             except (Exception, psycopg2.DatabaseError) as error:
-                #cmd2.Cmd.pexcept(error)
                 print_failure(error)
         else:
-            #cmd2.Cmd.pwarning("No workspace selected")
             print_failure("No workspace selected")
 
     #debugged - date: Feb 27 2021

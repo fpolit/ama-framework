@@ -86,7 +86,7 @@ class HashcatCombination(Attack):
                  wordlists:List[str] = None, hash_type: str = None,
                  hashes_file: str = None,
                  slurm:Slurm = None,
-                 pre_attack = None, post_attack = None):
+                 pre_attack: Auxiliary = None, post_attack:Auxiliary = None):
         """
         Initialization of wordlist attack using hashcat
         """

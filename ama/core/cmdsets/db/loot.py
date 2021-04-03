@@ -37,7 +37,13 @@ import psycopg2
 #from ama.core.cracker.cracker import PasswordCracker
 
 # fineprint imports
-from fineprint import print_failure
+from fineprint import (
+    print_failure,
+    print_status,
+    print_successful
+)
+from fineprint.color import ColorStr
+
 
 @with_default_category(Category.DB)
 class Loot(CommandSet):
@@ -52,7 +58,7 @@ class Loot(CommandSet):
     @with_argparser(loot_parser)
     def do_loot(self, ns: argparse.Namespace):
         """
-        Select the type of loot to show
+        Show loots
         """
         handler = ns.cmd2_handler.get()
         if handler is not None:
@@ -65,61 +71,96 @@ class Loot(CommandSet):
 
 
     hashes_parser = cmd2.Cmd2ArgumentParser()
+    db_interact_parser = hashes_parser.add_argument_group('Database Interaction')
+    db_interact_parser.add_argument('-r', '--remove', type=str,
+                                    help='Remove cracked hash from workspace')
+
     filterHashes_parser = hashes_parser.add_argument_group('Filters')
-    filterHashes_parser.add_argument('-c', '--cracker', type=str, default=None,
+    filterHashes_parser.add_argument('-c', '--cracker', type=str,
                                      help="Hash Cracker")
-    filterHashes_parser.add_argument('-m', dest='hashType', default=None,
+    filterHashes_parser.add_argument('-m', dest='hashType',
                                help="hash type")
 
-    # debugged - date: Feb 27 2021
+    # debugged - date: Apr 3 2021
     @cmd2.as_subcommand_to('loot', 'hashes', hashes_parser)
     def loot_hashes(self, args):
         """
-        Show loot of cracked hashes
+        Interact with cracked hashes in a workspace
         """
 
         #import pdb; pdb.set_trace()
         cur = None
 
         try:
-            if self._cmd.db_conn is None:
+            db_conn = self._cmd.db_conn
+            if db_conn is None:
                 raise Exception("Database not connected")
 
-            cur = self._cmd.db_conn.cursor()
+            cur = db_conn.cursor()
             workspace = self._cmd.workspace
             # validate the argument columns to query for specific columns
-            queryHashes = (
-                f"""
-                SELECT hash, type, cracker, password
-                FROM hashes_{workspace}
-                """
-            )
+            if args.remove:
+                rhash = args.remove
+                print_status(f"Removing {ColorStr(rhash).StyleBRIGHT} hash from {ColorStr(workspace).StyleBRIGHT} workspace")
+                getAllCrackedHashes = (
+                    f"""
+                    SELECT hash
+                    FROM hashes_{workspace}
+                    """
+                )
 
-            where = []
-            if args.cracker:
-                where.append(f"cracker ILIKE '%{args.cracker}%'")
+                remove_hash_sql = ""
+                cur.execute(getAllCrackedHashes)
+                for cracked_hash in cur.fetchall():
+                    if rhash == cracked_hash[0]:
+                        remove_hash_sql = (
+                            f"""
+                            DELETE FROM hashes_{workspace}
+                            WHERE hash = %s;
+                            """
+                        )
+                        break
+                if remove_hash_sql:
+                    cur.execute(remove_hash_sql, (rhash,))
+                    db_conn.commit()
+                    print_successful(f"Cracked hash {ColorStr(rhash).StyleBRIGHT} has been deleted from {ColorStr(workspace).StyleBRIGHT} workspace")
 
-            if args.hashType:
-                where.append(f"type ILIKE '%{args.hashType}%'")
+                else:
+                    print_failure(f"No hash {ColorStr(rhash).StyleBRIGHT} in {ColorStr(workspace).StyleBRIGHT} workspace")
 
-            if where:
-                whereQuery = "WHERE"
-                for filterId, filterQuery in enumerate(where):
-                    if not(filterId == 0):
-                        whereQuery += f" AND {filterQuery}"
-                    else:
-                        whereQuery += f" {filterQuery}"
+            else:
+                queryHashes = (
+                    f"""
+                    SELECT hash, type, cracker, password
+                    FROM hashes_{workspace}
+                    """
+                )
 
-                queryHashes += whereQuery
+                where = []
+                if args.cracker:
+                    where.append(f"cracker ILIKE '%{args.cracker}%'")
 
-            cur.execute(queryHashes)
+                if args.hashType:
+                    where.append(f"type ILIKE '%{args.hashType}%'")
 
-            hashesTableHeaders = ["Hash", "Type", "Password", "Cracker"]
+                if where:
+                    whereQuery = "WHERE"
+                    for filterId, filterQuery in enumerate(where):
+                        if not(filterId == 0):
+                            whereQuery += f" AND {filterQuery}"
+                        else:
+                            whereQuery += f" {filterQuery}"
 
-            hashesTable = [crackedHash for crackedHash in cur.fetchall()]
-            cur.close()
+                    queryHashes += whereQuery
 
-            print(tabulate(hashesTable, headers=hashesTableHeaders))
+                cur.execute(queryHashes)
+
+                hashesTableHeaders = ["Hash", "Type", "Password", "Cracker"]
+
+                hashesTable = [crackedHash for crackedHash in cur.fetchall()]
+                cur.close()
+
+                print(tabulate(hashesTable, headers=hashesTableHeaders))
 
         except (Exception, psycopg2.DatabaseError) as error:
             #cmd2.Cmd.poutput(error)

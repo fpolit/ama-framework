@@ -14,7 +14,7 @@ from .hashcat_combination import HashcatCombination
 from .hashcat_brute_force import HashcatBruteForce
 from .hashcat_incremental import HashcatIncremental
 from .hashcat_masks import HashcatMasks
-#from .hashcat_hybrid import HashcatHybrid
+from .hashcat_hybrid import HashcatHybrid
 
 # sth attack import
 from .sth import STH

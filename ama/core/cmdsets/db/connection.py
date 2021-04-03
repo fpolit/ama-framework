@@ -99,24 +99,24 @@ class Connection(CommandSet):
                 credentialParser = re.compile(r"([\W|\w]*)@([\W|\w]*)/([\W|\w]*)")
                 if credentials := credentialParser.fullmatch(args.credentials):
                     user, host, database = credentials.groups()
-                    self._cmd.db_creds = {'host': host, 'database': database, 'user': user}
+                    db_creds = {'host': host, 'database': database, 'user': user}
                     password = getpass(prompt=f"Password {user} role: ")
-                    self._cmd.db_creds['password'] = password
+                    db_creds['password'] = password
                 else:
                     raise InvalidFormatDatabaseCredential(args.credentials)
 
             elif args.creds:
-                self._cmd.db_creds = Connection.dbCreds(args.creds)
+                db_creds = Connection.dbCreds(args.creds)
 
             else: # no database credential supplied
                 raise NoDatabaseCredentialsSupplied
 
 
-            if  self._cmd.db_creds:
-                self._cmd.db_conn =  psycopg2.connect(**self._cmd.db_creds)
-                dbName = self._cmd.db_creds['database']
+            if  db_creds:
+                self._cmd.db_conn =  psycopg2.connect(**db_creds)
+                dbName = db_creds['database']
                 print_successful(f"Connected to {ColorStr(dbName).StyleBRIGHT} database")
-                del self._cmd.db_creds['password']
+                del db_creds
 
             else:
                 raise Exception("No database credential supplied")
@@ -133,12 +133,13 @@ class Connection(CommandSet):
         try:
             self._cmd.db_conn.close()
             self._cmd.db_conn = None
-            dbName = self._cmd.db_creds['database']
+
+            db_creds = Connection.dbCreds(self._cmd.database_credentials_file)
+            dbName = db_creds['database']
             print_status(f"Database {ColorStr(dbName).StyleBRIGHT} disconnected")
-            del self._cmd.db_creds
+            del db_creds
 
         except (Exception, psycopg2.DatabaseError) as error:
-            #cmd2.Cmd.pexcept(error)
             print_failure(error)
 
     def do_db_status(self, args):
@@ -146,17 +147,17 @@ class Connection(CommandSet):
         Report status of database connection
         """
         if self._cmd.db_conn:
-            dbName = self._cmd.db_creds['database']
+            db_creds = Connection.dbCreds(self._cmd.database_credentials_file)
+            dbName = db_creds['database']
             print_successful(f"Connected to {ColorStr(dbName).StyleBRIGHT} database")
         else:
             print_failure(f"Database not connected")
 
     @staticmethod
-    def dbCreds(dbconfig):
+    def dbCreds(dbconfig: Path):
+        db_credentials = None
         try:
-            #import pdb;pdb.set_trace()
-            dbconfig_file = Path(dbconfig)
-            dbconfig_file = dbconfig_file.expanduser()
+            dbconfig_file = dbconfig.expanduser()
             permission = [os.R_OK]
             Path.access(permission, dbconfig_file)
 

@@ -33,7 +33,7 @@ from ama.core.modules.attack.hashes import (
     HashcatBruteForce,
     HashcatIncremental,
     HashcatMasks,
-    #HashcatHybrid
+    HashcatHybrid
 )
 
 # sth
@@ -95,7 +95,7 @@ attackModules = {
     f"{HashcatBruteForce.MNAME}": HashcatBruteForce,
     f"{HashcatIncremental.MNAME}": HashcatIncremental,
     f"{HashcatMasks.MNAME}": HashcatMasks,
-    #HashcatHybrid
+    f"{HashcatHybrid.MNAME}": HashcatHybrid,
 
     # sth
     f"{STH.MNAME}": STH,

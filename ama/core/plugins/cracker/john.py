@@ -266,6 +266,10 @@ class John(PasswordCracker):
                 )
 
                 cur.executemany(insert_cracked_hash, new_cracked_hashes)
+                print(f"\n[*] Cracked hashes were saved to {workspace} workspace database")
+
+            else:
+                print(f"\n[*] No new cracked hashes to save to {workspace} workspace database")
 
             db_conn.commit()
             cur.close()
@@ -637,13 +641,13 @@ from sbash import Bash
 from ama.core.plugins.cracker import John
 
 
-hash_types = {hash_types if hash_types else None}
+hash_types = {hash_types}
 hashes_file = {__hashes_file}
-masks_file = {__masks_file}
+masks_file = Path({__masks_file})
 parallel_job_type = {__parallel_job_type}
 db_status = {db_status}
 workspace = {__workspace if workspace else None}
-db_credential_file = {__db_credential_file if db_credential_file else None}
+db_credential_file = Path({__db_credential_file})
 
 jtr = John()
 
@@ -679,7 +683,6 @@ for hash_type in hash_types:
         break
 
 if db_status and workspace and db_credential_file:
-    print(f"\\n[*] Saving cracked hashes to {_workspace} workspace")
     John.insert_hashes_to_db(hashes_file, workspace, db_credential_file)
                 """
             )

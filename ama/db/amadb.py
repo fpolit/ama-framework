@@ -50,7 +50,6 @@ class AmaDB:
             print_status(f"Creating role:  {ColorStr(roleName).StyleBRIGHT}")
 
             password = getpass(prompt=f"Password for {ColorStr(roleName).StyleBRIGHT} role (empty for random generation): ")
-            randomPasswd = False
             if not password:
                 passwd = PasswordGenerator()
                 passwd.minlen = 16
@@ -60,16 +59,11 @@ class AmaDB:
                 passwd.minuchars = 2
 
                 password = passwd.generate()
-                randomPasswd = True
 
             Bash.exec(f"psql -U postgres -c \"CREATE ROLE {roleName} WITH LOGIN CREATEDB PASSWORD '{password}'\"", quiet=True)
             Bash.exec(f"psql -U postgres -c \"CREATE DATABASE {roleName} OWNER {roleName}\"", quiet=True)
             #cmd2.Cmd.poutput(f"Role {roleName} has been created")
             print_successful(f"Role {ColorStr(roleName).StyleBRIGHT} has been created")
-
-            if randomPasswd:
-                #cmd2.Cmd.poutput(f"Password {roleName} role: {password}")
-                print_successful(f"Password {ColorStr(roleName).StyleBRIGHT} role: {ColorStr(password).StyleBRIGHT}")
 
             #cmd2.Cmd.poutput(f"Creating {dbName} database")
             print_status(f"Creating {ColorStr(dbName).StyleBRIGHT} database")
@@ -133,6 +127,7 @@ class AmaDB:
             with open(database_json_file, 'w') as db_credentials:
                 json.dump(dbCredential, db_credentials, indent=4)
 
+            print_successful(f"Database credential file has been created: {database_json_file}")
             del dbCredential
 
         except (Exception, psycopg2.DatabaseError) as error:

@@ -14,8 +14,6 @@ from tabulate import tabulate
 from sbash import Bash
 import psycopg2
 from typing import List
-
-# fineprint imports
 from fineprint.status import (
     print_status,
     print_failure,
@@ -23,29 +21,19 @@ from fineprint.status import (
 )
 from fineprint.color import ColorStr
 
-# slurm imports
-from ama.core.slurm import Slurm
 
-# cracker imports
+from ama.core.slurm import Slurm
 from .cracker import PasswordCracker
 from .crackedHash import CrackedHash
-
-# john hashes import
 from ama.data.hashes import hcHashes
-
-# core.file imports
 from ama.core.files import Path
-
-# cracker exceptions imports
+from .mask import Mask
+from ama.core.cmdsets.db import Connection
 from .crackerException import (
     InvalidParallelJob,
     NoValidHashType,
     InvalidWordlistsNumber
 )
-
-# mask imports
-from .mask import Mask
-
 
 class Hashcat(PasswordCracker):
     """
@@ -61,6 +49,7 @@ class Hashcat(PasswordCracker):
         super().__init__(name=['hashcat', 'hc'], version="v6.1.1")
 
 
+    #debugged - date: Apr 3 2021
     @staticmethod
     def check_hash_type(hash_types: List[int]):
         """
@@ -144,7 +133,7 @@ class Hashcat(PasswordCracker):
             print_failure(error)
 
 
-    # debugged - date Arp 2 2021
+    # debugged - date Apr 2 2021
     @staticmethod
     def are_all_hashes_cracked(hashes_file: Path, potfile: Path = None):
         """
@@ -195,11 +184,12 @@ class Hashcat(PasswordCracker):
             print_failure(error)
 
 
+    # debugged - date Apr 3 2021
     @staticmethod
     def insert_hashes_to_db(hashes_file: Path, workspace: str, creds_file: Path):
         cur = db_conn = None
         try:
-            import pdb;pdb.set_trace()
+            #import pdb;pdb.set_trace()
             hashes_status = Hashcat.hashes_file_status(hashes_file)
             cracked_hashes = hashes_status['cracked']
 
@@ -229,6 +219,10 @@ class Hashcat(PasswordCracker):
                 )
 
                 cur.executemany(insert_cracked_hash, cracked_hashes)
+                print_successful(f"\n[*] Cracked hashes were saved to {ColorStr(workspace).StyleBRIGHT} workspace")
+
+            else:
+                print_status(f"\n[*] No new cracked hashes to save to {ColorStr(workspace).StyleBRIGHT} workspace")
 
             db_conn.commit()
             cur.close()
@@ -274,7 +268,7 @@ class Hashcat(PasswordCracker):
             print_failure(f"Cracker {ColorStr(self.main_name).StyleBRIGHT} is disable")
 
 
-    # modify - date: Apr 1 2021 (debugged - date Apr 2 2021)
+    # modify - date: Apr 1 2021 (debugged - date Apr 3 2021)
     def wordlist_attack(self, *,
                         hash_types:List[int] , hashes_file:str, wordlist:str, rules_file:str=None,
                         slurm: Slurm, local:bool = False,
@@ -337,6 +331,7 @@ class Hashcat(PasswordCracker):
                             parallel_work.append((header_attack, attack_cmd))
 
                     slurm_script_name = slurm.gen_batch_script(parallel_work)
+                    #import pdb; pdb.set_trace()
                     Bash.exec(f"sbatch {slurm_script_name}")
 
                 else:
@@ -363,6 +358,7 @@ class Hashcat(PasswordCracker):
                             print_successful(f"Hashes in {ColorStr(hashes_file).StyleBRIGHT} were cracked")
                             break
 
+                    #import pdb; pdb.set_trace()
                     if db_status and workspace and db_credential_file:
                         Hashcat.insert_hashes_to_db(hashes_file, workspace, db_credential_file)
 
@@ -373,7 +369,7 @@ class Hashcat(PasswordCracker):
             print_failure(f"Cracker {ColorStr(self.main_name).StyleBRIGHT} is disable")
 
 
-    # modify - date: Apr 1 2021 (debugged - date Apr 2 2021)
+    # modify - date: Apr 1 2021 (debugged - date Apr 3 2021)
     def combination_attack(self, *,
                            hash_types: List[str] , hashes_file:str , wordlists: List[str],
                            slurm: Slurm, local:bool = False,
@@ -434,6 +430,7 @@ class Hashcat(PasswordCracker):
                             parallel_work.append((header_attack, attack_cmd))
 
                     slurm_script_name = slurm.gen_batch_script(parallel_work)
+                    #import pdb; pdb.set_trace()
                     Bash.exec(f"sbatch {slurm_script_name}")
 
                 else:
@@ -456,6 +453,7 @@ class Hashcat(PasswordCracker):
                             print_successful(f"Hashes in {ColorStr(hashes_file).StyleBRIGHT} were cracked")
                             break
 
+                    #import pdb; pdb.set_trace()
                     if db_status and workspace and db_credential_file:
                         Hashcat.insert_hashes_to_db(hashes_file, workspace, db_credential_file)
 
@@ -525,6 +523,7 @@ class Hashcat(PasswordCracker):
                             parallel_work.append((header_attack, attack_cmd))
 
                     slurm_script_name = slurm.gen_batch_script(parallel_work)
+                    import pdb;pdb.set_trace()
                     Bash.exec(f"sbatch {slurm_script_name}")
 
                 else:
@@ -547,6 +546,7 @@ class Hashcat(PasswordCracker):
                             print_successful(f"Hashes in {ColorStr(hashes_file).StyleBRIGHT} were cracked")
                             break
 
+                    import pdb;pdb.set_trace()
                     if db_status and workspace and db_credential_file:
                         Hashcat.insert_hashes_to_db(hashes_file, workspace, db_credential_file)
 
@@ -600,7 +600,7 @@ class Hashcat(PasswordCracker):
                           workspace = workspace,
                           db_credential_file = db_credential_file)
 
-    # modify - date: Apr 1 2021 (debugged -date Apr 2021)
+    # modify - date: Apr 1 2021 (debugged - date Apr 3 2021)
     def masks_attack(self,*,
                      hash_types:List[int], hashes_file:str, masks_file:str,
                      masks_attack_script: str,
@@ -675,6 +675,7 @@ class Hashcat(PasswordCracker):
                             print_successful(f"Hashes in {ColorStr(hashes_file).StyleBRIGHT} were cracked")
                             break
 
+                    #import pdb; pdb.set_trace()
                     if db_status and workspace and db_credential_file:
                         Hashcat.insert_hashes_to_db(hashes_file, workspace, db_credential_file)
 
@@ -685,7 +686,7 @@ class Hashcat(PasswordCracker):
             print_failure(f"Cracker {ColorStr(self.main_name).StyleBRIGHT} is disable")
 
 
-    # modify - date: Apr 1 2021
+    # modify - date: Apr 1 2021 (debugged - date Apr 3 2021)
     @staticmethod
     def gen_masks_attack(*,
                          hash_types: List[str], hashes_file: Path, masks_file: Path,
@@ -718,14 +719,14 @@ class Hashcat(PasswordCracker):
 from sbash import Bash
 
 from ama.core.plugins.cracker import Hashcat
+from ama.core.files import Path
 
-
-hash_types = {hash_types if hash_types else None}
-hashes_file = {__hashes_file}
+hash_types = {hash_types}
+hashes_file = Path({__hashes_file})
 masks_file = {__masks_file}
 db_status = {db_status}
 workspace = {__workspace if workspace else None}
-db_credential_file = {__db_credential_file if db_credential_file else None}
+db_credential_file = Path({__db_credential_file})
 
 hc = Hashcat()
 
@@ -753,7 +754,6 @@ for hash_type in hash_types:
         break
 
 if db_status and workspace and db_credential_file:
-    print(f"\\n[*] Saving cracked hashes to {_workspace} workspace")
     Hashcat.insert_hashes_to_db(hashes_file, workspace, db_credential_file)
                 """
             )
@@ -762,3 +762,160 @@ if db_status and workspace and db_credential_file:
             attack.write(masks_attack)
 
         print_successful(f"Masks attack script generated: {ColorStr(masks_attack_script).StyleBRIGHT}")
+
+
+    # modify - date: Apr 1 2021 (debugged - date Apr 3 2021)
+    def hybrid_attack(self, *,
+                      hash_types: List[str] , hashes_file:str , inverse:bool = False,
+                      wordlists: List[str], masks: List[str] = None, masks_file:Path = None,
+                      slurm: Slurm, local:bool = False,
+                      db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
+
+        """
+        hybrid attack using hashcat submiting parallel tasks in a cluster with Slurm
+
+        Args:
+        hash_type (str): Hashcat's hash type
+        hashes_file (str): Hash file to attack
+        inverse (bool): If inverse is false the attack combine WORDLISTS + MASKS, otherwise it combine MASKS + WORDLISTS
+        wordlists (List[str]): wordlists to attack
+        masks (List[str]): masks to attack
+        masks_file (str): masks file to attack
+        slurm (Slurm): Instance of Slurm class
+        """
+
+        #import pdb; pdb.set_trace()
+        if self.enable:
+            try:
+                if not inverse:
+                    attack_mode = 6
+                else:
+                    attack_mode = 7
+
+                permission = [os.R_OK]
+                Path.access(permission, hashes_file, *wordlists)
+                Hashcat.check_hash_type(hash_types)
+
+                if masks and masks_file:
+                    raise Exception("Only supplied masks or a masks file")
+
+                elif masks:
+                    valid_masks = []
+                    for mask in masks:
+                        if Mask.is_mask(mask):
+                            valid_masks.append(mask)
+
+                    if not valid_masks:
+                        raise Exception("No valid masks supplied")
+                    masks = valid_masks
+
+                else: # masks_file supplied
+                    Path.access(permission, masks_file)
+                    masks = []
+                    with open(masks_file, 'r') as _masks_file:
+                        while mask := _masks_file.readline().rstrip():
+                            if Mask.is_mask(mask):
+                                masks.append(mask)
+
+                if not inverse:
+                    print_status(f"Attacking hashes in {ColorStr(hashes_file).StyleBRIGHT} file in hibrid mode {ColorStr('WORDLISTS + MASKS').StyleBRIGHT} ")
+                else:
+                    print_status(f"Attacking hashes in {ColorStr(hashes_file).StyleBRIGHT} file in hibrid mode {ColorStr('MASKS + WORDLISTS').StyleBRIGHT}")
+
+                print_status(f"Wordlists: {ColorStr(wordlists).StyleBRIGHT}")
+                if masks and masks_file is None:
+                    print_status(f"Masks: {ColorStr(masks).StyleBRIGHT}")
+                else:
+                    print_status(f"Masks file: {ColorStr(masks_file).StyleBRIGHT}")
+
+
+                hash_types_names = [Hashcat.HASHES[hash_type]['Name'] for hash_type in hash_types]
+                print_status(f"Possible hashes identities: {ColorStr(hash_types_names).StyleBRIGHT}")
+
+                #import pdb; pdb.set_trace()
+                if (not local) and slurm and slurm.partition:
+
+                    parallel_job_type = slurm.parallel_job_parser()
+                    if not  parallel_job_type in ["GPU"]:
+                        raise InvalidParallelJob(parallel_job_type)
+
+                    parallel_work = []
+                    for hash_type in hash_types:
+                        for wordlist in wordlists:
+                            for mask in masks:
+                                if not inverse:
+                                    attack_cmd = (
+                                        f"{self.main_exec}"
+                                        f" -a {attack_mode}"
+                                        f" -m {hash_type}"
+                                        f" {hashes_file} {wordlist} {mask}"
+                                    )
+                                else:
+                                    attack_cmd = (
+                                        f"{self.main_exec}"
+                                        f" -a {attack_mode}"
+                                        f" -m {hash_type}"
+                                        f" {hashes_file} {mask} {wordlist}"
+                                    )
+
+                                header_attack = f"echo -e '\\n\\n[*] Running: {attack_cmd}'"
+
+                                if db_status and workspace and db_credential_file:
+                                    insert_cracked_hashes = (
+                                        f"amadb -c {db_credential_file} -w {workspace}"
+                                        f" --cracker {Hashcat.MAINNAME} -j {hashes_file}"
+                                    )
+
+                                    parallel_work.append((header_attack, attack_cmd, insert_cracked_hashes))
+                                else:
+                                    parallel_work.append((header_attack, attack_cmd))
+
+                    slurm_script_name = slurm.gen_batch_script(parallel_work)
+                    #import pdb; pdb.set_trace()
+                    Bash.exec(f"sbatch {slurm_script_name}")
+
+                else:
+                    #import pdb; pdb.set_trace()
+                    all_cracked = False
+
+                    for hash_type in hash_types:
+                        for wordlist in wordlists:
+                            for mask in masks:
+                                all_cracked = Hashcat.are_all_hashes_cracked(hashes_file)
+                                if  not all_cracked: # some hash isn't cracked yet
+                                    if not inverse:
+                                        attack_cmd = (
+                                            f"{self.main_exec}"
+                                            f" -a {attack_mode}"
+                                            f" -m {hash_type}"
+                                            f" {hashes_file} {wordlist} {mask}"
+                                        )
+                                    else:
+                                        attack_cmd = (
+                                            f"{self.main_exec}"
+                                            f" -a {attack_mode}"
+                                            f" -m {hash_type}"
+                                            f" {hashes_file} {mask} {wordlist}"
+                                        )
+
+                                    print()
+                                    print_status(f"Running: {ColorStr(attack_cmd).StyleBRIGHT}")
+                                    Bash.exec(attack_cmd)
+
+                                else:
+                                    print_successful(f"Hashes in {ColorStr(hashes_file).StyleBRIGHT} were cracked")
+                                    break
+                            if all_cracked:
+                                break
+                        if all_cracked:
+                            break
+
+                    #import pdb; pdb.set_trace()
+                    if db_status and workspace and db_credential_file:
+                        Hashcat.insert_hashes_to_db(hashes_file, workspace, db_credential_file)
+
+            except Exception as error:
+                print_failure(error)
+
+        else:
+            print_failure(f"Cracker {ColorStr(self.main_name).StyleBRIGHT} is disable")

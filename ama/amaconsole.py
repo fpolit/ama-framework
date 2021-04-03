@@ -7,12 +7,13 @@
 
 import sys
 import argparse
+import psycopg2
 
 # cmdsets imports
 from .core.cmdsets.db import (
-     Workspace,
-     Connection,
-     Loot
+    Workspace,
+    Connection,
+    Loot
 )
 
 from .core.cmdsets.module import (
@@ -55,7 +56,7 @@ class Ama(Cmd):
 
     AMA_HOME = AMA_HOME
 
-    def __init__(self):
+    def __init__(self, db_credentials:Path = Path.joinpath(AMA_HOME, 'db/database.json')):
         super().__init__(use_ipython=True)
 
         self.debug = True
@@ -63,14 +64,21 @@ class Ama(Cmd):
         self.prompt = "ama > "
         self.continuation_prompt = "> "
         self.default_category = Category.CORE
-        self.db_conn = None
+        self.db_conn = Ama.init_db_connection(db_credentials)
         self.workspace = "default" # selected workspace
-        self.database_credentials_file = Path.joinpath(AMA_HOME, 'db/database.json')
+        self.database_credentials_file = db_credentials
         self.modules = amaModules # format {NAME: MODULE_CLASS, ....}
         self.selectedModule = None # selected module with use command (Instance of the module)
         self.filteredModules = [] # filtered modules by a search (format: [(#, MODULE_CLASS), ...])
         #self.filteredFullAttacks = [] # filtered full attacks by a search (format: [(#, MODULE_CLASS), ...])
         self.gvalues = {} # global values set by setvg (format {OPTION_NAME: OPTION_VALUE, ...})
+
+    def init_db_connection(db_credentials:Path):
+        db_conn = None
+        dbCredentials = Connection.dbCreds(db_credentials)
+        db_conn = psycopg2.connect(**dbCredentials)
+        del dbCredentials
+        return db_conn
 
 def main(argv=sys.argv[1:]):
     ama = Ama()
