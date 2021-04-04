@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 #
-# masks attack using john with hashid as pre attack module
+# single attack using john with hashid as pre attack module
 #
-# date: Mar 24 2021
+# debugged - date Apr 3 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 from typing import Any
@@ -11,8 +11,7 @@ from fineprint.status import (
     print_status
 )
 
-
-from ..john_masks import JohnMasks
+from ..john_single import JohnSingle
 from ama.core.modules.auxiliary.hashes import HashID
 from ama.core.files import Path
 from ama.core.plugins.cracker import John
@@ -21,7 +20,7 @@ from ama.core.slurm import Slurm
 
 # name format: PREATTACK_ATTACK_POSTATTACK
 # (if pre/post attack is null then _ replace its name)
-class HashID_JohnMasks__(JohnMasks):
+class HashID_JohnSingle__(JohnSingle):
     def __init__(self, init_options = None):
 
         if init_options is None:
@@ -34,7 +33,7 @@ class HashID_JohnMasks__(JohnMasks):
         self.options['hash_type'].required = False
         self.fulldescription = (
             """
-            Perform masks attacks against hashes
+            Perform single attacks against hashes
             with john using the most likely john hashes type parsed by hashid,
             also this parallel task can be submited in a cluster using Slurm
             """
@@ -61,17 +60,15 @@ class HashID_JohnMasks__(JohnMasks):
 
             jtr = John()
 
-            hashes_identities = self.most_probably_hash_identities(pre_attack_output)
-            jtr.masks_attack(hash_types = hashes_identities,
-                             hashes_file = self.options['hashes_file'].value,
-                             masks_file= self.options['masks_file'].value,
-                             masks_attack_script= self.options['masks_attack'].value,
-                             slurm = self.slurm,
-                             local = local,
-                             db_status= db_status,
-                             workspace= workspace,
-                             db_credential_file=db_credential_file)
+            hash_types = self.most_probably_hash_identities(pre_attack_output)
 
+            jtr.single_attack(hash_types = hash_types,
+                              hashes_file = self.options['hashes_file'].value,
+                              slurm = self.slurm,
+                              local = local,
+                              db_status= db_status,
+                              workspace = workspace,
+                              db_credential_file = db_credential_file)
 
         except Exception as error:
             print_failure(error)
@@ -100,8 +97,7 @@ class HashID_JohnMasks__(JohnMasks):
         option = option.lower()
         # attack -> pre atack
         if option == "hashes_file":
-            if self.selected_pre_attack and not (pre_attack or post_attack): # and \
-               #self.options['hashes_file'].value is not None:
+            if self.selected_pre_attack and not (pre_attack or post_attack):
                 self.selected_pre_attack.options['hashes'].value = self.options['hashes_file'].value
 
         # pre atack -> attack

@@ -127,7 +127,7 @@ class Interaction(CommandSet):
                             if (selectedModule.isModuleOption(name) and only_module) or \
                                (selectedModule.isSlurmOption(name) and only_slurm) or \
                                (not only_module and not only_slurm):
-                                bkp_cmd = f"setv --pre {name.upper()} {value}"
+                                bkp_cmd = f"setv -pre {name.upper()} {value}"
                                 output.write(f"{bkp_cmd}\n")
 
                     if post_attack_module := selectedModule.selected_post_attack:
@@ -136,7 +136,7 @@ class Interaction(CommandSet):
                             if (selectedModule.isModuleOption(name) and only_module) or \
                                (selectedModule.isSlurmOption(name) and only_slurm) or \
                                (not only_module and not only_slurm):
-                                bkp_cmd = f"setv --post {name.upper()} {value}"
+                                bkp_cmd = f"setv -post {name.upper()} {value}"
                                 output.write(f"{bkp_cmd}\n")
 
             else:

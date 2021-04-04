@@ -166,7 +166,7 @@ class John(PasswordCracker):
 
         #import pdb; pdb.set_trace()
         all_cracked = True
-        #query_hash_pattern = re.compile(r"(\w*|\w*|.*):?(\w*|\w*|.*)") #parser to analize: NAME:HASH hashes
+        query_hash_pattern = re.compile(r"(\w*|\w*|.*):?(\w*|\w*|.*)") #parser to analize: NAME:HASH hashes
         with open(hashes_file, 'r') as hashes:
             while qhash := hashes.readline().rstrip():
                 if parser_hash := query_hash_pattern.fullmatch(qhash):
@@ -231,7 +231,7 @@ class John(PasswordCracker):
 
     # debugged - date: Apr 2 2021
     @staticmethod
-    def insert_hashes_to_db(hashes_file: Path, workspace: str, creds_file: Path):
+    def insert_hashes_to_db(hashes_file: Path, workspace: str, creds_file: Path, *, pretty:bool = False):
         cur = db_conn = None
         try:
             #import pdb;pdb.set_trace()
@@ -266,10 +266,16 @@ class John(PasswordCracker):
                 )
 
                 cur.executemany(insert_cracked_hash, new_cracked_hashes)
-                print(f"\n[*] Cracked hashes were saved to {workspace} workspace database")
+                if pretty:
+                    print_status(f"Cracked hashes were saved to {ColorStr(workspace).StyleBRIGHT} workspace database")
+                else:
+                    print(f"\n[*] Cracked hashes were saved to {workspace} workspace database")
 
             else:
-                print(f"\n[*] No new cracked hashes to save to {workspace} workspace database")
+                if pretty:
+                    print_status(f"No new cracked hashes to save to {ColorStr(workspace).StyleBRIGHT} workspace database")
+                else:
+                    print(f"\n[*] No new cracked hashes to save to {workspace} workspace database")
 
             db_conn.commit()
             cur.close()
@@ -413,7 +419,7 @@ class John(PasswordCracker):
                             break
 
                     if db_status and workspace and db_credential_file:
-                        John.insert_hashes_to_db(hashes_file, workspace, db_credential_file)
+                        John.insert_hashes_to_db(hashes_file, workspace, db_credential_file, pretty=True)
 
             except Exception as error:
                 #cmd2.Cmd.pexcept(error)
@@ -516,7 +522,7 @@ class John(PasswordCracker):
                             Bash.exec(attack_cmd)
 
                     if db_status and workspace and db_credential_file:
-                        John.insert_hashes_to_db(hashes_file, workspace, db_credential_file)
+                        John.insert_hashes_to_db(hashes_file, workspace, db_credential_file, pretty=True)
 
             except Exception as error:
                 #cmd2.Cmd.pexcept(error)
@@ -595,7 +601,7 @@ class John(PasswordCracker):
                             break
 
                     if db_status and workspace and db_credential_file:
-                        John.insert_hashes_to_db(hashes_file, workspace, db_credential_file)
+                        John.insert_hashes_to_db(hashes_file, workspace, db_credential_file, pretty=True)
 
             except Exception as error:
                 print_failure(error)
@@ -769,7 +775,7 @@ if db_status and workspace and db_credential_file:
                             break
 
                     if db_status and workspace and db_credential_file:
-                        John.insert_hashes_to_db(hashes_file, workspace, db_credential_file)
+                        John.insert_hashes_to_db(hashes_file, workspace, db_credential_file, pretty=True)
 
             except Exception as error:
                 print_failure(error)

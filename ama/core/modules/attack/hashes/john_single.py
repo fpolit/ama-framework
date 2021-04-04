@@ -64,9 +64,6 @@ class JohnSingle(Attack):
         slurm (Slurm): Instance of Slurm class
         """
 
-        pre_attack_name = pre_attack.mname if isinstance(pre_attack, Auxiliary) else None
-        post_attack_name = post_attack.mname if isinstance(post_attack, Auxiliary) else None
-
         attack_options = {
             'hash_type': Argument(hash_types, True, "John hash type"),
             'hashes_file': Argument(hashes_file, True, "Hashes file")

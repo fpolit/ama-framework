@@ -11,8 +11,18 @@ from .hashcat import Hashcat
 from .hydra import Hydra
 
 SUPPORTED_CRACKERS = [John, Hashcat, Hydra]
+SUPPORTED_HASHES_CRACKERS = [John, Hashcat]
 
 def get_availables_crackers(crackers=SUPPORTED_CRACKERS):
+    availables_crackers = []
+    for cracker in crackers:
+        cracker_instance = cracker()
+        if cracker_instance.enable:
+            availables_crackers.append(cracker)
+
+    return availables_crackers
+
+def get_availables_hashes_crackers(crackers=SUPPORTED_HASHES_CRACKERS):
     availables_crackers = []
     for cracker in crackers:
         cracker_instance = cracker()

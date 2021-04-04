@@ -2,9 +2,6 @@
 #
 # hashid - auxiliary application (hash identificator)
 #
-# NOTE (date: Mar 4 2021) - Try to remove this bug
-# /usr/local/hack/dev/fpolit/ama/env/lib/python3.9/site-packages/varname/utils.py:353: UserWarning: Cannot evaluate node Attribute(value=Name(id='Args', ctx=Load()), attr='some_not_none', ctx=Load()) using 'pure_eval'. Using 'eval' to get the function that calls 'argname'. Try calling it using a variable reference to the function, or passing the function to 'argname' explicitly.
-#   warnings.warn(
 #
 #
 # Maintainer: glozanoa <glozanoa@uni.pe>
@@ -12,7 +9,7 @@
 from typing import List
 import os
 import sys
-
+import re
 from sbash import Bash
 from fineprint.status import (
     print_failure,
@@ -59,7 +56,14 @@ class HashID(Auxiliary):
 
             identities = {} # {hash: [POSIBLE_IDENTITIES, ...], ...}
             hid = _HashID()
+            query_hash_pattern = re.compile(r"(\w*|\w*|.*):?(\w*|\w*|.*)") #parser to analize: NAME:HASH hashes
             for qhash in query_hashes:
+                parser_hash = query_hash_pattern.fullmatch(qhash)
+                if parser_hash.group(2):
+                    qhash = parser_hash.group(2)
+                else:
+                    qhash = parser_hash.group(1)
+
                 if qhash not in identities:
                     identities[qhash] = []
                     identified_modes = hid.identifyHash(qhash)

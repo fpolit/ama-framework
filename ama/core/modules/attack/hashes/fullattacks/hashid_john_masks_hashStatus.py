@@ -2,32 +2,26 @@
 #
 # wordlist attack using john with hashid as pre attack module and hashStatus as post attack module
 #
-# date: Feb 22 2021
+# date: Apr 3 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 from typing import Any
-
-from .hashid_john_wordlist__ import HashID_JohnWordlist__
-from ama.core.modules.auxiliary.hashes import HashID
-from ama.core.modules.auxiliary.hashes import HashesStatus
-
-# cracker imports
-from ama.core.plugins.cracker import John
-
-# slurm import
-from ama.core.slurm import Slurm
-
-#fineprint status
 from fineprint.status import (
     print_failure,
     print_status
 )
 
+from .hashid_john_masks__ import HashID_JohnMasks__
+from ama.core.modules.auxiliary.hashes import HashID
+from ama.core.modules.auxiliary.hashes import HashesStatus
+from ama.core.files import Path
+from ama.core.plugins.cracker import John
+from ama.core.slurm import Slurm
+
 
 # name format: PREATTACK_ATTACK_POSTATTACK
 # (if pre/post attack is null then _ replace its name)
-# Here HashId_JohnWordlist__ means: preattack: HashId, attack: JohnWordlist, postattack: null
-class HashID_JohnWordlist_HashesStatus(HashID_JohnWordlist__):
+class HashID_JohnMasks_HashesStatus(HashID_JohnMasks__):
     def __init__(self, init_options = None):
 
         if init_options is None:
@@ -39,7 +33,7 @@ class HashID_JohnWordlist_HashesStatus(HashID_JohnWordlist__):
         super().__init__(init_options)
         self.fulldescription = (
             """
-            Perform wordlists attacks against hashes
+            Perform masks attacks against hashes
             with john using the most likely john hashes type parsed by hashid and report hashes status,
             also this parallel task can be submited in a cluster using Slurm
             """

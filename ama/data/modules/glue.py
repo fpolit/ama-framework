@@ -59,6 +59,8 @@ from ama.core.modules.auxiliary.wordlists import (
 ## hash attacks
 from ama.core.modules.attack.hashes import (
     HashID_JohnWordlist__,
+    HashID_JohnMasks__,
+    HashID_JohnSingle__,
     Nth_JohnWordlist__,
     PackMaskgen_JohnMasks__,
     PackWholegen_JohnMasks__,
@@ -67,13 +69,16 @@ from ama.core.modules.attack.hashes import (
     Cewl_JohnWordlist__,
     CuppRefine_JohnWordlist__,
     __JohnWordlist_HashesStatus as None_JohnWordlist_HashesStatus,
-    CuppInteractive_JohnWordlist_HashesStatus,
-    CuppRefine_JohnWordlist_HashesStatus,
+
     HashID_JohnWordlist_HashesStatus,
+    HashID_JohnMasks_HashesStatus,
+    HashID_JohnSingle_HashesStatus,
     Nth_JohnWordlist_HashesStatus,
     PackMaskgen_JohnMasks_HashesStatus,
     PackWholegen_JohnMasks_HashesStatus,
     PackPolicygen_JohnMasks_HashesStatus,
+    CuppInteractive_JohnWordlist_HashesStatus,
+    CuppRefine_JohnWordlist_HashesStatus,
 )
 
 
@@ -125,17 +130,17 @@ class Glue:
                    attack=JohnWordlist,
                    postattack=None): HashID_JohnWordlist__, # debugged - date: Mar 30 2021
 
-        # fullAttack(preattack=HashID,
-        #            attack=JohnSingle,
-        #            postattack=None): None, #HashID_JohnSingle__,
+        fullAttack(preattack=HashID,
+                   attack=JohnSingle,
+                   postattack=None): HashID_JohnSingle__, # debugged - date Apr 3 2021
 
         # fullAttack(preattack=HashID,
         #            attack=JohnIncremental,
         #            postattack=None): None,
 
-        # fullAttack(preattack=HashID,
-        #            attack=JohnMasks,
-        #            postattack=None): None,
+        fullAttack(preattack=HashID,
+                   attack=JohnMasks,
+                   postattack=None): HashID_JohnMasks__,
 
         # fullAttack(preattack=HashID,
         #            attack=JohnHybrid,
@@ -146,17 +151,17 @@ class Glue:
                    attack=JohnWordlist,
                    postattack=HashesStatus): HashID_JohnWordlist_HashesStatus, # debugged - date: Mar 30 2021
 
-        # fullAttack(preattack=HashID,
-        #            attack=JohnSingle,
-        #            postattack=HashesStatus): None,
+        fullAttack(preattack=HashID,
+                   attack=JohnSingle,
+                   postattack=HashesStatus): HashID_JohnSingle_HashesStatus, # debugged - date: Apr 3 2021
 
         # fullAttack(preattack=HashID,
         #            attack=JohnIncremental,
         #            postattack=HashesStatus): None,
 
-        # fullAttack(preattack=HashID,
-        #            attack=JohnMasks,
-        #            postattack=HashesStatus): None,
+        fullAttack(preattack=HashID,
+                   attack=JohnMasks,
+                   postattack=HashesStatus): HashID_JohnMasks_HashesStatus,
 
         # fullAttack(preattack=HashID,
         #            attack=JohnHybrid,

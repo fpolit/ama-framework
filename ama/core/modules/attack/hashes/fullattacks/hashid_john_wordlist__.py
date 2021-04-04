@@ -6,26 +6,20 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 from typing import Any
-
-from ..john_wordlist import JohnWordlist
-from ama.core.modules.auxiliary.hashes import HashID
-
-# cracker imports
-from ama.core.plugins.cracker import John
-
-# slurm import
-from ama.core.slurm import Slurm
-
-#fineprint status
 from fineprint.status import (
     print_failure,
     print_status
 )
 
+from ..john_wordlist import JohnWordlist
+from ama.core.modules.auxiliary.hashes import HashID
+from ama.core.files import Path
+from ama.core.plugins.cracker import John
+from ama.core.slurm import Slurm
+
 
 # name format: PREATTACK_ATTACK_POSTATTACK
 # (if pre/post attack is null then _ replace its name)
-# Here HashId_JohnWordlist__ means: preattack: HashId, attack: JohnWordlist, postattack: null
 class HashID_JohnWordlist__(JohnWordlist):
     def __init__(self, init_options = None):
 
@@ -50,7 +44,8 @@ class HashID_JohnWordlist__(JohnWordlist):
             self.selected_pre_attack.options['hashes'].value = self.options['hashes_file'].value
 
     # preattack output format:  {hash: [POSIBLE_IDENTITIES, ...], ...}
-    def attack(self, local:bool = False, force: bool = False, pre_attack_output: Any = None):
+    def attack(self, local:bool = False, force: bool = False, pre_attack_output: Any = None,
+               db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
         """
         Wordlist attack using John the Ripper with HashId as pre attack module
 
@@ -70,7 +65,10 @@ class HashID_JohnWordlist__(JohnWordlist):
                                 hashes_file = self.options['hashes_file'].value,
                                 wordlist = self.options['wordlist'].value,
                                 slurm = self.slurm,
-                                local = local)
+                                local = local,
+                                db_status= db_status,
+                                workspace= workspace,
+                                db_credential_file=db_credential_file)
 
         except Exception as error:
             print_failure(error)
@@ -99,8 +97,7 @@ class HashID_JohnWordlist__(JohnWordlist):
         option = option.lower()
         # attack -> pre atack
         if option == "hashes_file":
-            if self.selected_pre_attack and not (pre_attack or post_attack): # and \
-               #self.options['hashes_file'].value is not None:
+            if self.selected_pre_attack and not (pre_attack or post_attack):
                 self.selected_pre_attack.options['hashes'].value = self.options['hashes_file'].value
 
         # pre atack -> attack
