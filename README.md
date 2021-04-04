@@ -1,10 +1,11 @@
 # ama - Attacks Manager
 
-Ama is a specialized environment for the password cracking process. It contains several modules (attacks and auxiliaries), so you can combine them to make the password cracking process efficient (`auxiliaries` modules as `preattack` or `postattack` of an `attack` module - we call them **fullattacks**: `preattack` + `attack` + `postattack`)
+Ama is a specialized environment for the password cracking process. It contains several modules (attacks and auxiliaries), so you can find an appropiate module for each step of the password cracking process, also you can combine them to automatize the password cracking process (`auxiliaries` modules working as `preattack` or `postattack` of an `attack` module - we call them **fullattacks**: `preattack` + `attack` + `postattack`)
 
-For example: You can use the `fullattack`: **fullAttack**(*preattack*:`auxiliary/hashes/hashid`, *attack*:`attack/hashes/john_wordlist`, *postattack*=`auxiliary/hashes/hashes_status`) and this one will first identify the most posible hashes identities with `auxiliary/hashes/hashid` module and then it will perform an attack with `attack/hashes/john_wordlist` using the generated hashes identities and finally it will run `auxiliary/hashes/hashes_status` module, which report the hashes status.
+**For example:**   
+You can use the **fullattack** (*preattack*:`auxiliary/hashes/pack_maskgen`, *attack*:`attack/hashes/hashcat_masks`, *postattack*=`auxiliary/hashes/hashes_status`). First, it will generate appropiate masks with `auxiliary/hashes/pack_maskgen` auxiliary module and then it will perform an attack with `attack/hashes/hashcat_wordlist` attack module using the generated masks and finally it will report the hashes status with `auxiliary/hashes/hashes_status` auxiliary module.
 
-Also ama's attack modules can be submitted in a cluster of computers using `Slurm`, so you can perform **large** attacks, other important feature is that `ama` saves loots (cracked `hashes` and `services`) in a database and organize them to enable efficient access to them. Finally, `ama` is easy extensible, so you can write custom modules to extend it.
+Also ama's attack modules can be submitted in a cluster of computers using `Slurm`, so you can perform **large** attacks, other important feature is that `ama` saves loots (cracked `hashes` and `services`) in a database and organize them (in *workspaces*) to enable efficient access to them. Finally, `ama` is easy extensible, so you can write custom modules to extend it.
 
 ## Dependences
 * Postgres (only if you want to use ama database) 
