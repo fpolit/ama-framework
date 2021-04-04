@@ -66,7 +66,7 @@ class HashcatHybrid(Attack):
     def __init__(self, *,
                  hash_type: str = None, hashes_file: str = None, inverse:bool = False,
                  wordlists: List[str] = None, masks = None,
-                 slurm:Slurm = None,
+                 sleep:int = 1, slurm:Slurm = None,
                  pre_attack:Auxiliary = None, post_attack:Auxiliary = None):
         """
         Initialization of Hybrid Attack using hashcat cracker
@@ -78,6 +78,7 @@ class HashcatHybrid(Attack):
             'wordlists': Argument(wordlists, True, "Wordlist files (split by commas)"),
             'masks': Argument(masks, True, "Masks(split by commas) or masks file"),
             'inverse': Argument(inverse, True, "Combine wordlists and masks in inverse form (masks + wordlists)"),
+            'sleep': Argument(sleep, True, 'Sleep time between each attack (seconds)')
         }
 
         if slurm is None:
@@ -163,6 +164,7 @@ class HashcatHybrid(Attack):
                     inverse = self.options['inverse'].value,
                     wordlists = wordlists,
                     masks_file = masks_file,
+                    sleep = self.options['sleep'].value,
                     slurm = self.slurm,
                     local = local,
                     db_status= db_status,
@@ -177,6 +179,7 @@ class HashcatHybrid(Attack):
                     inverse = self.options['inverse'].value,
                     wordlists = wordlists,
                     masks = masks,
+                    sleep = self.options['sleep'].value,
                     slurm = self.slurm,
                     local = local,
                     db_status= db_status,

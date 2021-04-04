@@ -91,7 +91,7 @@ class HashcatMasks(Attack):
     def __init__(self, *,
                  hash_type: str = None, hashes_file: str = None,
                  masks_file:str = None,
-                 masks_attack:str = "mask_attack.py",
+                 masks_attack:str = "mask_attack.py", sleep:int = 1,
                  slurm: Slurm = None,
                  pre_attack = None, post_attack = None):
         """
@@ -102,7 +102,8 @@ class HashcatMasks(Attack):
             'hash_type': Argument(hash_type, True, "Hashcat hash type"),
             'hashes_file': Argument(hashes_file, True, "Hashes file"),
             'masks_file': Argument(masks_file, True, "Masks file"),
-            'masks_attack': Argument(masks_attack, True, "Generated mask attack script")
+            'masks_attack': Argument(masks_attack, True, "Generated mask attack script"),
+            'sleep': Argument(sleep, True, 'Sleep time between each attack (seconds)')
         }
 
 
@@ -161,6 +162,7 @@ class HashcatMasks(Attack):
             "hashes_file": self.options['hashes_file'].value,
             "masks_file": self.options['masks_file'].value,
             "masks_attack": self.options['masks_attack'].value,
+            "sleep": self.options['sleep'].value,
             "slurm": self.slurm,
             "pre_attack": self.selected_pre_attack,
             "post_attack": self.selected_post_attack
@@ -202,6 +204,7 @@ class HashcatMasks(Attack):
                             hashes_file = self.options['hashes_file'].value,
                             masks_file = self.options['masks_file'].value,
                             masks_attack_script= self.options['masks_attack'].value,
+                            sleep = self.options['sleep'].value,
                             slurm = self.slurm,
                             local = local,
                             db_status= db_status,

@@ -84,7 +84,7 @@ class HashcatCombination(Attack):
 
     def __init__(self, *,
                  wordlists:List[str] = None, hash_type: str = None,
-                 hashes_file: str = None,
+                 hashes_file: str = None, sleep:int = 1,
                  slurm:Slurm = None,
                  pre_attack: Auxiliary = None, post_attack:Auxiliary = None):
         """
@@ -94,7 +94,8 @@ class HashcatCombination(Attack):
         attack_options = {
             'wordlists': Argument(wordlists, True, "Wordlists file (format: wl1,wl2)"),
             'hash_type': Argument(hash_type, True, "Hashcat hash type"),
-            'hashes_file': Argument(hashes_file, True, "Hashes file")
+            'hashes_file': Argument(hashes_file, True, "Hashes file"),
+            'sleep': Argument(sleep, True, 'Sleep time between each attack (seconds)')
         }
 
 
@@ -181,6 +182,7 @@ class HashcatCombination(Attack):
                                   hashes_file = self.options['hashes_file'].value,
                                   wordlists = wordlists,
                                   slurm = self.slurm,
+                                  sleep = self.options['sleep'].value,
                                   local = local,
                                   db_status= db_status,
                                   workspace= workspace,

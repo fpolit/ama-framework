@@ -25,6 +25,7 @@ from .fullattacks.__johnWordlist_hashesStatus import  __JohnWordlist_HashesStatu
 from .fullattacks.hashid_john_wordlist__ import HashID_JohnWordlist__
 from .fullattacks.hashid_john_masks__ import HashID_JohnMasks__
 from .fullattacks.hashid_johnSingle__ import HashID_JohnSingle__
+from .fullattacks.hashid_hashcat_wordlist__ import HashID_HashcatWordlist__
 from .fullattacks.nth_john_wordlist__ import Nth_JohnWordlist__
 from .fullattacks.packMaskgen_johnMasks__ import PackMaskgen_JohnMasks__
 from .fullattacks.packWholegen_johnMasks__ import PackWholegen_JohnMasks__
@@ -38,6 +39,7 @@ from .fullattacks.cewl_johnWordlist__ import Cewl_JohnWordlist__
 from .fullattacks.hashid_john_wordlist_hashesStatus import HashID_JohnWordlist_HashesStatus
 from .fullattacks.hashid_john_masks_hashStatus import HashID_JohnMasks_HashesStatus
 from .fullattacks.hashid_johnSingle_hashesStatus import HashID_JohnSingle_HashesStatus
+from .fullattacks.hashid_hashcat_wordlist_hashesStatus import HashID_HashcatWordlist_HashesStatus
 from .fullattacks.nth_johnWordlist_hashesStatus import Nth_JohnWordlist_HashesStatus
 from .fullattacks.packMaskgen_johnMask_hashesStatus import PackMaskgen_JohnMasks_HashesStatus
 from .fullattacks.packWholegen_johnMask_hashesStatus import PackWholegen_JohnMasks_HashesStatus

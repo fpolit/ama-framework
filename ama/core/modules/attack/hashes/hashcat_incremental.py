@@ -75,7 +75,7 @@ class HashcatIncremental(Attack):
                  hash_type: str = None, hashes_file: str = None,
                  incremental_attack:str = "incremental_attack.py",
                  charset:str = '?a', min_length:int = None, max_length:int = None,
-                 masks_file:str = "incremental_masks.txt",
+                 masks_file:str = "incremental_masks.txt", sleep:int = 1,
                  slurm:Slurm = None,
                  pre_attack: Auxiliary = None, post_attack: Auxiliary = None):
         """
@@ -89,7 +89,8 @@ class HashcatIncremental(Attack):
             'masks_file': Argument(masks_file, True, "File with generated masks to attack"),
             'incremental_attack': Argument(incremental_attack, True, "Generated incremental attack script"),
             'hash_type': Argument(hash_type, True, "Hashcat hash type"),
-            'hashes_file': Argument(hashes_file, True, "Hashes file")
+            'hashes_file': Argument(hashes_file, True, "Hashes file"),
+            'sleep': Argument(sleep, True, 'Sleep time between each attack (seconds)')
         }
 
 
@@ -150,6 +151,7 @@ class HashcatIncremental(Attack):
             "min_length": self.options['min_length'].value,
             "max_length": self.options['max_length'].value,
             "masks_file": self.options['masks_file'].value,
+            "sleep" : self.options['sleep'].value,
             "slurm": self.slurm,
             "pre_attack": self.selected_pre_attack,
             "post_attack": self.selected_post_attack
@@ -194,6 +196,7 @@ class HashcatIncremental(Attack):
                                   min_length = self.options['min_length'].value,
                                   max_length = self.options['max_length'].value,
                                   masks_file = self.options['masks_file'].value,
+                                  sleep = self.options['sleep'].value,
                                   slurm = self.slurm,
                                   local = local,
                                   db_status= db_status,

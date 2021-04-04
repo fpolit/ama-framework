@@ -59,7 +59,7 @@ class HashcatBruteForce(Attack):
 
     def __init__(self, *,
                  hash_type: str = None, hashes_file: str = None, mask:str = None,
-                 slurm:Slurm = None,
+                 sleep:int = 1, slurm:Slurm = None,
                  pre_attack = None, post_attack = None):
         """
         Initialization of wordlist attack using hashcat
@@ -68,7 +68,8 @@ class HashcatBruteForce(Attack):
         attack_options = {
             'mask': Argument(mask, True, "Mask to attack"),
             'hash_type': Argument(hash_type, True, "Hashcat hash type"),
-            'hashes_file': Argument(hashes_file, True, "Hashes file")
+            'hashes_file': Argument(hashes_file, True, "Hashes file"),
+            'sleep': Argument(sleep, True, 'Sleep time between each attack (seconds)')
         }
 
 
@@ -153,6 +154,7 @@ class HashcatBruteForce(Attack):
                                   hashes_file = self.options['hashes_file'].value,
                                   mask = self.options['mask'].value,
                                   slurm = self.slurm,
+                                  sleep = self.options['sleep'].value,
                                   local = local,
                                   db_status= db_status,
                                   workspace= workspace,

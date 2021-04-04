@@ -82,7 +82,7 @@ class HashcatWordlist(Attack):
 
     def __init__(self, *,
                  wordlist:str = None, hash_type: str = None,
-                 hashes_file: str = None,
+                 hashes_file: str = None, sleep:int = 1,
                  slurm: Slurm= None,
                  pre_attack: Auxiliary = None, post_attack: Auxiliary = None):
         """
@@ -92,7 +92,8 @@ class HashcatWordlist(Attack):
         attack_options = {
             'wordlist': Argument(wordlist, True, "Wordlist file"),
             'hash_type': Argument(hash_type, True, "Hashcat hash type"),
-            'hashes_file': Argument(hashes_file, True, "Hashes file")
+            'hashes_file': Argument(hashes_file, True, "Hashes file"),
+            'sleep': Argument(sleep, True, 'Sleep time between each attack (seconds)')
         }
 
 
@@ -148,6 +149,7 @@ class HashcatWordlist(Attack):
             "hash_type": self.options['hash_type'].value,
             "hashes_file": self.options['hashes_file'].value,
             "wordlist": self.options['wordlist'].value,
+            "sleep": self.options['sleep'].value,
             "slurm": self.slurm,
             "pre_attack": self.selected_pre_attack,
             "post_attack": self.selected_post_attack
@@ -186,6 +188,7 @@ class HashcatWordlist(Attack):
             hc.wordlist_attack(hash_types = hash_types,
                                hashes_file = self.options['hashes_file'].value,
                                wordlist = self.options['wordlist'].value,
+                               sleep = self.options['sleep'].value,
                                slurm = self.slurm,
                                local = local,
                                db_status= db_status,
