@@ -2,7 +2,7 @@
 #
 # check status (broken or not) of hash or hashes in a file
 #
-# date: Feb 25 2021
+# debugged - date Apr 3 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
@@ -24,8 +24,12 @@ from ama.core.modules.base import (
 )
 
 # cracker import
+from ama.core.plugins.cracker import (
+    John,
+    Hashcat
+)
 from ama.core.plugins.cracker.availables import (
-    get_availables_crackers
+    get_availables_hashes_crackers
 )
 
 # validator imports
@@ -48,8 +52,10 @@ class HashesStatus(Auxiliary):
     ]
     FULLDESCRIPTION = (
         """
-        Check status (broken or not) of hashes in a file
-        searching them in John and Hashcat potfiles
+        Check status (broken or not) of hashes
+        searching them in hash cracker's potfiles.
+        If no cracker is supplied, then search hashes in potfile of
+        all availables hash crackers supported by ama
         """
     )
 
@@ -57,14 +63,16 @@ class HashesStatus(Auxiliary):
 
     def __init__(self, *,
                  hashes_file:str = None, uncracked_hashes: str = None,
-                 slurm=None):
+                 slurm=None, cracker = None, potfile:Path = None):
         """
         Initialization of auxiliary/hashes/hashes_status ama module
         """
 
         auxiliary_options = {
             'hashes_file': Argument(hashes_file, True, "Hashes file to check status"),
-            'uncracked_hashes': Argument(uncracked_hashes, False, "File name to save uncracked hashes")
+            'uncracked_hashes': Argument(uncracked_hashes, False, "File to save uncracked hashes"),
+            'cracker': Argument(cracker, False, f"Hash cracker (<{John.MAINNAME}|{Hashcat.MAINNAME}>)"),
+            'potfile': Argument(potfile, False, "Potfile of hash cracker"),
         }
 
         init_options = {
@@ -87,32 +95,41 @@ class HashesStatus(Auxiliary):
         """
         #import pdb; pdb.set_trace()
 
-        crackers = get_availables_crackers()
-        hashes_status = {'cracked': [], 'uncracked': []}
+        global_hashes_status = {'cracked': [], 'uncracked': []}
 
         try:
-            permission = [os.R_OK]
+            cracker_name = self.options['cracker'].value
+            if cracker_name is not None:
+                if cracker_name not in [John.MAINNAME, Hashcat.MAINNAME]:
+                    raise Exception("Selected invalid cracker: {cracker_name}")
+                elif cracker_name == John.MAINNAME:
+                    crackers = [John]
+                else: #cracker_name == Hashcat.MAINNAME
+                    crackers = [Hashcat]
+            else:
+                crackers = get_availables_hashes_crackers()
+
+
             hashes_file = self.options['hashes_file'].value
-            Path.access(permission, hashes_file)
+            potfile = self.options['potfile'].value
 
-            with open(hashes_file, 'r') as hashes:
-                while query_hash := hashes.readline().rstrip():
-                    #query_hash = queryHash[0]
-                    cracked = False
-                    for cracker in crackers:
-                        if cracked_hash := cracker.hash_status(query_hash):
-                            cracked = True
-                            hashes_status['cracked'].append(cracked_hash.get_loot())
-                            break # break for loop
 
-                    if not cracked:
-                        hashes_status['uncracked'].append([query_hash])
+            for cracker in crackers:
+                hashes_status = cracker.hashes_file_status(hashes_file, potfile)
+
+                for cracked_hash in hashes_status['cracked']:
+                    if cracked_hash not in global_hashes_status['cracked']:
+                        global_hashes_status['cracked'].append(cracked_hash)
+
+                for uncracked_hash in hashes_status['uncracked']:
+                    if uncracked_hash not in global_hashes_status['uncracked']:
+                        global_hashes_status['uncracked'].append(uncracked_hash)
 
             if uncracked_hashes := self.options.get('uncracked_hashes', Argument.get_empty()).value:
                 with open(uncracked_hashes, 'w') as uncracked_hashes_file:
-                    for uhash in hashes_status['uncracked']:
-                        #hashes_status['uncracked'] struct is [[UNCRACKED_HASH], [OTHER_UNCRACKED_HASH], ...]
-                        uncracked_hashes_file.write(f"{uhash[0]}\n")
+                    #hashes_status['uncracked'] struct is [[UNCRACKED_HASH], [OTHER_UNCRACKED_HASH], ...]
+                    for [uhash] in global_hashes_status['uncracked']:
+                        uncracked_hashes_file.write(f"{uhash}\n")
 
                 print_status(f"Uncracked hashes have written to {uncracked_hashes} file")
 
@@ -123,11 +140,11 @@ class HashesStatus(Auxiliary):
                     f"""
         Cracked Hashes:
 
-{tabulate(hashes_status["cracked"],headers = ["Hash", "Type", "Password", "Cracker"])}
+{tabulate(global_hashes_status["cracked"],headers = ["Hash", "Type", "Password", "Cracker"])}
 
         Uncracked Hashes:
 
-{tabulate(hashes_status["uncracked"],headers = ["Hash"])}
+{tabulate(global_hashes_status["uncracked"],headers = ["Hash"])}
                 """
                 )
 
