@@ -140,6 +140,7 @@ License : GPLv3
         Show available options of a module
         """
 
+        #import pdb; pdb.set_trace()
         options = (
             f"""
             Module: {self.mname}

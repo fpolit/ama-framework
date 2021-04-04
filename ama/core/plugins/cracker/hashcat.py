@@ -7,7 +7,7 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 
-
+import time
 import os
 import re
 from tabulate import tabulate
@@ -219,10 +219,10 @@ class Hashcat(PasswordCracker):
                 )
 
                 cur.executemany(insert_cracked_hash, cracked_hashes)
-                print_successful(f"\n[*] Cracked hashes were saved to {ColorStr(workspace).StyleBRIGHT} workspace")
+                print_successful(f"Cracked hashes were saved to {ColorStr(workspace).StyleBRIGHT} workspace")
 
             else:
-                print_status(f"\n[*] No new cracked hashes to save to {ColorStr(workspace).StyleBRIGHT} workspace")
+                print_status(f"No new cracked hashes to save to {ColorStr(workspace).StyleBRIGHT} workspace")
 
             db_conn.commit()
             cur.close()
@@ -271,7 +271,7 @@ class Hashcat(PasswordCracker):
     # modify - date: Apr 1 2021 (debugged - date Apr 3 2021)
     def wordlist_attack(self, *,
                         hash_types:List[int] , hashes_file:str, wordlist:str, rules_file:str=None,
-                        slurm: Slurm, local:bool = False,
+                        sleep:int = 1, slurm: Slurm, local:bool = False,
                         db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
 
         """
@@ -295,7 +295,8 @@ class Hashcat(PasswordCracker):
 
                 print_status(f"Attacking hashes in {ColorStr(hashes_file).StyleBRIGHT} file with {ColorStr(wordlist).StyleBRIGHT} wordlist")
 
-                hash_types_names = [Hashcat.HASHES[hash_type]['Name'] for hash_type in hash_types]
+                hash_types_names = [Hashcat.HASHES[hash_type]['Name'] for hash_type in hash_types
+                                    if hash_type in Hashcat.HASHES]
                 print_status(f"Possible hashes identities: {ColorStr(hash_types_names).StyleBRIGHT}")
 
                 #import pdb; pdb.set_trace()
@@ -353,6 +354,9 @@ class Hashcat(PasswordCracker):
                             print()
                             print_status(f"Running: {ColorStr(attack_cmd).StyleBRIGHT}")
                             Bash.exec(attack_cmd)
+                            if sleep > 0:
+                                print_status(f"{ColorStr('Sleeping ...').StyleBRIGHT}")
+                                time.sleep(sleep)
 
                         else:
                             print_successful(f"Hashes in {ColorStr(hashes_file).StyleBRIGHT} were cracked")
@@ -372,7 +376,7 @@ class Hashcat(PasswordCracker):
     # modify - date: Apr 1 2021 (debugged - date Apr 3 2021)
     def combination_attack(self, *,
                            hash_types: List[str] , hashes_file:str , wordlists: List[str],
-                           slurm: Slurm, local:bool = False,
+                           sleep:int = 1, slurm: Slurm, local:bool = False,
                            db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
 
         """
@@ -448,6 +452,9 @@ class Hashcat(PasswordCracker):
                             print()
                             print_status(f"Running: {ColorStr(attack_cmd).StyleBRIGHT}")
                             Bash.exec(attack_cmd)
+                            if sleep > 0:
+                                print_status(f"{ColorStr('Sleeping ...').StyleBRIGHT}")
+                                time.sleep(sleep)
 
                         else:
                             print_successful(f"Hashes in {ColorStr(hashes_file).StyleBRIGHT} were cracked")
@@ -467,7 +474,7 @@ class Hashcat(PasswordCracker):
     # modify - date: Apr 1 2021 (debugged - date Apr 2 2021)
     def brute_force_attack(self, *,
                            hash_types:str , hashes_file:str , mask:str,
-                           slurm: Slurm, local:bool = False,
+                           sleep:int = 1, slurm: Slurm, local:bool = False,
                            db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
 
         """
@@ -541,6 +548,9 @@ class Hashcat(PasswordCracker):
                             print()
                             print_status(f"Running: {ColorStr(attack_cmd).StyleBRIGHT}")
                             Bash.exec(attack_cmd)
+                            if sleep > 0:
+                                print_status(f"{ColorStr('Sleeping ...').StyleBRIGHT}")
+                                time.sleep(sleep)
 
                         else:
                             print_successful(f"Hashes in {ColorStr(hashes_file).StyleBRIGHT} were cracked")
@@ -561,7 +571,7 @@ class Hashcat(PasswordCracker):
     def incremental_attack(self, *,
                            hash_types:List[int], hashes_file:str, incremental_attack_script:str,
                            charset:str = '?a', min_length:int = 0, max_length:int = 0,
-                           masks_file:str = "incremental_masks.txt",
+                           masks_file:str = "incremental_masks.txt", sleep:int = 1,
                            slurm: Slurm, local:bool = False,
                            db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
         """
@@ -576,7 +586,7 @@ class Hashcat(PasswordCracker):
         slurm (Slurm): Instance of Slurm class
         """
 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         print_status(f"Generating incremental masks file: {ColorStr(masks_file).StyleBRIGHT}")
         masks = None
         if Mask.is_valid_charset(charset):
@@ -595,6 +605,7 @@ class Hashcat(PasswordCracker):
                           masks_file= masks_file,
                           masks_attack_script=incremental_attack_script,
                           slurm=slurm,
+                          sleep = sleep,
                           local = local,
                           db_status = db_status,
                           workspace = workspace,
@@ -604,7 +615,7 @@ class Hashcat(PasswordCracker):
     def masks_attack(self,*,
                      hash_types:List[int], hashes_file:str, masks_file:str,
                      masks_attack_script: str,
-                     slurm: Slurm, local:bool = False,
+                     sleep:int = 1, slurm: Slurm, local:bool = False,
                      db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
 
         """
@@ -667,6 +678,9 @@ class Hashcat(PasswordCracker):
                                     print()
                                     print_status(f"Running: {ColorStr(attack_cmd).StyleBRIGHT}")
                                     Bash.exec(attack_cmd)
+                                    if sleep > 0:
+                                        print_status(f"{ColorStr('Sleeping ...').StyleBRIGHT}")
+                                        time.sleep(sleep)
 
                                 else:
                                     break #all hashes were cracked so stop attack
@@ -768,7 +782,7 @@ if db_status and workspace and db_credential_file:
     def hybrid_attack(self, *,
                       hash_types: List[str] , hashes_file:str , inverse:bool = False,
                       wordlists: List[str], masks: List[str] = None, masks_file:Path = None,
-                      slurm: Slurm, local:bool = False,
+                      sleep:int = 1, slurm: Slurm, local:bool = False,
                       db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
 
         """
@@ -901,6 +915,9 @@ if db_status and workspace and db_credential_file:
                                     print()
                                     print_status(f"Running: {ColorStr(attack_cmd).StyleBRIGHT}")
                                     Bash.exec(attack_cmd)
+                                    if sleep > 0:
+                                        print_status(f"{ColorStr('Sleeping ...').StyleBRIGHT}")
+                                        time.sleep(sleep)
 
                                 else:
                                     print_successful(f"Hashes in {ColorStr(hashes_file).StyleBRIGHT} were cracked")

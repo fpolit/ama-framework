@@ -61,6 +61,7 @@ from ama.core.modules.attack.hashes import (
     HashID_JohnWordlist__,
     HashID_JohnMasks__,
     HashID_JohnSingle__,
+    HashID_HashcatWordlist__,
     Nth_JohnWordlist__,
     PackMaskgen_JohnMasks__,
     PackWholegen_JohnMasks__,
@@ -73,6 +74,7 @@ from ama.core.modules.attack.hashes import (
     HashID_JohnWordlist_HashesStatus,
     HashID_JohnMasks_HashesStatus,
     HashID_JohnSingle_HashesStatus,
+    HashID_HashcatWordlist_HashesStatus,
     Nth_JohnWordlist_HashesStatus,
     PackMaskgen_JohnMasks_HashesStatus,
     PackWholegen_JohnMasks_HashesStatus,
@@ -86,23 +88,6 @@ fullAttack = namedtuple('fullAttack', ["preattack", "attack", "postattack"])
 
 class Glue:
     full_attacks = {
-        # None + hash cracker + None
-        # fullAttack(preattack=None,
-        #            attack=JohnBenchmark,
-        #            postattack=None): JohnBenchmark,
-
-        # fullAttack(preattack=None,
-        #            attack=JohnWordlist,
-        #            postattack=None): JohnWordlist,
-
-        # fullAttack(preattack=None,
-        #            attack=JohnSingle,
-        #            postattack=None): JohnSingle,
-
-        # fullAttack(preattack=None,
-        #            attack=JohnMasks,
-        #            postattack=None): JohnMasks,
-
         # None + hash cracker + HashesStatus
         fullAttack(preattack=None,
                    attack=JohnWordlist,
@@ -146,6 +131,10 @@ class Glue:
         #            attack=JohnHybrid,
         #            postattack=None): None,
 
+        fullAttack(preattack=HashID,
+                   attack=HashcatWordlist,
+                   postattack=None): HashID_HashcatWordlist__, # debugged - date Apr 3 2021
+
         # HashID + hash cracker + HashesStatus
         fullAttack(preattack=HashID,
                    attack=JohnWordlist,
@@ -166,6 +155,10 @@ class Glue:
         # fullAttack(preattack=HashID,
         #            attack=JohnHybrid,
         #            postattack=HashesStatus): None,
+
+        fullAttack(preattack=HashID,
+                   attack=HashcatWordlist,
+                   postattack=HashesStatus): HashID_HashcatWordlist_HashesStatus,
 
         # Nth + hash cracker + None
         fullAttack(preattack=Nth,
