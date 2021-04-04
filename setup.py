@@ -19,7 +19,7 @@ f.close()
 setup(
     name='ama',
     version=VERSION,
-    description='ama allow you perform several attacks in a cluster',
+    description='Specialized environment for the password cracking process',
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',
     author='glozanoa',

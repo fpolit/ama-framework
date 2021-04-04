@@ -2,7 +2,7 @@
 
 Ama is a specialized environment for the password cracking process. It contains several modules (attacks and auxiliaries), so you can combine them to make the password cracking process efficient (`auxiliaries` modules as `preattack` or `postattack` of an `attack` module - we call them **fullattacks**: `preattack` + `attack` + `postattack`)
 
-For example: you can use the `fullattack`: **fullAttack**(*preattack*:`auxiliary/hashes/hashid`, *attack*:`attack/hashes/john_wordlist`, *postattack*=`auxiliary/hashes/hashes_status`) and this one will first identify the most posible hashes identities with `auxiliary/hashes/hashid` module and then it will perform an attack with `attack/hashes/john_wordlist` using the generated hashes identities and finally it will run `auxiliary/hashes/hashes_status` module, which report the hashes status.
+For example: You can use the `fullattack`: **fullAttack**(*preattack*:`auxiliary/hashes/hashid`, *attack*:`attack/hashes/john_wordlist`, *postattack*=`auxiliary/hashes/hashes_status`) and this one will first identify the most posible hashes identities with `auxiliary/hashes/hashid` module and then it will perform an attack with `attack/hashes/john_wordlist` using the generated hashes identities and finally it will run `auxiliary/hashes/hashes_status` module, which report the hashes status.
 
 Also ama's attack modules can be submitted in a cluster of computers using `Slurm`, so you can perform **large** attacks, other important feature is that `ama` saves loots (cracked `hashes` and `services`) in a database and organize them to enable efficient access to them. Finally, `ama` is easy extensible, so you can write custom modules to extend it.
 
