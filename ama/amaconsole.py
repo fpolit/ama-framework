@@ -8,7 +8,7 @@
 import sys
 import argparse
 import psycopg2
-
+from fineprint.status import print_failure
 # cmdsets imports
 from .core.cmdsets.db import (
     Workspace,
@@ -75,10 +75,17 @@ class Ama(Cmd):
 
     def init_db_connection(db_credentials:Path):
         db_conn = None
-        dbCredentials = Connection.dbCreds(db_credentials)
-        db_conn = psycopg2.connect(**dbCredentials)
-        del dbCredentials
-        return db_conn
+        try:
+            dbCredentials = Connection.dbCreds(db_credentials)
+            db_conn = psycopg2.connect(**dbCredentials)
+            del dbCredentials
+
+        except Exception as error:
+            print_failure("Error while connecting to database")
+
+        finally:
+            return db_conn
+
 
 def main(argv=sys.argv[1:]):
     ama = Ama()

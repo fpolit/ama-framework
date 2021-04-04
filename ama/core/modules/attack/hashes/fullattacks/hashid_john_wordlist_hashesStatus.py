@@ -37,6 +37,7 @@ class HashID_JohnWordlist_HashesStatus(HashID_JohnWordlist__):
             }
 
         super().__init__(init_options)
+        self.selected_post_attack.options['cracker'].value = John.MAINNAME
         self.fulldescription = (
             """
             Perform wordlists attacks against hashes

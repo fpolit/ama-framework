@@ -573,7 +573,7 @@ class John(PasswordCracker):
 
                     parallel_work = [(f"python3 {masks_attack_script}",)]
                     slurm_script_name = slurm.gen_batch_script(parallel_work)
-                    import pdb; pdb.set_trace()
+                    #import pdb; pdb.set_trace()
                     Bash.exec(f"sbatch {slurm_script_name}")
 
                 else:
@@ -645,7 +645,7 @@ class John(PasswordCracker):
 from sbash import Bash
 
 from ama.core.plugins.cracker import John
-
+from ama.core.files import Path
 
 hash_types = {hash_types}
 hashes_file = {__hashes_file}

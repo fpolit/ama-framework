@@ -168,7 +168,8 @@ class JohnWordlist(Attack):
 
         return init_options
 
-    def attack(self, *, local:bool = False, force: bool = False, pre_attack_output: Any = None,
+    def attack(self, *,
+               local:bool = False, force: bool = False, pre_attack_output: Any = None,
                db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
         """
         Wordlist attack using John the Ripper

@@ -44,7 +44,8 @@ class HashID_JohnWordlist__(JohnWordlist):
             self.selected_pre_attack.options['hashes'].value = self.options['hashes_file'].value
 
     # preattack output format:  {hash: [POSIBLE_IDENTITIES, ...], ...}
-    def attack(self, local:bool = False, force: bool = False, pre_attack_output: Any = None,
+    def attack(self, *,
+               local:bool = False, force: bool = False, pre_attack_output: Any = None,
                db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
         """
         Wordlist attack using John the Ripper with HashId as pre attack module

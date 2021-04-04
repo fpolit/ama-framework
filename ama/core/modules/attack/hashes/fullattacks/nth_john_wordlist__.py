@@ -6,25 +6,20 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 from typing import Any
-
-from ..john_wordlist import JohnWordlist
-from ama.core.modules.auxiliary.hashes import Nth
-# cracker imports
-from ama.core.plugins.cracker import John
-
-# slurm import
-from ama.core.slurm import Slurm
-
-#fineprint status
 from fineprint.status import (
     print_failure,
     print_status
 )
 
 
+from ..john_wordlist import JohnWordlist
+from ama.core.modules.auxiliary.hashes import Nth
+from ama.core.plugins.cracker import John
+from ama.core.slurm import Slurm
+from ama.core.files import Path
+
 # name format: PREATTACK_ATTACK_POSTATTACK
 # (if pre/post attack is null then _ replace its name)
-# Here HashId_JohnWordlist__ means: preattack: HashId, attack: JohnWordlist, postattack: null
 class Nth_JohnWordlist__(JohnWordlist):
     def __init__(self, init_options=None):
         #import pdb; pdb.set_trace()
@@ -53,7 +48,9 @@ class Nth_JohnWordlist__(JohnWordlist):
         if self.selected_post_attack and 'hashes' in self.selected_post_attack.options:
             self.selected_post_attack.options['hashes'].value = self.options['hashes_file'].value
 
-    def attack(self, local:bool = False, force: bool = False, pre_attack_output: Any = None):
+    def attack(self, *,
+               local:bool = False, force: bool = False, pre_attack_output: Any = None,
+               db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
         """
         Wordlist attack using John the Ripper with HashId as pre attack module
 
@@ -74,7 +71,10 @@ class Nth_JohnWordlist__(JohnWordlist):
                                 hashes_file = self.options['hashes_file'].value,
                                 wordlist = self.options['wordlist'].value,
                                 slurm = self.slurm,
-                                local = local)
+                                local = local,
+                                db_status= db_status,
+                                workspace= workspace,
+                                db_credential_file=db_credential_file)
 
         except Exception as error:
             print_failure(error)

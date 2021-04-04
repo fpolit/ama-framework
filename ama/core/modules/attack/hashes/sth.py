@@ -13,7 +13,8 @@ from typing import List
 # module.base imports
 from ama.core.modules.base import (
     Attack,
-    Argument
+    Argument,
+    Auxiliary
 )
 
 # plugins imports
@@ -45,9 +46,14 @@ class STH(Attack):
         "https://github.com/HashPals/Search-That-Hash"
     ]
 
+    PRE_ATTACKS = {}
+    POST_ATTACKS = {}
+
+
     def __init__(self, *,
                  hashes: str = None,
-                 timeout: int = None, greppable: bool = False):
+                 timeout: int = None, greppable: bool = False,
+                 pre_attack: Auxiliary = None, post_attack: Auxiliary = None):
 
         attack_options = {
             'hashes': Argument(hashes, True, "Hashes to identify (hash or hashes file)"),
@@ -61,13 +67,15 @@ class STH(Attack):
             'description': STH.DESCRIPTION,
             'fulldescription': STH.FULLDESCRIPTION,
             'references': STH.REFERENCES,
+            'pre_attack': pre_attack,
             'attack_options': attack_options,
+            'post_attack': post_attack,
             'slurm': None
         }
 
         super().__init__(**init_options)
 
-    def attack(self, *args):
+    def attack(self, *args, **kwargs):
         """
         Identify an hash or hashes in a file using hashid
         """
