@@ -38,7 +38,7 @@ class STH(PasswordCracker):
         search an hash in all the availables online cracking APIs
         """
 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
 
         if self.enable:
             sth_cmd = f"{self.main_exec} --no-banner --accessible"
@@ -62,7 +62,7 @@ class STH(PasswordCracker):
         search each hash in hashes_file in all the availables online cracking APIs
         """
 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
 
         try:
             if self.enable:

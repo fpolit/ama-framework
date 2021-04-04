@@ -68,7 +68,7 @@ class Search(CommandSet):
     @with_argparser(full_attack_parser)
     def do_fullattack(self, args):
         """
-        search by availables full attacks
+        Search availables full attacks
         """
         fullAttackId = 0
         filtered_fullAttacks = [] #[(id, fullAttackClass), ...]

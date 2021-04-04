@@ -48,7 +48,7 @@ class PackMaskgen_JohnMasks__(JohnMasks):
         Args:
           local (bool): try to perform the attack locally
         """
-        import pdb;pdb.set_trace()
+        #import pdb;pdb.set_trace()
         try:
             if not force:
                 self.no_empty_required_options(local)

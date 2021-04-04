@@ -530,7 +530,7 @@ class Hashcat(PasswordCracker):
                             parallel_work.append((header_attack, attack_cmd))
 
                     slurm_script_name = slurm.gen_batch_script(parallel_work)
-                    import pdb;pdb.set_trace()
+                    #import pdb;pdb.set_trace()
                     Bash.exec(f"sbatch {slurm_script_name}")
 
                 else:
@@ -556,7 +556,7 @@ class Hashcat(PasswordCracker):
                             print_successful(f"Hashes in {ColorStr(hashes_file).StyleBRIGHT} were cracked")
                             break
 
-                    import pdb;pdb.set_trace()
+                    #import pdb;pdb.set_trace()
                     if db_status and workspace and db_credential_file:
                         Hashcat.insert_hashes_to_db(hashes_file, workspace, db_credential_file)
 
@@ -653,7 +653,7 @@ class Hashcat(PasswordCracker):
 
                     parallel_work = [(f"python3 {masks_attack_script}",)]
                     slurm_script_name = slurm.gen_batch_script(parallel_work)
-                    import pdb; pdb.set_trace()
+                    #import pdb; pdb.set_trace()
                     Bash.exec(f"sbatch {slurm_script_name}")
 
                 else:

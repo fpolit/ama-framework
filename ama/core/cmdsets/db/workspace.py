@@ -425,7 +425,7 @@ class Workspace(CommandSet):
         """
         Rename a workspace
         """
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         password = getpass(prompt=f"Password of {user} role: ")
         dbCredential = {'host': host, 'database': database, 'user': user, 'password': password}
         if Workspace.existWorkspace(oldWorkspace, **dbCredential):

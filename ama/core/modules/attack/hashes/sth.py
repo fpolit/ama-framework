@@ -72,7 +72,7 @@ class STH(Attack):
         Identify an hash or hashes in a file using hashid
         """
         try:
-            import pdb; pdb.set_trace()
+            #import pdb; pdb.set_trace()
 
             self.no_empty_required_options()
             sth = CrackerSTH()

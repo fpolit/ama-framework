@@ -13,7 +13,13 @@ from ..john_wordlist import JohnWordlist
 # (if pre/post attack is null then _ replace its name)
 # Here __JohnWordlist_HashesStatus means: preattack: null, attack: JohnWordlist, postattack: HashesStatus
 class __JohnWordlist_HashesStatus(JohnWordlist):
-    def __init__(self, init_options):
+    def __init__(self, init_options=None):
+        if init_options is None:
+            init_options = {
+                "pre_attack": HashID(),
+                "post_attack": None
+            }
+
         super().__init__(**init_options)
         self.fulldescription = (
             """

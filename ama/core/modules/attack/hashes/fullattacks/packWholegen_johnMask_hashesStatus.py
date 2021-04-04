@@ -31,7 +31,7 @@ class PackWholegen_JohnMasks_HashesStatus(PackWholegen_JohnMasks__):
 
         if init_options is None:
             init_options = {
-                "pre_attack": PackMaskgen(),
+                "pre_attack": PackWholegen(),
                 "post_attack": HashesStatus()
             }
 

@@ -35,7 +35,7 @@ class CuppInteractive_JohnWordlist_HashesStatus(CuppInteractive_JohnWordlist__):
                 "post_attack": HashesStatus()
             }
 
-        super().__init__(**init_options)
+        super().__init__(init_options)
         self.options['wordlist'].required = False
         self.fulldescription = (
             """
