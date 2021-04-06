@@ -30,7 +30,7 @@ class HashcatUtils(CommandSet):
 
     parser_combinator = argparse.ArgumentParser()
     parser_combinator.add_argument('wordlists', nargs='2', help='Wordlist files')
-    parser_mli2.add_argument('outfile', help='Ouput wordlist')
+    parser_combinator.add_argument('outfile', help='Ouput wordlist')
     def do_combinator(self, args):
         """
         Hashcat-Utils combinator
@@ -39,7 +39,7 @@ class HashcatUtils(CommandSet):
 
     parser_combinator3 = argparse.ArgumentParser()
     parser_combinator3.add_argument('wordlists', nargs='3', help='Wordlist files')
-    parser_mli2.add_argument('outfile', help='Ouput wordlist')
+    parser_combinator3.add_argument('outfile', help='Ouput wordlist')
     def do_combinator3(self, args):
         """
         Hashcat-Utils combinator3

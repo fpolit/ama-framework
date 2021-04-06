@@ -68,7 +68,7 @@ class Ama(Cmd):
         self.prompt = "ama > "
         self.continuation_prompt = "> "
         self.default_category = Category.CORE
-        self.db_conn = Ama.init_db_connection(db_credentials)
+        self.db_conn = self.init_db_connection(db_credentials)
         self.workspace = "default" # selected workspace
         self.database_credentials_file = db_credentials
         self.modules = amaModules # format {NAME: MODULE_CLASS, ....}
@@ -77,7 +77,7 @@ class Ama(Cmd):
         #self.filteredFullAttacks = [] # filtered full attacks by a search (format: [(#, MODULE_CLASS), ...])
         self.gvalues = {} # global values set by setvg (format {OPTION_NAME: OPTION_VALUE, ...})
 
-    def init_db_connection(db_credentials:Path):
+    def init_db_connection(self, db_credentials:Path):
         db_conn = None
         try:
             dbCredentials = Connection.dbCreds(db_credentials)
@@ -85,6 +85,7 @@ class Ama(Cmd):
             del dbCredentials
 
         except Exception as error:
+            print_failure(error)
             print_failure("Error while connecting to database")
 
         finally:
