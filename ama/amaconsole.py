@@ -74,7 +74,6 @@ class Ama(Cmd):
         self.modules = amaModules # format {NAME: MODULE_CLASS, ....}
         self.selectedModule = None # selected module with use command (Instance of the module)
         self.filteredModules = [] # filtered modules by a search (format: [(#, MODULE_CLASS), ...])
-        #self.filteredFullAttacks = [] # filtered full attacks by a search (format: [(#, MODULE_CLASS), ...])
         self.gvalues = {} # global values set by setvg (format {OPTION_NAME: OPTION_VALUE, ...})
 
     def init_db_connection(self, db_credentials:Path):
