@@ -22,8 +22,12 @@ from .core.cmdsets.module import (
     Interaction
 )
 
-from.core.cmdsets.core import (
+from .core.cmdsets.core import (
     Core
+)
+
+from .core.cmdsets.hashcat import (
+    HashcatUtils
 )
 
 # cmd2 imports
