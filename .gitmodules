@@ -2,5 +2,5 @@
 	path = docs/wiki
 	url = https://github.com/fpolit/ama-framework.wiki.git
 [submodule "ama/core/plugins/cracker/hashcat-utils"]
-	path = ama/core/plugins/cracker/hashcat-utils
+	path = ama/core/plugins/cracker/hashcat_utils
 	url = https://github.com/hashcat/hashcat-utils.git
