@@ -69,10 +69,7 @@ class Module:
 
                 else: # option is a slurm option
                     if isinstance(self.slurm, Slurm):
-                        argument = self.slurm.options.get(option)
-                        argument.value = value
-                        self.slurm.options[option] = argument
-                        setattr(self.slurm, option, value)
+                        self.slurm.set_option(option, value)
                     else:
                         raise Exception(f"{self.mname} doesn't support slurm")
 

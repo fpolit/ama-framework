@@ -68,7 +68,8 @@ class Core(CommandSet):
         print(Banner.random())
 
     hashes_parser = argparse.ArgumentParser()
-    hashes_parser.add_argument('-c', '--cracker', choices=['jtr', 'hc'], required=True,
+    password_crackers = [John.MAINNAME, Hashcat.MAINNAME]
+    hashes_parser.add_argument('-c', '--cracker', choices=password_crackers, required=True,
                                help="Password cracker")
 
     hashes_parser.add_argument('-s', '--sensitive', action='store_true',
@@ -83,7 +84,7 @@ class Core(CommandSet):
         """
         Search by valid hashes types
         """
-        if args.cracker == "jtr":
+        if args.cracker == John.MAINNAME:
             John.search_hash(args.pattern, sensitive=args.sensitive)
         else: # cracker == hc
             Hashcat.search_hash(args.pattern, sensitive=args.sensitive)

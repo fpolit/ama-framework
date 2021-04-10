@@ -28,6 +28,7 @@ from tabulate import tabulate
 from sbash import Bash
 from typing import List
 import psycopg2
+from math import floor
 
 # fineprint imports
 from fineprint.status import (
@@ -138,7 +139,7 @@ class John(PasswordCracker):
             permission = [os.R_OK]
             Path.access(permission, potfile)
 
-            cracked_pattern = re.compile(rf"\$(\W*|\w*|.*)\$({query_hash})(\$(\W*|\w*|.*)\$)?:(\W*|\w*|.*)",
+            cracked_pattern = re.compile(rf"(\$(\W*|\w*|.*)\$)?({query_hash})(\$(\W*|\w*|.*)\$)?:(\W*|\w*|.*)",
                                         re.DOTALL)
 
             with open(potfile, 'r') as john_potfile:
@@ -313,7 +314,7 @@ class John(PasswordCracker):
                 elif parallel_job_type == "OMP":
                     attack_cmd = f"srun "  + attack_cmd
 
-                header_attack = f"echo -e '\\n\\n[*] Running: {attack_cmd}'"
+                header_attack = f"echo -e \"\\n\\n[*] Running: {attack_cmd}\""
 
                 parallel_work = [(header_attack, attack_cmd)]
                 batch_script_name = slurm.gen_batch_script(parallel_work)
@@ -327,10 +328,10 @@ class John(PasswordCracker):
         else:
             print_failure(f"Cracker {ColorStr(self.main_name).StyleBRIGHT} is disable")
 
-    # debugged - date: Apr 1 2021
+    # Added support for array attacks [debugged - date: Apr 9 2021]
     def wordlist_attack(self , *,
-                        hash_types: List[str] = None , hashes_file: str, wordlist: str,
-                        rules:str = None, rules_file:str = None,
+                        hash_types: List[str] = None , hashes_file: Path, wordlists: List[Path],
+                        rules:str = None, rules_file:Path = None,
                         slurm: Slurm, local:bool = False,
                         db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
         """
@@ -347,7 +348,7 @@ class John(PasswordCracker):
         if self.enable:
             try:
                 permission = [os.R_OK]
-                Path.access(permission, hashes_file, wordlist)
+                Path.access(permission, hashes_file, *wordlists)
 
                 if hash_types:
                     John.check_hash_type(hash_types)
@@ -355,18 +356,171 @@ class John(PasswordCracker):
                 if rules and rules_file:
                     Path.access(permission, rules_file)
 
-                #cmd2.Cmd.poutput(f"Attacking {hash_type} hashes in {hashesfile} file with {wordlist} wordlist.")
-                print_status(f"Attacking hashes in {ColorStr(hashes_file).StyleBRIGHT} file with {ColorStr(wordlist).StyleBRIGHT} wordlist")
+                #cmd2.Cmd.poutput(f"Attacking {hash_type} hashes in {hashesfile} file with {wordlists} wordlist.")
+                print_status(f"Attacking hashes in {ColorStr(hashes_file).StyleBRIGHT} file in wordlist mode")
+                print_status(f"Wordlists: {ColorStr(wordlists).StyleBRIGHT}")
                 print_status(f"Possible hashes identities: {ColorStr(hash_types).StyleBRIGHT}")
+
 
                 if (not local) and slurm and slurm.partition:
                     parallel_job_type = slurm.parallel_job_parser()
                     if not  parallel_job_type in ["MPI", "OMP"]:
                         raise InvalidParallelJob(parallel_job_type)
 
-                    parallel_work = []
-                    for hash_type in hash_types:
+                    hash_types_len = len(hash_types)
+                    wordlists_len = len(wordlists)
+                    array_tasks = slurm.sbatch['array'].value
+                    #import pdb;pdb.set_trace()
+                    if array_tasks is None:
+                        array_tasks = 1
+
+                    #debugged - date Apr 9
+                    if hash_types_len > 1 and wordlists_len > 1:
+
+                        if array_tasks > 1:
+                            if array_tasks > wordlists_len:
+                                print_failure(f"These is more array jobs that work to process (ARRAY={array_tasks}, WLS={wordlists_len})")
+                                print_status(f"Adjusting {ColorStr('ARRAY').StyleBRIGHT} to {wordlists_len} (1 job per wordlist)")
+                                array_tasks = wordlists_len
+                                slurm.set_option('array', array_tasks)
+
+                            for array_task_id in range(array_tasks):
+                                init = floor(wordlists_len/array_tasks)*array_task_id
+                                if array_task_id == (array_tasks - 1):
+                                    end = wordlists_len
+                                else:
+                                    end = floor(wordlists_len/array_tasks)*(array_task_id+1)
+
+                                print_status(f"(array id {array_task_id}) Processing: wordlists={ColorStr(wordlists[init:end]).StyleBRIGHT}, hash_types={ColorStr('ALL').StyleBRIGHT}")
+
+                            WLS = self.pylist2bash(wordlists)
+                            HID = self.pylist2bash(hash_types)
+                            ARRAY = slurm.sbatch['array'].value  #array enumeration:  0-(ARRAY-1)
+                            LEN_WLS = "${#WLS[@]}"
+                            INIT = "$((LEN_WLS/ARRAY * SLURM_ARRAY_TASK_ID))"
+                            END = "$((LEN_WLS/ARRAY * (SLURM_ARRAY_TASK_ID+1)))"
+
+                            variable_definition_block = (
+                                f"WLS={WLS}",
+                                f"HID={HID}",
+                                f"LEN_WLS={LEN_WLS}",
+                                f"ARRAY={ARRAY}",
+                                f"INIT={INIT}",
+                                "\nif [[ $SLURM_ARRAY_TASK_ID -eq $((ARRAY -1)) ]]; then",
+                                "\t" + "END=$LEN_WLS",
+                                "else",
+                                "\t" + f"END={END}",
+                                "fi",
+                            )
+
+                        else:
+                            WLS = self.pylist2bash(wordlists)
+                            HID = self.pylist2bash(hash_types)
+                            INIT = 0
+                            END = wordlists_len
+
+                            variable_definition_block = (
+                                f"WLS={WLS}",
+                                f"HID={HID}",
+                                f"INIT={INIT}",
+                                f"END={END}",
+                            )
+
+
+                        attack_cmd = f"{self.main_exec}"
+                        attack_cmd += " --format=${identity}"
+                        attack_cmd += " -w ${wl}"
+
+                        if parallel_job_type == "MPI":
+                            attack_cmd = f"srun --mpi={slurm.pmix} "  + attack_cmd
+
+                        elif parallel_job_type == "OMP":
+                            attack_cmd = f"srun "  + attack_cmd
+
+                        if rules and rules_file:
+                            attack_cmd += f" --rules={rules} {rules_file}"
+
+                        attack_cmd += f" {hashes_file}"
+                        header_attack = f"echo -e \"\\n\\n[*] Running: {attack_cmd}\""
+
+                        insert_cracked_hashes = ''
+                        if db_status and workspace and db_credential_file:
+                            insert_cracked_hashes = (
+                                f"amadb -c {db_credential_file} -w {workspace}"
+                                f" --cracker {John.MAINNAME} -j {hashes_file}"
+                            )
+
+                        cracking_block = (
+                            "for wl in ${WLS[@]:INIT:END-INIT}; do",
+                            "\tfor identity in ${HID[@]}; do",
+                            "\t\t" + header_attack,
+                            "\t\t" + attack_cmd,
+                            "\t\t" + insert_cracked_hashes,
+                            "\t\t" + "all_cracked=false",
+                            "\t\t" + "if $all_cracked; then break; fi",
+                            "\tdone",
+                            "done"
+                        )
+
+                        parallel_work = (variable_definition_block,
+                                         cracking_block)
+
+
+                        slurm_script_name = slurm.gen_batch_script(parallel_work)
+                        #import pdb;pdb.set_trace()
+                        Bash.exec(f"sbatch {slurm_script_name}")
+
+                    #debugged - date apr 9 2021
+                    elif hash_types_len > 1 and wordlists_len == 1:
+                        #import pdb;pdb.set_trace()
+                        if array_tasks > 1:
+                            if array_tasks > hash_types_len:
+                                print_failure(f"These is more array jobs that work to process (ARRAY={array_tasks}, HID={hash_types_len})")
+                                print_status(f"Adjusting {ColorStr('ARRAY').StyleBRIGHT} to {hash_type_len} (1 job per hash type)")
+                                array_tasks = hash_types_len
+                                slurm.set_option('array', array_tasks)
+
+                            for array_task_id in range(array_tasks):
+                                init = floor(hash_types_len/array_tasks)*array_task_id
+                                if array_task_id == (array_tasks - 1):
+                                    end = hash_types_len
+                                else:
+                                    end = floor(hash_types_len/array_tasks)*(array_task_id+1)
+                                print_status(f"(array id {array_task_id}) Processing: hash-types={ColorStr(hash_types[init:end]).StyleBRIGHT}, wordlists={ColorStr('ALL').StyleBRIGHT}")
+
+                            HID = self.pylist2bash(hash_types)
+                            ARRAY = slurm.sbatch['array'].value  #array enumeration:  0-(ARRAY-1)
+                            LEN_HID = "${#HID[@]}"
+                            INIT = "$((LEN_HID/ARRAY * SLURM_ARRAY_TASK_ID))"
+                            END = "$((LEN_HID/ARRAY * (SLURM_ARRAY_TASK_ID+1)))"
+
+                            variable_definition_block = (
+                                f"HID={HID}",
+                                f"LEN_HID={LEN_HID}",
+                                f"ARRAY={ARRAY}",
+                                f"INIT={INIT}",
+                                "\nif [[ $SLURM_ARRAY_TASK_ID -eq $((ARRAY -1)) ]]; then",
+                                "\t" + "END=$LEN_HID",
+                                "else",
+                                "\t" + f"END={END}",
+                                "fi",
+                            )
+
+                        else:
+                            HID = self.pylist2bash(hash_types)
+                            INIT = 0
+                            END = hash_types_len
+
+                            variable_definition_block = (
+                                f"HID={HID}",
+                                f"INIT={INIT}",
+                                f"END={END}",
+                            )
+
+                        wordlist = wordlists[0]
                         attack_cmd = f"{self.main_exec} --wordlist={wordlist}"
+                        attack_cmd += " --format=${identity}"
+
                         if parallel_job_type == "MPI":
                             attack_cmd = f"srun --mpi={slurm.pmix} "  + attack_cmd
 
@@ -374,28 +528,167 @@ class John(PasswordCracker):
                         elif parallel_job_type == "OMP":
                             attack_cmd = f"srun "  + attack_cmd
 
-                        if hash_type:
-                            attack_cmd += f" --format={hash_type}"
-
                         if rules and rules_file:
                             attack_cmd += f" --rules={rules} {rules_file}"
 
                         attack_cmd += f" {hashes_file}"
-
-                        header_attack = f"echo -e '\\n\\n[*] Running: {attack_cmd}'"
-
+                        header_attack = f"echo -e \"\\n\\n[*] Running: {attack_cmd}\""
+                        insert_cracked_hashes = ''
                         if db_status and workspace and db_credential_file:
                             insert_cracked_hashes = (
                                 f"amadb -c {db_credential_file} -w {workspace}"
                                 f" --cracker {John.MAINNAME} -j {hashes_file}"
                             )
 
-                            parallel_work.append((header_attack, attack_cmd, insert_cracked_hashes))
-                        else:
-                            parallel_work.append((header_attack, attack_cmd))
+                        cracking_block = (
+                            "for identity in ${HID[@]:INIT:END-INIT}; do",
+                            "\t" + header_attack,
+                            "\t" + attack_cmd,
+                            "\t" + insert_cracked_hashes,
+                            "\t" + "all_cracked=false",
+                            "\t" + "if $all_cracked; then break; fi",
+                            "done"
+                        )
 
-                    slurm_script_name = slurm.gen_batch_script(parallel_work)
-                    Bash.exec(f"sbatch {slurm_script_name}")
+                        parallel_work = (variable_definition_block,
+                                         cracking_block)
+
+
+                        slurm_script_name = slurm.gen_batch_script(parallel_work)
+                        #import pdb;pdb.set_trace()
+                        Bash.exec(f"sbatch {slurm_script_name}")
+
+                    #debugged - date apr 9 2021
+                    elif hash_types_len == 1 and wordlists_len > 1:
+
+                        #import pdb;pdb.set_trace()
+                        if array_tasks > 1:
+                            if array_tasks > wordlists_len:
+                                print_failure(f"These is more array jobs that work to process (ARRAY={array_tasks}, WLS={wordlists_len})")
+                                print_status(f"Adjusting {ColorStr('ARRAY').StyleBRIGHT} to {wordlists_len} (1 job per wordlist)")
+                                array_tasks = wordlists_len
+                                slurm.set_option('array', array_tasks)
+
+                            for array_task_id in range(array_tasks):
+                                init = floor(wordlists_len/array_tasks)*array_task_id
+                                if array_task_id == (array_tasks - 1):
+                                    end = wordlists_len
+                                else:
+                                    end = floor(wordlists_len/array_tasks)*(array_task_id+1)
+                                print_status(f"(array id {array_task_id}) Processing: wordlists={ColorStr(wordlists[init:end]).StyleBRIGHT}, hash types={ColorStr('ALL').StyleBRIGHT}")
+
+                            WLS = self.pylist2bash(wordlists)
+                            ARRAY = slurm.sbatch['array'].value  #array enumeration:  0-(ARRAY-1)
+                            LEN_WLS = "${#WLS[@]}"
+                            INIT = "$((LEN_WLS/ARRAY * SLURM_ARRAY_TASK_ID))"
+                            END = "$((LEN_WLS/ARRAY * (SLURM_ARRAY_TASK_ID+1)))"
+
+                            variable_definition_block = (
+                                f"WLS={WLS}",
+                                f"LEN_WLS={LEN_WLS}",
+                                f"ARRAY={ARRAY}",
+                                f"INIT={INIT}",
+                                "\nif [[ $SLURM_ARRAY_TASK_ID -eq $((ARRAY -1)) ]]; then",
+                                "\t" + "END=$LEN_WLS",
+                                "else",
+                                "\t" + f"END={END}",
+                                "fi",
+                            )
+
+                        else:
+                            WLS = self.pylist2bash(wordlists)
+                            INIT = 0
+                            END = wordlists_len
+
+                            variable_definition_block = (
+                                f"WLS={WLS}",
+                                f"INIT={INIT}",
+                                f"END={END}"
+                            )
+
+
+                        hash_type = hash_types[0]
+                        attack_cmd = f"{self.main_exec} --format={hash_type}"
+                        attack_cmd += " -w ${wl}"
+                        if parallel_job_type == "MPI":
+                            attack_cmd = f"srun --mpi={slurm.pmix} "  + attack_cmd
+
+
+                        elif parallel_job_type == "OMP":
+                            attack_cmd = f"srun "  + attack_cmd
+
+                        if rules and rules_file:
+                            attack_cmd += f" --rules={rules} {rules_file}"
+
+                        attack_cmd += f" {hashes_file}"
+                        header_attack = f"echo -e \"\\n\\n[*] Running: {attack_cmd}\""
+                        insert_cracked_hashes = ''
+                        if db_status and workspace and db_credential_file:
+                            insert_cracked_hashes = (
+                                f"amadb -c {db_credential_file} -w {workspace}"
+                                f" --cracker {John.MAINNAME} -j {hashes_file}"
+                            )
+
+                        cracking_block = (
+                            "for wl in ${WLS[@]:INIT:END-INIT}; do",
+                            "\t" + header_attack,
+                            "\t" + attack_cmd,
+                            "\t" + insert_cracked_hashes,
+                            "\t" + "all_cracked=false",
+                            "\t" + "if $all_cracked; then break; fi",
+                            "done"
+                        )
+
+                        parallel_work = (variable_definition_block,
+                                         cracking_block)
+
+
+                        slurm_script_name = slurm.gen_batch_script(parallel_work)
+                        #import pdb;pdb.set_trace()
+                        Bash.exec(f"sbatch {slurm_script_name}")
+
+                    # debugged - date apr 9 2021
+                    else: # hash_types_len == 1 and wordlists_len == 1:
+
+                        if array_tasks > 1:
+                            print_failure("There is not much work for performing an array attack")
+                            slurm.set_option('array', None)
+                            if slurm.sbatch['output'] == "slurm-%A_%a.out": # default output name for array jobs
+                                slurm.set_option('output', 'slurm-%j.out')
+
+                        #import pdb;pdb.set_trace()
+                        hash_type = hash_types[0]
+                        wordlist = wordlists[0]
+                        attack_cmd = (
+                            f"{self.main_exec}"
+                            f" --wordlist={wordlist}"
+                            f" --format={hash_type}"
+                        )
+
+                        if parallel_job_type == "MPI":
+                            attack_cmd = f"srun --mpi={slurm.pmix} "  + attack_cmd
+
+                        elif parallel_job_type == "OMP":
+                            attack_cmd = f"srun "  + attack_cmd
+
+                        if rules and rules_file:
+                            attack_cmd += f" --rules={rules} {rules_file}"
+
+                        attack_cmd += f" {hashes_file}"
+                        header_attack = f"echo -e \"\\n\\n[*] Running: {attack_cmd}\""
+                        insert_cracked_hashes = ''
+                        if db_status and workspace and db_credential_file:
+                            insert_cracked_hashes = (
+                                f"amadb -c {db_credential_file} -w {workspace}"
+                                f" --cracker {John.MAINNAME} -j {hashes_file}"
+                            )
+
+                        cracking_block = (header_attack, attack_cmd, insert_cracked_hashes)
+
+                        parallel_work = [cracking_block]
+                        slurm_script_name = slurm.gen_batch_script(parallel_work)
+                        #import pdb;pdb.set_trace()
+                        Bash.exec(f"sbatch {slurm_script_name}")
 
                 else:
                     for hash_type in hash_types:
@@ -729,32 +1022,32 @@ if db_status and workspace and db_credential_file:
                         raise InvalidParallelJob(parallel_job_type)
 
 
-                    parallel_work = []
-                    for hash_type in hash_types:
-                        attack_cmd = f"{self.main_exec} --single"
-                        if parallel_job_type == "MPI":
-                            attack_cmd = f"srun --mpi={slurm.pmix} "  + attack_cmd
+                    #parallel_work = []
+                    # for hash_type in hash_types:
+                    #     attack_cmd = f"{self.main_exec} --single"
+                    #     if parallel_job_type == "MPI":
+                    #         attack_cmd = f"srun --mpi={slurm.pmix} "  + attack_cmd
 
-                        elif parallel_job_type == "OMP":
-                            attack_cmd = f"srun "  + attack_cmd
+                    #     elif parallel_job_type == "OMP":
+                    #         attack_cmd = f"srun "  + attack_cmd
 
-                        if hash_type:
-                            attack_cmd += f" --format={hash_type}"
+                    #     if hash_type:
+                    #         attack_cmd += f" --format={hash_type}"
 
-                        attack_cmd += f" {hashes_file}"
-                        header_attack = f"echo -e '\\n\\n[*] Running: {attack_cmd}'"
+                    #     attack_cmd += f" {hashes_file}"
+                    #     header_attack = f"echo -e '\\n\\n[*] Running: {attack_cmd}'"
 
-                        if db_status and workspace and db_credential_file:
-                            insert_cracked_hashes = (
-                                f"amadb -c {db_credential_file} -w {workspace}"
-                                f" --cracker {John.MAINNAME} -j {hashes_file}"
-                            )
-                            parallel_work.append((header_attack, attack_cmd, insert_cracked_hashes))
-                        else:
-                            parallel_work.append((header_attack, attack_cmd))
+                    #     if db_status and workspace and db_credential_file:
+                    #         insert_cracked_hashes = (
+                    #             f"amadb -c {db_credential_file} -w {workspace}"
+                    #             f" --cracker {John.MAINNAME} -j {hashes_file}"
+                    #         )
+                    #         parallel_work.append((header_attack, attack_cmd, insert_cracked_hashes))
+                    #     else:
+                    #         parallel_work.append((header_attack, attack_cmd))
 
-                        slurm_script_name = slurm.gen_batch_script(parallel_work)
-                        Bash.exec(f"sbatch {slurm_script_name}")
+                    #     slurm_script_name = slurm.gen_batch_script(parallel_work)
+                    #     Bash.exec(f"sbatch {slurm_script_name}")
 
                 else:
                     #import pdb; pdb.set_trace()

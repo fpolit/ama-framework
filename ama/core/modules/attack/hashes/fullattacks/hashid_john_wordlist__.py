@@ -42,6 +42,8 @@ class HashID_JohnWordlist__(JohnWordlist):
         # pre attack options
         if self.selected_pre_attack:
             self.selected_pre_attack.options['hashes'].value = self.options['hashes_file'].value
+            self.selected_pre_attack.options['hashcat'].value = False
+            self.selected_pre_attack.options['extended'].value = False
 
     # preattack output format:  {hash: [POSIBLE_IDENTITIES, ...], ...}
     def attack(self, *,
@@ -62,9 +64,11 @@ class HashID_JohnWordlist__(JohnWordlist):
             jtr = John()
 
             hashes_identities = self.most_probably_hash_identities(pre_attack_output)
+            wordlists = self.options['wordlist'].value.split(',')
+
             jtr.wordlist_attack(hash_types = hashes_identities,
                                 hashes_file = self.options['hashes_file'].value,
-                                wordlist = self.options['wordlist'].value,
+                                wordlists = wordlists,
                                 slurm = self.slurm,
                                 local = local,
                                 db_status= db_status,

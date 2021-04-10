@@ -58,7 +58,8 @@ class Slurm:
     ]
 
     OPTIONS = [*SBATCH_OPTIONS, *EXTRA_OPTIONS]
-    
+
+
     def __init__(self, **kwargs): # kwargs = {OPTION_NAME: Argument instance, ...}
         self.options = {}
         self.sbatch = {}
@@ -71,6 +72,19 @@ class Slurm:
                     self.sbatch[name] = arg
                 else: #name in Slurm.EXTRA_OPTIONS
                     self.extra[name] = arg
+
+
+    def set_option(self, name, value):
+        #import pdb;pdb.set_trace()
+        if name in Slurm.OPTIONS:
+            setattr(self, name, value)
+            self.options[name].value = value
+            if name in Slurm.SBATCH_OPTIONS:
+                self.sbatch[name].value = value
+            else: # option is a extra option
+                self.extra[name].value = value
+        else:
+            raise Exception(f"{{ColorStr(name).StyleBRIGHT}} option isn't a valid slurm's option")
 
     def parallel_job_parser(self):
         """
@@ -110,15 +124,18 @@ class Slurm:
         """
         #import pdb; pdb.set_trace()
 
-        batch_script_name = self.extra.get('slurm_script', 'attack.sh')
+        batch_script_name = self.batch_script if self.batch_script is not None else 'attack.sh'
 
 
         with open(batch_script_name, 'w') as batch_script:
             batch_script.write("#!/bin/bash\n")
             for flag, argument in self.sbatch.items():
-                if flag == "gpu" and argument > 0:
+                if flag == "gpu" and (argument.value is not None and argument.value > 0):
                     flag = flag.replace("_", "-")
                     batch_script.write(f"#SBATCH --gres={flag}:{argument.value}\n")
+
+                elif flag == 'array' and (argument.value is not None and argument.value > 0):
+                    batch_script.write(f"#SBATCH --array=0-{argument.value-1}\n")
                 else:
                     if isinstance(argument.value, bool):
                         if argument.value:

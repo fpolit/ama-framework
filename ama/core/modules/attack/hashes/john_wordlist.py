@@ -104,7 +104,7 @@ class JohnWordlist(Attack):
         """
 
         attack_options = {
-            'wordlist': Argument(wordlist, True, "wordlist file"),
+            'wordlist': Argument(wordlist, True, "wordlists file(split by commas)"),
             'hash_type': Argument(hash_type, True, "John hash types (split by commas)"),
             'hashes_file': Argument(hashes_file, True, "hashes file"),
         }
@@ -112,6 +112,7 @@ class JohnWordlist(Attack):
         if slurm is None:
             slurm_options = {
                 "account": Argument(None, False, "Cluster account to submit the job"),
+                "array": Argument(None, False, "Array jobs number"),
                 "dependency": Argument(None, False, "Defer the start of this job until the specified dependencies have been satisfied completed"),
                 "chdir" : Argument(os.getcwd(), True, "Working directory path"),
                 "error": Argument(None, False, "Error file"),
@@ -156,17 +157,16 @@ class JohnWordlist(Attack):
 
         super().__init__(**init_options)
 
-    def get_init_options(self):
-        init_options = {
-            "hash_type": self.options['hash_type'].value,
-            "hashes_file": self.options['hashes_file'].value,
-            "wordlist": self.options['wordlist'].value,
-            "slurm": self.slurm,
-            "pre_attack": self.selected_pre_attack,
-            "post_attack": self.selected_post_attack
-        }
-
-        return init_options
+    # def get_init_options(self):
+    #     init_options = {
+    #         "hash_type": self.options['hash_type'].value,
+    #         "hashes_file": self.options['hashes_file'].value,
+    #         "wordlist": self.options['wordlist'].value,
+    #         "slurm": self.slurm,
+    #         "pre_attack": self.selected_pre_attack,
+    #         "post_attack": self.selected_post_attack
+    #     }
+    #    return init_options
 
     def attack(self, *,
                local:bool = False, force: bool = False, pre_attack_output: Any = None,
@@ -187,10 +187,11 @@ class JohnWordlist(Attack):
             jtr = John()
 
             hash_types = self.options['hash_type'].value.split(',')
+            wordlists = self.options['wordlist'].value.split(',')
 
             jtr.wordlist_attack(hash_types = hash_types,
                                 hashes_file = self.options['hashes_file'].value,
-                                wordlist = self.options['wordlist'].value,
+                                wordlists = wordlists,
                                 slurm = self.slurm,
                                 local = local,
                                 db_status= db_status,
@@ -199,3 +200,13 @@ class JohnWordlist(Attack):
 
         except Exception as error:
             print_failure(error)
+
+
+    def setv(self, option, value, *, pre_attack: bool = False, post_attack: bool = False):
+        #import pdb; pdb.set_trace()
+        super().setv(option, value, pre_attack = pre_attack, post_attack = post_attack)
+
+        option = option.lower()
+        # attack ->  atack
+        if option == "array":
+            super().setv('output', 'slurm-%A_%a.out', pre_attack=False, post_attack=False)

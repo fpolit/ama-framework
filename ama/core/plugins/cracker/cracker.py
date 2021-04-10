@@ -26,3 +26,12 @@ class PasswordCracker(Plugin):
         Check the status (broken or not) of query hash or hashes file
         """
         pass # implement for each child class of PasswordCracker
+
+    def pylist2bash(self, pylist:list):
+        bash_array = '('
+        for id_list, value in enumerate(pylist):
+            if id_list == (len(pylist) - 1):
+                bash_array += f"'{value}')"
+            else:
+                bash_array += f"'{value}' "
+        return bash_array

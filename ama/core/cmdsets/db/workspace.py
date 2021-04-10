@@ -49,6 +49,7 @@ from ama.db.exceptions import WorkspaceExistsError
 
 # valiadator imports
 from ama.core.validator import Answer
+from .connection import Connection
 
 @with_default_category(Category.DB)
 class Workspace(CommandSet):
@@ -89,24 +90,28 @@ class Workspace(CommandSet):
 
             elif args.add or args.addswitch:
                 newWorkspace = args.addswitch or args.add
-                Workspace.init(newWorkspace, **self._cmd.db_creds)
+                db_creds = Connection.dbCreds(self._cmd.database_credentials_file)
+                Workspace.init(newWorkspace, **db_creds)
 
                 if args.addswitch:
                     self.switch(newWorkspace)
 
             elif args.delete:
                 deleteWorkspce = args.delete
+                db_creds = Connection.dbCreds(self._cmd.database_credentials_file)
                 self._cmd.workspace = Workspace.delete(deleteWorkspce, self._cmd.workspace,
-                                                       **self._cmd.db_creds)
+                                                       **db_creds)
 
             elif args.deleteall:
-                Workspace.deleteall(**self._cmd.db_creds)
+                db_creds = Connection.dbCreds(self._cmd.database_credentials_file)
+                Workspace.deleteall(**db_creds)
                 self._cmd.workspace = "default"
 
             elif args.rename:
                 oldWorkspace = args.rename[0]
                 newWorkspace = args.rename[1]
-                Workspace.rename(oldWorkspace, newWorkspace, **self._cmd.db_creds)
+                db_creds = Connection.dbCreds(self._cmd.database_credentials_file)
+                Workspace.rename(oldWorkspace, newWorkspace, **db_creds)
 
             else: #show the availables workspaces
                 try:
