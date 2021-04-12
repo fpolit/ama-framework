@@ -4,7 +4,11 @@ clean:
 	find . -name '*.py[co]' -delete
 
 cleanslurm:
+	rm slurm-*_*.out
 	rm slurm-*.out
+
+cleanbkp:
+	rm *.bkp
 
 virtualenv:
 	virtualenv --prompt '(ama)' env

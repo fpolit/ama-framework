@@ -134,7 +134,7 @@ class Connection(CommandSet):
             self._cmd.db_conn.close()
             self._cmd.db_conn = None
 
-            db_creds = Connection.dbCreds(self._cmd.database_credentials_file)
+            db_creds = Connection.dbCreds(self._cmd.config['db_credentials_file'])
             dbName = db_creds['database']
             print_status(f"Database {ColorStr(dbName).StyleBRIGHT} disconnected")
             del db_creds
@@ -146,8 +146,9 @@ class Connection(CommandSet):
         """
         Report status of database connection
         """
+        #import pdb; pdb.set_trace()
         if self._cmd.db_conn:
-            db_creds = Connection.dbCreds(self._cmd.database_credentials_file)
+            db_creds = Connection.dbCreds(self._cmd.config['db_credentials_file'])
             dbName = db_creds['database']
             print_successful(f"Connected to {ColorStr(dbName).StyleBRIGHT} database")
         else:
@@ -155,6 +156,7 @@ class Connection(CommandSet):
 
     @staticmethod
     def dbCreds(dbconfig: Path):
+        #import pdb; pdb.set_trace()
         db_credentials = None
         try:
             dbconfig_file = dbconfig.expanduser()

@@ -24,7 +24,7 @@ from spack import *
 
 
 class OpenmpiSlurm(AutotoolsPackage):
-    """FIXME: Put a proper description of your package here."""
+    """Openmpi with Slurm"""
 
     # FIXME: Add a proper url for your package's homepage here.
     homepage = "https://www.example.com"

@@ -27,8 +27,13 @@
 # |
 # |- data
 # | |- modules.py  (python script with custom ama modules)
+# |
+# |- config
+# | |- ama.json  (ama's configuration file)
+
 
 import os
+import json
 from ama.core.files import Path
 
 from fineprint.status import print_successful
@@ -92,6 +97,26 @@ def create_ama_home(base_path: Path = USER_HOME):
     ama_plugins = FilesStruct('plugins', base_path=BASE_PATH,
                               inside_dirs=['auxiliary', 'cracker'])
 
-    ama_home.filesStructs = [ama_db, ama_logs, ama_data, ama_modules, ama_plugins]
+    ama_config = FilesStruct('config', base_path=BASE_PATH,
+                             inside_files=['ama.json'])
+
+    ama_home.filesStructs = [ama_db, ama_logs, ama_data, ama_modules, ama_plugins, ama_config]
     ama_home.create()
-    print_successful(f"Ama home directory has been created at {ColorStr(ama_home.path).StyleBRIGHT}")
+    print_successful(f"Ama home directory has been created: {ColorStr(ama_home.path).StyleBRIGHT}")
+
+
+def init_ama_config():
+    #import pdb;pdb.set_trace()
+    ama_config_file = Path.joinpath(AMA_HOME, 'config/ama.json')
+    database_credentials = Path.joinpath(AMA_HOME, 'db/database.json')
+    configurations = {
+        'db_credentials_file': str(database_credentials),
+        'slurm_conf_file': None,
+        'john': None,
+        'hashcat': None
+    }
+
+    with open(ama_config_file, 'w') as config:
+        json.dump(configurations, config, indent=4)
+
+    print_successful(f"Configuration file has been created: {ColorStr(ama_config_file).StyleBRIGHT}")

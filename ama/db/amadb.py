@@ -127,11 +127,10 @@ class AmaDB:
             with open(database_json_file, 'w') as db_credentials:
                 json.dump(dbCredential, db_credentials, indent=4)
 
-            print_successful(f"Database credential file has been created: {database_json_file}")
+            print_successful(f"Database credential file has been created: {ColorStr(database_json_file).StyleBRIGHT}")
             del dbCredential
 
         except (Exception, psycopg2.DatabaseError) as error:
-            #cmd2.Cmd.pexcept(error)
             print_failure(error)
 
 

@@ -522,7 +522,7 @@ class Interaction(CommandSet):
                                                       pre_attack_output = pre_attack_output,
                                                       db_status = db_status,
                                                       workspace = self._cmd.workspace,
-                                                      db_credential_file = self._cmd.database_credentials_file)
+                                                      db_credential_file = self._cmd.config['db_credentials_file'])
 
                 #import pdb; pdb.set_trace()
                 if post_attack := selectedModule.selected_post_attack:

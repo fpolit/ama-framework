@@ -112,7 +112,7 @@ class JohnWordlist(Attack):
         if slurm is None:
             slurm_options = {
                 "account": Argument(None, False, "Cluster account to submit the job"),
-                "array": Argument(None, False, "Array jobs number"),
+                "array": Argument(None, False, "Number of array jobs"),
                 "dependency": Argument(None, False, "Defer the start of this job until the specified dependencies have been satisfied completed"),
                 "chdir" : Argument(os.getcwd(), True, "Working directory path"),
                 "error": Argument(None, False, "Error file"),

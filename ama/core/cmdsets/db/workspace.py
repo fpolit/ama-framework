@@ -90,7 +90,7 @@ class Workspace(CommandSet):
 
             elif args.add or args.addswitch:
                 newWorkspace = args.addswitch or args.add
-                db_creds = Connection.dbCreds(self._cmd.database_credentials_file)
+                db_creds = Connection.dbCreds(self._cmd.config['db_credentials_file'])
                 Workspace.init(newWorkspace, **db_creds)
 
                 if args.addswitch:
@@ -98,19 +98,19 @@ class Workspace(CommandSet):
 
             elif args.delete:
                 deleteWorkspce = args.delete
-                db_creds = Connection.dbCreds(self._cmd.database_credentials_file)
+                db_creds = Connection.dbCreds(self._cmd.config['db_credentials_file'])
                 self._cmd.workspace = Workspace.delete(deleteWorkspce, self._cmd.workspace,
                                                        **db_creds)
 
             elif args.deleteall:
-                db_creds = Connection.dbCreds(self._cmd.database_credentials_file)
+                db_creds = Connection.dbCreds(self._cmd.config['db_credentials_file'])
                 Workspace.deleteall(**db_creds)
                 self._cmd.workspace = "default"
 
             elif args.rename:
                 oldWorkspace = args.rename[0]
                 newWorkspace = args.rename[1]
-                db_creds = Connection.dbCreds(self._cmd.database_credentials_file)
+                db_creds = Connection.dbCreds(self._cmd.config['db_credentials_file'])
                 Workspace.rename(oldWorkspace, newWorkspace, **db_creds)
 
             else: #show the availables workspaces

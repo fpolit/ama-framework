@@ -14,7 +14,12 @@ from fineprint.status import (
 )
 
 from ama.db import AmaDB
-from ama.config import create_ama_home, AMA_HOME, USER_HOME
+from ama.config import (
+    init_ama_config,
+    create_ama_home,
+    AMA_HOME,
+    USER_HOME)
+
 from ama.amaconsole import main as amaconsoleMain
 from ama.core.files import Path
 
@@ -22,6 +27,7 @@ def init(args):
     base_path = USER_HOME
     create_ama_home(base_path)
     AmaDB.initDB(args.dbName, args.roleName)
+    init_ama_config()
 
 def reinit(args):
     pass
