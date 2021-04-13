@@ -45,8 +45,8 @@ class Hashcat(PasswordCracker):
     HASHES = hcHashes
     MAINNAME = "hashcat"
 
-    def __init__(self):
-        super().__init__(name=['hashcat', 'hc'], version="v6.1.1")
+    def __init__(self, hc_exec:Path=None):
+        super().__init__(name=['hashcat', 'hc'], version="v6.1.1", main_exec=hc_exec)
 
 
     #debugged - date: Apr 3 2021

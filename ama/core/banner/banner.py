@@ -32,7 +32,7 @@ class Banner:
                   Wordlists    : {len(auxiliaryWordlistModules)}
                   Hashes       : {len(auxiliaryHashesModules)}
 
-        Full Attack Modules (Pre Attack + Attack + Post Attack): {len(Glue.full_attacks)}
+        Full Attacks (Pre Attack + Attack + Post Attack): {len(Glue.full_attacks)}
         """
     )
     AMA_VERSION = get_version()

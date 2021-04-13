@@ -131,7 +131,8 @@ class HashcatHybrid(Attack):
 
     def attack(self, *,
                local:bool = False, force:bool = False, pre_attack_output: Any = None,
-               db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
+               db_status:bool = False, workspace:str = None, db_credential_file: Path = None,
+               cracker_main_exec:Path = None):
         """
         Hybrid Attack using hashcat cracker
         """
@@ -142,13 +143,18 @@ class HashcatHybrid(Attack):
                 self.no_empty_required_options(local)
 
 
-            hc = Hashcat()
+            if cracker_main_exec:
+                hc = Hashcat(hashcat_exec=cracker_main_exec)
+            else:
+                hc = Hashcat()
 
             hash_type = None
             if isinstance(self.options['hash_type'].value, int):
                 hash_types = [self.options['hash_type'].value]
+
             elif isinstance(self.options['hash_type'].value, str):
                 hash_types = [int(hash_type) for hash_type in self.options['hash_type'].value.split(',')]
+
             else:
                 raise TypeError(f"Invalid type hash_type: {type(hash_type)}")
 

@@ -34,6 +34,7 @@ class Attack(Module):
     """
     Base class to build attack modules
     """
+    CRACKER = None
     def __init__(self, *,
                  mname: str, author: List[str],
                  description: str, fulldescription: str, references: List[str],

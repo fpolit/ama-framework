@@ -70,6 +70,7 @@ class JohnWordlist(Attack):
         "https://github.com/openwall/john"
     ]
 
+    CRACKER = John.MAINNAME
     # {PRE_ATTACK_MNAME: PRE_ATTACK_CLASS, ...}
     PRE_ATTACKS = {
         # auxiliary/hashes
@@ -169,8 +170,9 @@ class JohnWordlist(Attack):
     #    return init_options
 
     def attack(self, *,
-               local:bool = False, force: bool = False, pre_attack_output: Any = None,
-               db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
+               local:bool = False, pre_attack_output: Any = None,
+               db_status:bool = False, workspace:str = None, db_credential_file: Path = None,
+               cracker_main_exec:Path = None, slurm_conf = None):
         """
         Wordlist attack using John the Ripper
 
@@ -181,10 +183,15 @@ class JohnWordlist(Attack):
 
         #import pdb; pdb.set_trace()
         try:
-            if not force:
-                self.no_empty_required_options(local)
+            self.no_empty_required_options(local)
 
-            jtr = John()
+            if slurm_conf:
+                self.slurm.config = slurm_conf
+
+            if cracker_main_exec:
+                jtr = John(john_exec=cracker_main_exec)
+            else:
+                jtr = John()
 
             hash_types = self.options['hash_type'].value.split(',')
             wordlists = self.options['wordlist'].value.split(',')

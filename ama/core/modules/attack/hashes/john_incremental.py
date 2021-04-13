@@ -115,7 +115,8 @@ class JohnIncremental(Attack):
         super().__init__(**init_options)
 
     def attack(self, *, local:bool = False, force:bool = False, pre_attack_output: Any = None,
-               db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
+               db_status:bool = False, workspace:str = None, db_credential_file: Path = None,
+               cracker_main_exec:Path = None):
         """
         Incremental attack using John the Ripper
         """
@@ -125,7 +126,11 @@ class JohnIncremental(Attack):
             if not force:
                 self.no_empty_required_options(local)
 
-            jtr = John()
+            if cracker_main_exec:
+                jtr = John(john_exec=cracker_main_exec)
+            else:
+                jtr = John()
+
             hash_types = self.options['hash_type'].value.split(',')
 
             jtr.incremental_attack(hash_types = hash_types,

@@ -16,6 +16,7 @@ from ama.core.modules.base import (
 
 # cracker imports
 from ama.core.plugins.cracker import John
+from ama.core.files import Path
 
 # slurm import
 from ama.core.slurm import Slurm
@@ -97,7 +98,9 @@ class JohnBenchmark(Attack):
         super().__init__(**init_options)
 
 
-    def attack(self, local:bool = False, force:bool = False, pre_attack_output: Any = None):
+    def attack(self, local:bool = False, force:bool = False, pre_attack_output: Any = None,
+               db_status:bool = False, workspace:str = None, db_credential_file: Path = None,
+               cracker_main_exec:Path = None):
         """
         John the Ripper benchmark
 
@@ -110,8 +113,10 @@ class JohnBenchmark(Attack):
             if not force:
                 self.no_empty_required_options(local)
 
-            jtr = John()
-            #print_status(f"Running {self.mname} module")
+            if cracker_main_exec:
+                jtr = John(john_exec=cracker_main_exec)
+            else:
+                jtr = John()
 
             if local:
                 jtr.benchmark(slurm = None)

@@ -72,8 +72,8 @@ class John(PasswordCracker):
     HASHES = jtrHashes
     MAINNAME = "john"
 
-    def __init__(self):
-        super().__init__(["john", "jtr"], version="1.9.0-jumbo-1 MPI + OMP")
+    def __init__(self, john_exec:Path=None):
+        super().__init__(["john", "jtr"], version="1.9.0-jumbo-1 MPI + OMP", main_exec=john_exec)
 
     # debugged - date: Apr 2 2021
     @staticmethod
@@ -96,7 +96,7 @@ class John(PasswordCracker):
                 break
 
         if not any_valid_hash_type:
-            NoValidHashType(John, hash_types)
+            raise NoValidHashType(John, hash_types)
 
     # debugged - date: Mar 1 2021
     @staticmethod
@@ -356,13 +356,15 @@ class John(PasswordCracker):
                 if rules and rules_file:
                     Path.access(permission, rules_file)
 
-                #cmd2.Cmd.poutput(f"Attacking {hash_type} hashes in {hashesfile} file with {wordlists} wordlist.")
-                print_status(f"Attacking hashes in {ColorStr(hashes_file).StyleBRIGHT} file in wordlist mode")
+                    print_status(f"Attacking hashes in {ColorStr(hashes_file).StyleBRIGHT} file in wordlist mode")
                 print_status(f"Wordlists: {ColorStr(wordlists).StyleBRIGHT}")
                 print_status(f"Possible hashes identities: {ColorStr(hash_types).StyleBRIGHT}")
 
 
                 if (not local) and slurm and slurm.partition:
+                    #import pdb; pdb.set_trace()
+                    self.check_slurm_partition(slurm.partition, slurm.config['partitions'])
+
                     parallel_job_type = slurm.parallel_job_parser()
                     if not  parallel_job_type in ["MPI", "OMP"]:
                         raise InvalidParallelJob(parallel_job_type)
@@ -375,7 +377,7 @@ class John(PasswordCracker):
                         array_tasks = 1
 
                     #debugged - date Apr 9
-                    if hash_types_len > 1 and wordlists_len > 1:
+                    if  wordlists_len > 1: # hash_types_len >= 1
 
                         if array_tasks > 1:
                             if array_tasks > wordlists_len:
@@ -558,94 +560,95 @@ class John(PasswordCracker):
                         #import pdb;pdb.set_trace()
                         Bash.exec(f"sbatch {slurm_script_name}")
 
+                    # replaced by case: hash_types_len >= 1 and wordlists_len > 1
                     #debugged - date apr 9 2021
-                    elif hash_types_len == 1 and wordlists_len > 1:
+                    # elif hash_types_len == 1 and wordlists_len > 1:
 
-                        #import pdb;pdb.set_trace()
-                        if array_tasks > 1:
-                            if array_tasks > wordlists_len:
-                                print_failure(f"These is more array jobs that work to process (ARRAY={array_tasks}, WLS={wordlists_len})")
-                                print_status(f"Adjusting {ColorStr('ARRAY').StyleBRIGHT} to {wordlists_len} (1 job per wordlist)")
-                                array_tasks = wordlists_len
-                                slurm.set_option('array', array_tasks)
+                    #     #import pdb;pdb.set_trace()
+                    #     if array_tasks > 1:
+                    #         if array_tasks > wordlists_len:
+                    #             print_failure(f"These is more array jobs that work to process (ARRAY={array_tasks}, WLS={wordlists_len})")
+                    #             print_status(f"Adjusting {ColorStr('ARRAY').StyleBRIGHT} to {wordlists_len} (1 job per wordlist)")
+                    #             array_tasks = wordlists_len
+                    #             slurm.set_option('array', array_tasks)
 
-                            for array_task_id in range(array_tasks):
-                                init = floor(wordlists_len/array_tasks)*array_task_id
-                                if array_task_id == (array_tasks - 1):
-                                    end = wordlists_len
-                                else:
-                                    end = floor(wordlists_len/array_tasks)*(array_task_id+1)
-                                print_status(f"(array id {array_task_id}) Processing: wordlists={ColorStr(wordlists[init:end]).StyleBRIGHT}, hash types={ColorStr('ALL').StyleBRIGHT}")
+                    #         for array_task_id in range(array_tasks):
+                    #             init = floor(wordlists_len/array_tasks)*array_task_id
+                    #             if array_task_id == (array_tasks - 1):
+                    #                 end = wordlists_len
+                    #             else:
+                    #                 end = floor(wordlists_len/array_tasks)*(array_task_id+1)
+                    #             print_status(f"(array id {array_task_id}) Processing: wordlists={ColorStr(wordlists[init:end]).StyleBRIGHT}, hash types={ColorStr('ALL').StyleBRIGHT}")
 
-                            WLS = self.pylist2bash(wordlists)
-                            ARRAY = slurm.sbatch['array'].value  #array enumeration:  0-(ARRAY-1)
-                            LEN_WLS = "${#WLS[@]}"
-                            INIT = "$((LEN_WLS/ARRAY * SLURM_ARRAY_TASK_ID))"
-                            END = "$((LEN_WLS/ARRAY * (SLURM_ARRAY_TASK_ID+1)))"
+                    #         WLS = self.pylist2bash(wordlists)
+                    #         ARRAY = slurm.sbatch['array'].value  #array enumeration:  0-(ARRAY-1)
+                    #         LEN_WLS = "${#WLS[@]}"
+                    #         INIT = "$((LEN_WLS/ARRAY * SLURM_ARRAY_TASK_ID))"
+                    #         END = "$((LEN_WLS/ARRAY * (SLURM_ARRAY_TASK_ID+1)))"
 
-                            variable_definition_block = (
-                                f"WLS={WLS}",
-                                f"LEN_WLS={LEN_WLS}",
-                                f"ARRAY={ARRAY}",
-                                f"INIT={INIT}",
-                                "\nif [[ $SLURM_ARRAY_TASK_ID -eq $((ARRAY -1)) ]]; then",
-                                "\t" + "END=$LEN_WLS",
-                                "else",
-                                "\t" + f"END={END}",
-                                "fi",
-                            )
+                    #         variable_definition_block = (
+                    #             f"WLS={WLS}",
+                    #             f"LEN_WLS={LEN_WLS}",
+                    #             f"ARRAY={ARRAY}",
+                    #             f"INIT={INIT}",
+                    #             "\nif [[ $SLURM_ARRAY_TASK_ID -eq $((ARRAY -1)) ]]; then",
+                    #             "\t" + "END=$LEN_WLS",
+                    #             "else",
+                    #             "\t" + f"END={END}",
+                    #             "fi",
+                    #         )
 
-                        else:
-                            WLS = self.pylist2bash(wordlists)
-                            INIT = 0
-                            END = wordlists_len
+                    #     else:
+                    #         WLS = self.pylist2bash(wordlists)
+                    #         INIT = 0
+                    #         END = wordlists_len
 
-                            variable_definition_block = (
-                                f"WLS={WLS}",
-                                f"INIT={INIT}",
-                                f"END={END}"
-                            )
-
-
-                        hash_type = hash_types[0]
-                        attack_cmd = f"{self.main_exec} --format={hash_type}"
-                        attack_cmd += " -w ${wl}"
-                        if parallel_job_type == "MPI":
-                            attack_cmd = f"srun --mpi={slurm.pmix} "  + attack_cmd
+                    #         variable_definition_block = (
+                    #             f"WLS={WLS}",
+                    #             f"INIT={INIT}",
+                    #             f"END={END}"
+                    #         )
 
 
-                        elif parallel_job_type == "OMP":
-                            attack_cmd = f"srun "  + attack_cmd
-
-                        if rules and rules_file:
-                            attack_cmd += f" --rules={rules} {rules_file}"
-
-                        attack_cmd += f" {hashes_file}"
-                        header_attack = f"echo -e \"\\n\\n[*] Running: {attack_cmd}\""
-                        insert_cracked_hashes = ''
-                        if db_status and workspace and db_credential_file:
-                            insert_cracked_hashes = (
-                                f"amadb -c {db_credential_file} -w {workspace}"
-                                f" --cracker {John.MAINNAME} -j {hashes_file}"
-                            )
-
-                        cracking_block = (
-                            "for wl in ${WLS[@]:INIT:END-INIT}; do",
-                            "\t" + header_attack,
-                            "\t" + attack_cmd,
-                            "\t" + insert_cracked_hashes,
-                            "\t" + "all_cracked=false",
-                            "\t" + "if $all_cracked; then break; fi",
-                            "done"
-                        )
-
-                        parallel_work = (variable_definition_block,
-                                         cracking_block)
+                    #     hash_type = hash_types[0]
+                    #     attack_cmd = f"{self.main_exec} --format={hash_type}"
+                    #     attack_cmd += " -w ${wl}"
+                    #     if parallel_job_type == "MPI":
+                    #         attack_cmd = f"srun --mpi={slurm.pmix} "  + attack_cmd
 
 
-                        slurm_script_name = slurm.gen_batch_script(parallel_work)
-                        #import pdb;pdb.set_trace()
-                        Bash.exec(f"sbatch {slurm_script_name}")
+                    #     elif parallel_job_type == "OMP":
+                    #         attack_cmd = f"srun "  + attack_cmd
+
+                    #     if rules and rules_file:
+                    #         attack_cmd += f" --rules={rules} {rules_file}"
+
+                    #     attack_cmd += f" {hashes_file}"
+                    #     header_attack = f"echo -e \"\\n\\n[*] Running: {attack_cmd}\""
+                    #     insert_cracked_hashes = ''
+                    #     if db_status and workspace and db_credential_file:
+                    #         insert_cracked_hashes = (
+                    #             f"amadb -c {db_credential_file} -w {workspace}"
+                    #             f" --cracker {John.MAINNAME} -j {hashes_file}"
+                    #         )
+
+                    #     cracking_block = (
+                    #         "for wl in ${WLS[@]:INIT:END-INIT}; do",
+                    #         "\t" + header_attack,
+                    #         "\t" + attack_cmd,
+                    #         "\t" + insert_cracked_hashes,
+                    #         "\t" + "all_cracked=false",
+                    #         "\t" + "if $all_cracked; then break; fi",
+                    #         "done"
+                    #     )
+
+                    #     parallel_work = (variable_definition_block,
+                    #                      cracking_block)
+
+
+                    #     slurm_script_name = slurm.gen_batch_script(parallel_work)
+                    #     #import pdb;pdb.set_trace()
+                    #     Bash.exec(f"sbatch {slurm_script_name}")
 
                     # debugged - date apr 9 2021
                     else: # hash_types_len == 1 and wordlists_len == 1:
@@ -687,7 +690,7 @@ class John(PasswordCracker):
 
                         parallel_work = [cracking_block]
                         slurm_script_name = slurm.gen_batch_script(parallel_work)
-                        #import pdb;pdb.set_trace()
+                        import pdb;pdb.set_trace()
                         Bash.exec(f"sbatch {slurm_script_name}")
 
                 else:
@@ -827,8 +830,7 @@ class John(PasswordCracker):
 
     #modify - date: Apr 1 2021 (debugged - date: Apr 2 2021)
     def masks_attack(self, *,
-                     hash_types: List[str] = None, hashes_file: str, masks_file: str,
-                     masks_attack_script: str,
+                     hash_types: List[str] = None, hashes_file: Path, masks_file: Path,
                      slurm: Slurm, local: bool = False,
                      db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
         """
@@ -855,18 +857,84 @@ class John(PasswordCracker):
                 print_status(f"Possible hashes identities: {ColorStr(hash_types).StyleBRIGHT}")
 
                 if (not local) and slurm and slurm.partition:
-                    John.gen_masks_attack(hash_types = hash_types,
-                                          hashes_file = hashes_file,
-                                          masks_file = masks_file,
-                                          masks_attack_script = masks_attack_script,
-                                          slurm = slurm,
-                                          db_status = db_status,
-                                          workspace = workspace,
-                                          db_credential_file = db_credential_file)
+                    self.check_slurm_partition(slurm.partition, slurm.config['partitions'])
 
-                    parallel_work = [(f"python3 {masks_attack_script}",)]
+                    parallel_job_type = slurm.parallel_job_parser()
+                    if not  parallel_job_type in ["MPI", "OMP"]:
+                        raise InvalidParallelJob(parallel_job_type)
+
+                    array_tasks = slurm.sbatch['array'].value
+                    if array_tasks is None:
+                        array_tasks = 1
+
+
+                    base_path = masks_file.parent
+                    name_masks_file = masks_file.name
+                    suffix = masks_file.suffix
+                    if array_tasks > 1:
+                        self.array_masks(masks_file, array_tasks)
+                        only_name_masks_file = name_masks_file[:-len(suffix)]
+
+                        for a in range(array_tasks):
+                            name_split_masks_file = only_name_masks_file + str(a) + suffix
+                            split_masks_file = Path.joinpath(base_path, name_split_masks_file)
+                            print_status(f"(array id {a}) Processing: masks file = {split_masks_file}")
+
+                        MASKS_FILE = only_name_masks_file + "${SLURM_ARRAY_TASK_ID}" + suffix
+
+                    else:
+                        MASKS_FILE = masks_file.name
+
+                    MASKS_FILE = Path.joinpath(base_path, MASKS_FILE)
+                    HASHES_FILE = hashes_file
+                    HID = self.pylist2bash(hash_types)
+                    #ARRAY = slurm.sbatch['array'].value
+
+                    variable_definition_block = (
+                        f"HASHES_FILE={HASHES_FILE}",
+                        f"MASKS_FILE={MASKS_FILE}",
+                        f"HID={HID}",
+                        #f"ARRAY="
+                    )
+
+                    attack_cmd = f"{self.main_exec}"
+                    attack_cmd += " --mask=${mask}"
+                    attack_cmd += " --format=${hid}"
+
+                    if parallel_job_type == "MPI":
+                        attack_cmd = f"srun --mpi={slurm.pmix} "  + attack_cmd
+
+                    elif parallel_job_type == "OMP":
+                        attack_cmd = f"srun "  + attack_cmd
+
+                    attack_cmd += " ${HASHES_FILE}"
+                    header_attack = f"echo -e \"\\n\\n[*] Running: {attack_cmd}\""
+
+                    insert_cracked_hashes = ''
+                    if db_status and workspace and db_credential_file:
+                        insert_cracked_hashes = (
+                            f"amadb -c {db_credential_file} -w {workspace}"
+                            f" --cracker {John.MAINNAME} -j {hashes_file}"
+                        )
+
+                    cracking_block = (
+                        "while read mask",
+                        "do",
+                        "\tfor hid in ${HID[@]}; do",
+                        "\t\t" + header_attack,
+                        "\t\t" + attack_cmd,
+                        "\t\t" + insert_cracked_hashes,
+                        "\t\t" + "all_cracked=false",
+                        "\t\t" + "if $all_cracked; then break; fi",
+                        "\tdone",
+                        "done < ${MASKS_FILE}"
+                    )
+
+                    parallel_work = (variable_definition_block,
+                                         cracking_block)
+
                     slurm_script_name = slurm.gen_batch_script(parallel_work)
-                    #import pdb; pdb.set_trace()
+                    import pdb; pdb.set_trace()
                     Bash.exec(f"sbatch {slurm_script_name}")
 
                 else:
@@ -904,92 +972,92 @@ class John(PasswordCracker):
 
 
     #modify - date: Apr 1 2021 (debugged - date: Apr 2 2021)
-    @staticmethod
-    def gen_masks_attack(*,
-                         hash_types: List[str], hashes_file: Path, masks_file: Path,
-                         masks_attack_script: Path, slurm: Slurm,
-                         db_status:bool, workspace:str, db_credential_file: Path):
+    # @staticmethod
+#     def gen_masks_attack(*,
+#                          hash_types: List[str], hashes_file: Path, masks_file: Path,
+#                          masks_attack_script: Path, slurm: Slurm,
+#                          db_status:bool, workspace:str, db_credential_file: Path):
 
-        #import pdb; pdb.set_trace()
+#         #import pdb; pdb.set_trace()
 
-        parallel_job_type = slurm.parallel_job_parser()
-        if not  parallel_job_type in ["MPI", "OMP"]:
-            raise InvalidParallelJob(parallel_job_type)
+#         parallel_job_type = slurm.parallel_job_parser()
+#         if not  parallel_job_type in ["MPI", "OMP"]:
+#             raise InvalidParallelJob(parallel_job_type)
 
-        _jtr_main_exec = "{jtr.main_exec}"
-        _mask = "{mask}"
-        _hash_type = "{hash_type}"
-        _hashes_file = "{hashes_file}"
-        _mask_attack = "{mask_attack}"
-        _header_attack = "{header_attack}"
-        _workspace = "{workspace}"
+#         _jtr_main_exec = "{jtr.main_exec}"
+#         _mask = "{mask}"
+#         _hash_type = "{hash_type}"
+#         _hashes_file = "{hashes_file}"
+#         _mask_attack = "{mask_attack}"
+#         _header_attack = "{header_attack}"
+#         _workspace = "{workspace}"
 
-        __hash_types = f"'{hash_types}'"
-        __hashes_file = f"'{hashes_file}'"
-        __masks_file = f"'{masks_file}'"
-        __parallel_job_type = f"'{parallel_job_type}'"
-        __workspace = f"'{workspace}'"
-        __db_credential_file = f"'{db_credential_file}'"
+#         __hash_types = f"'{hash_types}'"
+#         __hashes_file = f"'{hashes_file}'"
+#         __masks_file = f"'{masks_file}'"
+#         __parallel_job_type = f"'{parallel_job_type}'"
+#         __workspace = f"'{workspace}'"
+#         __db_credential_file = f"'{db_credential_file}'"
 
-        masks_attack = (
-                    f"""
-#!/bin/env python3
+#         masks_attack = (
+#                     f"""
+# #!/bin/env python3
 
-from sbash import Bash
+# from sbash import Bash
 
-from ama.core.plugins.cracker import John
-from ama.core.files import Path
+# from ama.core.plugins.cracker import John
+# from ama.core.files import Path
 
-hash_types = {hash_types}
-hashes_file = {__hashes_file}
-masks_file = Path({__masks_file})
-parallel_job_type = {__parallel_job_type}
-db_status = {db_status}
-workspace = {__workspace if workspace else None}
-db_credential_file = Path({__db_credential_file})
+# hash_types = {hash_types}
+# hashes_file = {__hashes_file}
+# masks_file = Path({__masks_file})
+# parallel_job_type = {__parallel_job_type}
+# db_status = {db_status}
+# workspace = {__workspace if workspace else None}
+# db_credential_file = Path({__db_credential_file})
 
-jtr = John()
+# jtr = John()
 
-all_cracked = False
+# all_cracked = False
 
-for hash_type in hash_types:
-    with open(masks_file, 'r') as masks:
-        while mask := masks.readline().rstrip():
-            all_cracked = John.are_all_hashes_cracked(hashes_file)
-            if not all_cracked:
-                mask_attack = f"{_jtr_main_exec} --mask={_mask}"
+# for hash_type in hash_types:
+#     with open(masks_file, 'r') as masks:
+#         while mask := masks.readline().rstrip():
+#             all_cracked = John.are_all_hashes_cracked(hashes_file)
+#             if not all_cracked:
+#                 mask_attack = f"{_jtr_main_exec} --mask={_mask}"
 
-                if parallel_job_type == "MPI":
-                    mask_attack = f"srun --mpi={slurm.pmix} " + mask_attack
+#                 if parallel_job_type == "MPI":
+#                     mask_attack = f"srun --mpi={slurm.pmix} " + mask_attack
 
-                elif parallel_job_type == "OMP":
-                    mask_attack = f"srun " + mask_attack
+#                 elif parallel_job_type == "OMP":
+#                     mask_attack = f"srun " + mask_attack
 
-                if hash_type:
-                    mask_attack += f" --format={_hash_type}"
+#                 if hash_type:
+#                     mask_attack += f" --format={_hash_type}"
 
-                mask_attack += f" {_hashes_file}"
+#                 mask_attack += f" {_hashes_file}"
 
-                header_attack = f"[*] Running: {_mask_attack}"
-                Bash.exec(f"echo -e '\\n\\n\\n{_header_attack}'")
-                Bash.exec(mask_attack)
+#                 header_attack = f"[*] Running: {_mask_attack}"
+#                 Bash.exec(f"echo -e '\\n\\n\\n{_header_attack}'")
+#                 Bash.exec(mask_attack)
 
-            else:
-                break
+#             else:
+#                 break
 
-    if all_cracked := John.are_all_hashes_cracked(hashes_file):
-        print(f"\\n[*] Hashes in {_hashes_file} were cracked")
-        break
+#     if all_cracked := John.are_all_hashes_cracked(hashes_file):
+#         print(f"\\n[*] Hashes in {_hashes_file} were cracked")
+#         break
 
-if db_status and workspace and db_credential_file:
-    John.insert_hashes_to_db(hashes_file, workspace, db_credential_file)
-                """
-            )
+# if db_status and workspace and db_credential_file:
+#     John.insert_hashes_to_db(hashes_file, workspace, db_credential_file)
+#                 """
+#             )
 
-        with open(masks_attack_script, 'w') as attack:
-            attack.write(masks_attack)
+#         with open(masks_attack_script, 'w') as attack:
+#             attack.write(masks_attack)
 
-        print_successful(f"Masks attack script generated: {ColorStr(masks_attack_script).StyleBRIGHT}")
+#         print_successful(f"Masks attack script generated: {ColorStr(masks_attack_script).StyleBRIGHT}")
 
     # modify - date: Apr 1 2021 (debugged - date: Apr 2 2021)
     def single_attack(self, *,

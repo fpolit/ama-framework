@@ -37,6 +37,12 @@ from ama.core.modules.base import (
     Auxiliary
 )
 
+# crackers
+from ama.core.plugins.cracker import (
+    John,
+    Hashcat
+)
+
 from ama.data.modules import Glue
 
 # slurm import
@@ -447,15 +453,16 @@ class Interaction(CommandSet):
     setv_parser.add_argument('-post', '--postattack', action='store_true',
                              help="Set value to post attack module option")
 
+
     #debugged - date: Feb 28 2021
     # modify (pre and post module) - date Mar 6 2021
     # NOTA: implement setv function in module base class to enable specialization of setv cmd by modules
+    # Implemented setv function in 'module' class - date Apr 11 2021 (debugged Apr 11 2021)
     @with_argparser(setv_parser)
     def do_setv(self, args):
         """
         Set a value to an valid option
         """
-        #import pdb; pdb.set_trace()
 
         try:
             option = args.option
@@ -464,7 +471,6 @@ class Interaction(CommandSet):
             if selectedModule := self._cmd.selectedModule:
                 if args.preattack:
                     if isinstance(selectedModule, Attack):
-                        #print(selectedModule)
                         selectedModule.setv(option, value, pre_attack=True)
                     else:
                         raise Exception("Auxiliary modules doesn't support pre attack modules")
@@ -482,7 +488,6 @@ class Interaction(CommandSet):
                 raise Exception("No module selected")
 
         except Exception as error:
-            #import pdb;pdb.set_trace()
             print_failure(error)
 
     def do_back(self, args):
@@ -495,8 +500,8 @@ class Interaction(CommandSet):
     attack_parser = argparse.ArgumentParser()
     attack_parser.add_argument('-l', '--local', action='store_true',
                                help="Try to perform the attack locally")
-    attack_parser.add_argument('-f', '--force', action='store_true',
-                               help="Force the attack")
+    # attack_parser.add_argument('-f', '--force', action='store_true',
+    #                            help="Force the attack")
     attack_parser.add_argument('-q', '--quiet', action='store_true',
                                help="Run quietly")
 
@@ -506,7 +511,6 @@ class Interaction(CommandSet):
         """
         Perform an attack with the selected module
         """
-        #import pdb; pdb.set_trace()
 
         if selectedModule := self._cmd.selectedModule:
             if isinstance(selectedModule, Attack):
@@ -517,14 +521,29 @@ class Interaction(CommandSet):
 
                 print_status(f"Running {ColorStr(selectedModule.mname).StyleBRIGHT} attack module")
                 db_status = True if self._cmd.db_conn else False
-                attack_output = selectedModule.attack(local = args.local,
-                                                      force = args.force,
-                                                      pre_attack_output = pre_attack_output,
-                                                      db_status = db_status,
-                                                      workspace = self._cmd.workspace,
-                                                      db_credential_file = self._cmd.config['db_credentials_file'])
 
-                #import pdb; pdb.set_trace()
+                if selectedModule.CRACKER == John.MAINNAME:
+                    cracker_main_exec = self._cmd.config['john']
+
+                elif selectedModule.CRACKER == Hashcat.MAINNAME:
+                    cracker_main_exec = self._cmd.config['hashcat']
+
+                else:
+                    cracker_main_exec = None
+
+                #import pdb;pdb.set_trace()
+                attack_output = selectedModule.attack(
+                    local = args.local,
+                    #force = args.force,
+                    pre_attack_output = pre_attack_output,
+                    db_status = db_status,
+                    workspace = self._cmd.workspace,
+                    db_credential_file = self._cmd.config['db_credentials_file'],
+                    cracker_main_exec=cracker_main_exec,
+                    slurm_conf = self._cmd.slurm_config
+                )
+
+
                 if post_attack := selectedModule.selected_post_attack:
                     print_status(f"Running {ColorStr(post_attack.mname).StyleBRIGHT} posattack module")
                     post_attack.run(quiet=args.quiet, attack_output=attack_output)

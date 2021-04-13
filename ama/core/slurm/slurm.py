@@ -183,6 +183,7 @@ class Slurm:
 
 
     def __init__(self, **kwargs): # kwargs = {OPTION_NAME: Argument instance, ...}
+        self.config = None
         self.options = {}
         self.sbatch = {}
         self.extra = {} # extra sbatch options

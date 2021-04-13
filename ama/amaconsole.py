@@ -34,9 +34,9 @@ from .core.cmdsets.core import (
     Core
 )
 
-from .core.cmdsets.hashcat import (
-    HashcatUtils
-)
+# from .core.cmdsets.hashcat import (
+#     HashcatUtils
+# )
 
 # banner
 from .core.banner import Banner
@@ -104,7 +104,7 @@ class Ama(Cmd):
         db_conn = None
         #import pdb; pdb.set_trace()
         try:
-            db_credentials = Path(self.config.get('db_credentials_file'))
+            db_credentials = Path(self.config.get("db_credentials_file"))
             dbCredentials = Connection.dbCreds(db_credentials)
             db_conn = psycopg2.connect(**dbCredentials)
             del dbCredentials
@@ -120,7 +120,7 @@ class Ama(Cmd):
     def init_slurm_config(self):
         #import pdb;pdb.set_trace()
         try:
-            slurm_config_file = self.config.get('slurm_conf_file')
+            slurm_config_file = self.config.get("slurm_conf_file")
             if slurm_config_file is None:
                 slurm_config_file = Slurm.find_slurm_config()
 

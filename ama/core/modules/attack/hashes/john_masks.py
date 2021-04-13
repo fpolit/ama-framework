@@ -9,8 +9,6 @@ import os
 from typing import Any
 from fineprint.status import print_failure
 
-
-
 from ama.core.modules.base import (
     Attack,
     Argument
@@ -104,7 +102,7 @@ class JohnMasks(Attack):
             'hash_type': Argument(hash_type, True, "John hash types(split by commas)"),
             'hashes_file': Argument(hashes_file, True, "Hashes file"),
             'masks_file': Argument(masks_file, True, "Masks file"),
-            'masks_attack': Argument(masks_attack, True, "Generated masks attack script"),
+            #'masks_attack': Argument(masks_attack, True, "Generated masks attack script"),
         }
 
 
@@ -112,6 +110,7 @@ class JohnMasks(Attack):
         if slurm is None:
             slurm_options = {
                 "account": Argument(None, False, "Cluster account to submit the job"),
+                "array": Argument(None, False, "Number of array jobs"),
                 "dependency": Argument(None, False, "Defer the start of this job until the specified dependencies have been satisfied completed"),
                 "chdir" : Argument(os.getcwd(), True, "Working directory path"),
                 "error": Argument(None, False, "Error file"),
@@ -156,23 +155,10 @@ class JohnMasks(Attack):
 
         super().__init__(**init_options)
 
-    def get_init_options(self):
-
-        init_options = {
-            "hash_type": self.options['hash_type'].value,
-            "hashes_file": self.options['hashes_file'].value,
-            "masks_file": self.options['masks_file'].value,
-            "masks_attack": self.options['masks_attack'].value,
-            "slurm": self.slurm,
-            "pre_attack": self.selected_pre_attack,
-            "post_attack": self.selected_post_attack
-        }
-
-        return init_options
-
-
-    def attack(self, local=False, force:bool = False, pre_attack_output: Any = None,
-               db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
+    def attack(self, *,
+               local=False, pre_attack_output: Any = None,
+               db_status:bool = False, workspace:str = None, db_credential_file: Path = None,
+               cracker_main_exec:Path = None,  slurm_conf = None):
         """
         Masks attack using John the Ripper
         Args:
@@ -180,18 +166,23 @@ class JohnMasks(Attack):
         """
         #import pdb; pdb.set_trace()
         try:
-            if not force:
-                self.no_empty_required_options(local)
+            self.no_empty_required_options(local)
 
-            jtr = John()
+            if slurm_conf:
+                self.slurm.config = slurm_conf
+
+            if cracker_main_exec:
+                jtr = John(john_exec=cracker_main_exec)
+            else:
+                jtr = John()
 
             hash_types  = self.options['hash_type'].value.split(',')
-
+            hashes_file = Path(self.options['hashes_file'].value)
+            masks_file = Path(self.options['masks_file'].value)
 
             jtr.masks_attack(hash_types = hash_types,
-                             hashes_file = self.options['hashes_file'].value,
-                             masks_file= self.options['masks_file'].value,
-                             masks_attack_script= self.options['masks_attack'].value,
+                             hashes_file = hashes_file,
+                             masks_file= masks_file,
                              slurm = self.slurm,
                              local = local,
                              db_status= db_status,
@@ -200,3 +191,13 @@ class JohnMasks(Attack):
 
         except Exception as error:
             print_failure(error)
+
+
+    def setv(self, option, value, *, pre_attack: bool = False, post_attack: bool = False):
+        #import pdb; pdb.set_trace()
+        super().setv(option, value, pre_attack = pre_attack, post_attack = post_attack)
+
+        option = option.lower()
+        # attack ->  atack
+        if option == "array":
+            super().setv('output', 'slurm-%A_%a.out', pre_attack=False, post_attack=False)

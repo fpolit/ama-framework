@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from fineprint.color import ColorStr
 
 # exceptions for general PaswordCracker class
 # class CrackerExecNotFound(Exception):
@@ -79,4 +80,12 @@ class InvalidWordlistsNumber(Exception):
 class InvalidServiceError(Exception):
     def __init__(self, service):
         self.warning = f"Invalid service: {service}"
+        super().__init__(self.warning)
+
+# exceptions for slurm
+class InvalidPartition(Exception):
+    def __init__(self, partition, valid_partitions):
+        self.warning = f"Invalid partition: {partition}\n"
+        self.warning += f"{ColorStr.ForeCYAN('[+]')} Valid slurm partitions: " +\
+            ColorStr.StyleBRIGHT(", ".join(valid_partitions))
         super().__init__(self.warning)

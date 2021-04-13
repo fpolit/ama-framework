@@ -125,7 +125,8 @@ class HashcatBruteForce(Attack):
     # debugged - date: Mar 6 2021
     def attack(self, *,
                local:bool = False, force:bool = False, pre_attack_output: Any = None,
-               db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
+               db_status:bool = False, workspace:str = None, db_credential_file: Path = None,
+               cracker_main_exec:Path = None):
         """
         Wordlist attack using Hashcat
 
@@ -139,7 +140,10 @@ class HashcatBruteForce(Attack):
             if not force:
                 self.no_empty_required_options(local)
 
-            hc = Hashcat()
+            if cracker_main_exec:
+                hc = Hashcat(hashcat_exec=cracker_main_exec)
+            else:
+                hc = Hashcat()
 
 
             hash_type = None

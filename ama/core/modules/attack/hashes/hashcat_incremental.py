@@ -141,28 +141,10 @@ class HashcatIncremental(Attack):
         }
         super().__init__(**init_options)
 
-
-    def get_init_options(self):
-        init_options = {
-            "hash_type": self.options['hash_type'].value,
-            "hashes_file": self.options['hashes_file'].value,
-            "incremental_attack": self.options['incremental_attack'].value,
-            "charset": self.options['charset'].value,
-            "min_length": self.options['min_length'].value,
-            "max_length": self.options['max_length'].value,
-            "masks_file": self.options['masks_file'].value,
-            "sleep" : self.options['sleep'].value,
-            "slurm": self.slurm,
-            "pre_attack": self.selected_pre_attack,
-            "post_attack": self.selected_post_attack
-        }
-
-        return init_options
-
-
     def attack(self, *,
                local:bool = False, force:bool = False, pre_attack_output: Any = None,
-               db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
+               db_status:bool = False, workspace:str = None, db_credential_file: Path = None,
+               cracker_main_exec:Path = None):
         """
         Incremental attack using Hashcat
 
@@ -177,7 +159,10 @@ class HashcatIncremental(Attack):
             if not force:
                 self.no_empty_required_options(local)
 
-            hc = Hashcat()
+            if cracker_main_exec:
+                hc = Hashcat(hashcat_exec=cracker_main_exec)
+            else:
+                hc = Hashcat()
 
 
             hash_type = None
