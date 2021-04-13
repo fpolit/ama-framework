@@ -4,11 +4,11 @@ clean:
 	find . -name '*.py[co]' -delete
 
 cleanslurm:
-	rm slurm-*_*.out
-	rm slurm-*.out
+	rm -f slurm-*_*.out
+	rm -f slurm-*.out
 
 cleanbkp:
-	rm *.bkp
+	rm -f *.bkp
 
 virtualenv:
 	virtualenv --prompt '(ama)' env
@@ -29,7 +29,7 @@ install:
 	python3 -m pip install .
 	
 installdev:
-	python3 -m pip install --upgrade -r requirements-dev.txt
+	python3 -m pip install -r requirements-dev.txt
 	python3 -m pip install . --verbose
 
 pkgdev:
