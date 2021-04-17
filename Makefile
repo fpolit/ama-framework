@@ -1,7 +1,6 @@
 .PHONY: clean virtualenv test docker dist dist-upload
 
-clean:
-	find . -name '*.py[co]' -delete
+clean: cleanslurm cleanbkp cleanmasks
 
 cleanslurm:
 	rm -f slurm-*_*.out
@@ -9,6 +8,10 @@ cleanslurm:
 
 cleanbkp:
 	rm -f *.bkp
+
+cleanmasks:
+	rm -f *.hcmasks
+	rm -f *.masks
 
 virtualenv:
 	virtualenv --prompt '(ama)' env
@@ -24,12 +27,10 @@ require:
 requiredev:
 	python3 -m pip install -r requirements-dev.txt
 
-install:
-	python3 -m pip install -r requirements.txt
+install: require
 	python3 -m pip install .
 	
-installdev:
-	python3 -m pip install -r requirements-dev.txt
+installdev: requiredev
 	python3 -m pip install . --verbose
 
 pkgdev:
