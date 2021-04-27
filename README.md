@@ -5,12 +5,12 @@ Ama is a specialized environment for the password cracking process. It contains 
 Also ama's attack modules can be submitted in a cluster of computers using `Slurm`, so you can perform **large** attacks, other important feature is that `ama` saves loots (cracked `hashes` and `services`) in a database and organize them (in *workspaces*) to enable efficient access to them. Finally, `ama` is easy extensible, so you can write custom modules to extend it.
 
 ## Dependences
-* Postgres (only if you want to use ama database) 
-* Hashcat (only if you want to perform attacks against hashes using GPU power)
-* Hydra (only if you want to perform attacks against services)
+* Postgresql
+* Hashcat
+* Hydra
 * pmix
-* Openmpi (with slurm and pmix support)
-* John The Ripper (with MPI support) (only if you want to perform attacks against hashes using CPU power)
+* Openmpi
+* John The Ripper (with MPI support)
 * HPC Cluster (only if you want to submit attacks in a cluster of computers with `Slurm`)
 
 Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can find guides to install them properly.
