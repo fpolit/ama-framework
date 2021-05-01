@@ -6,6 +6,7 @@ from .john_single import JohnSingle
 from .john_combination import JohnCombination
 from .john_hybrid import JohnHybrid
 from .john_masks import JohnMasks
+from .john_test import JohnTest # PRUEBA
 
 # hashcat attack import
 from .hashcat_benchmark import HashcatBenchmark

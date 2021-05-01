@@ -293,7 +293,7 @@ class John(PasswordCracker):
 
 
     # debugged - date: Feb 28 2021
-    def benchmark(self,  slurm=None):
+    def benchmark(self, *, slurm=None, local:bool = True):
         """
         Run john benchmark
         """
@@ -301,7 +301,7 @@ class John(PasswordCracker):
         if self.enable:
             #cmd2.Cmd.poutput(f"Performing John Benchmark.")
             #print_status(f"Performing John Benchmark.")
-            if slurm and slurm.partition:
+            if (not local) and slurm and slurm.partition:
                 parallel_job_type = slurm.parallel_job_parser()
                 if not  parallel_job_type in ["MPI", "OMP"]:
                     raise InvalidParallelJob(parallel_job_type)
@@ -356,7 +356,7 @@ class John(PasswordCracker):
                 if rules and rules_file:
                     Path.access(permission, rules_file)
 
-                    print_status(f"Attacking hashes in {ColorStr(hashes_file).StyleBRIGHT} file in wordlist mode")
+                print_status(f"Attacking hashes in {ColorStr(hashes_file).StyleBRIGHT} file in wordlist mode")
                 print_status(f"Wordlists: {ColorStr(wordlists).StyleBRIGHT}")
                 print_status(f"Possible hashes identities: {ColorStr(hash_types).StyleBRIGHT}")
 
@@ -697,6 +697,7 @@ class John(PasswordCracker):
                     for hash_type in hash_types:
                         are_all_hashes_cracked = John.are_all_hashes_cracked(hashes_file)
                         if  not are_all_hashes_cracked: # some hash isn't cracked yet
+                            wordlist = wordlists[0]
                             attack_cmd = f"{self.main_exec} --wordlist={wordlist}"
                             if hash_type:
                                 attack_cmd += f" --format={hash_type}"

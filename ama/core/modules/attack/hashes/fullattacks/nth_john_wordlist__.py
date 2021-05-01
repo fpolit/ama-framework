@@ -100,20 +100,21 @@ class Nth_JohnWordlist__(JohnWordlist):
         most_likely_identities = sorted(hash_type_frequency.items(), key=lambda x: x[1], reverse=True)
         return [identity for identity, frequency in most_likely_identities]
 
+
     def setv(self, option, value, *, pre_attack: bool = False, post_attack: bool = False):
         #import pdb; pdb.set_trace()
         super().setv(option, value, pre_attack = pre_attack, post_attack = post_attack)
 
         option = option.lower()
         # attack -> pre atack
-        if option == "hashes_file":
-            if self.selected_pre_attack and not (pre_attack or post_attack): # and \
-               #self.options['hashes_file'].value is not None:
-                self.selected_pre_attack.options['hashes'].value = self.options['hashes_file'].value
+        if option in ["hashes_file"]:
+            if not (pre_attack or post_attack):
+                pre_attack_option = option
+                super().setv(pre_attack_option, self.options[option].value, pre_attack = True)
 
         # pre atack -> attack
-        if option == "hashes":
-            if self.selected_pre_attack and pre_attack: # and \
-               #self.selected_pre_attack.options['hashes'].value is not None:
-                self.options['hashes_file'].value = self.selected_pre_attack.options['hashes'].value
-
+        if option in ["hashes"]:
+            if pre_attack:
+                if option == "hashes":
+                    attack_option = "hashes_file"
+                super().setv(attack_option, self.selected_post_attack.options[option].value)

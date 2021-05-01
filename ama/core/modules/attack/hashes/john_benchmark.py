@@ -98,9 +98,10 @@ class JohnBenchmark(Attack):
         super().__init__(**init_options)
 
 
-    def attack(self, local:bool = False, force:bool = False, pre_attack_output: Any = None,
+    def attack(self, *,
+               local:bool = False, pre_attack_output: Any = None,
                db_status:bool = False, workspace:str = None, db_credential_file: Path = None,
-               cracker_main_exec:Path = None):
+               cracker_main_exec:Path = None, slurm_conf=None):
         """
         John the Ripper benchmark
 
@@ -110,19 +111,18 @@ class JohnBenchmark(Attack):
         """
         #import pdb; pdb.set_trace()
         try:
-            if not force:
-                self.no_empty_required_options(local)
+            self.no_empty_required_options(local)
 
             if cracker_main_exec:
                 jtr = John(john_exec=cracker_main_exec)
             else:
                 jtr = John()
 
-            if local:
-                jtr.benchmark(slurm = None)
+            jtr.benchmark(slurm = self.slurm)
 
-            else:
-                jtr.benchmark(slurm = self.slurm)
+
+            jtr.benchmark(slurm = self.slurm,
+                          local = local)
 
         except Exception as error:
             print_failure(error)

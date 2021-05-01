@@ -23,6 +23,7 @@ from ama.core.modules.attack.hashes import (
     JohnMasks,
     #JohnCombination,
     #JohnHybrid,
+    JohnTest
 )
 
 # hashcat attacks imports
@@ -87,6 +88,7 @@ attackModules = {
     f"{JohnMasks.MNAME}": JohnMasks,
     #f"{JohnCombination.MNAME}": JohnCombination,
     #f"{JohnHybrid.MNAME}": JohnHybrid,
+    f"{JohnTest.MNAME}": JohnTest,
 
     # hashcat attacks
     f"{HashcatBenchmark.MNAME}": HashcatBenchmark,

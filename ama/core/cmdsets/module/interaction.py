@@ -534,7 +534,6 @@ class Interaction(CommandSet):
                 #import pdb;pdb.set_trace()
                 attack_output = selectedModule.attack(
                     local = args.local,
-                    #force = args.force,
                     pre_attack_output = pre_attack_output,
                     db_status = db_status,
                     workspace = self._cmd.workspace,

@@ -158,17 +158,6 @@ class JohnWordlist(Attack):
 
         super().__init__(**init_options)
 
-    # def get_init_options(self):
-    #     init_options = {
-    #         "hash_type": self.options['hash_type'].value,
-    #         "hashes_file": self.options['hashes_file'].value,
-    #         "wordlist": self.options['wordlist'].value,
-    #         "slurm": self.slurm,
-    #         "pre_attack": self.selected_pre_attack,
-    #         "post_attack": self.selected_post_attack
-    #     }
-    #    return init_options
-
     def attack(self, *,
                local:bool = False, pre_attack_output: Any = None,
                db_status:bool = False, workspace:str = None, db_credential_file: Path = None,
@@ -185,7 +174,7 @@ class JohnWordlist(Attack):
         try:
             self.no_empty_required_options(local)
 
-            if slurm_conf:
+            if not local and slurm_conf:
                 self.slurm.config = slurm_conf
 
             if cracker_main_exec:
