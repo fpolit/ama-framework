@@ -148,7 +148,7 @@ class HashcatWordlist(Attack):
     def attack(self, *,
                local:bool = False, force:bool = False, pre_attack_output: Any = None,
                db_status:bool = False, workspace:str = None, db_credential_file: Path = None,
-               cracker_main_exec:Path = None):
+               cracker_main_exec:Path = None, slurm_conf=None):
         """
         Wordlist attack using Hashcat
 

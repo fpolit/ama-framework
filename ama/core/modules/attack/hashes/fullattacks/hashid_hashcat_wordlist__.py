@@ -41,10 +41,14 @@ class HashID_HashcatWordlist__(HashcatWordlist):
         # pre attack options
         if self.selected_pre_attack:
             self.selected_pre_attack.options['hashes'].value = self.options['hashes_file'].value
+            self.selected_pre_attack.options['john'].value = False
+            self.selected_pre_attack.options['hashcat'].value = True
+            self.selected_pre_attack.options['extended'].value = False
 
     # preattack output format:  {hash: [POSIBLE_IDENTITIES, ...], ...}
     def attack(self, local:bool = False, force: bool = False, pre_attack_output: Any = None,
-               db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
+               db_status:bool = False, workspace:str = None, db_credential_file: Path = None,
+               cracker_main_exec:Path = None, slurm_conf=None):
         """
         Wordlist attack using John the Ripper with HashId as pre attack module
 
@@ -54,15 +58,23 @@ class HashID_HashcatWordlist__(HashcatWordlist):
         """
         #import pdb; pdb.set_trace()
         try:
-            if not force:
-                self.no_empty_required_options(local)
 
-            hc = Hashcat()
+            self.no_empty_required_options(local)
 
-            hash_types = self.most_probably_hash_identities(pre_attack_output)
-            hc.wordlist_attack(hash_types = hash_types,
+            if not local and slurm_conf:
+                self.slurm.config = slurm_conf
+
+            if cracker_main_exec:
+                hc = Hashcat(hc_exec=cracker_main_exec)
+            else:
+                hc = Hashcat()
+
+            hashes_identities = self.most_probably_hash_identities(pre_attack_output)
+            wordlists = self.options['wordlist'].value.split(',')
+
+            hc.wordlist_attack(hash_types = hashes_identities,
                                hashes_file = self.options['hashes_file'].value,
-                               wordlist = self.options['wordlist'].value,
+                               wordlists = wordlists,
                                slurm = self.slurm,
                                local = local,
                                db_status= db_status,
@@ -95,12 +107,15 @@ class HashID_HashcatWordlist__(HashcatWordlist):
 
         option = option.lower()
         # attack -> pre atack
-        if option == "hashes_file":
-            if self.selected_pre_attack and not (pre_attack or post_attack):
-                self.selected_pre_attack.options['hashes'].value = self.options['hashes_file'].value
+        if option in ["hashes_file"]:
+            if not (pre_attack or post_attack):
+                if option == "hashes_file":
+                    pre_attack_option = "hashes"
+                super().setv(pre_attack_option, self.options[option].value, pre_attack = True)
 
         # pre atack -> attack
-        if option == "hashes":
-            if self.selected_pre_attack and pre_attack: # and \
-               #self.selected_pre_attack.options['hashes'].value is not None:
-                self.options['hashes_file'].value = self.selected_pre_attack.options['hashes'].value
+        if option in ["hashes"]:
+            if pre_attack:
+                if option == "hashes":
+                    attack_option = "hashes_file"
+                super().setv(attack_option, self.selected_pre_attack.options[option].value)

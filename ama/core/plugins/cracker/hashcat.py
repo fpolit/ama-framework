@@ -270,7 +270,7 @@ class Hashcat(PasswordCracker):
 
     # modify - date: Apr 1 2021 (debugged - date Apr 3 2021)
     def wordlist_attack(self, *,
-                        hash_types:List[int] , hashes_file:str, wordlist:str, rules_file:str=None,
+                        hash_types:List[int] , hashes_file:str, wordlists:str, rules_file:str=None,
                         sleep:int = 1, slurm: Slurm, local:bool = False,
                         db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
 
@@ -284,16 +284,16 @@ class Hashcat(PasswordCracker):
         slurm (Slurm): Instance of Slurm class
         """
 
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         if self.enable:
             attack_mode = 0
             try:
                 permission = [os.R_OK]
-                Path.access(permission, hashes_file, wordlist)
+                Path.access(permission, hashes_file, *wordlists)
 
                 Hashcat.check_hash_type(hash_types)
 
-                print_status(f"Attacking hashes in {ColorStr(hashes_file).StyleBRIGHT} file with {ColorStr(wordlist).StyleBRIGHT} wordlist")
+                print_status(f"Attacking hashes in {ColorStr(hashes_file).StyleBRIGHT} file with {ColorStr(wordlists).StyleBRIGHT} wordlist")
 
                 hash_types_names = [Hashcat.HASHES[hash_type]['Name'] for hash_type in hash_types
                                     if hash_type in Hashcat.HASHES]
@@ -308,28 +308,29 @@ class Hashcat(PasswordCracker):
 
                     parallel_work = []
                     for hash_type in hash_types:
-                        attack_cmd = (
-                            f"srun {self.main_exec}"
-                            f" -a {attack_mode}"
-                            f" -m {hash_type}"
-                            f" {hashes_file} {wordlist}"
-                        )
-
-                        if rules_file:
-                            Path.access(permission, rules_file)
-                            attack_cmd += f" -r {rules_file}"
-
-                        header_attack = f"echo -e '\\n\\n[*] Running: {attack_cmd}'"
-
-                        if db_status and workspace and db_credential_file:
-                            insert_cracked_hashes = (
-                                f"amadb -c {db_credential_file} -w {workspace}"
-                                f" --cracker {Hashcat.MAINNAME} -j {hashes_file}"
+                        for wordlist in wordlists:
+                            attack_cmd = (
+                                f"srun {self.main_exec}"
+                                f" -a {attack_mode}"
+                                f" -m {hash_type}"
+                                f" {hashes_file} {wordlists}"
                             )
 
-                            parallel_work.append((header_attack, attack_cmd, insert_cracked_hashes))
-                        else:
-                            parallel_work.append((header_attack, attack_cmd))
+                            if rules_file:
+                                Path.access(permission, rules_file)
+                                attack_cmd += f" -r {rules_file}"
+
+                            header_attack = f"echo -e '\\n\\n[*] Running: {attack_cmd}'"
+
+                            if db_status and workspace and db_credential_file:
+                                insert_cracked_hashes = (
+                                    f"amadb -c {db_credential_file} -w {workspace}"
+                                    f" --cracker {Hashcat.MAINNAME} -j {hashes_file}"
+                                )
+
+                                parallel_work.append((header_attack, attack_cmd, insert_cracked_hashes))
+                            else:
+                                parallel_work.append((header_attack, attack_cmd))
 
                     slurm_script_name = slurm.gen_batch_script(parallel_work)
                     #import pdb; pdb.set_trace()
@@ -338,29 +339,30 @@ class Hashcat(PasswordCracker):
                 else:
                     #import pdb; pdb.set_trace()
                     for hash_type in hash_types:
-                        are_all_hashes_cracked = Hashcat.are_all_hashes_cracked(hashes_file)
-                        if  not are_all_hashes_cracked: # some hash isn't cracked yet
-                            attack_cmd = (
-                                f"{self.main_exec}"
-                                f" -a {attack_mode}"
-                                f" -m {hash_type}"
-                                f" {hashes_file} {wordlist}"
-                            )
+                        for wordlist in wordlists:
+                            are_all_hashes_cracked = Hashcat.are_all_hashes_cracked(hashes_file)
+                            if  not are_all_hashes_cracked: # some hash isn't cracked yet
+                                attack_cmd = (
+                                    f"{self.main_exec}"
+                                    f" -a {attack_mode}"
+                                    f" -m {hash_type}"
+                                    f" {hashes_file} {wordlist}"
+                                )
 
-                            if rules_file:
-                                Path.access(permission, rules_file)
-                                attack_cmd += f" -r {rules_file}"
+                                if rules_file:
+                                    Path.access(permission, rules_file)
+                                    attack_cmd += f" -r {rules_file}"
 
-                            print()
-                            print_status(f"Running: {ColorStr(attack_cmd).StyleBRIGHT}")
-                            Bash.exec(attack_cmd)
-                            if sleep > 0:
-                                print_status(f"{ColorStr('Sleeping ...').StyleBRIGHT}")
-                                time.sleep(sleep)
+                                print()
+                                print_status(f"Running: {ColorStr(attack_cmd).StyleBRIGHT}")
+                                Bash.exec(attack_cmd)
+                                if sleep > 0:
+                                    print_status(f"{ColorStr('Sleeping ...').StyleBRIGHT}")
+                                    time.sleep(sleep)
 
-                        else:
-                            print_successful(f"Hashes in {ColorStr(hashes_file).StyleBRIGHT} were cracked")
-                            break
+                            else:
+                                print_successful(f"Hashes in {ColorStr(hashes_file).StyleBRIGHT} were cracked")
+                                break
 
                     #import pdb; pdb.set_trace()
                     if db_status and workspace and db_credential_file:
