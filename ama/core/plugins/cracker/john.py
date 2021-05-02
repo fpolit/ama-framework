@@ -297,7 +297,7 @@ class John(PasswordCracker):
         """
         Run john benchmark
         """
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         if self.enable:
             #cmd2.Cmd.poutput(f"Performing John Benchmark.")
             #print_status(f"Performing John Benchmark.")
@@ -323,7 +323,7 @@ class John(PasswordCracker):
 
             else:
                 attack_cmd = f"{self.main_exec} --test"
-                print_status("Running: {ColorStr(attack_cmd).StyleBRIGHT}")
+                print_status(f"Running: {ColorStr(attack_cmd).StyleBRIGHT}")
                 Bash.exec(attack_cmd)
         else:
             print_failure(f"Cracker {ColorStr(self.main_name).StyleBRIGHT} is disable")

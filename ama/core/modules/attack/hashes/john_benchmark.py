@@ -51,7 +51,6 @@ class JohnBenchmark(Attack):
 
         if slurm is None:
             slurm_options = {
-                #"array",
                 "account": Argument(None, False, "Cluster account to submit the job"),
                 "dependency": Argument(None, False, "Defer the start of this job until the specified dependencies have been satisfied completed"),
                 "chdir" : Argument(os.getcwd(), True, "Working directory path"),
@@ -109,7 +108,7 @@ class JohnBenchmark(Attack):
            local (bool): if local is True run attack localy otherwise
                          submiting parallel tasks in a cluster using slurm
         """
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         try:
             self.no_empty_required_options(local)
 
@@ -117,9 +116,6 @@ class JohnBenchmark(Attack):
                 jtr = John(john_exec=cracker_main_exec)
             else:
                 jtr = John()
-
-            jtr.benchmark(slurm = self.slurm)
-
 
             jtr.benchmark(slurm = self.slurm,
                           local = local)
