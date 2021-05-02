@@ -177,7 +177,7 @@ class HashcatWordlist(Attack):
 
             hc.wordlist_attack(hash_types = hash_types,
                                hashes_file = self.options['hashes_file'].value,
-                               wordlist = self.options['wordlist'].value,
+                               wordlists = self.options['wordlist'].value,
                                sleep = self.options['sleep'].value,
                                slurm = self.slurm,
                                local = local,
