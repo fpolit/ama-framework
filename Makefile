@@ -3,7 +3,7 @@
 install: require
 	python3 -m pip install .
 	
-install_dev: require_dev
+installdev: requiredev
 	python3 -m pip install . --verbose
 
 clean: cleanslurm cleanbkp cleanmasks
@@ -36,7 +36,7 @@ virtualenv_dev:
 require:
 	python3 -m pip install -r requirements.txt
 
-require_dev:
+requiredev:
 	python3 -m pip install -r requirements-dev.txt
 
 pkgdev:
