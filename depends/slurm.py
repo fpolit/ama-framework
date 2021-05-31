@@ -36,8 +36,8 @@ class Slurm(Package):
             "--with-pmix",
             "--with-munge"
         ]
-        configure_cmd = "./configure" + " ".join(flags)
-        Bash.exece(configure_cmd)
+        configure = "./configure" + " ".join(flags)
+        Bash.exec(configure)
         Bash.exec("make")
 
     def install(self):
@@ -60,3 +60,25 @@ class Slurm(Package):
 
         for cmd in configrations:
             Bash.exec(cmd)
+
+
+def main():
+    parser = Package.cmd_parser()
+    args = parser.parse_args()
+    slurm_pkg = Slurm(
+        source="https://download.schedmd.com/slurm/slurm-20.11.7.tar.bz2",
+        pkgver="20.11.7"
+    )
+    slurm_pkg.prepare(uncompressed_dir = args.uncompres_dir,
+                      compilation_path = args.compilation,
+                      avoid_download = args.no_download)
+    slurm_pkg.build()
+
+    if args.check:
+        slurm_pkg.check()
+
+    slurm_pkg.install()
+
+
+if __name__=="__main__":
+    main()

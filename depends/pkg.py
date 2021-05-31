@@ -4,6 +4,7 @@
 #
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
+import argparse
 import os
 import sys
 import zipfile
@@ -90,7 +91,7 @@ class Package:
         compressed_file = os.path.join(self.compilation_path, os.path.basename(self.source))
 
         if uncompressed_dir is not None:
-            self.uncompressed_path = uncompressed_dir
+            self.uncompressed_path = os.path.join(self.compilation_path, uncompressed_dir)
         else:
             self.uncompressed_path = os.path.join(self.compilation_path, f"{self.pkgname}-{self.pkgver}")
             print_status(f"Setting uncompresed_path to default value: {self.uncompressed_path}")
@@ -146,6 +147,20 @@ class Package:
 
         self.install()
         print_successful(f"Sucefully installation of {self.pkgname}-{self.pkgver}")
+
+    @staticmethod
+    def cmd_parser():
+        pkg_parser = argparse.ArgumentParser(f"Automatization script")
+        pkg_parser.add_argument("-u", "--uncompress_dir", type=str,
+                                help="Name of uncompress directory")
+        pkg_parser.add_argument("-c", "--compilation", type=str,
+                                help="Build directory path ")
+        pkg_parser.add_argument("-d", "--no_download", action='store_true',
+                                help="Avoid download package")
+        pkg_parser.add_argument("--check", action='store_true',
+                                help="Perform check of compilation")
+
+        return pkg_parser
 
 
     def __repr__(self):
