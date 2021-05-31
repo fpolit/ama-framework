@@ -1,2 +1,2 @@
-# Ama dependencies - Spack packages
-Here you can find `Spack` packages to automatize installation of `ama` dependencies using [spack](https://spack.readthedocs.io/en/latest/)
+# Ama dependencies
+Here you can find bash scripts and `spack` packages to automatize installation of `ama` dependencies.
