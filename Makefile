@@ -16,7 +16,7 @@ cleanmasks:
 virtualenv:
 	virtualenv --prompt '(ama)' env
 	env/bin/pip3 install -r requirements-dev.txt
-	env/bin/python3 setup.py develop
+	#env/bin/python3 setup.py develop
 	@echo
 	@echo "VirtualENV Setup Complete. Now run: source env/bin/activate"
 	@echo
@@ -34,7 +34,7 @@ installdev: requiredev
 	python3 -m pip install . --verbose
 
 pkgdev:
-	python3 -m pip install . --verbose
+	python3 -m pip install . --verbose --use-feature=in-tree-build
 
 test:
 	env/bin/python3 -m pytest \
