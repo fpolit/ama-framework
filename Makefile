@@ -1,5 +1,11 @@
 .PHONY: clean virtualenv test docker dist dist-upload
 
+install: require
+	python3 -m pip install .
+	
+install_dev: require_dev
+	python3 -m pip install . --verbose
+
 clean: cleanslurm cleanbkp cleanmasks
 
 cleanslurm:
@@ -15,8 +21,14 @@ cleanmasks:
 
 virtualenv:
 	virtualenv --prompt '(ama)' env
+	env/bin/pip3 install -r requirements.txt
+	@echo
+	@echo "VirtualENV Setup Complete. Now run: source env/bin/activate"
+	@echo
+
+virtualenv_dev:
+	virtualenv --prompt '(ama)' env
 	env/bin/pip3 install -r requirements-dev.txt
-	#env/bin/python3 setup.py develop
 	@echo
 	@echo "VirtualENV Setup Complete. Now run: source env/bin/activate"
 	@echo
@@ -24,28 +36,11 @@ virtualenv:
 require:
 	python3 -m pip install -r requirements.txt
 
-requiredev:
+require_dev:
 	python3 -m pip install -r requirements-dev.txt
-
-install: require
-	python3 -m pip install .
-	
-installdev: requiredev
-	python3 -m pip install . --verbose
 
 pkgdev:
 	python3 -m pip install . --verbose --use-feature=in-tree-build
-
-test:
-	env/bin/python3 -m pytest \
-		-v \
-		--cov=ama \
-		--cov-report=term \
-		--cov-report=html:coverage-report \
-		tests/
-
-docker: clean
-	docker build -t ama:latest .
 
 dist: clean
 	rm -rf dist/*
