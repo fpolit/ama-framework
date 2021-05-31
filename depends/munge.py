@@ -2,18 +2,34 @@
 #
 # automatization of munge installation
 #
+# Status: DEBUGGED - date May 31 2021
+#
+# Warnings:
+# Check output of bash process and quit execution if it fails
+#
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
 from sbash import Bash
+from fineprint.status import print_status, print_successful
 
 from pkg import Package
 
 
 class Munge(Package):
     def __init__(self, *, pkgver, source):
-        depends = ["gcc"]
-        makedepends = ["make", "wget"]
+        depends = {
+            "gcc": {"Centos": "gcc.x86_64"},
+            "OpenSSL": {"Centos": "openssl-devel.x86_64"},
+            "libevent": {"Centos": "libevent-devel.x86_64"},
+            "zlib": {"Centos": "zlib-devel.x86_64"}
+        }
+
+        makedepends = {
+            "make": {"Centos": "make.x86_64"},
+            "wget": {"Centos": "wget.x86_64"}
+        }
+
         super().__init__("munge",
                          pkgver=pkgver,
                          source=source,
@@ -21,17 +37,19 @@ class Munge(Package):
                          makedepends=makedepends)
 
     def build(self):
-        os.chdir(self.uncompressed_path)
+        print_status(f"Building {self.pkgname}-{self.pkgver}")
+        print(ColorStr("It can take a while, so go for a cafe ...").StyleBRIGHT)
 
-        Bash.exec("./bootstrap")
+        Bash.exec("./bootstrap", where=self.uncompressed_path)
         flags = [
             "--prefix=/usr",
             "--sysconfdir=/etc",
             "--localstatedir=/var"
         ]
-        configure = "./configure" + " ".join(flags)
-        Bash.exece(configure)
-        Bash.exec("make")
+
+        configure = "./configure " + " ".join(flags)
+        Bash.exec(configure, where=self.uncompressed_path)
+        Bash.exec("make", where=self.uncompressed_path)
 
 
 
@@ -43,15 +61,19 @@ def main():
         source="https://github.com/dun/munge/archive/refs/tags/munge-0.5.14.tar.gz",
         pkgver="0.5.14"
     )
-    munge_pkg.prepare(uncompressed_dir = args.uncompres_dir,
-                      compilation_path = args.compilation,
-                      avoid_download = args.no_download)
+    munge_pkg.prepare(compilation_path = args.compilation,
+                      avoid_download = args.no_download,
+                      avoid_uncompress = args.no_uncompress)
+    #import pdb; pdb.set_trace()
     munge_pkg.build()
 
     if args.check:
         munge_pkg.check()
 
     munge_pkg.install()
+
+    print_successful(f"Package {munge_pkg.pkgname}-{munge_pkg.pkgver} was sucefully installed")
+    print_status("Now create munge key in /etc/munge using mungekey.Then initialize munge service")
 
 
 if __name__=="__main__":

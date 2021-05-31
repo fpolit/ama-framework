@@ -11,6 +11,7 @@ import zipfile
 import tarfile
 
 from fineprint.status import print_status, print_successful, print_failure
+from fineprint.color import ColorStr
 from sbash import Bash
 
 from pkg_exceptions import UnsupportedCompression
@@ -48,17 +49,21 @@ class Package:
         """
         print_status("These packages are required to continue with the installation:")
         print_status("Dependencies:")
-        for depend in self.depends:
-            print(f"\t{depend}")
+        for name, pkg_linux in self.depends.items():
+            print(f"\t{name}:")
+            for os, pkg in pkg_linux.items():
+                print(f"\t\t{os}: {pkg}")
 
         print_status("Compilation dependencies (only used for compilation):")
-        for depend in self.makedepends:
-            print(f"\t{depend}")
+        for name, pkg_linux in self.makedepends.items():
+            print(f"\t{name}:")
+            for os, pkg in pkg_linux.items():
+                print(f"\t\t{os}: {pkg}")
 
         print()
         not_continue = True
         while not_continue:
-            answer = input("Do you have installed all dependencies.(y/n)? ")
+            answer = input("Do you have installed all dependencies(y/n)? ")
             answer = answer.lower()
 
             if answer in ["y", "yes"]:
@@ -67,46 +72,59 @@ class Package:
                 print_status(f"Install all the dependencies before install {self.pkgname}-{self.pkgver}")
                 sys.exit(1)
 
-    def prepare(self, *, uncompressed_dir:str =None, compilation_path=None, avoid_download=False):
+    def prepare(self, *, compilation_path=None, avoid_download=False, avoid_uncompress=False):
         """
         Download and uncompress the source code
         """
+        #import pdb; pdb.set_trace()
         self.depends_info()
 
         if compilation_path is not None:
             self.compilation_path = os.path.abspath(compilation_path)
+            if not (os.path.exists(compilation_path) and os.path.isdir(compilation_path)):
+                os.mkdir(compilation_path)
         else:
             self.compilation_path = os.getcwd()
 
-        if compilation_path is not None:
-            if not (os.path.exists(self.compilation_path) and os.path.isdir(self.compilation_path)):
-                os.mkdir(self.compilation_path)
-            os.chdir(self.compilation_path)
-
         if not avoid_download:
-            Bash.exec(f"wget {self.source}")
+            print_status(f"Downloading {os.path.basename(self.source)}")
+            Bash.exec(f"wget {self.source}", where=self.compilation_path)
 
-        import pdb; pdb.set_trace()
         ## uncompress
         compressed_file = os.path.join(self.compilation_path, os.path.basename(self.source))
 
-        if uncompressed_dir is not None:
-            self.uncompressed_path = os.path.join(self.compilation_path, uncompressed_dir)
-        else:
-            self.uncompressed_path = os.path.join(self.compilation_path, f"{self.pkgname}-{self.pkgver}")
-            print_status(f"Setting uncompresed_path to default value: {self.uncompressed_path}")
-            print_status("\tProvide uncompresed_path argument if it's default value isn't rigth")
-            print_status("\tAlso set avoid_download to True to avoid re-download the source code")
+        if not avoid_uncompress:
+            print_status(f"Uncompressing {compressed_file}")
+            if zipfile.is_zipfile(compressed_file): # source was compressed using zip
+                with zipfile.ZipFile(compressed_file, 'r') as zip_compressed_file:
+                    zip_compressed_file.extractall(self.compilation_path)
 
-        if zipfile.is_zipfile(compressed_file): # source was compressed using zip
-            with zipfile.ZipFile(compressed_file, 'r') as zip_compressed_file:
-                zip_compressed_file.extractall()
+            elif tarfile.is_tarfile(compressed_file): # source was compressed using tar
+                with tarfile.open(compressed_file, 'r') as tar_compressed_file:
+                    tar_compressed_file.extractall(self.compilation_path)
+            else:
+                raise UnsupportedCompression(["zip", "tar"])
 
-        elif tarfile.is_tarfile(compressed_file): # source was compressed using tar
-            with tarfile.open(compressed_file, 'r') as tar_compressed_file:
-                tar_compressed_file.extractall()
-        else:
-            raise UnsupportedCompression(["zip", "tar"])
+        self.uncompressed_path = os.path.join(self.compilation_path, f"{self.pkgname}-{self.pkgver}")
+        print_status(f"Setting {ColorStr('uncompressed_path').StyleBRIGHT} to: {self.uncompressed_path}")
+
+        advice = f"""
+        Look for the uncompressed directory in {self.compilation_path} directory
+        and check if its name match with {ColorStr('uncompressed_path').StyleBRIGHT} variable value,
+        otherwise reset its value
+        """
+        print_status(advice)
+
+        ansnwer = None
+        while True:
+            answer = input("Do you want to reset uncompressed_path value(y/n)? ")
+            answer = answer.lower()
+
+            if answer in ["y", "yes", "n", "no"]:
+                break
+
+        if answer in ["y", "yes"]:
+            self.uncompressed_path = input("Reset value: ")
 
         print_successful(f"Package {self.pkgname}-{self.pkgver} was prepared")
 
@@ -114,25 +132,31 @@ class Package:
         """
         Build the souce code
         """
-        os.chdir(self.uncompressed_path)
-        Bash.exec("./configure")
-        Bash.exec("make")
+        print_status(f"Building {self.pkgname}-{self.pkgver}")
+        print(ColorStr("It can take a while, so go for a cafe ...").StyleBRIGHT)
+        #import pdb; pdb.set_trace()
+
+        Bash.exec("./configure", where=self.uncompressed_path)
+        Bash.exec("make", where=self.uncompressed_path)
 
 
     def check(self):
         """
         Check the status of the compiled source
         """
-        os.chdir(self.uncompressed_path)
-        Bash.exec("make check")
+        #import pdb; pdb.set_trace()
+
+        Bash.exec("make check", where=self.uncompressed_path)
 
 
     def install(self): # simple installation(use inheritance for more complex installations)
         """
         Install the compiler source code
         """
-        os.chdir(self.uncompressed_path)
-        Bash.exec("sudo make install")
+        print_status(f"Installing {self.pkgname}-{self.pkgver}")
+        #import pdb; pdb.set_trace()
+
+        Bash.exec("sudo make install", where=self.uncompressed_path)
 
 
     def doall(self, avoid_check=False):
@@ -150,13 +174,13 @@ class Package:
 
     @staticmethod
     def cmd_parser():
-        pkg_parser = argparse.ArgumentParser(f"Automatization script")
-        pkg_parser.add_argument("-u", "--uncompress_dir", type=str,
-                                help="Name of uncompress directory")
+        pkg_parser = argparse.ArgumentParser()
         pkg_parser.add_argument("-c", "--compilation", type=str,
                                 help="Build directory path ")
-        pkg_parser.add_argument("-d", "--no_download", action='store_true',
+        pkg_parser.add_argument("--no-download", action='store_true', dest="no_download",
                                 help="Avoid download package")
+        pkg_parser.add_argument("--no-uncompress", action='store_true', dest="no_uncompress",
+                                help="Avoid uncompress package")
         pkg_parser.add_argument("--check", action='store_true',
                                 help="Perform check of compilation")
 
