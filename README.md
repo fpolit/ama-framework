@@ -9,9 +9,8 @@ Also ama's attack modules can be submitted in a cluster of computers using `Slur
 * Hashcat
 * Hydra
 * pmix
-* Openmpi
+* Openmpi (with slurm and pmix support)
 * John The Ripper (with MPI support)
-* HPC Cluster (only if you want to submit attacks in a cluster of computers with `Slurm`)
 
 Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can find guides to install them properly.
 Also visit [depends](https://github.com/fpolit/ama-framework/tree/master/depends) directory, there you can find python scripts and spack packages to automatize ama's dependencies.
@@ -23,7 +22,7 @@ Also visit [depends](https://github.com/fpolit/ama-framework/tree/master/depends
 ```bash
     # Download some release (stable code)
     $ cd DOWNLOADED_AMA_RELEASE
-    # I suggest you install ama in a python virtual enviroment
+    # I suggest you install ama in a python virtual enviroment (run: make virtualenv)
     $ make install
 ```
 
@@ -35,9 +34,9 @@ and then install `ama` and the developer packages.
 ```bash
     $ git clone https://github.com/fpolit/ama-framework.git ama
     $ cd ama
-    $ make virtualenv
+    $ make virtualenv_dev
     $ source env/bin/activate
-    $ make installdev
+    $ make pkgdev
 ```
 
 **NOTE:**  
