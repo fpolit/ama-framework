@@ -38,11 +38,13 @@ class Package:
         self.source=source # link to the source code (compressed file)
         self.depends=depends
         self.makedepends=makedepends # these packages are needed by compilations
-        self.compilation_path = os.path.join(os.getcwd(), self.pkgname)
         self.uncompressed_path = None #path of uncompressed directory
 
 
     def depends_info(self):
+        """
+        Print information of dependencies and make dependencies
+        """
         print_status("These packages are required to continue with the installation:")
         print_status("Dependencies:")
         for depend in self.depends:
@@ -52,6 +54,7 @@ class Package:
         for depend in self.makedepends:
             print(f"\t{depend}")
 
+        print()
         not_continue = True
         while not_continue:
             answer = input("Do you have installed all dependencies.(y/n)? ")
@@ -63,33 +66,54 @@ class Package:
                 print_status(f"Install all the dependencies before install {self.pkgname}-{self.pkgver}")
                 sys.exit(1)
 
-    def prepare(self, uncompressed_dir:str =None):
+    def prepare(self, *, uncompressed_dir:str =None, compilation_path=None, avoid_download=False):
         """
         Download and uncompress the source code
         """
         self.depends_info()
-        os.mkdir(self.compilation_path)
-        os.chdir(self.compilation_path)
-        Bash.exec(f"wget {self.source}")
 
+        if compilation_path is not None:
+            self.compilation_path = os.path.abspath(compilation_path)
+        else:
+            self.compilation_path = os.getcwd()
+
+        if compilation_path is not None:
+            if not (os.path.exists(self.compilation_path) and os.path.isdir(self.compilation_path)):
+                os.mkdir(self.compilation_path)
+            os.chdir(self.compilation_path)
+
+        if not avoid_download:
+            Bash.exec(f"wget {self.source}")
+
+        import pdb; pdb.set_trace()
         ## uncompress
-        compressed_file = os.path.basename(self.source)
+        compressed_file = os.path.join(self.compilation_path, os.path.basename(self.source))
+
+        if uncompressed_dir is not None:
+            self.uncompressed_path = uncompressed_dir
+        else:
+            self.uncompressed_path = os.path.join(self.compilation_path, f"{self.pkgname}-{self.pkgver}")
+            print_status(f"Setting uncompresed_path to default value: {self.uncompressed_path}")
+            print_status("\tProvide uncompresed_path argument if it's default value isn't rigth")
+            print_status("\tAlso set avoid_download to True to avoid re-download the source code")
 
         if zipfile.is_zipfile(compressed_file): # source was compressed using zip
             with zipfile.ZipFile(compressed_file, 'r') as zip_compressed_file:
                 zip_compressed_file.extractall()
 
         elif tarfile.is_tarfile(compressed_file): # source was compressed using tar
-            with tarfile.TarFile(compressed_file, 'r') as tar_compressed_file:
+            with tarfile.open(compressed_file, 'r') as tar_compressed_file:
                 tar_compressed_file.extractall()
         else:
             raise UnsupportedCompression(["zip", "tar"])
+
+        print_successful(f"Package {self.pkgname}-{self.pkgver} was prepared")
 
     def build(self): # simple build(use inheritance for more complex builds)
         """
         Build the souce code
         """
-        #os.chdir(self.compilation_path)
+        os.chdir(self.uncompressed_path)
         Bash.exec("./configure")
         Bash.exec("make")
 
@@ -98,22 +122,30 @@ class Package:
         """
         Check the status of the compiled source
         """
+        os.chdir(self.uncompressed_path)
         Bash.exec("make check")
 
 
     def install(self): # simple installation(use inheritance for more complex installations)
+        """
+        Install the compiler source code
+        """
+        os.chdir(self.uncompressed_path)
         Bash.exec("sudo make install")
 
 
-    def doall(self):
+    def doall(self, avoid_check=False):
         """
         Install the buildable package(build, check, and install)
         """
         self.prepare()
         self.build()
-        self.check()
+
+        if not avoid_check:
+            self.check()
+
         self.install()
-        print_successful(f"Sucefully installation of {self.pkgname}")
+        print_successful(f"Sucefully installation of {self.pkgname}-{self.pkgver}")
 
 
     def __repr__(self):
