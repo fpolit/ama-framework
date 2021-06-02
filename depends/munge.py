@@ -12,6 +12,7 @@
 import os
 from sbash import Bash
 from fineprint.status import print_status, print_successful
+from fineprint.color import ColorStr
 
 from pkg import Package
 
@@ -44,12 +45,36 @@ class Munge(Package):
         flags = [
             "--prefix=/usr",
             "--sysconfdir=/etc",
-            "--localstatedir=/var"
+            "--localstatedir=/var",
+            "--libdir=/usr/lib64"
         ]
 
         configure = "./configure " + " ".join(flags)
         Bash.exec(configure, where=self.uncompressed_path)
         Bash.exec("make", where=self.uncompressed_path)
+
+    def install(self):
+        print_status(f"Installing {self.pkgname}-{self.pkgver}")
+        #import pdb; pdb.set_trace()
+
+        Bash.exec("sudo make install", where=self.uncompressed_path)
+
+        print_status("Creating munge user")
+        configure = [
+            "sudo useradd -s /bin/bash -d /var/log/munge munge",
+            "sudo chown munge:munge -R /var/log/munge/",
+
+            "sudo chown munge:munge /etc/munge/",
+            "sudo chmod 700 /etc/munge/"
+
+            "sudo chown munge:munge /var/lib/munge/",
+            "sudo chmod 711 /var/lib/munge/",
+
+            "sudo chmod 700 /var/log/munge"
+        ]
+
+        #for cmd in configure:
+            #Bash.exec(cmd)
 
 
 
