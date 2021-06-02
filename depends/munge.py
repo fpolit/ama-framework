@@ -39,7 +39,7 @@ class Munge(Package):
 
     def build(self):
         print_status(f"Building {self.pkgname}-{self.pkgver}")
-        print(ColorStr("It can take a while, so go for a cafe ...").StyleBRIGHT)
+        print(ColorStr("It can take a while, so go for a coffee ...").StyleBRIGHT)
 
         Bash.exec("./bootstrap", where=self.uncompressed_path)
         flags = [
@@ -59,13 +59,13 @@ class Munge(Package):
 
         Bash.exec("sudo make install", where=self.uncompressed_path)
 
-        print_status("Creating munge user")
+        print_status(f"Configuring {self.pkgname}-{self.pkgver} package")
         configure = [
             "sudo useradd -s /bin/bash -d /var/log/munge munge",
             "sudo chown munge:munge -R /var/log/munge/",
 
             "sudo chown munge:munge /etc/munge/",
-            "sudo chmod 700 /etc/munge/"
+            "sudo chmod 700 /etc/munge/",
 
             "sudo chown munge:munge /var/lib/munge/",
             "sudo chmod 711 /var/lib/munge/",
@@ -73,8 +73,8 @@ class Munge(Package):
             "sudo chmod 700 /var/log/munge"
         ]
 
-        #for cmd in configure:
-            #Bash.exec(cmd)
+        for cmd in configure:
+            Bash.exec(cmd)
 
 
 

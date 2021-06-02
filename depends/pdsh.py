@@ -2,7 +2,7 @@
 #
 # automatization of pdsh installation
 #
-# Status:
+# Status: DEBUGGED - date: Jun 2 2021
 #
 # Warnings:
 # Check output of bash process and quit execution if it fails
@@ -36,11 +36,13 @@ class Pdsh(Package):
 
     def build(self):
         print_status(f"Building {self.pkgname}-{self.pkgver}")
-        print(ColorStr("It can take a while, so go for a cafe ...").StyleBRIGHT)
+        print(ColorStr("It can take a while, so go for a coffee ...").StyleBRIGHT)
 
+        #import pdb; pdb.set_trace()
         Bash.exec("./bootstrap", where=self.uncompressed_path)
+        self.prefix = "/usr/local/pdsh" 
         flags = [
-            "--prefix=/usr/local/pdsh",
+            f"--prefix={self.prefix}",
             "--with-ssh"
         ]
 
@@ -49,7 +51,7 @@ class Pdsh(Package):
         Bash.exec("make", where=self.uncompressed_path)
 
     def install(self):
-        print_status(f"Installing {self.pkgname}-{self.pkgver}")
+        print_status(f"Installing {self.pkgname}-{self.pkgver} in {self.prefix}")
         #import pdb; pdb.set_trace()
 
         Bash.exec("sudo make install", where=self.uncompressed_path) 
@@ -73,7 +75,7 @@ def main():
 
     pdsh_pkg.install()
 
-    print_successful(f"Package {munge_pkg.pkgname}-{munge_pkg.pkgver} was sucefully installed")
+    print_successful(f"Package {pdsh_pkg.pkgname}-{pdsh_pkg.pkgver} was sucefully installedi in {self.prefix}")
     print_status("Now add pdsh to your PATH")
 
 
