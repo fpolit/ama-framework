@@ -75,7 +75,7 @@ def main():
 
     pdsh_pkg.install()
 
-    print_successful(f"Package {pdsh_pkg.pkgname}-{pdsh_pkg.pkgver} was sucefully installedi in {self.prefix}")
+    print_successful(f"Package {pdsh_pkg.pkgname}-{pdsh_pkg.pkgver} was sucefully installed")
     print_status("Now add pdsh to your PATH")
 
 
