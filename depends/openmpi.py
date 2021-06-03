@@ -42,7 +42,7 @@ class Openmpi(Package):
 
         flags = [
             f"--prefix={prefix}",
-            "--with-pmix=/usr/lib64/pmix",
+            "--with-pmix",
             "--with-slurm"
         ]
 
@@ -71,7 +71,7 @@ def main():
 
     openmpi_pkg.install()
 
-    print_successful(f"Package {openmpi_pkg.pkgname}-{openmpi_pkg.pkgver} was sucefully installed in {openmpi.prefix}")
+    print_successful(f"Package {openmpi_pkg.pkgname}-{openmpi_pkg.pkgver} was sucefully installed in {openmpi_pkg.prefix}")
     print_status("Now add openmpi to you PATH")
 
 
