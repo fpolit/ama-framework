@@ -64,7 +64,7 @@ def main():
                         avoid_download = args.no_download,
                         avoid_uncompress = args.no_uncompress)
     #import pdb; pdb.set_trace()
-    openmpi_pkg.build(arg.prefix)
+    openmpi_pkg.build(args.prefix)
 
     if args.check:
         openmpi_pkg.check()
