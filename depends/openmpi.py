@@ -2,7 +2,7 @@
 #
 # automatization of openmpi installation with pmix ans slurm support
 #
-# Status:
+# Status: DEBUGGED - date: Jun 3 2021
 #
 # Warnings:
 # Check output of bash process and quit execution if it fails
