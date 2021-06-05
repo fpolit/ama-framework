@@ -47,7 +47,7 @@ class PackPolicygen(Auxiliary):
                  min_length:int = None, max_length:int = None, min_digit:int = None, max_digit: int = None,
                  min_upper:int = None, max_upper:int = None, min_lower:int = None, max_lower:int = None,
                  min_special:int = None, max_special:int = None,
-                 show_masks:bool = False, quiet:bool = True):
+                 show_masks:bool = False):
 
         auxiliary_options = {
             'output': Argument(output, True, "File to save generated masks"),
@@ -102,7 +102,7 @@ class PackPolicygen(Auxiliary):
                                     min_special = self.options['min_special'].value,
                                     max_special = self.options['max_special'].value,
                                     show_masks = self.options['show_masks'].value,
-                                    quietRun = quiet)
+                                    quiet = quiet)
 
 
             return output

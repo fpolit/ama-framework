@@ -33,23 +33,16 @@ from pack_ama import (
     PolicyGen,
     WholeGen
 )
-
-from pack_ama.banner import (
-    statsgen_banner,
-    maskgen_banner,
-    policygen_banner
-)
-
 class Pack(Auxiliary):
     """
-    Identify the different types of hashes
+    Password Analysis and Cracking Kit
     """
 
     MAINNAME = "pack"
 
-    STATSGEN_BANNER = statsgen_banner()
-    MASKGEN_BANNER = maskgen_banner()
-    POLICYGEN_BANNER = policygen_banner()
+    STATSGEN_BANNER = StatsGen.banner
+    MASKGEN_BANNER = MaskGen.banner
+    POLICYGEN_BANNER = PolicyGen.banner
 
 
     MASKGEN_SORTING_MODES = ["optindex", "occurrence", "complexity"]
@@ -87,6 +80,9 @@ class Pack(Auxiliary):
 
             statsgen.generate_stats()
             statsgen.print_stats()
+
+            if output:
+                print(f"[*] Generated stats were saved in {output}")
 
         except Exception as error:
             print_failure(error)
@@ -148,6 +144,9 @@ class Pack(Auxiliary):
                 print("[*] Sorting masks by their [%s]." % sorting)
                 maskgen.generate_masks(sorting)
 
+            if output:
+                print(f"[+] Masks were saved in {output}")
+
         except Exception as error:
             print_failure(error)
 
@@ -155,16 +154,18 @@ class Pack(Auxiliary):
     #debugged - date: Mar 7 2021
     @staticmethod
     def policygen( *,
-               output: str = None,
-               min_length:int = None, max_length:int = None, min_digit:int = None, max_digit: int = None,
-               min_upper:int = None, max_upper:int = None, min_lower:int = None, max_lower:int = None,
-               min_special:int = None, max_special:int = None,
-                show_masks:bool = False, quiet:bool = True, quietRun:bool = False):
+                   output: str = None,
+                   min_length:int = None, max_length:int = None,
+                   min_digit:int = None, max_digit: int = None,
+                   min_upper:int = None, max_upper:int = None,
+                   min_lower:int = None, max_lower:int = None,
+                   min_special:int = None, max_special:int = None,
+                   show_masks:bool = False, quiet:bool = True):
 
         #import pdb; pdb.set_trace()
         #Print program header
-        if not (quiet or quietRun):
-            print(policygen_banner())
+        if not quiet:
+            print(Pack.POLICYGEN_BANNER)
 
         policygen = PolicyGen(output = output,
                               min_length = min_length,
@@ -179,18 +180,19 @@ class Pack(Auxiliary):
                               max_special = max_special,
                               show_masks = show_masks)
 
-        if not quietRun:
-            print("[*] Generating masks.")
+        print("[*] Generating masks.")
         policygen.generate_masks()
-        if output and not quietRun:
-            print("[*] Saving generated masks to [%s]" % output)
+        if output:
+            print("[*] Saving generated masks to %s" % output)
 
         return output
 
     @staticmethod
     def wholegen(*,
+                 #files
                  wordlist: str, output: str,
-                 charsets: List[str] = None,
+                 #filters
+                 simplemasks: List[str] = None, charsets: List[str] = None,
                  minlength: int      = None, maxlength: int    = None,
                  mindigit:int        = None, maxdigit:int      = None,
                  minupper:int        = None, maxupper:int      = None,
@@ -198,20 +200,18 @@ class Pack(Auxiliary):
                  minspecial:int      = None, maxspecial:int    = None,
                  mincomplexity:int   = None, maxcomplexity:int = None,
                  minoccurrence:int   = None, maxoccurrence:int = None,
-                 mintime:int         = None, maxtime:int       = None,
-                 target_time:int     = None,
+                 target_time:int     = None, mintime:int       = None, maxtime:int       = None,
+                 check_masks: List[str] = None, check_masks_file: str = None,
                  hiderare: int       = 0,
-                 showmasks:bool = False, quiet: bool = False,
-                 sorting = "optindex"):
+
+                 #print
+                 showmasks:bool = False, quiet: bool = False, sorting = "optindex"):
 
         #import pdb; pdb.set_trace()
 
         try:
             permission = [os.R_OK]
             Path.access(permission, wordlist)
-
-
-            print(f"[*] Analyzing passwords in {wordlist}")
 
             whole = WholeGen(
                 wordlist = wordlist,

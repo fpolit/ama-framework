@@ -13,6 +13,8 @@ from fineprint.status import (
     print_successful
 )
 
+import cupp
+
 # from cupp import (
 #     print_cow,
 #     interactive,

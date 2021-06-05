@@ -45,7 +45,7 @@ class PackStatsgen(Auxiliary):
                  wordlist:str = None, output: str = None,
                  minlength: int = None, maxlength: int = None,
                  charsets: List[str] = None, simplemasks: List[str] = None,
-                 hiderare:int = 0, quiet: bool = True):
+                 hiderare:int = 0):
 
         auxiliary_options = {
             'wordlist': Argument(wordlist, True, "Wordlist to analyze"),
@@ -55,7 +55,7 @@ class PackStatsgen(Auxiliary):
             'min_length': Argument(minlength, False, "Minimum password length"),
             'max_length': Argument(maxlength, False, "Maximum password length"),
             'charsets': Argument(charsets, False, "Password charset filter (e.g. loweralpha,numeric)"),
-            'simple_masks': Argument(simplemasks, False, "Password mask filter (e.g.stringdigit,allspecial)"),
+            'simple_masks': Argument(simplemasks, False, "Password mask filter (e.g. stringdigit,allspecial)"),
 
             'hiderare': Argument(hiderare, True, "Hide statistics lower than the supplied percent"),
         }
@@ -82,12 +82,12 @@ class PackStatsgen(Auxiliary):
             self.no_empty_required_options()
 
             if self.options['charsets'].value:
-                charsets = [charset for charset in self.options['charsets'].value.split(',')]
+                charsets = self.options['charsets'].value.split(',')
             else:
                 charsets = None
 
             if self.options['simple_masks'].value:
-                simple_masks = [simplemask for simplemask in self.options['simple_masks'].value.split(',')]
+                simple_masks = self.options['charsets'].value.split(',')
             else:
                 simple_masks = None
 
