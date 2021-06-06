@@ -1,5 +1,5 @@
 # base packages
-psycopg2
+#psycopg2
 fineprint
 sbash
 random-password-generator
@@ -12,19 +12,18 @@ psutil
 
 ## auxiliary/hashes
 name-that-hash
-#sth-ama
 search-that-hash
 hashid
 
 ## auxiliary/wordlists
-pydictor
+#pydictor
 cupp
-crunch-ama
+#crunch-ama
 
 
 ## auxiliary/analysis
 pack-ama
-ppack-ama
+#ppack-ama
 
 ## auxiliary/combinator
-mixer-ama
+#mixer-ama
