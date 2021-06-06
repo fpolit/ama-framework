@@ -116,7 +116,7 @@ class JohnIncremental(Attack):
 
     def attack(self, *, local:bool = False, force:bool = False, pre_attack_output: Any = None,
                db_status:bool = False, workspace:str = None, db_credential_file: Path = None,
-               cracker_main_exec:Path = None):
+               cracker_main_exec:Path = None, slurm_conf = None):
         """
         Incremental attack using John the Ripper
         """
@@ -125,6 +125,9 @@ class JohnIncremental(Attack):
         try:
             if not force:
                 self.no_empty_required_options(local)
+
+            if not local and slurm_conf:
+                self.slurm.config = slurm_conf
 
             if cracker_main_exec:
                 jtr = John(john_exec=cracker_main_exec)

@@ -173,9 +173,9 @@ class HashcatMasks(Attack):
 
     #debugged - date: Mar 6 2021
     def attack(self, *,
-               local:bool = False, force:bool = False, pre_attack_output: Any = None,
+               local:bool = False, pre_attack_output: Any = None,
                db_status:bool = False, workspace:str = None, db_credential_file: Path = None,
-               cracker_main_exec:Path = None):
+               cracker_main_exec:Path = None, slurm_conf=None):
         """
         Wordlist attack using Hashcat
 
@@ -186,8 +186,11 @@ class HashcatMasks(Attack):
         #import pdb; pdb.set_trace()
 
         try:
-            if not force:
-                self.no_empty_required_options(local)
+
+            self.no_empty_required_options(local)
+
+            if not local and slurm_conf:
+                self.slurm.config = slurm_conf
 
             if cracker_main_exec:
                 hc = Hashcat(hashcat_exec=cracker_main_exec)

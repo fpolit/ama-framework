@@ -149,9 +149,9 @@ class HashcatCombination(Attack):
 
     # debugged - date: Mar 6 2021
     def attack(self, *,
-               local:bool = False, force:bool = False, pre_attack_output: Any = None,
+               local:bool = False, pre_attack_output: Any = None,
                db_status:bool = False, workspace:str = None, db_credential_file: Path = None,
-               cracker_main_exec:Path = None):
+               cracker_main_exec:Path = None, slurm_conf=None):
         """
         Combination attack using Hashcat
 
@@ -163,15 +163,15 @@ class HashcatCombination(Attack):
         #import pdb; pdb.set_trace()
         try:
 
-            if not force:
-                self.no_empty_required_options(local)
+            self.no_empty_required_options(local)
 
+            if not local and slurm_conf:
+                self.slurm.config = slurm_conf
 
             if cracker_main_exec:
                 hc = Hashcat(hashcat_exec=cracker_main_exec)
             else:
                 hc = Hashcat()
-                
 
             hash_type = None
             if isinstance(self.options['hash_type'].value, int):
@@ -181,13 +181,13 @@ class HashcatCombination(Attack):
             else:
                 raise TypeError(f"Invalid type hash_type: {type(hash_type)}")
 
-            wordlists = [wordlist.strip() for wordlist in self.options['wordlists'].value.split(',')]
+            wordlists = [wordlist for wordlist in self.options['wordlists'].value.split(',')]
 
             hc.combination_attack(hash_types = hash_types,
                                   hashes_file = self.options['hashes_file'].value,
                                   wordlists = wordlists,
-                                  slurm = self.slurm,
                                   sleep = self.options['sleep'].value,
+                                  slurm = self.slurm,
                                   local = local,
                                   db_status= db_status,
                                   workspace= workspace,

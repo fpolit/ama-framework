@@ -2,7 +2,8 @@
 #
 # hybrid attack using hashcat
 #
-# Implemented - date: Apr 3 2021
+# Status: DEBUGGED - date: Jun 5 2021
+#
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
@@ -130,18 +131,19 @@ class HashcatHybrid(Attack):
 
 
     def attack(self, *,
-               local:bool = False, force:bool = False, pre_attack_output: Any = None,
+               local:bool = False, pre_attack_output: Any = None,
                db_status:bool = False, workspace:str = None, db_credential_file: Path = None,
-               cracker_main_exec:Path = None):
+               cracker_main_exec:Path = None, slurm_conf=None):
         """
         Hybrid Attack using hashcat cracker
         """
         #import pdb; pdb.set_trace()
         try:
 
-            if not force:
-                self.no_empty_required_options(local)
+            self.no_empty_required_options(local)
 
+            if not local and slurm_conf:
+                self.slurm.config = slurm_conf
 
             if cracker_main_exec:
                 hc = Hashcat(hashcat_exec=cracker_main_exec)
@@ -158,7 +160,7 @@ class HashcatHybrid(Attack):
             else:
                 raise TypeError(f"Invalid type hash_type: {type(hash_type)}")
 
-            wordlists = [wordlist.strip() for wordlist in self.options['wordlists'].value.split(',')]
+            wordlists = self.options['wordlists'].value.split(',')
 
             masks = self.options['masks'].value
 
@@ -178,7 +180,7 @@ class HashcatHybrid(Attack):
                     db_credential_file=db_credential_file)
 
             else:
-                masks = [mask.strip() for mask in masks.split(',')]
+                masks = masks.split(',')
                 hc.hybrid_attack(
                     hash_types = hash_types,
                     hashes_file = self.options['hashes_file'].value,

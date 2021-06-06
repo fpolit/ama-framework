@@ -520,7 +520,6 @@ class Interaction(CommandSet):
                     pre_attack_output = pre_attack.run(quiet=args.quiet)
 
                 print_status(f"Running {ColorStr(selectedModule.mname).StyleBRIGHT} attack module")
-                db_status = True if self._cmd.db_conn else False
 
                 if selectedModule.CRACKER == John.MAINNAME:
                     cracker_main_exec = self._cmd.config['john']
@@ -532,6 +531,7 @@ class Interaction(CommandSet):
                     cracker_main_exec = None
 
                 #import pdb;pdb.set_trace()
+                db_status = True if self._cmd.db_conn else False
                 attack_output = selectedModule.attack(
                     local = args.local,
                     pre_attack_output = pre_attack_output,
@@ -553,6 +553,11 @@ class Interaction(CommandSet):
             print_failure("No module selected")
 
     #debugged - data: feb 27 2021
+    auxiliary_parser = argparse.ArgumentParser()
+    auxiliary_parser.add_argument('-q', '--quiet', action='store_true',
+                                  help="Run quietly")
+
+    @with_argparser(auxiliary_parser)
     def do_run(self, args):
         """
         Run the selected auxiliary module
@@ -562,7 +567,7 @@ class Interaction(CommandSet):
         if selectedModule:
             if isinstance(selectedModule, Auxiliary):
                 print_status(f"Running {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
-                selectedModule.run()
+                selectedModule.run(quiet=args.quiet)
             else: # selectedModule is an instance of Attack
                 print_failure(f"No run method for {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
         else:

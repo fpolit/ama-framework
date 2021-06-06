@@ -24,6 +24,13 @@ class Slurm:
     Manage sbatch parameters to submit parallel jobs
     """
 
+    MPI="MPI"
+    OMP="OMP"
+    MPI_OMP="MPI_OMP"
+    GPU_MPI="GPU_MPI"
+
+    JOB_TYPE = [MPI, OMP, MPI_OMP, GPU_MPI]
+
     # sbatch options
     SBATCH_OPTIONS = [
         "array",
@@ -228,6 +235,9 @@ class Slurm:
         elif gpus == 0 and nodes >= 1 and ntasks >= 1 and cpus_per_task == 1:
             return "MPI"
 
+        elif gpus == 0 and node >= 1 and cpus_per_task > 1 and ntasks > 1:
+            return "MPI_OMP"
+
         elif gpus > 0 and nodes == 1 and ntasks == 1 and cpus_per_task == 1:
             return "GPU"
 
@@ -269,7 +279,7 @@ class Slurm:
                             flag = flag.replace("_", "-")
                             batch_script.write(f"#SBATCH --{flag}={argument.value}\n")
 
-            if self.parallel_job_parser() == "OMP":
+            if self.parallel_job_parser() ["OMP", "MPI_OMP"]:
                 batch_script.write("export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK\n")
 
             whiteLine = "\n"

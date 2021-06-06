@@ -2,7 +2,8 @@
 #
 # wordlist attack using hashcat
 #
-# date: Feb 21 2021
+# Status: DEBUGGED - date: Jun 5 2021
+#
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
@@ -90,8 +91,8 @@ class HashcatWordlist(Attack):
         """
 
         attack_options = {
-            'wordlist': Argument(wordlist, True, "Wordlist file"),
-            'hash_type': Argument(hash_type, True, "Hashcat hash type"),
+            'wordlist': Argument(wordlist, True, "Wordlist files (format: WL1,WL2,...)"),
+            'hash_type': Argument(hash_type, True, "Hashcat hash types (split by commas)"),
             'hashes_file': Argument(hashes_file, True, "Hashes file"),
             'sleep': Argument(sleep, True, 'Sleep time between each attack (seconds)')
         }
@@ -146,7 +147,7 @@ class HashcatWordlist(Attack):
 
     # debugged - date: Mar 6 2021
     def attack(self, *,
-               local:bool = False, force:bool = False, pre_attack_output: Any = None,
+               local:bool = False, pre_attack_output: Any = None,
                db_status:bool = False, workspace:str = None, db_credential_file: Path = None,
                cracker_main_exec:Path = None, slurm_conf=None):
         """
@@ -159,8 +160,10 @@ class HashcatWordlist(Attack):
 
         #import pdb; pdb.set_trace()
         try:
-            if not force:
-                self.no_empty_required_options(local)
+            self.no_empty_required_options(local)
+
+            if not local and slurm_conf:
+                self.slurm.config = slurm_conf
 
             if cracker_main_exec:
                 hc = Hashcat(hashcat_exec=cracker_main_exec)
@@ -170,14 +173,16 @@ class HashcatWordlist(Attack):
             hash_type = None
             if isinstance(self.options['hash_type'].value, int):
                 hash_types = [self.options['hash_type'].value]
-            elif isinstance(self.options['hash_type'].value, str):
+            elif isinstance(self.options['hash_type'].value, str): # "HASH_TYPE1,HASH_TYPE2,..."
                 hash_types = [int(hash_type) for hash_type in self.options['hash_type'].value.split(',')]
             else:
                 raise TypeError(f"Invalid type hash_type: {type(hash_type)}")
 
+            wordlists = self.options['wordlist'].value.split(',')
+
             hc.wordlist_attack(hash_types = hash_types,
                                hashes_file = self.options['hashes_file'].value,
-                               wordlists = self.options['wordlist'].value,
+                               wordlists = wordlists,
                                sleep = self.options['sleep'].value,
                                slurm = self.slurm,
                                local = local,

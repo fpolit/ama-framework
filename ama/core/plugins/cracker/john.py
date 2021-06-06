@@ -28,6 +28,7 @@ from tabulate import tabulate
 from sbash import Bash
 from typing import List
 import psycopg2
+import psutil
 from math import floor
 
 # fineprint imports
@@ -59,6 +60,8 @@ from .crackerException import (
     InvalidParallelJob,
     NoValidHashType
 )
+
+from ama.core.plugins import Plugin
 
 from ama.core.cmdsets.db import Connection
 
@@ -292,41 +295,60 @@ class John(PasswordCracker):
                 db_conn.close()
 
 
-    # debugged - date: Feb 28 2021
-    def benchmark(self, *, slurm=None, local:bool = True):
+    # debugged - date: Jun 5 2021
+    def benchmark(self, *, cores=1, threads=1, slurm=None, local:bool = True):
         """
         Run john benchmark
         """
-        import pdb; pdb.set_trace()
-        if self.enable:
-            #cmd2.Cmd.poutput(f"Performing John Benchmark.")
-            #print_status(f"Performing John Benchmark.")
-            if (not local) and slurm and slurm.partition:
-                parallel_job_type = slurm.parallel_job_parser()
-                if not  parallel_job_type in ["MPI", "OMP"]:
-                    raise InvalidParallelJob(parallel_job_type)
+        #import pdb; pdb.set_trace()
+        try:
+            if self.enable:
+                max_cores = psutil.cpu_count(logical=False)
+                max_threads = psutil.cpu_count(logical=True)
 
-                attack_cmd = f"{self.main_exec} --test"
-                if parallel_job_type == "MPI":
-                    attack_cmd = f"srun --mpi={slurm.pmix} "  + attack_cmd
+                if cores == -1 or cores > max_cores:
+                    cores = max_cores
+                if threads == -1 or threads > max_threads:
+                    threads = max_threads
+
+                if (not local) and slurm and slurm.partition:
+                    slurm.set_option("ntasks", cores)
+                    slurm.set_option("cpu_per_task", threads)
+                    parallel_job_type = slurm.parallel_job_parser()
+                    if not  parallel_job_type in ["MPI", "OMP", "MPI_OMP"]:
+                        raise InvalidParallelJob(parallel_job_type)
+
+                    attack_cmd = f"{self.main_exec} --test"
+                    if parallel_job_type in ["MPI", "MPI_OMP"]:
+                        attack_cmd = f"srun --mpi={slurm.pmix} "  + attack_cmd
 
 
-                elif parallel_job_type == "OMP":
-                    attack_cmd = f"srun "  + attack_cmd
+                    elif parallel_job_type == "OMP":
+                        attack_cmd = f"srun "  + attack_cmd
 
-                header_attack = f"echo -e \"\\n\\n[*] Running: {attack_cmd}\""
+                    header_attack = f"echo -e \"\\n\\n[*] Running: {attack_cmd}\""
 
-                parallel_work = [(header_attack, attack_cmd)]
-                batch_script_name = slurm.gen_batch_script(parallel_work)
+                    parallel_work = [(header_attack, attack_cmd)]
+                    batch_script_name = slurm.gen_batch_script(parallel_work)
 
-                Bash.exec(f"sbatch {batch_script_name}")
+                    Bash.exec(f"sbatch {batch_script_name}")
 
+                else:
+                    if cores > 1:
+                        mpirun = Plugin(["mpirun", "mpiexec"])
+                        os.environ['OMP_NUM_THREADS'] = str(threads)
+                        attack_cmd = f"{mpirun.main_exec} -n {cores} {self.main_exec} --test"
+                    else:
+                        os.environ['OMP_NUM_THREADS'] = str(threads)
+                        attack_cmd = f"{self.main_exec} --test"
+
+                    print_status(f"Running: {ColorStr(attack_cmd).StyleBRIGHT}")
+                    Bash.exec(attack_cmd)
             else:
-                attack_cmd = f"{self.main_exec} --test"
-                print_status(f"Running: {ColorStr(attack_cmd).StyleBRIGHT}")
-                Bash.exec(attack_cmd)
-        else:
-            print_failure(f"Cracker {ColorStr(self.main_name).StyleBRIGHT} is disable")
+                raise Exception(f"Cracker {ColorStr(self.main_name).StyleBRIGHT} is disable")
+
+        except Exception as error:
+            print_failure(error)
 
     # Added support for array attacks [debugged - date: Apr 9 2021]
     def wordlist_attack(self , *,
@@ -707,7 +729,6 @@ class John(PasswordCracker):
 
                             attack_cmd += f" {hashes_file}"
 
-                            print()
                             print_status(f"Running: {ColorStr(attack_cmd).StyleBRIGHT}")
                             Bash.exec(attack_cmd)
 
@@ -814,7 +835,6 @@ class John(PasswordCracker):
                             break
 
                         else: # some hash isn't cracked yet
-                            print()
                             print_status(f"Running: {ColorStr(attack_cmd).StyleBRIGHT}")
                             Bash.exec(attack_cmd)
 
@@ -829,7 +849,7 @@ class John(PasswordCracker):
             print_failure(f"Cracker {ColorStr(self.main_name).StyleBRIGHT} is disable")
 
 
-    #modify - date: Apr 1 2021 (debugged - date: Apr 2 2021)
+    #debugged - date: Jun 5 2021
     def masks_attack(self, *,
                      hash_types: List[str] = None, hashes_file: Path, masks_file: Path,
                      slurm: Slurm, local: bool = False,

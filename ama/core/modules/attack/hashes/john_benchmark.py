@@ -2,7 +2,8 @@
 #
 # john benchmark
 #
-# date: Feb 22 2021
+# Status: DEBUGGED - date: Jun 5 2021
+#
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
@@ -47,7 +48,10 @@ class JohnBenchmark(Attack):
         """
         Initialization of John benchmark class
         """
-        attack_options = {}
+        attack_options = {
+            "cores": Argument(1, False, "Number of cores to lunch MPI job (-1: MAXIMUM CORES)"),
+            "threads": Argument(-1, False, "Number of threads to lunch OMP job (-1: MAXIMUM THREADS)"),
+        }
 
         if slurm is None:
             slurm_options = {
@@ -97,6 +101,7 @@ class JohnBenchmark(Attack):
         super().__init__(**init_options)
 
 
+    # debugged - date: Jun 5 2021
     def attack(self, *,
                local:bool = False, pre_attack_output: Any = None,
                db_status:bool = False, workspace:str = None, db_credential_file: Path = None,
@@ -108,7 +113,7 @@ class JohnBenchmark(Attack):
            local (bool): if local is True run attack localy otherwise
                          submiting parallel tasks in a cluster using slurm
         """
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         try:
             self.no_empty_required_options(local)
 
@@ -117,7 +122,9 @@ class JohnBenchmark(Attack):
             else:
                 jtr = John()
 
-            jtr.benchmark(slurm = self.slurm,
+            jtr.benchmark(cores = self.options["cores"].value,
+                          threads = self.options["threads"].value,
+                          slurm = self.slurm,
                           local = local)
 
         except Exception as error:

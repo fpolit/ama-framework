@@ -102,7 +102,6 @@ class JohnMasks(Attack):
             'hash_type': Argument(hash_type, True, "John hash types(split by commas)"),
             'hashes_file': Argument(hashes_file, True, "Hashes file"),
             'masks_file': Argument(masks_file, True, "Masks file"),
-            #'masks_attack': Argument(masks_attack, True, "Generated masks attack script"),
         }
 
 

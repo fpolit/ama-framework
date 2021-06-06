@@ -2,7 +2,7 @@
 #
 # mask attack using john with pack wholegen as pre attack module
 #
-# debugged - date: Mar 30 2021
+# debugged - date: Jun 5 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 from typing import Any
@@ -41,34 +41,6 @@ class PackWholegen_JohnMasks__(JohnMasks):
         # pre attack options
         # if self.selected_pre_attack:
         #     self.selected_pre_attack['output'].value = self.options['masks_file'].value
-
-
-    def attack(self, local=False, force:bool = False, pre_attack_output: Any = None):
-        """
-        Masks attack using John the Ripper
-        Args:
-          local (bool): try to perform the attack locally
-        """
-        #import pdb;pdb.set_trace()
-        try:
-            if not force:
-                self.no_empty_required_options(local)
-
-            jtr = John()
-
-            hash_types  = self.options['hash_type'].value.split(',')
-
-            masks_file = pre_attack_output # name of masks file
-
-            jtr.masks_attack(hash_types = hash_types,
-                             hashes_file = self.options['hashes_file'].value,
-                             masks_file= masks_file,
-                             masks_attack_script= self.options['masks_attack'].value,
-                             slurm = self.slurm,
-                             local = local)
-
-        except Exception as error:
-            print_failure(error)
 
     def setv(self, option, value, *, pre_attack: bool = False, post_attack: bool = False):
         #import pdb; pdb.set_trace()

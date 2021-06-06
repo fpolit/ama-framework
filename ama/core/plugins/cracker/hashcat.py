@@ -270,7 +270,7 @@ class Hashcat(PasswordCracker):
 
     # modify - date: Apr 1 2021 (debugged - date Apr 3 2021)
     def wordlist_attack(self, *,
-                        hash_types:List[int] , hashes_file:str, wordlists:str, rules_file:str=None,
+                        hash_types:List[int] , hashes_file:str, wordlists:List[str], rules_file:str=None,
                         sleep:int = 1, slurm: Slurm, local:bool = False,
                         db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
 
@@ -284,7 +284,7 @@ class Hashcat(PasswordCracker):
         slurm (Slurm): Instance of Slurm class
         """
 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         if self.enable:
             attack_mode = 0
             try:
@@ -293,7 +293,7 @@ class Hashcat(PasswordCracker):
 
                 Hashcat.check_hash_type(hash_types)
 
-                print_status(f"Attacking hashes in {ColorStr(hashes_file).StyleBRIGHT} file with {ColorStr(wordlists).StyleBRIGHT} wordlist")
+                print_status(f"Attacking hashes in {ColorStr(hashes_file).StyleBRIGHT} file with {ColorStr(wordlists).StyleBRIGHT} wordlists")
 
                 hash_types_names = [Hashcat.HASHES[hash_type]['Name'] for hash_type in hash_types
                                     if hash_type in Hashcat.HASHES]
@@ -357,7 +357,8 @@ class Hashcat(PasswordCracker):
                                 print_status(f"Running: {ColorStr(attack_cmd).StyleBRIGHT}")
                                 Bash.exec(attack_cmd)
                                 if sleep > 0:
-                                    print_status(f"{ColorStr('Sleeping ...').StyleBRIGHT}")
+                                    sleeping_msg = ColorStr(f"Sleeping {sleep} seg ...").StyleBRIGHT
+                                    print_status(sleeping_msg)
                                     time.sleep(sleep)
 
                             else:
@@ -376,6 +377,9 @@ class Hashcat(PasswordCracker):
 
 
     # modify - date: Apr 1 2021 (debugged - date Apr 3 2021)
+    # NOTE - date Jun 5 2021:
+    # Implement: Accept more than 2 wordlists and permute them 2 by 2 (unique combination of 2)
+    #            and perform a combination attack with each combination (of 2 wordlists)
     def combination_attack(self, *,
                            hash_types: List[str] , hashes_file:str , wordlists: List[str],
                            sleep:int = 1, slurm: Slurm, local:bool = False,
@@ -473,9 +477,9 @@ class Hashcat(PasswordCracker):
             print_failure(f"Cracker {ColorStr(self.main_name).StyleBRIGHT} is disable")
 
 
-    # modify - date: Apr 1 2021 (debugged - date Apr 2 2021)
+    # DEBUGGED - date Jun 5 2021
     def brute_force_attack(self, *,
-                           hash_types:str , hashes_file:str , mask:str,
+                           hash_types:List[str] , hashes_file:str , mask:str,
                            sleep:int = 1, slurm: Slurm, local:bool = False,
                            db_status:bool = False, workspace:str = None, db_credential_file: Path = None):
 
@@ -489,7 +493,7 @@ class Hashcat(PasswordCracker):
         slurm (Slurm): Instance of Slurm class
         """
 
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         if self.enable:
             try:
                 attack_mode = 3
@@ -780,7 +784,7 @@ if db_status and workspace and db_credential_file:
         print_successful(f"Masks attack script generated: {ColorStr(masks_attack_script).StyleBRIGHT}")
 
 
-    # modify - date: Apr 1 2021 (debugged - date Apr 3 2021)
+    #debugged - date Jun 5 2021
     def hybrid_attack(self, *,
                       hash_types: List[str] , hashes_file:str , inverse:bool = False,
                       wordlists: List[str], masks: List[str] = None, masks_file:Path = None,
@@ -800,7 +804,7 @@ if db_status and workspace and db_credential_file:
         slurm (Slurm): Instance of Slurm class
         """
 
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         if self.enable:
             try:
                 if not inverse:
@@ -839,7 +843,7 @@ if db_status and workspace and db_credential_file:
                     print_status(f"Attacking hashes in {ColorStr(hashes_file).StyleBRIGHT} file in hibrid mode {ColorStr('MASKS + WORDLISTS').StyleBRIGHT}")
 
                 print_status(f"Wordlists: {ColorStr(wordlists).StyleBRIGHT}")
-                if masks and masks_file is None:
+                if masks_file is None:
                     print_status(f"Masks: {ColorStr(masks).StyleBRIGHT}")
                 else:
                     print_status(f"Masks file: {ColorStr(masks_file).StyleBRIGHT}")
