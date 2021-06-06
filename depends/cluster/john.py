@@ -90,7 +90,7 @@ def main():
 
     ### exporting openmpi to the PATH
     export JOHN_HOME={john_pkg.uncompressed_path}
-    export PATH=$PATH:${JOHN_HOME}/run
+    export PATH=$PATH:$\{JOHN_HOME\}/run
     """
 
 

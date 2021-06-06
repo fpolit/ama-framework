@@ -80,8 +80,8 @@ def main():
 
     ### exporting openmpi to the PATH
     export OPENMPI_HOME={openmpi_pkg.prefix}
-    export PATH=$PATH:${OPENMPI_HOME}/bin
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${OPENMPI_HOME}/lib
+    export PATH=$PATH:$\{OPENMPI_HOME\}/bin
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$\{OPENMPI_HOME\}/lib
     """
 
     print(openmpi2path)

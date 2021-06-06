@@ -85,8 +85,8 @@ def main():
     # Adding PDSH to the PATH
     export PDSH_RCMD_TYPE=ssh
     export PDSH_HOME=/usr/local/pdsh
-    export PATH=$PATH:${PDSH_HOME}/bin
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${PDSH_HOME}/lib
+    export PATH=$PATH:$\{PDSH_HOME\}/bin
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$\{PDSH_HOME\}/lib
     """
     print(pdsh2path)
 
