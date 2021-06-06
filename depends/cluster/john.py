@@ -44,7 +44,7 @@ class John(Package):
             "--enable-mpi"
         ]
 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         configure = "./configure " + " ".join(flags)
         Bash.exec(configure, where=os.path.join(self.uncompressed_path, "src"))
         Bash.exec("make", where=os.path.join(self.uncompressed_path, "src"))
@@ -55,7 +55,7 @@ class John(Package):
         Install the compiler source code
         """
         print_status(f"Installing {self.pkgname}-{self.pkgver}")
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
 
         Bash.exec("sudo make install", where=os.path.join(self.uncompressed_path, "src"))
 
