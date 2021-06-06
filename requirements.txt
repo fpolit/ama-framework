@@ -6,6 +6,7 @@ random-password-generator
 cmd2
 tabulate
 varname
+psutil
 
 # auxiliary module packages
 
