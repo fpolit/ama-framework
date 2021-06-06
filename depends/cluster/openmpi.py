@@ -74,6 +74,17 @@ def main():
     print_successful(f"Package {openmpi_pkg.pkgname}-{openmpi_pkg.pkgver} was sucefully installed in {openmpi_pkg.prefix}")
     print_status("Now add openmpi to you PATH")
 
+    openmpi2path = f"""
+    
+    * Open ~/.bashrc and add the following
+
+    ### exporting openmpi to the PATH
+    export OPENMPI_HOME={openmpi_pkg.prefix}
+    export PATH=$PATH:${OPENMPI_HOME}/bin
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${OPENMPI_HOME}/lib
+    """
+
+    print(openmpi2path)
 
 if __name__=="__main__":
     main()
