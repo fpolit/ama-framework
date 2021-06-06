@@ -5,13 +5,14 @@
 # date: Feb 18 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
+import os
 import json
 import sys
 import argparse
 import psycopg2
 import cmd2
 from cmd2 import Cmd
-from fineprint.status import print_failure
+from fineprint.status import print_failure, print_status
 
 
 # categories
@@ -87,23 +88,34 @@ class Ama(Cmd):
 
     @staticmethod
     def get_ama_configurations(ama_config:Path):
-        configurations = None
-        with open(ama_config) as config:
-            configurations = json.load(config)
+        try:
+            configurations = None
 
-        if db_credentials := configurations["db_credentials_file"]:
-            configurations["db_credentials_file"] = Path(db_credentials)
+            if not os.path.exists(ama_config):
+                raise Exception(f"Ama configuration file didn't exist: {ama_config}")
+            
+            with open(ama_config) as config:
+                configurations = json.load(config)
 
-        if slurm_conf_file := configurations["slurm_conf_file"]:
-            configurations["slurm_conf_file"] = Path(slurm_conf_file)
+            if db_credentials := configurations["db_credentials_file"]:
+                configurations["db_credentials_file"] = Path(db_credentials)
 
-        return configurations
+            if slurm_conf_file := configurations["slurm_conf_file"]:
+                configurations["slurm_conf_file"] = Path(slurm_conf_file)
+
+            return configurations
+
+        except Exception as error:
+            print_failure(error)
+            print_status("Using default ama configuration")
 
 
     def init_db_connection(self):
         db_conn = None
         #import pdb; pdb.set_trace()
         try:
+            if self.config is None:
+                raise Exception("Ama configuration file wasn't load.")
             db_credentials = Path(self.config.get("db_credentials_file"))
             dbCredentials = Connection.dbCreds(db_credentials)
             db_conn = psycopg2.connect(**dbCredentials)
@@ -111,7 +123,8 @@ class Ama(Cmd):
 
         except Exception as error:
             print_failure(error)
-            #print_failure("Error while connecting to database")
+            print_failure("Error while connecting to database.")
+            print_status("Database status: disconnected")
 
         finally:
             return db_conn
