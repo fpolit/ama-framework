@@ -1,9 +1,9 @@
 .PHONY: clean virtualenv test docker dist dist-upload
 
-install: require
+install:
 	python3 -m pip install .
 	
-installdev: requiredev
+installdev:
 	python3 -m pip install . --verbose
 
 clean: cleanslurm cleanbkp cleanmasks
@@ -40,7 +40,7 @@ requiredev:
 	python3 -m pip install -r requirements-dev.txt
 
 pkgdev:
-	python3 -m pip install . --verbose --use-feature=in-tree-build
+	python3 -m pip install . --verbose
 
 dist: clean
 	rm -rf dist/*
