@@ -20,7 +20,8 @@ from pkg import Package
 class John(Package):
     def __init__(self, *, pkgver, source):
         depends = {
-            "MPI": {}
+            "MPI": {"Linux": "https://github.com/fpolit/ama-framework/blob/master/depends/cluster/openmpi.py"},
+            "OpenSSL": {"Centos": "openssl-devel.x86_64"}
         }
 
         makedepends = {
@@ -40,9 +41,10 @@ class John(Package):
 
         flags = [
             "--with-systemwide",
-            "--with-mpi"
+            "--enable-mpi"
         ]
 
+        import pdb; pdb.set_trace()
         configure = "./configure " + " ".join(flags)
         Bash.exec(configure, where=os.path.join(self.uncompressed_path, "src"))
         Bash.exec("make", where=os.path.join(self.uncompressed_path, "src"))
@@ -53,7 +55,7 @@ class John(Package):
         Install the compiler source code
         """
         print_status(f"Installing {self.pkgname}-{self.pkgver}")
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
 
         Bash.exec("sudo make install", where=os.path.join(self.uncompressed_path, "src"))
 
@@ -68,7 +70,7 @@ def main():
     args = parser.parse_args()
     john_pkg = John(
         source="https://github.com/openwall/john/archive/1.9.0-Jumbo-1.tar.gz",
-        pkgver="1.9.0-jumbo"
+        pkgver="1.9.0-Jumbo-1"
     )
     john_pkg.prepare(compilation_path = args.compilation,
                      avoid_download = args.no_download,
@@ -84,15 +86,17 @@ def main():
     print_successful(f"Package {john_pkg.pkgname}-{john_pkg.pkgver} was sucefully installed in {john_pkg.uncompressed_path}")
     print_status("Now add john to you PATH")
 
+    _JOHN_HOME = "JOHN_HOME"
     john2path = f"""
     
     * Open ~/.bashrc and add the following
 
     ### exporting openmpi to the PATH
     export JOHN_HOME={john_pkg.uncompressed_path}
-    export PATH=$PATH:$\{JOHN_HOME\}/run
+    export PATH=$PATH:${_JOHN_HOME}/run
     """
 
+    print(john2path)
 
 
 if __name__=="__main__":

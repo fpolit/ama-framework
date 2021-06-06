@@ -78,6 +78,7 @@ def main():
     print_successful(f"Package {pdsh_pkg.pkgname}-{pdsh_pkg.pkgver} was sucefully installed")
     print_status("Now add pdsh to your PATH")
 
+    _PDSH_HOME = "PDSH_HOME"
     pdsh2path = """
     
     * Open ~/.bashrc and add the following
@@ -85,8 +86,8 @@ def main():
     # Adding PDSH to the PATH
     export PDSH_RCMD_TYPE=ssh
     export PDSH_HOME=/usr/local/pdsh
-    export PATH=$PATH:$\{PDSH_HOME\}/bin
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$\{PDSH_HOME\}/lib
+    export PATH=$PATH:${_PDSH_HOME}/bin
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${_PDSH_HOME}/lib
     """
     print(pdsh2path)
 
