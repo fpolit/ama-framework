@@ -91,7 +91,7 @@ def main():
     
     * Open ~/.bashrc and add the following
 
-    ### exporting openmpi to the PATH
+    ### exporting john to the PATH
     export JOHN_HOME={john_pkg.uncompressed_path}
     export PATH=$PATH:${_JOHN_HOME}/run
     """

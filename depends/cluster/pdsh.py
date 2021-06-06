@@ -79,7 +79,7 @@ def main():
     print_status("Now add pdsh to your PATH")
 
     _PDSH_HOME = "PDSH_HOME"
-    pdsh2path = """
+    pdsh2path = f"""
     
     * Open ~/.bashrc and add the following
 
