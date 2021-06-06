@@ -34,20 +34,18 @@ class John(Package):
                          depends=depends,
                          makedepends=makedepends)
 
-    def build(self, prefix):
-        self.prefix = prefix
+    def build(self):
         print_status(f"Building {self.pkgname}-{self.pkgver}")
         print(ColorStr("It can take a while, so go for a coffee ...").StyleBRIGHT)
 
         flags = [
-            f"--prefix={prefix}",
             "--with-systemwide",
             "--with-mpi"
         ]
 
         configure = "./configure " + " ".join(flags)
-        Bash.exec(configure, where=self.uncompressed_path)
-        Bash.exec("make", where=self.uncompressed_path)
+        Bash.exec(configure, where=os.path.join(self.uncompressed_path, "src"))
+        Bash.exec("make", where=os.path.join(self.uncompressed_path, "src"))
 
     
     def install(self):
@@ -57,7 +55,7 @@ class John(Package):
         print_status(f"Installing {self.pkgname}-{self.pkgver}")
         #import pdb; pdb.set_trace()
 
-        Bash.exec("sudo make install", where=self.uncompressed_path)
+        Bash.exec("sudo make install", where=os.path.join(self.uncompressed_path, "src"))
 
         # Configurations
         Bash.exec("sudo mkdir -p /usr/share/john")
@@ -67,8 +65,6 @@ class John(Package):
 
 def main():
     parser = Package.cmd_parser()
-    parser.add_argument("--prefix", default=os.getcwd(),
-                        help="Location to install john")
     args = parser.parse_args()
     john_pkg = John(
         source="https://github.com/openwall/john/archive/1.9.0-Jumbo-1.tar.gz",
@@ -78,15 +74,25 @@ def main():
                      avoid_download = args.no_download,
                      avoid_uncompress = args.no_uncompress)
     #import pdb; pdb.set_trace()
-    john_pkg.build(args.prefix)
+    john_pkg.build()
 
     if args.check:
         john_pkg.check()
 
     john_pkg.install()
 
-    print_successful(f"Package {john_pkg.pkgname}-{john_pkg.pkgver} was sucefully installed in {john_pkg.prefix}")
+    print_successful(f"Package {john_pkg.pkgname}-{john_pkg.pkgver} was sucefully installed in {john_pkg.uncompressed_path}")
     print_status("Now add john to you PATH")
+
+    john2path = f"""
+    
+    * Open ~/.bashrc and add the following
+
+    ### exporting openmpi to the PATH
+    export JOHN_HOME={john_pkg.uncompressed_path}
+    export PATH=$PATH:${JOHN_HOME}/run
+    """
+
 
 
 if __name__=="__main__":
