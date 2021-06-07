@@ -48,7 +48,7 @@ class Slurm(Package):
             "--sysconfdir=/etc/slurm-llnl",
             "--localstatedir=/var",
             "--enable-pam",
-            "--with-pmix=/usr/lib64/pmix",
+            "--with-pmix=/usr",
             "--with-munge"
         ]
         #import pdb; pdb.set_trace()
