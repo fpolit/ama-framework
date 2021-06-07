@@ -67,7 +67,7 @@ class Ama(Cmd):
     def __init__(self,
                  ama_config:Path = Path.joinpath(AMA_HOME, 'config/ama.json')):
 
-        super().__init__(use_ipython=True)
+        super().__init__(include_ipy=True)
 
         self.debug = True
         self.intro = Banner.random()
