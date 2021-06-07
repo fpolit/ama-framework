@@ -1,6 +1,6 @@
 .PHONY: clean virtualenv test docker dist dist-upload
 
-install:
+install: require
 	python3 -m pip install .
 	
 installdev: requiredev
@@ -20,17 +20,10 @@ cleanmasks:
 	rm -f *.masks
 
 virtualenv:
-	virtualenv --prompt '(ama)' env
-	env/bin/pip3 install -r requirements.txt
+	python3 -m venv --prompt 'ama' env
 	@echo
-	@echo "VirtualENV Setup Complete. Now run: source env/bin/activate"
-	@echo
-
-virtualenv_dev:
-	virtualenv --prompt '(ama)' env
-	env/bin/pip3 install -r requirements-dev.txt
-	@echo
-	@echo "VirtualENV Setup Complete. Now run: source env/bin/activate"
+	@echo "Virtual enviroment was created. Now run: source env/bin/activate"
+	@echo "Now to install ama-framework run: make install"
 	@echo
 
 require:
