@@ -42,7 +42,8 @@ class Openmpi(Package):
 
         flags = [
             f"--prefix={prefix}",
-            "--with-pmix",
+            "--with-pmix=/usr",
+            "--with-pmi",
             "--with-slurm"
         ]
 
