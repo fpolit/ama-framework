@@ -3,7 +3,7 @@
 install:
 	python3 -m pip install .
 	
-installdev:
+installdev: requiredev
 	python3 -m pip install . --verbose
 
 clean: cleanslurm cleanbkp cleanmasks
