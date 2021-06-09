@@ -21,7 +21,7 @@ class Openmpi(Package):
     def __init__(self, *, pkgver, source):
         depends = {
             "gcc": {"Centos": "gcc.x86_64"},
-            "pmix": {"CentOS": "pmix.x86_64"}
+            "pmix": {"CentOS": "https://github.com/fpolit/ama-framework/blob/master/depends/cluster/pmix.py"}
         }
 
         makedepends = {
