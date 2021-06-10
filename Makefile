@@ -6,7 +6,7 @@ install:
 installdev:
 	python3 -m pip install . --verbose
 
-clean: cleanslurm cleanbkp cleanmasks
+clean: cleanslurm cleanbkp cleanmasks cleanstats
 
 cleanslurm:
 	rm -f slurm-*_*.out
@@ -18,6 +18,8 @@ cleanbkp:
 cleanmasks:
 	rm -f *.hcmasks
 	rm -f *.masks
+cleanstats:
+	rm -f *.stats
 
 virtualenv:
 	virtualenv --prompt '(ama)' env
