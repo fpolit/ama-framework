@@ -1,4 +1,5 @@
 # base packages
+# psycopg2 need of libpq-devel.x86_64 and postgresql.x86_64 centos 8 packages
 psycopg2
 fineprint
 sbash
@@ -12,19 +13,18 @@ psutil
 
 ## auxiliary/hashes
 name-that-hash
-#sth-ama
 search-that-hash
 hashid
 
 ## auxiliary/wordlists
-pydictor
+#pydictor
 cupp
-crunch-ama
+#crunch-ama
 
 
 ## auxiliary/analysis
 pack-ama
-ppack-ama
+#ppack-ama
 
 ## auxiliary/combinator
-mixer-ama
+#mixer-ama

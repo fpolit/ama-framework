@@ -30,6 +30,19 @@ setup(
     package_data={
         "ama.core.plugins.auxiliary.wordlists": ["cupp.cfg"],
     },
+    install_requires = [
+        'fineprint',
+        'sbash',
+        'random-password-generator',
+        'cmd2',
+        'tabulate',
+        'varname',
+        'psutil',
+        'name-that-hash',
+        'search-that-hash',
+        'hashid',
+        'cupp'
+    ],
     include_package_data=True,
     entry_points={
         'console_scripts':[

@@ -532,12 +532,17 @@ class Interaction(CommandSet):
 
                 #import pdb;pdb.set_trace()
                 db_status = True if self._cmd.db_conn else False
+
+                db_credential_file = None
+                if self._cmd.config:
+                    db_credential_file = self._cmd.config['db_credentials_file']
+
                 attack_output = selectedModule.attack(
                     local = args.local,
                     pre_attack_output = pre_attack_output,
                     db_status = db_status,
                     workspace = self._cmd.workspace,
-                    db_credential_file = self._cmd.config['db_credentials_file'],
+                    db_credential_file = db_credential_file,
                     cracker_main_exec=cracker_main_exec,
                     slurm_conf = self._cmd.slurm_config
                 )

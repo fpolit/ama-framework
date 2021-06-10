@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 #
-# automatization of pdsh installation
+# automatization of pmix installation
 #
-# Status: DEBUGGED - date: Jun 2 2021
+# Status:
 #
 # Warnings:
 # Check output of bash process and quit execution if it fails
@@ -17,10 +17,13 @@ from fineprint.color import ColorStr
 from pkg import Package
 
 
-class Pdsh(Package):
+class Pmix(Package):
     def __init__(self, *, pkgver, source):
         depends = {
-            "ssh": {"Centos": "libssh.x86_64"},
+            "gcc": {"Centos": "gcc.x86_64"},
+            "libevent": {"Centos": "libevent-devel.x86_64"},
+            "zlib": {"CentOS": "zlib-devel.x86_64 "},
+            "munge": {"Linux": "https://github.com/fpolit/ama-framework/blob/master/depends/cluster/munge.py"},
         }
 
         makedepends = {
@@ -28,7 +31,7 @@ class Pdsh(Package):
             "wget": {"Centos": "wget.x86_64"}
         }
 
-        super().__init__("pdsh",
+        super().__init__("pmix",
                          pkgver=pkgver,
                          source=source,
                          depends=depends,
@@ -38,58 +41,38 @@ class Pdsh(Package):
         print_status(f"Building {self.pkgname}-{self.pkgver}")
         print(ColorStr("It can take a while, so go for a coffee ...").StyleBRIGHT)
 
-        #import pdb; pdb.set_trace()
-        Bash.exec("./bootstrap", where=self.uncompressed_path)
-        self.prefix = "/usr/local/pdsh" 
+        Bash.exec("./autogen.pl", where=self.uncompressed_path)
         flags = [
-            f"--prefix={self.prefix}",
-            "--with-ssh"
+            "--prefix=/usr",
+            "--with-libevent",
+            "--with-zlib",
+            "--with-munge"
         ]
 
         configure = "./configure " + " ".join(flags)
         Bash.exec(configure, where=self.uncompressed_path)
         Bash.exec("make", where=self.uncompressed_path)
-
-    def install(self):
-        print_status(f"Installing {self.pkgname}-{self.pkgver} in {self.prefix}")
-        #import pdb; pdb.set_trace()
-
-        Bash.exec("sudo make install", where=self.uncompressed_path) 
-
+ 
 
 def main():
     parser = Package.cmd_parser()
     args = parser.parse_args()
-    pdsh_pkg = Pdsh(
-        source="https://github.com/chaos/pdsh/releases/download/pdsh-2.32/pdsh-2.32.tar.gz",
-        pkgver="2.32"
+    pmix_pkg = Pmix(
+        source="https://github.com/openpmix/openpmix/releases/download/v3.2.3/pmix-3.2.3.tar.gz",
+        pkgver="3.2.3"
     )
-    pdsh_pkg.prepare(compilation_path = args.compilation,
+    pmix_pkg.prepare(compilation_path = args.compilation,
                       avoid_download = args.no_download,
                       avoid_uncompress = args.no_uncompress)
     #import pdb; pdb.set_trace()
-    pdsh_pkg.build()
+    pmix_pkg.build()
 
     if args.check:
-        pdsh_pkg.check()
+        pmix_pkg.check()
 
-    pdsh_pkg.install()
+    pmix_pkg.install()
 
-    print_successful(f"Package {pdsh_pkg.pkgname}-{pdsh_pkg.pkgver} was sucefully installed")
-    print_status("Now add pdsh to your PATH")
-
-    _PDSH_HOME = "PDSH_HOME"
-    pdsh2path = f"""
-    
-    * Open ~/.bashrc and add the following
-
-    # Adding PDSH to the PATH
-    export PDSH_RCMD_TYPE=ssh
-    export PDSH_HOME=/usr/local/pdsh
-    export PATH=$PATH:${_PDSH_HOME}/bin
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${_PDSH_HOME}/lib
-    """
-    print(pdsh2path)
+    print_successful(f"Package {pmix_pkg.pkgname}-{pmix_pkg.pkgver} was sucefully installed")
 
 
 if __name__=="__main__":

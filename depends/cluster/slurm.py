@@ -18,7 +18,7 @@ class Slurm(Package):
     def __init__(self, *, pkgver, source):
         depends = {
             "gcc": {"CentOS": "gcc.x86_64"},
-            "pmix": {"CentOS": "pmix.x86_64"},
+            "pmix": {"Linux": "ADD_LINK2SCRIPT"},
             "gtk2": {"CentOS": "gtk2-devel.x86_64"},
             "pam": {"CentOS": "pam-devel.x86_64"}
             }
@@ -48,7 +48,7 @@ class Slurm(Package):
             "--sysconfdir=/etc/slurm-llnl",
             "--localstatedir=/var",
             "--enable-pam",
-            "--with-pmix=/usr/lib64/pmix",
+            "--with-pmix=/usr",
             "--with-munge"
         ]
         #import pdb; pdb.set_trace()
@@ -62,7 +62,7 @@ class Slurm(Package):
 
         print_status(f"Configuring {self.pkgname}-{self.pkgver} package")
 
-        configrations = [
+        configurations = [
             'sudo install -D -m644 etc/slurm.conf.example    "/etc/slurm-llnl/slurm.conf.example"',
             'sudo install -D -m644 etc/slurmdbd.conf.example "/etc/slurm-llnl/slurmdbd.conf.example"',
             'sudo install -D -m644 LICENSE.OpenSSL           "/usr/share/licenses/slurm/LICENSE.OpenSSL"',
@@ -79,7 +79,7 @@ class Slurm(Package):
             'sudo install -d -m700 -o slurm -g slurm "/var/spool/slurm/ctld"'
         ]
 
-        for cmd in configrations:
+        for cmd in configurations:
             Bash.exec(cmd, where=self.uncompressed_path)
 
 

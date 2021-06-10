@@ -21,7 +21,7 @@ class Openmpi(Package):
     def __init__(self, *, pkgver, source):
         depends = {
             "gcc": {"Centos": "gcc.x86_64"},
-            "pmix": {"CentOS": "pmix.x86_64"}
+            "pmix": {"CentOS": "https://github.com/fpolit/ama-framework/blob/master/depends/cluster/pmix.py"}
         }
 
         makedepends = {
@@ -42,7 +42,8 @@ class Openmpi(Package):
 
         flags = [
             f"--prefix={prefix}",
-            "--with-pmix",
+            "--with-pmix=/usr",
+            "--with-pmi",
             "--with-slurm"
         ]
 
@@ -74,6 +75,19 @@ def main():
     print_successful(f"Package {openmpi_pkg.pkgname}-{openmpi_pkg.pkgver} was sucefully installed in {openmpi_pkg.prefix}")
     print_status("Now add openmpi to you PATH")
 
+    _OPENMPI_HOME = "OPENMPI_HOME"
+
+    openmpi2path = f"""
+    
+    * Open ~/.bashrc and add the following
+
+    ### exporting openmpi to the PATH
+    export OPENMPI_HOME={openmpi_pkg.prefix}
+    export PATH=$PATH:${_OPENMPI_HOME}/bin
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${_OPENMPI_HOME}/lib
+    """
+
+    print(openmpi2path)
 
 if __name__=="__main__":
     main()
