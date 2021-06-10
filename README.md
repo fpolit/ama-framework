@@ -1,4 +1,4 @@
-# ama - Attacks Manager
+    # ama - Attacks Manager
 
 Ama is a specialized environment for the password cracking process. It contains several modules (attacks and auxiliaries), so you can find an appropiate module for each step of the password cracking process, also you can combine them to automatize the password cracking process (`auxiliaries` modules working as `preattack` or `postattack` of an `attack` module - we call them **fullattacks**: `preattack` + `attack` + `postattack`)
 
