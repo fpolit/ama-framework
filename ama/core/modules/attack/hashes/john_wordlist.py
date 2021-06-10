@@ -2,11 +2,13 @@
 #
 # wordlist attack using john
 #
-# date: Feb 22 2021
+# Status: DEBUGGED - date: Jun 8 2021
+#
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
 from typing import Any
+import psutil
 
 from ama.core.files import Path
 
@@ -28,6 +30,8 @@ from fineprint.status import (
     print_failure,
     print_status
 )
+
+from fineprint.color import ColorStr
 
 # pre attack import
 ## auxiliary/hashes
@@ -185,9 +189,22 @@ class JohnWordlist(Attack):
                 jtr = John()
 
             hash_types = self.options['hash_type'].value.split(',')
-            wordlists = self.options['wordlist'].value.split(',')
 
-            jtr.wordlist_attack(hash_types = hash_types,
+            if self.options['wls'].value:
+                wordlists_file = self.options['wordlist'].value
+                if os.path.isfile(wordlists_file) and os.access(wordlists_file, os.R_OK):
+                    wordlists = [wl.rstrip() for wl in open(wordlists_file, 'r')]
+                else:
+                    if not os.path.isfile(wordlists_file):
+                        raise FileNotFoundError(f"File {wordlists_file} didn't exist")
+                    else:
+                        raise PermissionError(f"File {wordlists_file} hasn't read permission")
+            else:
+                wordlists = [self.options['wordlist'].value]
+
+            jtr.wordlist_attack(cores = self.options['cores'].value,
+                                threads = self.options['threads'].value,
+                                hash_types = hash_types,
                                 hashes_file = self.options['hashes_file'].value,
                                 wordlists = wordlists,
                                 slurm = self.slurm,
@@ -201,10 +218,31 @@ class JohnWordlist(Attack):
 
 
     def setv(self, option, value, *, pre_attack: bool = False, post_attack: bool = False):
-        #import pdb; pdb.set_trace()
-        super().setv(option, value, pre_attack = pre_attack, post_attack = post_attack)
+        try:
+            option = option.lower()
+            if option == "cores":
+                max_cores = psutil.cpu_count(logical=False)
+                cores = int(value)
 
-        option = option.lower()
-        # attack ->  atack
-        if option == "array":
-            super().setv('output', 'slurm-%A_%a.out', pre_attack=False, post_attack=False)
+                if cores <= -1 or cores > max_cores:
+                    value = max_cores
+
+                super().setv('NTASKS', value)
+
+            elif option == "threads":
+                max_threads = psutil.cpu_count(logical=True)
+                threads = int(value)
+
+                if threads <= -1 or threads > max_threads:
+                    value = max_threads
+
+                super().setv('CPUS_PER_TASK', value)
+
+            elif option == "array":
+                super().setv('output', 'slurm-%A_%a.out')
+
+
+            super().setv(option, value, pre_attack=pre_attack, post_attack = post_attack)
+
+        except Exception as error:
+            print_failure(error)
