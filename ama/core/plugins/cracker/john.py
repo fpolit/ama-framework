@@ -27,7 +27,7 @@ import re
 from tabulate import tabulate
 from sbash import Bash
 from typing import List
-import psycopg2
+#import psycopg2
 import psutil
 from math import floor
 
@@ -63,7 +63,7 @@ from .crackerException import (
 
 from ama.core.plugins import Plugin
 
-from ama.core.cmdsets.db import Connection
+#from ama.core.cmdsets.db import Connection
 
 class John(PasswordCracker):
     """
@@ -236,63 +236,64 @@ class John(PasswordCracker):
     # debugged - date: Apr 2 2021
     @staticmethod
     def insert_hashes_to_db(hashes_file: Path, workspace: str, creds_file: Path, *, pretty:bool = False):
-        cur = db_conn = None
-        try:
-            #import pdb;pdb.set_trace()
-            hashes_status = John.hashes_file_status(hashes_file)
-            cracked_hashes = hashes_status['cracked']
+        pass
+        # cur = db_conn = None
+        # try:
+        #     #import pdb;pdb.set_trace()
+        #     hashes_status = John.hashes_file_status(hashes_file)
+        #     cracked_hashes = hashes_status['cracked']
 
-            db_credentials = Connection.dbCreds(creds_file)
-            db_conn = psycopg2.connect(**db_credentials)
+        #     db_credentials = Connection.dbCreds(creds_file)
+        #     db_conn = psycopg2.connect(**db_credentials)
 
-            cur = db_conn.cursor()
+        #     cur = db_conn.cursor()
 
-            cur.execute(f"SELECT hash from hashes_{workspace}")
-            cracked_hashes_db = cur.fetchall()
-            new_cracked_hashes = []  #only non-repeated cracked hashes
-            for cracked_hash in cracked_hashes: # cracked_hash = (hash, type, cracked, password)
-                repeated = False
-                for cracked_hash_db in cracked_hashes_db: # cracked_hash_db = (cracked_hash)
-                    if cracked_hash[0] == cracked_hash_db[0]:
-                        repeated = True
-                        break
+        #     cur.execute(f"SELECT hash from hashes_{workspace}")
+        #     cracked_hashes_db = cur.fetchall()
+        #     new_cracked_hashes = []  #only non-repeated cracked hashes
+        #     for cracked_hash in cracked_hashes: # cracked_hash = (hash, type, cracked, password)
+        #         repeated = False
+        #         for cracked_hash_db in cracked_hashes_db: # cracked_hash_db = (cracked_hash)
+        #             if cracked_hash[0] == cracked_hash_db[0]:
+        #                 repeated = True
+        #                 break
 
-                if not repeated:
-                    new_cracked_hashes.append(cracked_hash)
+        #         if not repeated:
+        #             new_cracked_hashes.append(cracked_hash)
 
-            if new_cracked_hashes:
+        #     if new_cracked_hashes:
 
-                insert_cracked_hash = (
-                    f"""
-                    INSERT INTO hashes_{workspace} (hash, type, cracker, password)
-                    VALUES (%s, %s, %s, %s)
-                    """
-                )
+        #         insert_cracked_hash = (
+        #             f"""
+        #             INSERT INTO hashes_{workspace} (hash, type, cracker, password)
+        #             VALUES (%s, %s, %s, %s)
+        #             """
+        #         )
 
-                cur.executemany(insert_cracked_hash, new_cracked_hashes)
-                if pretty:
-                    print_status(f"Cracked hashes were saved to {ColorStr(workspace).StyleBRIGHT} workspace database")
-                else:
-                    print(f"\n[*] Cracked hashes were saved to {workspace} workspace database")
+        #         cur.executemany(insert_cracked_hash, new_cracked_hashes)
+        #         if pretty:
+        #             print_status(f"Cracked hashes were saved to {ColorStr(workspace).StyleBRIGHT} workspace database")
+        #         else:
+        #             print(f"\n[*] Cracked hashes were saved to {workspace} workspace database")
 
-            else:
-                if pretty:
-                    print_status(f"No new cracked hashes to save to {ColorStr(workspace).StyleBRIGHT} workspace database")
-                else:
-                    print(f"\n[*] No new cracked hashes to save to {workspace} workspace database")
+        #     else:
+        #         if pretty:
+        #             print_status(f"No new cracked hashes to save to {ColorStr(workspace).StyleBRIGHT} workspace database")
+        #         else:
+        #             print(f"\n[*] No new cracked hashes to save to {workspace} workspace database")
 
-            db_conn.commit()
-            cur.close()
+        #     db_conn.commit()
+        #     cur.close()
 
-        except Exception as error:
-            print_failure(error)
+        # except Exception as error:
+        #     print_failure(error)
 
-        finally:
-            if cur is not None:
-                cur.close()
+        # finally:
+        #     if cur is not None:
+        #         cur.close()
 
-            if db_conn is not None:
-                db_conn.close()
+        #     if db_conn is not None:
+        #         db_conn.close()
 
 
     # debugged - date: Jun 5 2021

@@ -16,7 +16,7 @@ from fineprint.status import (
 from fineprint.color import ColorStr
 
 
-from ama.core.modules.base.argFormat import Argument
+#from ama.core.modules.base import Argument
 from ama.core.files import Path
 
 class Slurm:
@@ -207,14 +207,14 @@ class Slurm:
     def set_option(self, name, value):
         #import pdb;pdb.set_trace()
         if name in Slurm.OPTIONS:
+            self.options[name].set_value(value)
             setattr(self, name, value)
-            self.options[name].value = value
             if name in Slurm.SBATCH_OPTIONS:
-                self.sbatch[name].value = value
+                self.sbatch[name].set_value(value)
             else: # option is a extra option
-                self.extra[name].value = value
+                self.extra[name].set_value(value)
         else:
-            raise Exception(f"{{ColorStr(name).StyleBRIGHT}} option isn't a valid slurm's option")
+            raise Exception(f"{ColorStr(name).StyleBRIGHT} option isn't a valid slurm's option")
 
     def parallel_job_parser(self):
         """
@@ -326,49 +326,50 @@ class Slurm:
         SLURM_CONFIG_OPTIONS = 'partitions' and VALUE is {PARTITION_NAME: {PARTITION_SPECIFICATIONS},...}
         """
         slurm_config = {}
-        slurm_config['nodes'] = {}
-        slurm_config['partitions'] = {}
-        comment_line = re.compile(r'#(\w|\W|\.|\s)*', re.DOTALL)
+        if slurm_conf:
+            slurm_config['nodes'] = {}
+            slurm_config['partitions'] = {}
+            comment_line = re.compile(r'#(\w|\W|\.|\s)*', re.DOTALL)
 
-        #import pdb;pdb.set_trace()
-        with open(slurm_conf) as slurm_conf_file:
-            for config_line in slurm_conf_file.readlines():
-                config_line = config_line.rstrip()
-                config = config_line.split('=')
-                if comment_line.fullmatch(config_line) is not None:
-                    continue
+            #import pdb;pdb.set_trace()
+            with open(slurm_conf) as slurm_conf_file:
+                for config_line in slurm_conf_file.readlines():
+                    config_line = config_line.rstrip()
+                    config = config_line.split('=')
+                    if comment_line.fullmatch(config_line) is not None:
+                        continue
 
-                #config hasn't SLURM_OPTION=VALUE structure
-                #(it can be a comment or a more complex configuration as NodeName or PartitionName SLURM_OPTION)
-                if len(config) != 2:
-                    # configure line is a multi config (OPTION1=VALUE1 OPTION2=VALUE2 ...)
-                    slurm_config_key = None
-                    multi_config = {}
-                    #import pdb;pdb.set_trace()
-                    for config in re.split(r'\s+', config_line):
-                        config = config.rstrip().split('=')
-                        if len(config) == 2:
-                            option, value = config
-                            multi_config[option] = value
+                    #config hasn't SLURM_OPTION=VALUE structure
+                    #(it can be a comment or a more complex configuration as NodeName or PartitionName SLURM_OPTION)
+                    if len(config) != 2:
+                        # configure line is a multi config (OPTION1=VALUE1 OPTION2=VALUE2 ...)
+                        slurm_config_key = None
+                        multi_config = {}
+                        #import pdb;pdb.set_trace()
+                        for config in re.split(r'\s+', config_line):
+                            config = config.rstrip().split('=')
+                            if len(config) == 2:
+                                option, value = config
+                                multi_config[option] = value
 
-                    for option in multi_config:
-                        if option in ['NodeName', 'NodeAddr']: # This line is a node definition
-                            slurm_config_key = 'nodes'
-                            break
-                        elif option in ['PartitionName']: # This line is a partition definition
-                            slurm_config_key = 'partitions'
-                            break
+                        for option in multi_config:
+                            if option in ['NodeName', 'NodeAddr']: # This line is a node definition
+                                slurm_config_key = 'nodes'
+                                break
+                            elif option in ['PartitionName']: # This line is a partition definition
+                                slurm_config_key = 'partitions'
+                                break
 
-                    if slurm_config_key:
-                        if slurm_config_key == "nodes":
-                            node_name = multi_config['NodeName']
-                            slurm_config['nodes'][node_name] = multi_config
-                        elif slurm_config_key == "partitions":
-                            partition_name = multi_config['PartitionName']
-                            slurm_config['partitions'][partition_name] = multi_config
-                else:
-                    option, value = config
-                    if not comment_line.fullmatch(config_line):
-                        slurm_config[option] = value
+                        if slurm_config_key:
+                            if slurm_config_key == "nodes":
+                                node_name = multi_config['NodeName']
+                                slurm_config['nodes'][node_name] = multi_config
+                            elif slurm_config_key == "partitions":
+                                partition_name = multi_config['PartitionName']
+                                slurm_config['partitions'][partition_name] = multi_config
+                    else:
+                        option, value = config
+                        if not comment_line.fullmatch(config_line):
+                            slurm_config[option] = value
 
         return slurm_config

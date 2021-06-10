@@ -26,9 +26,11 @@ from ..category import CmdsetCategory as Category
 
 # cmd2 imports
 from cmd2 import (
+    Cmd,
     CommandSet,
     with_default_category,
-    with_argparser
+    with_argparser,
+    Cmd2ArgumentParser
 )
 
 # modules.base import
@@ -325,23 +327,6 @@ class Interaction(CommandSet):
         except Exception as error:
             print_failure(error)
 
-        # else: #initialization of selectedModule's options with the global options' values
-        #     selectedModule = self._cmd.selectedModule
-        #     for option, value in self._cmd.gvalues.items():
-        #         if selectedModule.isOption(option):
-        #             if selectedModule.isModuleOption(option):
-        #                 argument = selectedModule.options.get(option)
-        #                 argument.value = value
-        #                 selectedModule.options[option] = argument
-        #             else:
-        #                 if selectedModule.slurm:
-        #                     argument = selectedModule.slurm.options.get(option)
-        #                     argument.value = value
-        #                     selectedModule.slurm.options[option] = argument
-        #                     setattr(selectedModule.slurm, option, value)
-
-        #     self._cmd.selectedModule = selectedModule
-
     unset_parser = argparse.ArgumentParser()
     unset_parser.add_argument('option', help='Option to unset value')
 
@@ -444,9 +429,11 @@ class Interaction(CommandSet):
             print_failure("No module selected")
 
 
-    setv_parser = argparse.ArgumentParser()
+    #setv_parser = argparse.ArgumentParser()
+    setv_parser = Cmd2ArgumentParser()
     setv_parser.add_argument("option", help="Option to set value")
-    setv_parser.add_argument("value", help="Value of option")
+    setv_parser.add_argument("value",  completer=Cmd.path_complete,
+                             help="Value of option")
 
     setv_parser.add_argument('-pre', '--preattack', action='store_true',
                              help="Set value to pre attack module option")
@@ -465,21 +452,19 @@ class Interaction(CommandSet):
         """
 
         try:
-            option = args.option
+            option = args.option.lower()
             value = args.value
 
             if selectedModule := self._cmd.selectedModule:
                 if args.preattack:
-                    if isinstance(selectedModule, Attack):
-                        selectedModule.setv(option, value, pre_attack=True)
-                    else:
+                    if not isinstance(selectedModule, Attack):
                         raise Exception("Auxiliary modules doesn't support pre attack modules")
+                    selectedModule.setv(option, value, pre_attack=True)
 
                 elif args.postattack:
-                    if isinstance(selectedModule, Attack):
-                        selectedModule.setv(option, value, post_attack=True)
-                    else:
+                    if not isinstance(selectedModule, Attack):
                         raise Exception("Auxiliary modules doesn't support post attack modules")
+                    selectedModule.setv(option, value, post_attack=True)
 
                 else: # set option of main module
                     selectedModule.setv(option, value)

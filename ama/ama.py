@@ -13,7 +13,7 @@ from fineprint.status import (
     print_status
 )
 
-from ama.db import AmaDB
+#from ama.db import AmaDB
 from ama.config import (
     init_ama_config,
     create_ama_home,
@@ -26,14 +26,15 @@ from ama.core.files import Path
 def init(args):
     base_path = USER_HOME
     create_ama_home(base_path)
-    AmaDB.initDB(args.dbName, args.roleName)
     init_ama_config()
+    # AmaDB.initDB(args.dbName, args.roleName)
 
 def reinit(args):
     pass
 
 def delete(args):
-    AmaDB.deleteDB(args.dbName, args.roleName)
+    pass
+    #AmaDB.deleteDB(args.dbName, args.roleName)
 
 
 def amaConsoleParser():

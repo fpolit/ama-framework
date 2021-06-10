@@ -13,7 +13,7 @@ from typing import (
 )
 
 # base imports
-from .argFormat import Argument
+from .argument import Argument
 from .auxiliary import Auxiliary
 from ama.core.modules.base import Module
 

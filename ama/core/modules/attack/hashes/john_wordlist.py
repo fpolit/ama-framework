@@ -105,15 +105,17 @@ class JohnWordlist(Attack):
         """
 
         attack_options = {
-            'wordlist': Argument(wordlist, True, "wordlists file(split by commas)"),
-            'hash_type': Argument(hash_type, True, "John hash types (split by commas)"),
-            'hashes_file': Argument(hashes_file, True, "hashes file"),
+            'wordlist': Argument(wordlist, True, "wordlists file(split by commas)", value_type=str),
+            'hash_type': Argument(hash_type, True, "John hash types (split by commas)", value_type=str),
+            'hashes_file': Argument(hashes_file, True, "hashes file", value_type=str),
+            "cores": Argument(1, False, "Number of cores to lunch MPI job (-1: MAXIMUM CORES)", value_type=int),
+            "threads": Argument(-1, False, "Number of threads to lunch OMP job (-1: MAXIMUM THREADS)", value_type=int),
         }
 
         if slurm is None:
             slurm_options = {
                 "account": Argument(None, False, "Cluster account to submit the job"),
-                "array": Argument(None, False, "Number of array jobs"),
+                "array": Argument(None, False, "Number of array jobs", value_type=int),
                 "dependency": Argument(None, False, "Defer the start of this job until the specified dependencies have been satisfied completed"),
                 "chdir" : Argument(os.getcwd(), True, "Working directory path"),
                 "error": Argument(None, False, "Error file"),

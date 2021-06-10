@@ -9,7 +9,7 @@ import os
 import json
 import sys
 import argparse
-import psycopg2
+#import psycopg2
 import cmd2
 from cmd2 import Cmd
 from fineprint.status import print_failure, print_status
@@ -19,11 +19,11 @@ from fineprint.status import print_failure, print_status
 from .core.cmdsets import CmdsetCategory as Category
 
 # cmdsets
-from .core.cmdsets.db import (
-    Workspace,
-    Connection,
-    Loot
-)
+# from .core.cmdsets.db import (
+#     Workspace,
+#     Connection,
+#     Loot
+# )
 
 from .core.cmdsets.module import (
     Search,
@@ -69,13 +69,14 @@ class Ama(Cmd):
 
         super().__init__(include_ipy=True)
 
+        #import pdb; pdb.set_trace()
         self.debug = True
         self.intro = Banner.random()
         self.prompt = "ama > "
         self.continuation_prompt = "> "
         self.default_category = Category.CORE
         self.config = Ama.get_ama_configurations(ama_config)
-        self.db_conn = self.init_db_connection()
+        self.db_conn = None #self.init_db_connection()
         self.workspace = "default" # selected workspace
         # ama configuration (slurm.conf path, dbcreds path, john and hashcat executable path)
         self.modules = amaModules # format {NAME: MODULE_CLASS, ....}
@@ -93,7 +94,7 @@ class Ama(Cmd):
 
             if not os.path.exists(ama_config):
                 raise Exception(f"Ama configuration file didn't exist: {ama_config}")
-            
+
             with open(ama_config) as config:
                 configurations = json.load(config)
 
@@ -110,30 +111,34 @@ class Ama(Cmd):
             print_status("Using default ama configuration")
 
 
-    def init_db_connection(self):
-        db_conn = None
-        #import pdb; pdb.set_trace()
-        try:
-            if self.config is None:
-                raise Exception("Ama configuration file wasn't load.")
-            db_credentials = Path(self.config.get("db_credentials_file"))
-            dbCredentials = Connection.dbCreds(db_credentials)
-            db_conn = psycopg2.connect(**dbCredentials)
-            del dbCredentials
+    # def init_db_connection(self):
+    #     db_conn = None
+    #     #import pdb; pdb.set_trace()
+    #     try:
+    #         if self.config is None:
+    #             raise Exception("Ama configuration file wasn't load.")
+    #         db_credentials = Path(self.config.get("db_credentials_file"))
+    #         dbCredentials = Connection.dbCreds(db_credentials)
+    #         db_conn = psycopg2.connect(**dbCredentials)
+    #         del dbCredentials
 
-        except Exception as error:
-            print_failure(error)
-            print_failure("Error while connecting to database.")
-            print_status("Database status: disconnected")
+    #     except Exception as error:
+    #         print_failure(error)
+    #         print_failure("Error while connecting to database.")
+    #         print_status("Database status: disconnected")
 
-        finally:
-            return db_conn
+    #     finally:
+    #         return db_conn
 
 
     def init_slurm_config(self):
         #import pdb;pdb.set_trace()
         try:
-            slurm_config_file = self.config.get("slurm_conf_file")
+
+            slurm_config_file = None
+            if self.config:
+                slurm_config_file = self.config.get("slurm_conf_file")
+
             if slurm_config_file is None:
                 slurm_config_file = Slurm.find_slurm_config()
 

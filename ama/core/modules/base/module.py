@@ -50,22 +50,10 @@ class Module:
         set option of a module with supplied value
         """
         try:
-            option = option.lower()
-
-            try:
-                value = int(value)
-
-            except ValueError: # value is a string
-                if value in ["True", "False"]:
-                    if value == "True":
-                        value = True
-                    else:
-                        value = False
-
             #import pdb; pdb.set_trace()
             if self.isOption(option):
                 if self.isModuleOption(option):
-                    self.options[option].value = value
+                    self.options[option].set_value(value)
 
                 else: # option is a slurm option
                     if isinstance(self.slurm, Slurm):
@@ -257,13 +245,9 @@ License : GPLv3
         return False
 
     def isOption(self, option):
-        if self.slurm: #module that support slurm
-            if option in self.options or \
-               option in self.slurm.options:
-                return True
-        else: #module that doesn't support slurm
-            if option in self.options:
-                return True
+        #import pdb; pdb.set_trace()
+        if self.isModuleOption(option) or self.isSlurmOption(option):
+            return True
 
         return False
 

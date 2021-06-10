@@ -12,7 +12,7 @@ import os
 import re
 from tabulate import tabulate
 from sbash import Bash
-import psycopg2
+#import psycopg2
 from typing import List
 from fineprint.status import (
     print_status,
@@ -28,7 +28,7 @@ from .crackedHash import CrackedHash
 from ama.data.hashes import hcHashes
 from ama.core.files import Path
 from .mask import Mask
-from ama.core.cmdsets.db import Connection
+#from ama.core.cmdsets.db import Connection
 from .crackerException import (
     InvalidParallelJob,
     NoValidHashType,
@@ -187,55 +187,56 @@ class Hashcat(PasswordCracker):
     # debugged - date Apr 3 2021
     @staticmethod
     def insert_hashes_to_db(hashes_file: Path, workspace: str, creds_file: Path):
-        cur = db_conn = None
-        try:
-            #import pdb;pdb.set_trace()
-            hashes_status = Hashcat.hashes_file_status(hashes_file)
-            cracked_hashes = hashes_status['cracked']
+        pass
+        # cur = db_conn = None
+        # try:
+        #     #import pdb;pdb.set_trace()
+        #     hashes_status = Hashcat.hashes_file_status(hashes_file)
+        #     cracked_hashes = hashes_status['cracked']
 
-            db_credentials = Connection.dbCreds(creds_file)
-            db_conn = psycopg2.connect(**db_credentials)
+        #     db_credentials = Connection.dbCreds(creds_file)
+        #     db_conn = psycopg2.connect(**db_credentials)
 
-            cur = db_conn.cursor()
-            cur.execute(f"SELECT hash from hashes_{workspace}")
-            cracked_hashes_db = cur.fetchall()
-            new_cracked_hashes = []  #only non-repeated cracked hashes
-            for cracked_hash in cracked_hashes: # cracked_hash = (hash, type, cracked, password)
-                repeated = False
-                for cracked_hash_db in cracked_hashes_db: # cracked_hash_db = (cracked_hash)
-                    if cracked_hash[0] == cracked_hash_db[0]:
-                        repeated = True
-                        break
+        #     cur = db_conn.cursor()
+        #     cur.execute(f"SELECT hash from hashes_{workspace}")
+        #     cracked_hashes_db = cur.fetchall()
+        #     new_cracked_hashes = []  #only non-repeated cracked hashes
+        #     for cracked_hash in cracked_hashes: # cracked_hash = (hash, type, cracked, password)
+        #         repeated = False
+        #         for cracked_hash_db in cracked_hashes_db: # cracked_hash_db = (cracked_hash)
+        #             if cracked_hash[0] == cracked_hash_db[0]:
+        #                 repeated = True
+        #                 break
 
-                if not repeated:
-                    new_cracked_hashes.append(cracked_hash)
+        #         if not repeated:
+        #             new_cracked_hashes.append(cracked_hash)
 
-            if new_cracked_hashes:
-                insert_cracked_hash = (
-                    f"""
-                    INSERT INTO hashes_{workspace} (hash, type, cracker, password)
-                    VALUES (%s, %s, %s, %s)
-                    """
-                )
+        #     if new_cracked_hashes:
+        #         insert_cracked_hash = (
+        #             f"""
+        #             INSERT INTO hashes_{workspace} (hash, type, cracker, password)
+        #             VALUES (%s, %s, %s, %s)
+        #             """
+        #         )
 
-                cur.executemany(insert_cracked_hash, cracked_hashes)
-                print_successful(f"Cracked hashes were saved to {ColorStr(workspace).StyleBRIGHT} workspace")
+        #         cur.executemany(insert_cracked_hash, cracked_hashes)
+        #         print_successful(f"Cracked hashes were saved to {ColorStr(workspace).StyleBRIGHT} workspace")
 
-            else:
-                print_status(f"No new cracked hashes to save to {ColorStr(workspace).StyleBRIGHT} workspace")
+        #     else:
+        #         print_status(f"No new cracked hashes to save to {ColorStr(workspace).StyleBRIGHT} workspace")
 
-            db_conn.commit()
-            cur.close()
+        #     db_conn.commit()
+        #     cur.close()
 
-        except Exception as error:
-            print_failure(error)
+        # except Exception as error:
+        #     print_failure(error)
 
-        finally:
-            if cur is not None:
-                cur.close()
+        # finally:
+        #     if cur is not None:
+        #         cur.close()
 
-            if db_conn is not None:
-                db_conn.close()
+        #     if db_conn is not None:
+        #         db_conn.close()
 
     # modify - date: Apr 1 2021 (debugged - date Apr 2 2021)
     def benchmark(self, slurm, local:bool = False):
