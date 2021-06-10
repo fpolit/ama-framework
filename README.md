@@ -5,9 +5,8 @@ Ama is a specialized environment for the password cracking process. It contains 
 Also ama's attack modules can be submitted in a cluster of computers using `Slurm`, so you can perform **large** attacks, other important feature is that `ama` saves loots (cracked `hashes` and `services`) in a database and organize them (in *workspaces*) to enable efficient access to them. Finally, `ama` is easy extensible, so you can write custom modules to extend it.
 
 ## Dependencies
-* [spack](https://spack.io/)
-* [Hashcat](https://hashcat.net/hashcat/)
-* [John](https://github.com/openwall/john) (with MPI support - Openmpi or MPICH (with slurm and pmix support))
+* [Hashcat](https://hashcat.net/hashcat/) (Only for hashcat attack modules)
+* [John](https://github.com/openwall/john) (with MPI support - Openmpi or MPICH (with slurm and pmix support))(Only for john attack modules)
 * [Hydra](https://github.com/vanhauser-thc/thc-hydra) (NO DEVELOPED ATTACKS MODULES YET)
 
 
