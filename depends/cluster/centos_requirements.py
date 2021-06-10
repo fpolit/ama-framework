@@ -13,7 +13,10 @@ if __name__=="__main__":
         "pmix": ["libevent-devel.x86_64", "zlib-devel.x86_64",  "make.x86_64", "wget.x86_64"],
         "slurm": ["gtk2-devel.x86_64", "pam-devel.x86_64", "make.x86_64", "wget.x86_64"]
     }
-    
+
+    print_status("Installing 'Development Tools' group")
+    Bash.exec("sudo yum -y group install 'Development Tools'")
+
     for pkg, require in requirements.items():
         print_status(f"Installing {pkg}'s CentOS dependencies")
         #import pdb; pdb.set_trace()
