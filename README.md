@@ -8,7 +8,6 @@ Also ama's attack modules can be submitted in a cluster of computers using `Slur
 * [spack](https://spack.io/)
 * [Hashcat](https://hashcat.net/hashcat/)
 * [John](https://github.com/openwall/john) (with MPI support - Openmpi or MPICH (with slurm and pmix support))
-* Postgresql
 * [Hydra](https://github.com/vanhauser-thc/thc-hydra) (NO DEVELOPED ATTACKS MODULES YET)
 
 
