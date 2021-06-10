@@ -1,4 +1,4 @@
-    # ama - Attacks Manager
+# ama - Attacks Manager
 
 Ama is a specialized environment for the password cracking process. It contains several modules (attacks and auxiliaries), so you can find an appropiate module for each step of the password cracking process, also you can combine them to automatize the password cracking process (`auxiliaries` modules working as `preattack` or `postattack` of an `attack` module - we call them **fullattacks**: `preattack` + `attack` + `postattack`)
 
@@ -12,30 +12,6 @@ Also ama's attack modules can be submitted in a cluster of computers using `Slur
 
 Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can find guides to install them properly.
 Also visit [depends](https://github.com/fpolit/ama-framework/tree/master/depends) directory, there you can find python scripts and spack packages to automatize ama's dependencies.
-
-
-## Installation
-* Users
-
-```bash
-    # Download some release (stable code)
-    $ cd DOWNLOADED_AMA_RELEASE
-    # I suggest you install ama in a python virtual enviroment (run: make virtualenv)
-    $ make install
-```
-
-* Developers
-
-If you want to contribute to `ama-framework` you are welcome.   
-As developer you will first create a python virtual enviroment 
-and then install `ama` and the developer packages.
-```bash
-    $ git clone https://github.com/fpolit/ama-framework.git ama
-    $ cd ama
-    $ make virtualenv_dev
-    $ source env/bin/activate
-    $ make pkgdev
-```
 
 **NOTE:**  
 *Ama-framework* was tested in the following GNU/Linux distributions:
