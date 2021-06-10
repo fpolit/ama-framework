@@ -16,7 +16,6 @@ from fineprint.status import (
 from fineprint.color import ColorStr
 
 
-#from ama.core.modules.base import Argument
 from ama.core.files import Path
 
 class Slurm:
