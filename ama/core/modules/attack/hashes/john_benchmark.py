@@ -8,6 +8,7 @@
 
 import os
 from typing import Any
+import psutil
 
 # base  imports
 from ama.core.modules.base import (
@@ -126,6 +127,33 @@ class JohnBenchmark(Attack):
                           threads = self.options["threads"].value,
                           slurm = self.slurm,
                           local = local)
+
+        except Exception as error:
+            print_failure(error)
+
+
+    def setv(self, option, value, *, pre_attack: bool = False, post_attack: bool = False):
+        try:
+            option = option.lower()
+            if option == "cores":
+                max_cores = psutil.cpu_count(logical=False)
+                cores = int(value)
+
+                if cores <= -1 or cores > max_cores:
+                    value = max_cores
+
+                super().setv('NTASKS', value)
+
+            elif option == "threads":
+                max_threads = psutil.cpu_count(logical=True)
+                threads = int(value)
+
+                if threads <= -1 or threads > max_threads:
+                    value = max_threads
+
+                super().setv('CPUS_PER_TASK', value)
+
+            super().setv(option, value, pre_attack=pre_attack, post_attack = post_attack)
 
         except Exception as error:
             print_failure(error)

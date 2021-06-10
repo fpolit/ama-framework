@@ -500,8 +500,6 @@ class Interaction(CommandSet):
     attack_parser = argparse.ArgumentParser()
     attack_parser.add_argument('-l', '--local', action='store_true',
                                help="Try to perform the attack locally")
-    # attack_parser.add_argument('-f', '--force', action='store_true',
-    #                            help="Force the attack")
     attack_parser.add_argument('-q', '--quiet', action='store_true',
                                help="Run quietly")
 
@@ -521,14 +519,13 @@ class Interaction(CommandSet):
 
                 print_status(f"Running {ColorStr(selectedModule.mname).StyleBRIGHT} attack module")
 
-                if selectedModule.CRACKER == John.MAINNAME:
-                    cracker_main_exec = self._cmd.config['john']
+                cracker_main_exec = None
+                if self._cmd.config:
+                    if selectedModule.CRACKER == John.MAINNAME:
+                        cracker_main_exec = self._cmd.config['john']
 
-                elif selectedModule.CRACKER == Hashcat.MAINNAME:
-                    cracker_main_exec = self._cmd.config['hashcat']
-
-                else:
-                    cracker_main_exec = None
+                    elif selectedModule.CRACKER == Hashcat.MAINNAME:
+                        cracker_main_exec = self._cmd.config['hashcat']
 
                 #import pdb;pdb.set_trace()
                 db_status = True if self._cmd.db_conn else False
