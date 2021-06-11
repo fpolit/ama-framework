@@ -9,7 +9,7 @@ Ama is a specialized environment for the password cracking process. It contains 
 
 
 Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can find guides to install them properly.
-Also visit [depends/cluster](https://github.com/fpolit/ama-framework/tree/master/depends/cluster) directory, there you can find python scripts to automatize ama's dependencies.
+Also visit [depends/cluster](https://github.com/fpolit/ama-framework/tree/master/depends/cluster) directory, there you can find python scripts to automatize installation of ama's dependencies.
 
 **NOTE:**  
 *Ama-framework* was tested in the following GNU/Linux distributions:
