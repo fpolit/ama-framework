@@ -6,7 +6,7 @@
 #
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
-import cmd2
+import os
 from fineprint.status import print_failure
 from typing import List
 
@@ -61,29 +61,29 @@ class PackWholegen(Auxiliary):
                  sorting = "optindex"):
 
         auxiliary_options = {
-            'wordlist': Argument(wordlist, True, "Wordlist to analyze"),
-            'output': Argument(output, True, "File name to save generated masks and occurrence"),
-            'charsets': Argument(charsets, False, "Password charset filter (e.g. loweralpha,numeric)"),
-            'min_length': Argument(min_length, False, "Minimum password length"),
-            'max_length': Argument(max_length, False, "Maximum password length"),
-            'min_special': Argument(min_special, False, "Minimum number of special characters"),
-            'min_upper': Argument(min_upper, False, "Minimum number of uppercase characters"),
-            'min_lower': Argument(min_lower, False, "Minimum number of lowercase characters"),
-            'min_digit': Argument(min_digit, False, "Minimum number of digit"),
-            'max_special': Argument(max_special, False, "Maximum number of special characters"),
-            'max_upper': Argument(max_upper, False, "Maximum number of uppercase characters"),
-            'max_digit': Argument(max_digit, False, "Maximum number of digit"),
-            'max_lower': Argument(max_lower, False, "Maximum number of lowercase characters"),
-            'min_complexity': Argument(min_complexity, False, "Minimum complexity"),
-            'max_complexity': Argument(max_complexity, False, "Maximum complexity"),
-            'min_occurrence': Argument(min_occurrence, False, "Minimum occurrence"),
-            'max_occurrence': Argument(max_occurrence, False, "Maximum occurrence"),
-            'min_time': Argument(min_time, False, "Minimum mask runtime (seconds)"),
-            'max_time': Argument(max_time, False, "Maximum mask runtime (seconds)"),
-            'target_time': Argument(target_time, False, "Target time of all masks (seconds)"),
-            'sorting': Argument(sorting, True, "Mask sorting (<optindex|occurrence|complexity>)"),
-            'hiderare': Argument(hiderare, True, "Hide statistics lower than the supplied percent"),
-            'show_masks': Argument(show_masks, True, "Show matching mask"),
+            'wordlist': Argument(wordlist, True, "Wordlist to analyze", value_type=str),
+            'output': Argument(output, True, "File name to save generated masks and occurrence", value_type=str),
+            'charsets': Argument(charsets, False, "Password charset filter (e.g. loweralpha,numeric)", value_type=str),
+            'min_length': Argument(min_length, False, "Minimum password length", value_type=int),
+            'max_length': Argument(max_length, False, "Maximum password length", value_type=int),
+            'min_special': Argument(min_special, False, "Minimum number of special characters", value_type=int),
+            'min_upper': Argument(min_upper, False, "Minimum number of uppercase characters", value_type=int),
+            'min_lower': Argument(min_lower, False, "Minimum number of lowercase characters", value_type=int),
+            'min_digit': Argument(min_digit, False, "Minimum number of digit", value_type=int),
+            'max_special': Argument(max_special, False, "Maximum number of special characters", value_type=int),
+            'max_upper': Argument(max_upper, False, "Maximum number of uppercase characters", value_type=int),
+            'max_digit': Argument(max_digit, False, "Maximum number of digit", value_type=int),
+            'max_lower': Argument(max_lower, False, "Maximum number of lowercase characters", value_type=int),
+            'min_complexity': Argument(min_complexity, False, "Minimum complexity", value_type=int),
+            'max_complexity': Argument(max_complexity, False, "Maximum complexity", value_type=int),
+            'min_occurrence': Argument(min_occurrence, False, "Minimum occurrence", value_type=int),
+            'max_occurrence': Argument(max_occurrence, False, "Maximum occurrence", value_type=int),
+            'min_time': Argument(min_time, False, "Minimum mask runtime (seconds)", value_type=int),
+            'max_time': Argument(max_time, False, "Maximum mask runtime (seconds)", value_type=int),
+            'target_time': Argument(target_time, False, "Target time of all masks (seconds)", value_type=int),
+            'sorting': Argument(sorting, True, "Mask sorting (<optindex|occurrence|complexity>)", value_type=str),
+            'hiderare': Argument(hiderare, True, "Hide statistics lower than the supplied percent", value_type=int),
+            'show_masks': Argument(show_masks, True, "Show matching mask", value_type=bool),
         }
 
         init_options = {
@@ -149,3 +149,14 @@ class PackWholegen(Auxiliary):
 
         except Exception as error:
             print_failure(error)
+
+
+    def setv(self, option, value):
+        #import pdb; pdb.set_trace()
+        super().setv(option, value)
+
+        option = option.lower()
+        # attack ->  atack
+        if option == "wordlist":
+            output_file_name = os.path.basename(value) + ".masks"
+            super().setv('output', output_file_name)

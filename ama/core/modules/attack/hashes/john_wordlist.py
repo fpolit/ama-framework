@@ -109,43 +109,44 @@ class JohnWordlist(Attack):
         """
 
         attack_options = {
-            'wordlist': Argument(wordlist, True, "wordlists file(split by commas)", value_type=str),
+            'wordlist': Argument(wordlist, True, "wordlist or wordlists file", value_type=str),
             'hash_type': Argument(hash_type, True, "John hash types (split by commas)", value_type=str),
             'hashes_file': Argument(hashes_file, True, "hashes file", value_type=str),
+            'wls': Argument(False, False, f"Parse {ColorStr('WORDLIST').StyleBRIGHT}'s value as a wordlists file", value_type=bool),
             "cores": Argument(1, False, "Number of cores to lunch MPI job (-1: MAXIMUM CORES)", value_type=int),
             "threads": Argument(-1, False, "Number of threads to lunch OMP job (-1: MAXIMUM THREADS)", value_type=int),
         }
 
         if slurm is None:
             slurm_options = {
-                "account": Argument(None, False, "Cluster account to submit the job"),
+                "account": Argument(None, False, "Cluster account to submit the job", value_type=str),
                 "array": Argument(None, False, "Number of array jobs", value_type=int),
                 "dependency": Argument(None, False, "Defer the start of this job until the specified dependencies have been satisfied completed"),
-                "chdir" : Argument(os.getcwd(), True, "Working directory path"),
+                "chdir" : Argument(os.getcwd(), True, "Working directory path", value_type=str),
                 "error": Argument(None, False, "Error file"),
-                "job_name" : Argument('attack', False, "Name for the job allocation"),
+                "job_name" : Argument('attack', False, "Name for the job allocation", value_type=str),
                 "cluster" : Argument(None, False, "Cluster Name"),
-                "distribution": Argument('block', True, "Distribution methods for remote processes (<block|cyclic|plane|arbitrary>)"),
+                "distribution": Argument('block', True, "Distribution methods for remote processes (<block|cyclic|plane|arbitrary>)", value_type=str),
                 "mail_type": Argument(None, False, "Event types to notify user by email(<BEGIN|END|FAIL|REQUEUE|ALL|TIME_LIMIT_PP>)"),
                 "mail_user": Argument(None, False, "User email"),
                 "mem": Argument(None, False, "Memory per node (<size[units]>)"),
                 "mem_per_cpu": Argument(None, False, "Minimum memory required per allocated CPU (<size[units]>)"),
-                "cpus_per_task": Argument(1, True, "Number of processors per task"),
-                "nodes": Argument(1, True, "Number of nodes(<minnodes[-maxnodes]>)"),
-                "ntasks": Argument(1, True, "Number of tasks"),
-                "nice": Argument(None, False, "Run the job with an adjusted scheduling"),
-                "output": Argument('slurm-%j.out', True, "Output file name"),
+                "cpus_per_task": Argument(1, True, "Number of processors per task", value_type=int),
+                "nodes": Argument(1, True, "Number of nodes(<minnodes[-maxnodes]>)", value_type=int),
+                "ntasks": Argument(1, True, "Number of tasks", value_type=int),
+                "nice": Argument(None, False, "Run the job with an adjusted scheduling", value_type=int),
+                "output": Argument('slurm-%j.out', True, "Output file name", value_type=str),
                 "open_mode": Argument('truncate', True, "Output open mode (<append|truncate>)"),
-                "partition": Argument(None, True, "Partition to submit job"),
+                "partition": Argument(None, True, "Partition to submit job", value_type=str),
                 "reservation": Argument(None, False, "Resource reservation name"),
                 "time": Argument(None, False, "Limit of time (format: DD-HH:MM:SS)"),
-                "test_only": Argument(False, True, "Validate the batch script and return an estimate of when a job would be scheduled to run. No job is actually submitted"),
-                "verbose": Argument(False, True, "Increase the verbosity of sbatch's informational messages"),
+                "test_only": Argument(False, True, "Validate the batch script and return an estimate of when a job would be scheduled to run. No job is actually submitted", value_type=bool),
+                "verbose": Argument(False, True, "Increase the verbosity of sbatch's informational messages", value_type=bool),
                 "nodelist": Argument(None, False, "Nodelist"),
-                "wait": Argument(False, True, "Do not exit until the submitted job terminates"),
+                "wait": Argument(False, True, "Do not exit until the submitted job terminates", value_type=bool),
                 "exclude": Argument(None, False, "Do not exit until the submitted job terminates"),
-                'batch_script': Argument('attack.sh', True, "Name for the generated batch script"),
-                'pmix': Argument('pmix_v3', True, "MPI type")
+                'batch_script': Argument('attack.sh', True, "Name for the generated batch script", value_type=str),
+                'pmix': Argument('pmix_v3', True, "MPI type", value_type=str)
             }
 
             slurm = Slurm(**slurm_options)
@@ -219,6 +220,9 @@ class JohnWordlist(Attack):
 
     def setv(self, option, value, *, pre_attack: bool = False, post_attack: bool = False):
         try:
+
+            super().setv(option, value, pre_attack=pre_attack, post_attack = post_attack)
+
             option = option.lower()
             if option == "cores":
                 max_cores = psutil.cpu_count(logical=False)
@@ -239,10 +243,8 @@ class JohnWordlist(Attack):
                 super().setv('CPUS_PER_TASK', value)
 
             elif option == "array":
-                super().setv('output', 'slurm-%A_%a.out')
+                super().setv('OUTPUT', 'slurm-%A_%a.out')
 
-
-            super().setv(option, value, pre_attack=pre_attack, post_attack = post_attack)
 
         except Exception as error:
             print_failure(error)

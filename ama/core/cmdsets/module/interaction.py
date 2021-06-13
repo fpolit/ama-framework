@@ -452,7 +452,7 @@ class Interaction(CommandSet):
         """
 
         try:
-            option = args.option.lower()
+            option = args.option
             value = args.value
 
             if selectedModule := self._cmd.selectedModule:

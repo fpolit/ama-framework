@@ -27,5 +27,5 @@ Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can fi
 
 
 
-Good luck!  
-            glozanoa
+Good luck!
+glozanoa
