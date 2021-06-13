@@ -17,7 +17,7 @@ class Argument:
         self.description = description
 
     def set_value(self, value):
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         self.value = Argument.parse(value, self.value_type)
 
     def get_attributes(self):
@@ -46,7 +46,7 @@ class Argument:
                     valid_true_values = ["True", "true", "1", 1]
                     valid_false_values = ["False", "false", "0", 0]
 
-                    if self.value not in [*valid_true_values, *valid_false_values]:
+                    if value not in [*valid_true_values, *valid_false_values]:
                         raise Exception(f"Invalid value for a boolean argument")
 
                     parsed_value = True if value in valid_true_values else False
@@ -74,6 +74,7 @@ class Argument:
             return self.value == other.value
         else:
             return self.value == other
+
     def __ne__(self, other):
         return not (self == other)
 
@@ -90,13 +91,7 @@ class Argument:
             return self.value > other
 
     def __le__(self, other):
-        if isinstance(other, Argument):
-            return self.value < other.value or self.value == other.value
-        else:
-            return self.value < other or self.value == other
+        return self == other or self < other
 
     def __ge__(self, other):
-        if isinstance(other, Argument):
-            return self.value > other.value or self.value == other.value
-        else:
-            return self.value > other or self.value == other
+        return self == other or self > other

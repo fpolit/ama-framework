@@ -234,7 +234,7 @@ class Slurm:
         elif gpus == 0 and nodes >= 1 and ntasks >= 1 and cpus_per_task == 1:
             return "MPI"
 
-        elif gpus == 0 and nodes >= 1 and cpus_per_task > 1 and ntasks > 1:
+        elif gpus == 0 and nodes >= 1 and ntasks > 1 and cpus_per_task > 1:
             return "MPI_OMP"
 
         elif gpus > 0 and nodes == 1 and ntasks == 1 and cpus_per_task == 1:

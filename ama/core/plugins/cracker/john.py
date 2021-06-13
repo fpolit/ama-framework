@@ -832,6 +832,9 @@ class John(PasswordCracker):
                         f"{self.MAINNAME.upper()}={self.main_exec}",
                     )
 
+                    if slurm.config:
+                        self.check_slurm_partition(slurm.partition, slurm.config['partitions'])
+
                     parallel_job_type = slurm.parallel_job_parser()
                     if not  parallel_job_type in [Slurm.MPI, Slurm.OMP]:
                         raise InvalidParallelJob(parallel_job_type)

@@ -51,6 +51,7 @@ class Module:
         """
         try:
             #import pdb; pdb.set_trace()
+            option = option.lower()
             if self.isOption(option):
                 if self.isModuleOption(option):
                     self.options[option].set_value(value)
