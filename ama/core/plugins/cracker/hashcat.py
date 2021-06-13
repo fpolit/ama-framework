@@ -781,6 +781,18 @@ class Hashcat(PasswordCracker):
                     print_status(f"Masks file: {ColorStr(masks_file).StyleBRIGHT}")
 
 
+                wls_masks = []
+                counter = 1
+                for wl in wordlists:
+                    for mask in masks:
+                        combination = (wl, mask)
+                        if inverse:
+                            print_status(f"Combination {counter}: {combination[::-1]}")
+                        else:
+                            print_status(f"Combination {counter}: {combination}")
+                        wls_masks.append(combination)
+
+
                 hash_types_names = [Hashcat.HASHES[hash_type]['Name'] for hash_type in hash_types]
                 print_status(f"Possible hashes identities: {ColorStr(hash_types_names).StyleBRIGHT}")
 
@@ -830,37 +842,34 @@ class Hashcat(PasswordCracker):
                     #import pdb; pdb.set_trace()
                     all_cracked = False
 
-                    for hash_type in hash_types:
-                        for wordlist in wordlists:
-                            for mask in masks:
-                                all_cracked = Hashcat.are_all_hashes_cracked(hashes_file)
-                                if  not all_cracked: # some hash isn't cracked yet
-                                    if not inverse:
-                                        attack_cmd = (
-                                            f"{self.main_exec}"
-                                            f" -a {attack_mode}"
-                                            f" -m {hash_type}"
-                                            f" {hashes_file} {wordlist} {mask}"
-                                        )
-                                    else:
-                                        attack_cmd = (
-                                            f"{self.main_exec}"
-                                            f" -a {attack_mode}"
-                                            f" -m {hash_type}"
-                                            f" {hashes_file} {mask} {wordlist}"
-                                        )
-
-                                    print()
-                                    print_status(f"Running: {ColorStr(attack_cmd).StyleBRIGHT}")
-                                    Bash.exec(attack_cmd)
-                                    if sleep > 0:
-                                        print_status(f"{ColorStr('Sleeping ...').StyleBRIGHT}")
-                                        time.sleep(sleep)
-
+                    for hid in hash_types:
+                        for wl, mask in wls_masks:
+                            all_cracked = Hashcat.are_all_hashes_cracked(hashes_file)
+                            if  not all_cracked: # some hash isn't cracked yet
+                                if not inverse:
+                                    attack_cmd = (
+                                        f"{self.main_exec}"
+                                        f" -a {attack_mode}"
+                                        f" -m {hid}"
+                                        f" {hashes_file} {wl} {mask}"
+                                    )
                                 else:
-                                    print_successful(f"Hashes in {ColorStr(hashes_file).StyleBRIGHT} were cracked")
-                                    break
-                            if all_cracked:
+                                    attack_cmd = (
+                                        f"{self.main_exec}"
+                                        f" -a {attack_mode}"
+                                        f" -m {hid}"
+                                        f" {hashes_file} {mask} {wl}"
+                                    )
+
+                                print("\n")
+                                print_status(f"Running: {ColorStr(attack_cmd).StyleBRIGHT}")
+                                Bash.exec(attack_cmd)
+
+                                if sleep > 0:
+                                    time.sleep(sleep)
+
+                            else:
+                                print_successful(f"Hashes in {ColorStr(hashes_file).StyleBRIGHT} were cracked")
                                 break
                         if all_cracked:
                             break
