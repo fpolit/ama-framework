@@ -91,52 +91,52 @@ class HashcatMasks(Attack):
     def __init__(self, *,
                  hash_type: str = None, hashes_file: str = None,
                  masks_file:str = None,
-                 masks_attack:str = "mask_attack.py", sleep:int = 1,
+                 sleep:int = 1,
                  slurm: Slurm = None,
-                 pre_attack = None, post_attack = None):
+                 pre_attack: Auxiliary = None, post_attack: Auxiliary = None):
         """
         Initialization of wordlist attack using hashcat
         """
 
         attack_options = {
-            'hash_type': Argument(hash_type, True, "Hashcat hash type"),
-            'hashes_file': Argument(hashes_file, True, "Hashes file"),
-            'masks_file': Argument(masks_file, True, "Masks file"),
-            'masks_attack': Argument(masks_attack, True, "Generated mask attack script"),
-            'sleep': Argument(sleep, True, 'Sleep time between each attack (seconds)')
+            'hash_type': Argument(hash_type, True, "Hashcat hash type", value_type=int),
+            'hashes_file': Argument(hashes_file, True, "Hashes file", value_type=str),
+            'masks_file': Argument(masks_file, True, "Masks file", value_type=str),
+            'sleep': Argument(sleep, True, 'Sleep time between each attack (seconds)', value_type=int)
         }
 
 
         if slurm is None:
             slurm_options = {
-                "account": Argument(None, False, "Cluster account to submit the job"),
+                "account": Argument(None, False, "Cluster account to submit the job", value_type=str),
+                "array": Argument(None, False, "Number of array jobs", value_type=int),
                 "dependency": Argument(None, False, "Defer the start of this job until the specified dependencies have been satisfied completed"),
-                "chdir" : Argument(os.getcwd(), True, "Working directory path"),
-                "error": Argument(None, False, "Error file"),
-                "job_name" : Argument('attack', False, "Name for the job allocation"),
-                "cluster" : Argument(None, False, "Cluster Name"),
-                "distribution": Argument('block', True, "Distribution methods for remote processes (<block|cyclic|plane|arbitrary>)"),
-                "mail_type": Argument(None, False, "Event types to notify user by email(<BEGIN|END|FAIL|REQUEUE|ALL|TIME_LIMIT_PP>)"),
-                "main_user": Argument(None, False, "User email"),
-                "mem": Argument(None, False, "Memory per node (<size[units]>)"),
-                "mem_per_cpu": Argument(None, False, "Minimum memory required per allocated CPU (<size[units]>)"),
-                "cpus_per_task": Argument(1, True, "Number of processors per task"),
-                "nodes": Argument(1, True, "Number of nodes(<minnodes[-maxnodes]>)"),
-                "gpu": Argument(1, True, "Number of GPUS"),
-                "ntasks": Argument(1, True, "Number of tasks"),
-                "nice": Argument(None, False, "Run the job with an adjusted scheduling"),
-                "output": Argument('slurm-%j.out', True, "Output file name"),
-                "open_mode": Argument('truncate', True, "Output open mode (<append|truncate>)"),
-                "partition": Argument(None, True, "Partition to submit job"),
-                "reservation": Argument(None, False, "Resource reservation name"),
-                "time": Argument(None, False, "Limit of time (format: DD-HH:MM:SS)"),
-                "test_only": Argument(False, True, "Validate the batch script and return an estimate of when a job would be scheduled to run. No job is actually submitted"),
-                "verbose": Argument(False, True, "Increase the verbosity of sbatch's informational messages"),
-                "nodelist": Argument(None, False, "Nodelist"),
-                "wait": Argument(False, True, "Do not exit until the submitted job terminates"),
-                "exclude": Argument(None, False, "Do not exit until the submitted job terminates"),
-                'batch_script': Argument('attack.sh', True, "Name for the generated batch script"),
-                'pmix': Argument('pmix_v3', True, "MPI type")
+                "chdir" : Argument(os.getcwd(), True, "Working directory path", value_type=str),
+                "error": Argument(None, False, "Error file", value_type=str),
+                "job_name" : Argument('attack', False, "Name for the job allocation", value_type=str),
+                "cluster" : Argument(None, False, "Cluster Name", value_type=str),
+                "distribution": Argument('block', True, "Distribution methods for remote processes (<block|cyclic|plane|arbitrary>)", value_type=str),
+                "mail_type": Argument(None, False, "Event types to notify user by email(<BEGIN|END|FAIL|REQUEUE|ALL|TIME_LIMIT_PP>)", value_type=str),
+                "main_user": Argument(None, False, "User email", value_type=str),
+                "mem": Argument(None, False, "Memory per node (<size[units]>)", value_type=str),
+                "mem_per_cpu": Argument(None, False, "Minimum memory required per allocated CPU (<size[units]>)", value_type=str),
+                "cpus_per_task": Argument(1, True, "Number of processors per task", value_type=int),
+                "nodes": Argument(1, True, "Number of nodes(<minnodes[-maxnodes]>)", value_type=int),
+                "gpu": Argument(1, True, "Number of GPUS", value_type=int),
+                "ntasks": Argument(1, True, "Number of tasks", value_type=int),
+                "nice": Argument(None, False, "Run the job with an adjusted scheduling", value_type=int),
+                "output": Argument('slurm-%j.out', True, "Output file name", value_type=str),
+                "open_mode": Argument('truncate', True, "Output open mode (<append|truncate>)", value_type=str),
+                "partition": Argument(None, True, "Partition to submit job", value_type=str),
+                "reservation": Argument(None, False, "Resource reservation name", value_type=str),
+                "time": Argument(None, False, "Limit of time (format: DD-HH:MM:SS)", value_type=str),
+                "test_only": Argument(False, True, "Validate the batch script and return an estimate of when a job would be scheduled to run. No job is actually submitted", value_type=bool),
+                "verbose": Argument(False, True, "Increase the verbosity of sbatch's informational messages", value_type=bool),
+                "nodelist": Argument(None, False, "Nodelist", value_type=str),
+                "wait": Argument(False, True, "Do not exit until the submitted job terminates", value_type=bool),
+                "exclude": Argument(None, False, "Do not exit until the submitted job terminates", value_type=str),
+                'batch_script': Argument('attack.sh', True, "Name for the generated batch script", value_type=str),
+                'pmix': Argument('pmix_v3', True, "MPI type", value_type=str)
             }
 
             slurm = Slurm(**slurm_options)
@@ -153,22 +153,6 @@ class HashcatMasks(Attack):
             'slurm': slurm
         }
         super().__init__(**init_options)
-
-
-    def get_init_options(self):
-
-        init_options = {
-            "hash_type": self.options['hash_type'].value,
-            "hashes_file": self.options['hashes_file'].value,
-            "masks_file": self.options['masks_file'].value,
-            "masks_attack": self.options['masks_attack'].value,
-            "sleep": self.options['sleep'].value,
-            "slurm": self.slurm,
-            "pre_attack": self.selected_pre_attack,
-            "post_attack": self.selected_post_attack
-        }
-
-        return init_options
 
 
     #debugged - date: Mar 6 2021
@@ -210,7 +194,6 @@ class HashcatMasks(Attack):
             hc.masks_attack(hash_types = hash_types,
                             hashes_file = self.options['hashes_file'].value,
                             masks_file = self.options['masks_file'].value,
-                            masks_attack_script= self.options['masks_attack'].value,
                             sleep = self.options['sleep'].value,
                             slurm = self.slurm,
                             local = local,

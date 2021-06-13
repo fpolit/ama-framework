@@ -12,7 +12,7 @@ from fineprint.status import (
     print_failure,
     print_status
 )
-
+from fineprint.color import ColorStr
 
 from ama.core.modules.base import (
     Attack,
@@ -91,43 +91,45 @@ class HashcatWordlist(Attack):
         """
 
         attack_options = {
-            'wordlist': Argument(wordlist, True, "Wordlist files (format: WL1,WL2,...)"),
-            'hash_type': Argument(hash_type, True, "Hashcat hash types (split by commas)"),
-            'hashes_file': Argument(hashes_file, True, "Hashes file"),
-            'sleep': Argument(sleep, True, 'Sleep time between each attack (seconds)')
+            'wordlist': Argument(wordlist, True, "Wordlist or wordlists file", value_type=str),
+            'hash_type': Argument(hash_type, True, "Hashcat hash types (split by commas)", value_type=str),
+            'hashes_file': Argument(hashes_file, True, "Hashes file", value_type=str),
+            'wls': Argument(False, False, f"Parse {ColorStr('WORDLIST').StyleBRIGHT}'s value as a wordlists file", value_type=bool),
+            'sleep': Argument(sleep, True, 'Sleep time between each attack (seconds)', value_type=int)
         }
 
 
         if slurm is None:
             slurm_options = {
-                "account": Argument(None, False, "Cluster account to submit the job"),
+                "account": Argument(None, False, "Cluster account to submit the job", value_type=str),
+                "array": Argument(None, False, "Number of array jobs", value_type=int),
                 "dependency": Argument(None, False, "Defer the start of this job until the specified dependencies have been satisfied completed"),
-                "chdir" : Argument(os.getcwd(), True, "Working directory path"),
-                "error": Argument(None, False, "Error file"),
-                "job_name" : Argument('attack', False, "Name for the job allocation"),
-                "cluster" : Argument(None, False, "Cluster Name"),
-                "distribution": Argument('block', True, "Distribution methods for remote processes (<block|cyclic|plane|arbitrary>)"),
-                "mail_type": Argument(None, False, "Event types to notify user by email(<BEGIN|END|FAIL|REQUEUE|ALL|TIME_LIMIT_PP>)"),
-                "main_user": Argument(None, False, "User email"),
-                "mem": Argument(None, False, "Memory per node (<size[units]>)"),
-                "mem_per_cpu": Argument(None, False, "Minimum memory required per allocated CPU (<size[units]>)"),
-                "cpus_per_task": Argument(1, True, "Number of processors per task"),
-                "nodes": Argument(1, True, "Number of nodes(<minnodes[-maxnodes]>)"),
-                "gpu": Argument(1, True, "Number of GPUS"),
-                "ntasks": Argument(1, True, "Number of tasks"),
-                "nice": Argument(None, False, "Run the job with an adjusted scheduling"),
-                "output": Argument('slurm-%j.out', True, "Output file name"),
-                "open_mode": Argument('truncate', True, "Output open mode (<append|truncate>)"),
-                "partition": Argument(None, True, "Partition to submit job"),
-                "reservation": Argument(None, False, "Resource reservation name"),
-                "time": Argument(None, False, "Limit of time (format: DD-HH:MM:SS)"),
-                "test_only": Argument(False, True, "Validate the batch script and return an estimate of when a job would be scheduled to run. No job is actually submitted"),
-                "verbose": Argument(False, True, "Increase the verbosity of sbatch's informational messages"),
-                "nodelist": Argument(None, False, "Nodelist"),
-                "wait": Argument(False, True, "Do not exit until the submitted job terminates"),
-                "exclude": Argument(None, False, "Do not exit until the submitted job terminates"),
-                'batch_script': Argument('attack.sh', True, "Name for the generated batch script"),
-                'pmix': Argument('pmix_v3', True, "MPI type")
+                "chdir" : Argument(os.getcwd(), True, "Working directory path", value_type=str),
+                "error": Argument(None, False, "Error file", value_type=str),
+                "job_name" : Argument('attack', False, "Name for the job allocation", value_type=str),
+                "cluster" : Argument(None, False, "Cluster Name", value_type=str),
+                "distribution": Argument('block', True, "Distribution methods for remote processes (<block|cyclic|plane|arbitrary>)", value_type=str),
+                "mail_type": Argument(None, False, "Event types to notify user by email(<BEGIN|END|FAIL|REQUEUE|ALL|TIME_LIMIT_PP>)", value_type=str),
+                "main_user": Argument(None, False, "User email", value_type=str),
+                "mem": Argument(None, False, "Memory per node (<size[units]>)", value_type=str),
+                "mem_per_cpu": Argument(None, False, "Minimum memory required per allocated CPU (<size[units]>)", value_type=str),
+                "cpus_per_task": Argument(1, True, "Number of processors per task", value_type=int),
+                "nodes": Argument(1, True, "Number of nodes(<minnodes[-maxnodes]>)", value_type=int),
+                "gpu": Argument(1, True, "Number of GPUS", value_type=int),
+                "ntasks": Argument(1, True, "Number of tasks", value_type=int),
+                "nice": Argument(None, False, "Run the job with an adjusted scheduling", value_type=int),
+                "output": Argument('slurm-%j.out', True, "Output file name", value_type=str),
+                "open_mode": Argument('truncate', True, "Output open mode (<append|truncate>)", value_type=str),
+                "partition": Argument(None, True, "Partition to submit job", value_type=str),
+                "reservation": Argument(None, False, "Resource reservation name", value_type=str),
+                "time": Argument(None, False, "Limit of time (format: DD-HH:MM:SS)", value_type=str),
+                "test_only": Argument(False, True, "Validate the batch script and return an estimate of when a job would be scheduled to run. No job is actually submitted", value_type=bool),
+                "verbose": Argument(False, True, "Increase the verbosity of sbatch's informational messages", value_type=bool),
+                "nodelist": Argument(None, False, "Nodelist", value_type=str),
+                "wait": Argument(False, True, "Do not exit until the submitted job terminates", value_type=bool),
+                "exclude": Argument(None, False, "Do not exit until the submitted job terminates", value_type=str),
+                'batch_script': Argument('attack.sh', True, "Name for the generated batch script", value_type=str),
+                'pmix': Argument('pmix_v3', True, "MPI type", value_type=str)
             }
 
             slurm = Slurm(**slurm_options)
@@ -178,7 +180,17 @@ class HashcatWordlist(Attack):
             else:
                 raise TypeError(f"Invalid type hash_type: {type(hash_type)}")
 
-            wordlists = self.options['wordlist'].value.split(',')
+            if self.options['wls'].value:
+                wordlists_file = self.options['wordlist'].value
+                if os.path.isfile(wordlists_file) and os.access(wordlists_file, os.R_OK):
+                    wordlists = [wl.rstrip() for wl in open(wordlists_file, 'r')]
+                else:
+                    if not os.path.isfile(wordlists_file):
+                        raise FileNotFoundError(f"File {wordlists_file} didn't exist")
+                    else:
+                        raise PermissionError(f"File {wordlists_file} hasn't read permission")
+            else:
+                wordlists = [self.options['wordlist'].value]
 
             hc.wordlist_attack(hash_types = hash_types,
                                hashes_file = self.options['hashes_file'].value,

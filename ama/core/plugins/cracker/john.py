@@ -309,7 +309,7 @@ class John(PasswordCracker):
                     enviroment = (
                         f"{self.MAINNAME.upper()}={self.main_exec}",
                     )
-                    
+
                     parallel_job_type = slurm.parallel_job_parser()
                     if not  parallel_job_type in ["MPI", "OMP", "MPI_OMP"]:
                         raise InvalidParallelJob(parallel_job_type)
@@ -501,8 +501,8 @@ class John(PasswordCracker):
                     if cores > 1:
                         mpirun = Plugin(["mpirun", "mpiexec"])
 
-                    for wl in wordlists:
-                        for hid in hash_types:
+                    for hid in hash_types:
+                        for wl in wordlists:
                             all_cracked = John.are_all_hashes_cracked(hashes_file)
                             if  not all_cracked: # some hash isn't cracked yet
                                 attack_cmd = f"{self.main_exec} --wordlist={wl} --format={hid}"
