@@ -4,3 +4,6 @@
 [submodule "docs/wiki"]
 	path = docs/wiki
 	url = https://github.com/fpolit/ama-framework.wiki.git
+[submodule "docs/ama_wiki"]
+	path = docs/ama_wiki
+	url = https://github.com/fpolit/ama-framework.wiki.git
