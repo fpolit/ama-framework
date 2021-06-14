@@ -22,10 +22,17 @@ setup(
     description='Specialized environment for the password cracking process',
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',
+    keywords=['Password Cracking', 'Hpc Cluster'],
     author='glozanoa',
     author_email='glozanoa@uni.pe',
     url='https://github.com/fpolit/ama-framework',
     license='GPL3',
+    classifiers = [
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9"
+    ],
     packages=find_packages(),
     package_data={
         "ama.core.plugins.auxiliary.wordlists": ["cupp.cfg"],
@@ -39,15 +46,16 @@ setup(
         'varname',
         'psutil',
         'name-that-hash',
-        'search-that-hash',
+        #'search-that-hash',
         'hashid',
-        'cupp'
+        'cupp',
+        'pack-ama'
     ],
     include_package_data=True,
     entry_points={
         'console_scripts':[
             'ama = ama.ama:main',
-            'amadb = ama.amadb:main',
+            #'amadb = ama.amadb:main',
         ],
     }
 )
