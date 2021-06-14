@@ -1,12 +1,16 @@
 .PHONY: clean virtualenv test docker dist dist-upload
 
-install: require
-	python3 -m pip install .
+install: virtualenv require
+	env/bin/python3 -m pip install . --use-feature=in-tree-build
 	
-installdev: requiredev
-	python3 -m pip install . --verbose
+installdev: virtualenv requiredev
+	env/bin/python3 -m pip install . --verbose --use-feature=in-tree-build
 
 clean: cleanslurm cleanbkp cleanmasks cleanstats
+	
+cleanpkg:
+	rm -rf ama.egg-info
+	rm -rf build
 
 cleanslurm:
 	rm -f slurm-*_*.out
@@ -24,23 +28,23 @@ cleanstats:
 virtualenv:
 	python3 -m venv --prompt 'ama' env
 	@echo
-	@echo "Virtual enviroment was created. Now run: source env/bin/activate"
-	@echo "Now to install ama-framework run: make install"
+	@echo "Virtual enviroment was created. Now activate it: source env/bin/activate"
 	@echo
+	env/bin/python3 -m pip install --upgrade pip
 
 require:
-	python3 -m pip install -r requirements.txt
+	env/bin/python3 -m pip install -r requirements.txt
 
 requiredev:
-	python3 -m pip install -r requirements-dev.txt
+	env/bin/python3 -m pip install -r requirements-dev.txt
 
 pkgdev:
-	python3 -m pip install . --verbose
+	env/bin/python3 -m pip install . --verbose --use-feature=in-tree-build
 
 dist: clean
 	rm -rf dist/*
-	python setup.py sdist
-	python setup.py bdist_wheel
+	env/bin/python3 setup.py sdist
+	env/bin/python3 setup.py bdist_wheel
 
 dist-upload:
-	twine upload dist/*
+	env/bin/twine upload dist/*

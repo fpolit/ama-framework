@@ -9,6 +9,10 @@ tabulate
 varname
 psutil
 
+# hcutils
+build
+cython
+
 # auxiliary module packages
 
 ## auxiliary/hashes
