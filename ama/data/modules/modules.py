@@ -60,7 +60,8 @@ from ama.core.modules.auxiliary.wordlists import (
 from ama.core.modules.auxiliary.hashes import (
     HashesStatus,
     HashID,
-    Nth as NthAuxiliary
+    Nth as NthAuxiliary,
+    HashGenerator
 )
 
 ## auxiliary/analysis modules imports
@@ -120,7 +121,8 @@ auxiliaryWordlistModules = {
 auxiliaryHashesModules = {
     f"{HashesStatus.MNAME}": HashesStatus,
     f"{HashID.MNAME}": HashID,
-    f"{NthAuxiliary.MNAME}": NthAuxiliary
+    f"{NthAuxiliary.MNAME}": NthAuxiliary,
+    f"{HashGenerator.MNAME}": HashGenerator
 }
 
 ## auxiliary/analysis modules
