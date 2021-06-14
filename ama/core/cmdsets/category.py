@@ -11,4 +11,5 @@ class CmdsetCategory:
     MODULE = "Module Commands"
     DB = "Database Commands"
     SLURM = "Slurm Commands"
-    HASHCAT = "Hashcat Commands"
+    HASHCAT = "Hashcat Utilities"
+    JOHN = "John Utilities"
