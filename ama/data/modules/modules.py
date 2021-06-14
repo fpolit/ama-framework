@@ -37,7 +37,7 @@ from ama.core.modules.attack.hashes import (
 )
 
 # sth
-from ama.core.modules.attack.hashes import STH
+#from ama.core.modules.attack.hashes import STH
 
 ## attack/services modules imports
 
@@ -98,7 +98,7 @@ attackModules = {
     f"{HashcatHybrid.MNAME}": HashcatHybrid,
 
     # sth
-    f"{STH.MNAME}": STH,
+    #f"{STH.MNAME}": STH,
 
     ## attack/services modules
     # hydra attacks
