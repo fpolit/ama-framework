@@ -25,6 +25,10 @@ from .core.cmdsets import CmdsetCategory as Category
 #     Loot
 # )
 
+from .core.cmdsets.john import (
+    JohnUtilities
+)
+
 from .core.cmdsets.module import (
     Search,
     Information,
