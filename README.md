@@ -3,6 +3,7 @@
 Ama is a specialized environment for the password cracking process. It contains several modules (attacks and auxiliaries), so you can find an appropiate module for each step of the password cracking process, also you can combine them to automatize the password cracking process.
 
 ## Dependencies
+* *Python3.8* or *never versions*
 * [Hashcat](https://hashcat.net/hashcat/) (Only for *hashcat* attack modules)
 * [John](https://github.com/openwall/john) (Only for *john* attack modules)
 
