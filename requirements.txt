@@ -13,7 +13,7 @@ psutil
 
 ## auxiliary/hashes
 name-that-hash
-search-that-hash
+#search-that-hash
 hashid
 
 ## auxiliary/wordlists
