@@ -10,10 +10,18 @@ Ama is a specialized environment for the password cracking process. It contains 
 Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can find guides to install them properly.
 Also visit [depends/cluster](https://github.com/fpolit/ama-framework/tree/master/depends/cluster) directory, there you can find python scripts to automatize installation of ama's dependencies.
 
+## Installation
+```bash
+$ make install
+$ source env/bin/activate
+$ ama init && ama
+```
+
 **NOTE:**  
 * *Ama-framework* was tested in the following GNU/Linux distributions:
      * Centos 8
 * If you want to submit attacks in a cluster of computers, you must have configured a cluster using [Slurm](https://slurm.schedmd.com/overview.html), also you must have installed *john* with *MPI* support.
+* You only need run `ama init` just one time, then you simply have to activate the virtual environment and run `ama`.
 
 ## Usage
 Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can find useful documentation about `ama`.  
