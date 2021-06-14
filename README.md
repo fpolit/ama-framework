@@ -15,6 +15,13 @@ Also visit [depends/cluster](https://github.com/fpolit/ama-framework/tree/master
      * Centos 8
 * If you want to submit attacks in a cluster of computers, you must have configured a cluster using [Slurm](https://slurm.schedmd.com/overview.html), also you must have installed *john* with *MPI* support.
 
+## Installation
+```bash
+$ make install
+$ source env/bin/activate
+$ ama
+```
+
 ## Usage
 Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can find useful documentation about `ama`.  
 
