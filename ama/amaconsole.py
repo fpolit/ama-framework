@@ -39,9 +39,9 @@ from .core.cmdsets.core import (
     Core
 )
 
-# from .core.cmdsets.hashcat import (
-#     HashcatUtils
-# )
+from .core.cmdsets.hashcat import (
+    HashcatUtils
+)
 
 # banner
 from .core.banner import Banner

@@ -46,7 +46,7 @@ import cmd2
 from ama.core.slurm import Slurm
 
 # cracker imports
-from .cracker import PasswordCracker
+from .hash_cracker import HashCracker
 from .crackedHash import CrackedHash
 
 # john hashes import
@@ -65,7 +65,7 @@ from ama.core.plugins import Plugin
 
 #from ama.core.cmdsets.db import Connection
 
-class John(PasswordCracker):
+class John(HashCracker):
     """
     John password cracker
     This class implement the diverse attack of john the ripper and its benchmark
@@ -77,33 +77,9 @@ class John(PasswordCracker):
 
     def __init__(self, john_exec:Path=None):
         super().__init__(["john", "jtr"], version="1.9.0-jumbo-1 MPI + OMP", main_exec=john_exec)
+        self.potfile = os.path.join(Path.home(), ".john/john.pot")
 
-    # debugged - date: Apr 2 2021
-    @staticmethod
-    def check_hash_type(hash_types: List[str]):
-        """
-        Check if hash_type is a valid hash type
-
-        Args:
-            hash_type (str): hash type
-
-        Raises:
-            InvalidHashType: Error if the hasType is an unsopported hash type of a cracker
-        """
-
-        any_valid_hash_type = False
-        for htype in hash_types:
-            htype = htype.lower()
-            if htype in John.HASHES:
-                any_valid_hash_type = True
-                break
-
-        if not any_valid_hash_type:
-            raise NoValidHashType(John, hash_types)
-
-    # debugged - date: Mar 1 2021
-    @staticmethod
-    def search_hash(pattern, *, sensitive=False):
+    def search_hash_type(pattern, *, sensitive=False):
         """
         Search  john's hashes types given a pattern
         """
@@ -114,186 +90,23 @@ class John(PasswordCracker):
 
         filtered_hashes = []
         hashId = 0
-        for hash_type in John.HASHES:
+        for hash_type in self.HASHES:
             if hash_pattern.fullmatch(hash_type):
                 filtered_hashes.append((hashId, hash_type))
                 hashId += 1
 
         print(tabulate(filtered_hashes, headers=["#", "Name"]))
 
-
-    # debugged - date: Apr 2 2021
-    @staticmethod
-    def hash_status(query_hash: str, potfile: Path = None):
+    def hash_status(query_hash: str):
         """
-        Check the status (broken by John or not) of query hash
+        Check the status of query hash in john potfile
 
         Return:
-        if query_hash is in potfile then [HASHTYPE, HASH, PASSWORD] list is returned
-        otherwise None is returned
         """
-        #import pdb;pdb.set_trace()
+        pattern = re.compile(rf"(\$(\W*|\w*|.*)\$)?({query_hash})(\$(\W*|\w*|.*)\$)?:(\W*|\w*|.*)",
+                             re.DOTALL)
 
-        if potfile is None:
-            HOME = Path.home()
-            potfile = Path.joinpath(HOME, ".john/john.pot")
-
-        try:
-            permission = [os.R_OK]
-            Path.access(permission, potfile)
-
-            cracked_pattern = re.compile(rf"(\$(\W*|\w*|.*)\$)?({query_hash})(\$(\W*|\w*|.*)\$)?:(\W*|\w*|.*)",
-                                        re.DOTALL)
-
-            with open(potfile, 'r') as john_potfile:
-                while cracked_hash := john_potfile.readline().rstrip():
-                    if cracked_hashpot := cracked_pattern.fullmatch(cracked_hash):
-                        hashpot = cracked_hashpot.groups()
-                        return CrackedHash(hash_type = hashpot[0],
-                                           cracked_hash= hashpot[1],
-                                           password = hashpot[-1],
-                                           cracker = John)
-            return None
-
-
-        except Exception as error:
-            #cmd2.Cmd.pexcept(error)
-            print_failure(error)
-
-    # debugged - date Apr 2 2021
-    @staticmethod
-    def are_all_hashes_cracked(hashes_file: Path, potfile: Path = None):
-        """
-        Check if all hashes are cracked
-        return True if all hashes were cracked otherwise return False
-        """
-
-        #import pdb; pdb.set_trace()
-        all_cracked = True
-        query_hash_pattern = re.compile(r"(\w*|\w*|.*):?(\w*|\w*|.*)") #parser to analize: NAME:HASH hashes
-        with open(hashes_file, 'r') as hashes:
-            while qhash := hashes.readline().rstrip():
-                if parser_hash := query_hash_pattern.fullmatch(qhash):
-                    query_hash = None
-                    if parser_hash.group(2):
-                        query_hash = parser_hash.group(2)
-                    else:
-                        query_hash = parser_hash.group(1)
-
-                    cracked_hash = John.hash_status(query_hash, potfile)
-                    if cracked_hash is None: # query_hash isn't cracked yet
-                        all_cracked = False
-                        break
-                else:
-                    all_cracked = False
-                    break
-
-        return all_cracked
-
-
-    # debugged - date Apr 2 2021
-    @staticmethod
-    def hashes_file_status(hashes_file: Path, potfile:Path = None):
-        """
-        Check the status (broken by John or not) of hashes in query_hashes_file
-        and return the cracked and uncracked hashes
-        """
-        #import pdb; pdb.set_trace()
-        hashes_status = {'cracked': [], "uncracked": []}
-
-        if potfile is None:
-            HOME = Path.home()
-            potfile = Path.joinpath(HOME, ".john/john.pot")
-
-        try:
-            permission = [os.R_OK]
-            Path.access(permission, potfile, hashes_file)
-
-
-            with open(hashes_file, 'r') as hashes:
-                while qhash := hashes.readline().rstrip():
-                    query_hash_pattern = re.compile(r"(\w*|\w*|.*):?(\w*|\w*|.*)") #parser to analize: NAME:HASH hashes
-                    if parser_hash := query_hash_pattern.fullmatch(qhash):
-                        query_hash = None
-                        if parser_hash.group(2):
-                            query_hash = parser_hash.group(2)
-                        else:
-                            query_hash = parser_hash.group(1)
-
-                        if cracker_hash := John.hash_status(query_hash):
-                            hashes_status['cracked'].append(cracker_hash.get_loot())
-                        else: #crackedHash is uncracked
-                            hashes_status['uncracked'].append([query_hash])
-                    else:
-                        hashes_status['uncracked'].append([qhash])
-
-            return hashes_status
-
-        except Exception as error:
-            print_failure(error)
-
-
-    # debugged - date: Apr 2 2021
-    @staticmethod
-    def insert_hashes_to_db(hashes_file: Path, workspace: str, creds_file: Path, *, pretty:bool = False):
-        pass
-        # cur = db_conn = None
-        # try:
-        #     #import pdb;pdb.set_trace()
-        #     hashes_status = John.hashes_file_status(hashes_file)
-        #     cracked_hashes = hashes_status['cracked']
-
-        #     db_credentials = Connection.dbCreds(creds_file)
-        #     db_conn = psycopg2.connect(**db_credentials)
-
-        #     cur = db_conn.cursor()
-
-        #     cur.execute(f"SELECT hash from hashes_{workspace}")
-        #     cracked_hashes_db = cur.fetchall()
-        #     new_cracked_hashes = []  #only non-repeated cracked hashes
-        #     for cracked_hash in cracked_hashes: # cracked_hash = (hash, type, cracked, password)
-        #         repeated = False
-        #         for cracked_hash_db in cracked_hashes_db: # cracked_hash_db = (cracked_hash)
-        #             if cracked_hash[0] == cracked_hash_db[0]:
-        #                 repeated = True
-        #                 break
-
-        #         if not repeated:
-        #             new_cracked_hashes.append(cracked_hash)
-
-        #     if new_cracked_hashes:
-
-        #         insert_cracked_hash = (
-        #             f"""
-        #             INSERT INTO hashes_{workspace} (hash, type, cracker, password)
-        #             VALUES (%s, %s, %s, %s)
-        #             """
-        #         )
-
-        #         cur.executemany(insert_cracked_hash, new_cracked_hashes)
-        #         if pretty:
-        #             print_status(f"Cracked hashes were saved to {ColorStr(workspace).StyleBRIGHT} workspace database")
-        #         else:
-        #             print(f"\n[*] Cracked hashes were saved to {workspace} workspace database")
-
-        #     else:
-        #         if pretty:
-        #             print_status(f"No new cracked hashes to save to {ColorStr(workspace).StyleBRIGHT} workspace database")
-        #         else:
-        #             print(f"\n[*] No new cracked hashes to save to {workspace} workspace database")
-
-        #     db_conn.commit()
-        #     cur.close()
-
-        # except Exception as error:
-        #     print_failure(error)
-
-        # finally:
-        #     if cur is not None:
-        #         cur.close()
-
-        #     if db_conn is not None:
-        #         db_conn.close()
+        return self.pattern_in_potfile(pattern, self.potfile)
 
 
     # debugged - date: Jun 8 2021

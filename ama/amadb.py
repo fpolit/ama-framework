@@ -32,9 +32,9 @@ def amadb_parser():
     amadb_parser.add_argument('--cracker', required=True, choices=available_cracker_names,
                               help="Password Cracker")
     insert_parser = amadb_parser.add_mutually_exclusive_group(required=True)
-    insert_parser.add_argument('-j', '--insert-hashes', dest='insert_hashes', metavar="HASHES_FILE",
+    insert_parser.add_argument('-iH', '--insert-hashes', dest='insert_hashes', metavar="HASHES_FILE",
                               help='Insert cracked hashes to ama database')
-    insert_parser.add_argument('-s', '--insert-services', dest='insert_services', metavar="TARGET_SERVICE",
+    insert_parser.add_argument('-iS', '--insert-services', dest='insert_services', metavar="TARGET_SERVICE",
                               help='Insert cracked services to ama database')
 
     return amadb_parser

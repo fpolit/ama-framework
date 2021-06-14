@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 #
 # Hashcat class
-# Jan 9 2021 - Implementation of Hashcat class
-#                (using core module of pyhashcat python package)
+#
+# Jan 9 2021
+# Implementation of Hashcat class (using core module of pyhashcat python package)
 #
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
@@ -12,7 +13,6 @@ import os
 import re
 from tabulate import tabulate
 from sbash import Bash
-#import psycopg2
 from typing import List
 from fineprint.status import (
     print_status,
@@ -23,7 +23,7 @@ from fineprint.color import ColorStr
 
 
 from ama.core.slurm import Slurm
-from .cracker import PasswordCracker
+from .hash_cracker import HashCracker
 from .crackedHash import CrackedHash
 from ama.data.hashes import hcHashes
 from ama.core.files import Path
@@ -35,7 +35,7 @@ from .crackerException import (
     InvalidWordlistsNumber
 )
 
-class Hashcat(PasswordCracker):
+class Hashcat(HashCracker):
     """
     Hashcat password cracker
     This class implement the diverse attack of hashcat and its benchmark
@@ -45,38 +45,10 @@ class Hashcat(PasswordCracker):
     HASHES = hcHashes
     MAINNAME = "hashcat"
 
-    def __init__(self, hc_exec:Path=None):
+    def __init__(self, *, hc_exec:Path=None, potfile:Path = None):
         super().__init__(name=['hashcat', 'hc'], version="v6.1.1", main_exec=hc_exec)
+        self.patfile = potfile if potfile else os.path.join(Path.home(), ".hashcat/hashcat.potfile")
 
-
-    #debugged - date: Apr 3 2021
-    @staticmethod
-    def check_hash_type(hash_types: List[int]):
-        """
-        Check if hash_type is a valid hash type
-
-        Args:
-            hash_type (str): hash type
-
-        Raises:
-            InvalidHashType: Error if the hasType is an unsopported hash type of a cracker
-        """
-        #import pdb;pdb.set_trace()
-
-        any_valid_hash_type = False
-        for htype in hash_types:
-            if htype in Hashcat.HASHES:
-                any_valid_hash_type = True
-                break
-            else:
-                print_failure(f"Invalid hashcat hash type: {htype}")
-
-
-        if not any_valid_hash_type:
-            raise NoValidHashType(Hashcat, hash_types)
-
-    #debugged - date: Mar 6 2021
-    @staticmethod
     def search_hash(pattern, *, sensitive=False):
         """
         Search valid hashcat's hashes types given a pattern
@@ -88,155 +60,23 @@ class Hashcat(PasswordCracker):
             hash_pattern = re.compile(rf"[\W|\w|\.]*{pattern}[\W|\w|\.]*", re.IGNORECASE)
 
         posible_hashes = []
-        for hash_id, hash_type in Hashcat.HASHES.items():
+        for hash_id, hash_type in self.HASHES.items():
             hash_name, description = hash_type.values()
             if hash_pattern.fullmatch(hash_name):
                 posible_hashes.append((hash_id, hash_name, description))
 
         print(tabulate(posible_hashes, headers=["#", "Name", "Description"]))
 
-    # CHECK John.hashes_status
-    @staticmethod
-    def hash_status(query_hash: str, potfile:str = None):
+
+    def hash_status(query_hash: str):
         """
-        Check the status (broken by Hashcat or not) of query hash
+        Check the status of query hash in hashcat potfile
 
         Return:
-        if query_hash is in potfile then [HASHTYPE, HASH, PASSWORD] list is returned
-        otherwise None is returned
         """
-        #import pdb;pdb.set_trace()
+        pattern = re.compile(rf"({query_hash}):(\W*|\w*|.*)", re.DOTALL)
 
-        if potfile is None:
-            HOME = Path.home()
-            potfile = Path.joinpath(HOME, ".hashcat/hashcat.potfile")
-
-        try:
-            permission = [os.R_OK]
-            Path.access(permission, potfile)
-
-            cracked_pattern = re.compile(rf"({query_hash}):(\W*|\w*|.*)", re.DOTALL)
-
-            with open(potfile, 'r') as hashcat_potfile:
-                while   cracked_hash := hashcat_potfile.readline().rstrip():
-                    if cracked_hashpot := cracked_pattern.fullmatch(cracked_hash):
-                        hashpot = cracked_hashpot.groups()
-                        return CrackedHash(cracked_hash = hashpot[0],
-                                           password = hashpot[1],
-                                           cracker = Hashcat)
-
-            return None
-
-
-        except Exception as error:
-            #cmd2.Cmd.pexcept(error)
-            print_failure(error)
-
-
-    # debugged - date Apr 2 2021
-    @staticmethod
-    def are_all_hashes_cracked(hashes_file: Path, potfile: Path = None):
-        """
-        Check if all hashes are cracked
-        return True if all hashes were cracked otherwise return False
-        """
-        #import pdb;pdb.set_trace()
-        all_cracked = True
-        with open(hashes_file, 'r') as hashes:
-            while query_hash := hashes.readline().rstrip():
-                cracker_hash = Hashcat.hash_status(query_hash)
-                if cracker_hash is None: # query_hash isn't cracked yet
-                    all_cracked = False
-                    break
-
-        return all_cracked
-
-
-    # CHECK John.hahses_file_status
-    @staticmethod
-    def hashes_file_status(query_hashes_file:Path, potfile=None):
-        """
-        Check the status (broken by John or not) of hashes in query_hashes_file
-        and return the cracked and uncracked hashes
-        """
-        #import pdb; pdb.set_trace()
-        hashes_status = {'cracked': [], "uncracked": []}
-
-        if potfile is None:
-            HOME = Path.home()
-            potfile = Path.joinpath(HOME, ".hashcat/hashcat.potfile")
-
-        try:
-            permission = [os.R_OK]
-            Path.access(permission, potfile, query_hashes_file)
-
-
-            with open(query_hashes_file, 'r') as hashes_file:
-                while query_hash := hashes_file.readline().rstrip():
-                    if cracker_hash := Hashcat.hash_status(query_hash):
-                        hashes_status['cracked'].append(cracker_hash.get_loot())
-                    else: #crackedHash is uncracked
-                        hashes_status['uncracked'].append([query_hash])
-
-            return hashes_status
-
-        except Exception as error:
-            print_failure(error)
-
-
-    # debugged - date Apr 3 2021
-    @staticmethod
-    def insert_hashes_to_db(hashes_file: Path, workspace: str, creds_file: Path):
-        pass
-        # cur = db_conn = None
-        # try:
-        #     #import pdb;pdb.set_trace()
-        #     hashes_status = Hashcat.hashes_file_status(hashes_file)
-        #     cracked_hashes = hashes_status['cracked']
-
-        #     db_credentials = Connection.dbCreds(creds_file)
-        #     db_conn = psycopg2.connect(**db_credentials)
-
-        #     cur = db_conn.cursor()
-        #     cur.execute(f"SELECT hash from hashes_{workspace}")
-        #     cracked_hashes_db = cur.fetchall()
-        #     new_cracked_hashes = []  #only non-repeated cracked hashes
-        #     for cracked_hash in cracked_hashes: # cracked_hash = (hash, type, cracked, password)
-        #         repeated = False
-        #         for cracked_hash_db in cracked_hashes_db: # cracked_hash_db = (cracked_hash)
-        #             if cracked_hash[0] == cracked_hash_db[0]:
-        #                 repeated = True
-        #                 break
-
-        #         if not repeated:
-        #             new_cracked_hashes.append(cracked_hash)
-
-        #     if new_cracked_hashes:
-        #         insert_cracked_hash = (
-        #             f"""
-        #             INSERT INTO hashes_{workspace} (hash, type, cracker, password)
-        #             VALUES (%s, %s, %s, %s)
-        #             """
-        #         )
-
-        #         cur.executemany(insert_cracked_hash, cracked_hashes)
-        #         print_successful(f"Cracked hashes were saved to {ColorStr(workspace).StyleBRIGHT} workspace")
-
-        #     else:
-        #         print_status(f"No new cracked hashes to save to {ColorStr(workspace).StyleBRIGHT} workspace")
-
-        #     db_conn.commit()
-        #     cur.close()
-
-        # except Exception as error:
-        #     print_failure(error)
-
-        # finally:
-        #     if cur is not None:
-        #         cur.close()
-
-        #     if db_conn is not None:
-        #         db_conn.close()
+        return self.pattern_in_potfile(pattern, self.potfile)
 
 
     # debugged (local attack)  - date Jun 13 2021

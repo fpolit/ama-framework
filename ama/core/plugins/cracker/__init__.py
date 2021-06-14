@@ -1,5 +1,5 @@
 #base class
-from .cracker import PasswordCracker
+from .password_cracker import PasswordCracker
 from .crackedHash import CrackedHash
 
 # crackers

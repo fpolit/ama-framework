@@ -14,7 +14,7 @@ from fineprint.status import (
 )
 
 
-from .cracker import PasswordCracker
+from .password_cracker import PasswordCracker
 
 # core.file imports
 from ama.core.files import Path

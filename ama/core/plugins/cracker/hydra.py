@@ -14,7 +14,7 @@ from sbash import Bash
 from ...slurm import Slurm
 
 # cracker modules import
-from .cracker import PasswordCracker
+from .password_cracker import PasswordCracker
 
 # cracker exceptions import
 from .crackerException import InvalidParallelJob

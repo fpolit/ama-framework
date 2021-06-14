@@ -1,1 +1,1 @@
-from .utils import HashcatUtils
+from .hcutils_cmds import HashcatUtils
