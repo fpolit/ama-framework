@@ -1,16 +1,20 @@
 .PHONY: clean virtualenv test docker dist dist-upload
 
-install: virtualenv require
+install: virtualenv require dist/ama-*.whl
 	env/bin/python3 -m pip install . --use-feature=in-tree-build
-	
+
 installdev: virtualenv requiredev
 	env/bin/python3 -m pip install . --verbose --use-feature=in-tree-build
 
-clean: cleanslurm cleanbkp cleanmasks cleanstats
-	
+dist/ama-*.whl: ama/core/plugins/hcutils/pyhcutils.pyx ama/core/plugins/hcutils/libhcutils/combinator.* ama/core/plugins/hcutils/libhcutils/combinator3.* ama/core/plugins/hcutils/libhcutils/combipow.*
+	env/bin/python3 -m build
+
+clean: cleanslurm cleanbkp cleanmasks cleanstats cleanpkg
+
 cleanpkg:
 	rm -rf ama.egg-info
 	rm -rf build
+	rm -rf dist
 
 cleanslurm:
 	rm -f slurm-*_*.out
@@ -38,7 +42,10 @@ require:
 requiredev:
 	env/bin/python3 -m pip install -r requirements-dev.txt
 
-pkgdev:
+pkg: dist/ama-*.whl
+	env/bin/python3 -m pip install . --use-feature=in-tree-build
+
+pkgdev: dist/ama-*.whl
 	env/bin/python3 -m pip install . --verbose --use-feature=in-tree-build
 
 dist: clean
