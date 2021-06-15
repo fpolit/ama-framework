@@ -6,10 +6,11 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 
-from setuptools import setup, find_packages
-from ama.core.version import get_version
+from setuptools import setup, find_packages, Extension
+from Cython.Build import cythonize
+#from ama.core.version import get_version
 
-VERSION = get_version()
+VERSION = "1.3.0"
 
 f = open('README.md', 'r')
 LONG_DESCRIPTION = f.read()
@@ -37,25 +38,38 @@ setup(
     package_data={
         "ama.core.plugins.auxiliary.wordlists": ["cupp.cfg"],
     },
-    install_requires = [
-        'fineprint',
-        'sbash',
-        'random-password-generator',
-        'cmd2',
-        'tabulate',
-        'varname',
-        'psutil',
-        'name-that-hash',
-        #'search-that-hash',
-        'hashid',
-        'cupp',
-        'pack-ama'
-    ],
+    # install_requires = [
+    #     'fineprint',
+    #     'sbash',
+    #     'random-password-generator',
+    #     'cmd2',
+    #     'tabulate',
+    #     'varname',
+    #     'psutil',
+    #     'name-that-hash',
+    #     #'search-that-hash',
+    #     'hashid',
+    #     'cupp',
+    #     'pack-ama'
+    # ],
     include_package_data=True,
     entry_points={
         'console_scripts':[
             'ama = ama.ama:main',
             'amadb = ama.amadb:main',
         ],
-    }
+    },
+
+    ext_modules=cythonize(
+        Extension(
+            "ama.core.plugins.hcutils.pyhcutils",
+            ["ama/core/plugins/hcutils/pyhcutils.pyx",
+             "ama/core/plugins/hcutils/libhcutils/combinator.c",
+             "ama/core/plugins/hcutils/libhcutils/combinator3.c",
+             "ama/core/plugins/hcutils/libhcutils/combipow.c"],
+             #"ama/core/plugins/hcutils/libhcutils/mli2.c"],
+            include_dirs=["ama/core/plugins/hcutils/libhcutils"],
+            compiler_directives={"language_level": 3},
+        )
+    )
 )
