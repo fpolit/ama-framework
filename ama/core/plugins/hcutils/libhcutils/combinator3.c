@@ -1,16 +1,7 @@
+#include "combinator3.h"
 #define _GNU_SOURCE
 #define _FILE_OFFSET_BITS 64
 #define __MSVCRT_VERSION__ 0x0700
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdint.h>
-#include <ctype.h>
-#include <errno.h>
-#include <fcntl.h>
-
-#include "combinator3.h"
 
 #define LEN_MAX 32
 

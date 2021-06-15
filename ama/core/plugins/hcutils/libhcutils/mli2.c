@@ -1,18 +1,7 @@
+#include "mli2.h"
 #define _GNU_SOURCE
 #define _FILE_OFFSET_BITS 64
 #define __MSVCRT_VERSION__ 0x0700
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdint.h>
-#include <ctype.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include "utils.c"
 
 /**
  * Name........: mli2
@@ -25,20 +14,17 @@ static int cmp_cache (const void *p1, const void *p2)
   return strcmp (p1, p2);
 }
 
-int main (int argc, char *argv[])
+int mli2stdout(char* infile, char* mergefile)
 {
   FILE *fd1;
   FILE *fd2;
 
-  if (argc != 3)
-  {
-    fprintf (stderr, "usage: %s infile mergefile\n", argv[0]);
+  /* if (argc != 3) */
+  /* { */
+  /*   fprintf (stderr, "usage: %s infile mergefile\n", argv[0]); */
 
-    return (-1);
-  }
-
-  char *infile    = argv[1];
-  char *mergefile = argv[2];
+  /*   return (-1); */
+  /* } */
 
   if ((fd1 = fopen (infile, "rb")) == NULL)
   {

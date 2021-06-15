@@ -17,11 +17,10 @@
  * License.....: MIT
  */
 
-int len(int min, int max, char* infile, char* outfile)
+int len(int min, int max, char* infile)
 {
 
   FILE *in;
-  FILE *out;
 
   #ifdef _WINDOWS
   _setmode (_fileno (stdin), _O_BINARY);

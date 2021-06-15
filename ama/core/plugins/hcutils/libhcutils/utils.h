@@ -1,5 +1,5 @@
-#ifndef __UTILS_H
-#define __UTILS_H
+#ifndef _UTILS_H
+#define _UTILS_H
 
 typedef unsigned int uint;
 int super_chop (char *s, const int len_orig);
@@ -11,4 +11,4 @@ uint get_random_num (const uint min, const uint max);
 uint get_random_num (const uint min, const uint max);
 #endif
 
-#endif //__UTILS_H
+#endif //_UTILS_H

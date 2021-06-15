@@ -7,4 +7,4 @@
 
 #include "utils.h"
 
-int len(int min, int max, char* infile, char* outfile);
+int len(int min, int max, char* infile);

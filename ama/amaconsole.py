@@ -71,7 +71,7 @@ class Ama(Cmd):
     def __init__(self,
                  ama_config:Path = Path.joinpath(AMA_HOME, 'config/ama.json')):
 
-        super().__init__(include_ipy=True)
+        super().__init__(include_ipy=True, allow_redirection=True)
 
         #import pdb; pdb.set_trace()
         self.debug = True
