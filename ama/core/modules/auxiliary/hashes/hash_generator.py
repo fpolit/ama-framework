@@ -66,7 +66,7 @@ class HashGenerator(Auxiliary):
     def run(self, quiet=False):
         """
         """
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         try:
             # CODE
             self.no_empty_required_options()
@@ -75,6 +75,21 @@ class HashGenerator(Auxiliary):
 
             if self.options['bye'].value:
                 print("Bye Abraham")
+
+            ###code added
+            print_status(f"Generating a {args.hash_type} hash for '{args.text}'")
+
+            hash_algorithm = hashlib.new(args.hash_type)
+            hash_algorithm.update(bytes(args.text, 'utf-8'))
+
+            generated_hash = hash_algorithm.hexdigest()
+            print_successful(f"Generated hash: {generated_hash}")
+
+            if args.output:
+                with open(args.output, 'w') as output:
+                    output.write(f"{generated_hash}\n")
+
+                print_successful(f"Hash was saved to {args.output} file")
 
         except Exception as error:
             print_failure(error)
