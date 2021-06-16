@@ -29,7 +29,7 @@ class HashGenerator(Auxiliary):
     MNAME = "auxiliary/hashes/hash_generator"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
     AUTHOR = [
-        "acher <acher@uni.pe>"
+        "abjoschevaro <acheva@uni.pe>"
     ]
 
     FULLDESCRIPTION = (
@@ -43,12 +43,12 @@ class HashGenerator(Auxiliary):
     ]
 
     def __init__(self, *,
-                 word: str = None):
+                 text: str = None):
 
         auxiliary_options = {
-            'word': Argument(word, True, "Word to generate a hash", value_type=str),
-            'alg': Argument(word, True, "algorithm", value_type=str),
-            'output': Argument(word, False, "Save in file", value_type=str)
+            'text': Argument(text, True, "Word to generate a hash", value_type=str),
+            'hfunc': Argument(None, True, "Hash algorithm", value_type=),
+            'output': Argument(None, False, "Output file", value_type=str)
         }
 
         init_options = {
