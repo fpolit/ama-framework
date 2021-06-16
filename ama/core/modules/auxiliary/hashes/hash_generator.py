@@ -6,7 +6,7 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
-from fineprint.status import print_failure
+from fineprint.status import print_failure, print_status, print_successful
 #from typing import List
 
 # module.base imports
@@ -74,7 +74,7 @@ class HashGenerator(Auxiliary):
             print_status(f"Generating a {self.options['hfunc'].value} hash for '{self.options['text'].value}'")
 
             hash_algorithm = hashlib.new(self.options['hfunc'].value)
-            hash_algorithm.update(bytes(args.text, 'utf-8'))
+            hash_algorithm.update(bytes(self.options['text'].value, 'utf-8'))
 
             generated_hash = hash_algorithm.hexdigest()
             print_successful(f"Generated hash: {generated_hash}")
