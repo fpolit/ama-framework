@@ -2,7 +2,7 @@
 In this guide I show you how you will use *python* scripts to install packages.
 * Installing script dependencies
 
-  Before we install any package we need to create a virtual enviroment, to do that I going to use `virtualenv` rule of [Makefile](https://github.com/fpolit/ama-framework/blob/master/Makefile)
+  Before we install any package we need to create a virtual enviroment, to do that I am going to use `virtualenv` rule of [Makefile](https://github.com/fpolit/ama-framework/blob/master/Makefile)
   ```bash
    # I am in AMA_REPO
    $ make virtualenv
