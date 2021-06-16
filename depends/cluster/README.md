@@ -1,6 +1,7 @@
 # Usage
 In this guide I show you how you will use *python* scripts to install a package.
 * Installing script dependencies
+
   Before we install any package we need create a virtual enviroment, to do that I going to use `virtualenv` rule of [Makefile](https://github.com/fpolit/ama-framework/blob/master/Makefile)
   ```bash
    # I am in AMA_REPO
@@ -8,6 +9,7 @@ In this guide I show you how you will use *python* scripts to install a package.
    $ source env/bin/activate
   ```
   * Installing packages in [requirements.txt](https://github.com/fpolit/ama-framework/blob/master/depends/cluster/requirements.txt)
+  
   To run *python scripts* we need install some python packages in ouw created virtual enviroment.
   ```bash
   # I am in AMA_REPO/depends/cluster
@@ -15,6 +17,7 @@ In this guide I show you how you will use *python* scripts to install a package.
   ```
   
   * Installing *CentOS* dependencies  
+  
   Each script need some *CentOS* packages, so you can install them using [centos requirements](https://github.com/fpolit/ama-framework/blob/master/depends/cluster/centos_requirements.py) script as follow:
   ```bash
     $ python3 centos_requirements.py
@@ -24,8 +27,10 @@ In this guide I show you how you will use *python* scripts to install a package.
   otherwise (you only want to run attack localy) install only **John**.
 
 * Installing *Slurm*
+
 To install *Slurm* you need to install *munge*, and *pmix* (which needs of *munge* package). So first we are going to install *munge*
   * Munge installation
+  
     ```bash
     # Im am in AMA_REPO/depends/cluster
     $ python3 munge.py -c build
@@ -34,6 +39,7 @@ To install *Slurm* you need to install *munge*, and *pmix* (which needs of *mung
     compiled and intalled in appropriate places (check the script for more detail).
     
   * Pmix Installation
+  
     ```bash
     # Im am in AMA_REPO/depends/cluster
     $ python3 pmix.py -c build
@@ -55,11 +61,15 @@ compiled and intalled in *appropriate places* (check the script for more detail)
 Finally, the Slurm's configuration files are in `/etc/slurm-llnl` directory.
 
 * Installing *John*
+
 To install *john* you need to install *OpenMPI*, and to install *OpenMPI* you need *pmix* which needs of *munge* package. 
 
   * Installing Munge and Pmix
+ 
     If you have installed **Slurm**, then you have installed both packages, otherwise check *Slurm* installation.
+    
   * Installing OpenMPI
+  
   ```bash
     # I am in AMA_REPO/depends/cluster
     $ python3 openmpi.py -c build --prefix=/usr/local/openmpi
