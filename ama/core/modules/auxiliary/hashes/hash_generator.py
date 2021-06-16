@@ -28,11 +28,13 @@ class HashGenerator(Auxiliary):
         "abjoschevaro <acheva@uni.pe>"
     ]
 
+    _algorithms_available = list(hashlib.algorithms_available)
     FULLDESCRIPTION = (
         f"""
         Generate hashes for a given text.
-        Supported hashes:
-           {' '.join(hashlib.algorithms_available)}
+        Supported hash functions:
+           {' '.join(_algorithms_available[:10])}
+           {' '.join(_algorithms_available[10:])}
         """
     )
 
