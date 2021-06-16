@@ -73,6 +73,9 @@ class HashGenerator(Auxiliary):
 
             print_status(f"Generating a {self.options['hfunc'].value} hash for '{self.options['text'].value}'")
 
+            if self.options['hfunc'].value not in hashlib.algorithms_available:
+                    raise Exception(f"Invalid algorithm: {self.options['hfunc'].value}")
+
             hash_algorithm = hashlib.new(self.options['hfunc'].value)
             hash_algorithm.update(bytes(self.options['text'].value, 'utf-8'))
 
