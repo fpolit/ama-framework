@@ -6,8 +6,8 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
+import hashlib
 from fineprint.status import print_failure, print_status, print_successful
-#from typing import List
 
 # module.base imports
 from ama.core.modules.base import (
@@ -15,17 +15,13 @@ from ama.core.modules.base import (
     Argument
 )
 
-# validator imports
-#from ama.core.validator import Args
-#from ama.core.files import Path
-
 import hashlib
 
 class HashGenerator(Auxiliary):
     """
 
     """
-    DESCRIPTION = "Generate hashes"
+    DESCRIPTION = "Hash Generator"
     MNAME = "auxiliary/hashes/hash_generator"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
     AUTHOR = [
@@ -33,8 +29,10 @@ class HashGenerator(Auxiliary):
     ]
 
     FULLDESCRIPTION = (
-        """
-        Generate hashes given a word
+        f"""
+        Generate hashes for a given text.
+        Supported hashes:
+           {' '.join(hashlib.algorithms_available)}
         """
     )
 
@@ -47,7 +45,7 @@ class HashGenerator(Auxiliary):
 
         auxiliary_options = {
             'text': Argument(text, True, "Word to generate a hash", value_type=str),
-            'hfunc': Argument(None, True, "Hash algorithm", value_type=str),
+            'hfunc': Argument(None, True, "Hash function", value_type=str),
             'output': Argument(None, False, "Output file", value_type=str)
         }
 
