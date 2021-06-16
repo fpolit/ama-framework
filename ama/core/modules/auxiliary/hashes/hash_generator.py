@@ -71,19 +71,19 @@ class HashGenerator(Auxiliary):
             # CODE
             self.no_empty_required_options()
 
-            print_status(f"Generating a {self.options['hfunc']} hash for '{self.options['text']}'")
+            print_status(f"Generating a {self.options['hfunc'].value} hash for '{self.options['text'].value}'")
 
-            hash_algorithm = hashlib.new(self.options['hfunc'])
+            hash_algorithm = hashlib.new(self.options['hfunc'].value)
             hash_algorithm.update(bytes(args.text, 'utf-8'))
 
             generated_hash = hash_algorithm.hexdigest()
             print_successful(f"Generated hash: {generated_hash}")
 
             if self.options['output'].value:
-                with open(args.output, 'w') as output:
+                with open(self.options['output'].value, 'w') as output:
                     output.write(f"{generated_hash}\n")
 
-                print_successful(f"Hash was saved to {self.options['output']} file")
+                print_successful(f"Hash was saved to {self.options['output'].value} file")
 
         except Exception as error:
             print_failure(error)
