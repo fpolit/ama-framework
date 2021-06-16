@@ -121,3 +121,4 @@ class Core(CommandSet):
                 output.write(f"{generated_hash}\n")
 
             print_successful(f"Hash was saved to {args.output} file")
+
