@@ -71,7 +71,7 @@ class HashGenerator(Auxiliary):
             # CODE
             self.no_empty_required_options()
             print(f"word: {self.options['word'].value}, alg: {self.options['alg'].value}")
-            print("hi abraham")
+            print("hi abjos")
 
             if self.options['bye'].value:
                 print("Bye Abraham")
