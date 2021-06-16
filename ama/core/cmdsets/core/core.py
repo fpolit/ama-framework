@@ -122,9 +122,13 @@ class Core(CommandSet):
 
             print_successful(f"Hash was saved to {args.output} file")
 
-    def do_bye(self, args):
-            """
-            Good Bye
-            """
+    bye_parser = Cmd2ArgumentParser()
+    bye_parser.add_argument('-r', type=str, help='XXXDX')
 
-        print_status(f"Say bye, goodbye")
+    @with_argparser(bye_parser)
+    def do_bye(self, args):
+        """
+        Good Bye
+        """
+
+        print_status(f"Say bye, goodbye: {args}")
