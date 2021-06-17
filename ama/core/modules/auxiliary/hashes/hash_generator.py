@@ -6,8 +6,8 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
+import hashlib
 from fineprint.status import print_failure, print_status, print_successful
-#from typing import List
 
 # module.base imports
 from ama.core.modules.base import (
@@ -15,26 +15,26 @@ from ama.core.modules.base import (
     Argument
 )
 
-# validator imports
-#from ama.core.validator import Args
-#from ama.core.files import Path
-
 import hashlib
 
 class HashGenerator(Auxiliary):
     """
 
     """
-    DESCRIPTION = "Generate hashes"
+    DESCRIPTION = "Hash Generator"
     MNAME = "auxiliary/hashes/hash_generator"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
     AUTHOR = [
         "abjoschevaro <acheva@uni.pe>"
     ]
 
+    _algorithms_available = list(hashlib.algorithms_available)
     FULLDESCRIPTION = (
-        """
-        Generate hashes given a word
+        f"""
+        Generate hashes for a given text.
+        Supported hash functions:
+           {' '.join(_algorithms_available[:10])}
+           {' '.join(_algorithms_available[10:])}
         """
     )
 
@@ -47,7 +47,7 @@ class HashGenerator(Auxiliary):
 
         auxiliary_options = {
             'text': Argument(text, True, "Word to generate a hash", value_type=str),
-            'hfunc': Argument(None, True, "Hash algorithm", value_type=str),
+            'hfunc': Argument(None, True, "Hash function", value_type=str),
             'output': Argument(None, False, "Output file", value_type=str)
         }
 
@@ -65,10 +65,10 @@ class HashGenerator(Auxiliary):
 
     def run(self, quiet=False):
         """
+        Hash generator - auxiliary module
         """
         #import pdb; pdb.set_trace()
         try:
-            # CODE
             self.no_empty_required_options()
 
             print_status(f"Generating a {self.options['hfunc'].value} hash for '{self.options['text'].value}'")
