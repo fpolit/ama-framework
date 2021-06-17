@@ -20,6 +20,9 @@ $ ama init && ama
 **NOTE:**  
 * *Ama-framework* was tested in the following GNU/Linux distributions:
      * Centos 8
+     * Kali
+     * Archlinux (only local attacks)
+     
 * If you want to submit attacks in a cluster of computers, you must have configured a cluster using [Slurm](https://slurm.schedmd.com/overview.html), also you must have installed *john* with *MPI* support.
 * You only need run `ama init` just one time, then you simply have to activate the virtual environment and run `ama`.
 
