@@ -28,8 +28,9 @@ from depends import (
     install_requirements
 )
 
-BuildablePackage = namedtuple('BuildablePackage', ['name', 'version', 'source', 'pkg', 'build_path', 'uncompressed_dir'])
-
+BuildablePackage = namedtuple('BuildablePackage', ['name', 'version', 'source',
+                                                   'pkg', 'build_path', 'uncompressed_dir'])
+pkgs_names = ['munge', 'pmix', 'slurm', 'openmpi', 'john']
 tested_linux_distros = ['ubuntu', 'kali', 'arch', 'centos']
 
 def install_args():
@@ -38,27 +39,38 @@ def install_args():
     parser.add_argument('-b','--build-dir', dest='build_dir', required=True,
                         help="Directory where packages will be downloaded, uncompressed and compiled")
 
-    # python_parser = parser.add_argument_group("Python enviroment")
-    # python_parser.add_argument('--pyenv', default = None,
-    #                            help="Python enviroment to install python requirements")
-    # python_parser.add_argument('--create-pyenv', action="store_true", dest='create_pyenv',
-    #                            help="Create a python enviroment if supplied enviroment doesn't exist")
-    # python_parser.add_argument('--pyenv-prompt', dest='pyenv_prompt', default='ama',
-    #                            help="Python enviroment name")
-
     prefix_parser = parser.add_argument_group("Location to install dependencies")
     prefix_parser.add_argument("--openmpi-prefix", dest="openmpi_prefix", default="/usr/local/openmpi",
                                help="Location to install OpenMPI")
     prefix_parser.add_argument("--john-prefix", dest="john_prefix", required=True,
                                help="Location to install John")
 
-    depends_parser = parser.add_argument_group("Optional dependencies")
+
+    installation_parser = parser.add_argument_group("Customized Installation")
+    installation_parser.add_argument("--no-ospkgs", dest='no_ospkgs', action='store_true',
+                                help="Do not install OS dependecy packages")
+    installation_parser.add_argument("--only-compile", dest='only_compile', nargs='*',
+                                     choices=pkgs_names,
+                                     default=[],
+                                     help="Do not donwload and uncompress, simply compile packages")
+    installation_parser.add_argument("--avoid-download", dest='avoid_download', nargs='*',
+                                     choices=pkgs_names,
+                                     default=[],
+                                     help="Do not download package")
+    installation_parser.add_argument("--avoid-uncompress", dest='avoid_uncompress', nargs='*',
+                                     choices=pkgs_names,
+                                     default=[],
+                                     help="Do not uncompress package")
+    installation_parser.add_argument("--disable", nargs='*',
+                                     choices=pkgs_names,
+                                     default=[],
+                                     help="Do not install selected packages (USE WITH CAUTION)")
+
+
+
+    depends_parser = parser.add_argument_group("Optional Features")
     depends_parser.add_argument("--enable-slurm", dest='enable_slurm', action='store_true',
                                 help="Install Slurm to perform distributed attacks")
-    depends_parser.add_argument("--disable", nargs='*',
-                                choices=['munge', 'pmix', 'slurm', 'openmpi', 'john'],
-                                default=[],
-                                help="Do not install selected packages (USE WITH CAUTION)")
 
     return parser.parse_args()
 
@@ -143,14 +155,15 @@ def install():
                 else:
                     break
 
-        install_requirements(distro_id)
+        if not args.no_ospkgs:
+            install_requirements(distro_id)
         #import pdb; pdb.set_trace()
 
         for bpkg in packages:
             if distro_id == "arch":
                 if bpkg.name == "john":
                     print_status(f"Install john using {ColorStr('john-git')} AUR package")
-                    print_failure(f"{ColorStr('john-git')} AUR package is compiler using default {ColorStr('openmpi')} package (without slurm and pmix support)")
+                    print_failure(f"{ColorStr('john-git')} AUR package is compiled using default {ColorStr('openmpi')} package (it hasn't slurm and pmix support)")
                     continue
 
                 # elif bpkg.name == "slurm":
@@ -172,7 +185,30 @@ def install():
 
                 pkg.set_prefix(prefix)
 
-            pkg.doall(no_confirm=True)
+            installation_options = { # default installation options
+                'no_confirm': True,
+                'avoid_download': False,
+                'avoid_uncompress': False,
+                'avoid_check': True
+            }
+
+            if pkg.pkgname in args.only_compile:
+                installation_options['avoid_download'] = True
+                installation_options['avoid_uncompress'] = True
+
+            if pkg.pkgname in args.avoid_download:
+                installation_options['avoid_download'] = True
+
+            if pkg.pkgname in args.avoid_uncompress:
+                installation_options['avoid_uncompress'] = True
+
+            print_status("Installation options:")
+            for option, value in installation_options.items():
+                print(f"\t{option}: {value}")
+
+            #import pdb; pdb.set_trace()
+
+            pkg.doall(**installation_options)
 
 
     except Exception as error:
