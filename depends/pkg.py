@@ -157,7 +157,6 @@ class Package:
         try:
             self.prepare(avoid_download = avoid_download,
                          avoid_uncompress = avoid_uncompress,
-                         avoid_check = avoid_check,
                          no_confirm = no_confirm)
             self.build()
 
@@ -186,5 +185,5 @@ class Package:
         return pkg_parser
 
 
-    def __repr__(self):
-        return f"Package(name={self.pkgname}, version={self.pkgver})"
+    # def __repr__(self):
+    #     return f"Package(name={self.pkgname}, version={self.pkgver})"

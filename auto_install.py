@@ -5,7 +5,6 @@
 #       John with MPI support (it depends of openmpi, which depends of pmix)
 #       Slurm with Pmix support (it depends of munge and pmix)
 #
-#
 # Status:
 #
 # Maintainer: glozanoa <glozanoa@uni.pe>
@@ -14,6 +13,7 @@ import argparse
 from collections import namedtuple
 import distro
 from fineprint.status import print_failure, print_status, print_successful
+from fineprint.color import ColorStr
 import platform
 from tabulate import tabulate
 import os
@@ -38,13 +38,13 @@ def install_args():
     parser.add_argument('-b','--build-dir', dest='build_dir', required=True,
                         help="Directory where packages will be downloaded, uncompressed and compiled")
 
-    python_parser = parser.add_argument_group("Python enviroment")
-    python_parser.add_argument('--pyenv', default = None,
-                               help="Python enviroment to install python requirements")
-    python_parser.add_argument('--create-pyenv', action="store_true", dest='create_pyenv',
-                               help="Create a python enviroment if supplied enviroment doesn't exist")
-    python_parser.add_argument('--pyenv-prompt', dest='pyenv_prompt', default='ama',
-                               help="Python enviroment name")
+    # python_parser = parser.add_argument_group("Python enviroment")
+    # python_parser.add_argument('--pyenv', default = None,
+    #                            help="Python enviroment to install python requirements")
+    # python_parser.add_argument('--create-pyenv', action="store_true", dest='create_pyenv',
+    #                            help="Create a python enviroment if supplied enviroment doesn't exist")
+    # python_parser.add_argument('--pyenv-prompt', dest='pyenv_prompt', default='ama',
+    #                            help="Python enviroment name")
 
     prefix_parser = parser.add_argument_group("Location to install dependencies")
     prefix_parser.add_argument("--openmpi-prefix", dest="openmpi_prefix", default="/usr/local/openmpi",
@@ -77,7 +77,7 @@ def check_distro():
             short_answer = short_answer.lower()
             if short_answer in ['y', 'yes', 'n', 'no']:
                 if short_answer in ['n', 'no']:
-                    raise Exception("Instalation was canceled")
+                    raise Exception("Installation was canceled")
                 else:
                     break
 
@@ -91,16 +91,26 @@ def install():
         build_path = os.path.abspath(os.path.expanduser(args.build_dir))
 
         packages = [
-            BuildablePackage(name='munge', version='0.5.14', source='https://github.com/dun/munge/archive/refs/tags/munge-0.5.14.tar.gz', pkg=Munge, build_path=build_path, uncompressed_dir='munge-munge-0.5.14'),
-            BuildablePackage(name='pmix', version='3.2.3', source='https://github.com/openpmix/openpmix/releases/download/v3.2.3/pmix-3.2.3.tar.gz', pkg=Pmix, build_path=build_path, uncompressed_dir='pmix-3.2.3'),
+            BuildablePackage(name='munge', version='0.5.14',
+                             source='https://github.com/dun/munge/archive/refs/tags/munge-0.5.14.tar.gz',
+                             pkg=Munge, build_path=build_path, uncompressed_dir='munge-munge-0.5.14'),
+            BuildablePackage(name='pmix', version='3.2.3',
+                             source='https://github.com/openpmix/openpmix/releases/download/v3.2.3/pmix-3.2.3.tar.gz',
+                             pkg=Pmix, build_path=build_path, uncompressed_dir='pmix-3.2.3'),
         ]
 
         if args.enable_slurm:
-            packages.append(BuildablePackage(name='slurm', version='20.11.7', source='https://download.schedmd.com/slurm/slurm-20.11.7.tar.bz2', pkg=Slurm, build_path=build_path, uncompressed_dir='slurm-20.11.7'))
+            packages.append(BuildablePackage(name='slurm', version='20.11.7',
+                                             source='https://download.schedmd.com/slurm/slurm-20.11.7.tar.bz2',
+                                             pkg=Slurm, build_path=build_path, uncompressed_dir='slurm-20.11.7'))
 
         packages += [
-            BuildablePackage(name='openmpi', version='4.1.1', source='https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.gz', pkg=OpenMPI, build_path=build_path, uncompressed_dir='openmpi-4.1.1'),
-            BuildablePackage(name='john', version='1.9.0-Jumbo-1', source='https://github.com/openwall/john/archive/1.9.0-Jumbo-1.tar.gz', pkg=John, build_path=args.john_prefix, uncompressed_dir='john-1.9.0-Jumbo-1')
+            BuildablePackage(name='openmpi', version='4.1.1',
+                             source='https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.gz',
+                             pkg=OpenMPI, build_path=build_path, uncompressed_dir='openmpi-4.1.1'),
+            BuildablePackage(name='john', version='1.9.0-Jumbo-1',
+                             source='https://github.com/openwall/john/archive/1.9.0-Jumbo-1.tar.gz',
+                             pkg=John, build_path=args.john_prefix, uncompressed_dir='john-1.9.0-Jumbo-1')
         ]
 
         pretty_name_distro = distro.os_release_info()['pretty_name']
@@ -113,13 +123,24 @@ def install():
             short_answer = short_answer.lower()
             if short_answer in ['y', 'yes', 'n', 'no']:
                 if short_answer in ['n', 'no']:
-                    raise Exception("Instalation was canceled")
+                    raise Exception("Installation was canceled")
                 else:
                     break
 
         install_requirements(distro_id)
+        #import pdb; pdb.set_trace()
 
         for bpkg in packages:
+            if distro_id == "arch":
+                if bpkg.name == "john":
+                    print_status(f"Install john using {ColorStr('john-git')} AUR package")
+                    print_failure(f"{ColorStr('john-git')} AUR package is compiler using default {ColorStr('openmpi')} package (without slurm and pmix support)")
+                    continue
+
+                # elif bpkg.name == "slurm":
+                #     print_status(f"Install slurm using {ColorStr('slurm-llnl')} AUR package")
+                #     continue
+
             print_status(f"Installing {bpkg.name}-{bpkg.version}")
             PkgClass = bpkg.pkg
             pkg = PkgClass(pkgver = bpkg.version,
@@ -127,7 +148,7 @@ def install():
                            build_path = bpkg.build_path,
                            uncompressed_dir = bpkg.uncompressed_dir)
 
-            #pkg.doall(no_confirm=True)
+            pkg.doall(no_confirm=True)
 
 
     except Exception as error:
