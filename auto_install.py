@@ -5,7 +5,8 @@
 #       John with MPI support (it depends of openmpi, which depends of pmix)
 #       Slurm with Pmix support (it depends of munge and pmix)
 #
-# Status:
+# Status: DEBUGGED - date: Jun 18 2021
+#    Tested OS: Centos 8
 #
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
@@ -34,7 +35,7 @@ pkgs_names = ['munge', 'pmix', 'slurm', 'openmpi', 'john']
 tested_linux_distros = ['ubuntu', 'kali', 'arch', 'centos']
 
 def install_args():
-    parser = argparse.ArgumentParser(description="Install ama's dependencies")
+    parser = argparse.ArgumentParser(description="Script to automate installation of dependencies")
 
     parser.add_argument('-b','--build-dir', dest='build_dir', required=True,
                         help="Directory where packages will be downloaded, uncompressed and compiled")
