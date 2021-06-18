@@ -46,7 +46,7 @@ class HashGenerator(Auxiliary):
                  text: str = None):
 
         auxiliary_options = {
-            'text': Argument(text, True, "Word to generate a hash", value_type=str),
+            'text': Argument(text, True, "Text to generate a hash", value_type=str),
             'hfunc': Argument(None, True, "Hash function", value_type=str),
             'output': Argument(None, False, "Output file", value_type=str)
         }
