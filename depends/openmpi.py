@@ -45,7 +45,7 @@ class OpenMPI(Package):
         print(ColorStr("It can take a while, so go for a coffee ...").StyleBRIGHT)
 
         flags = [
-            f"--prefix={prefix}",
+            f"--prefix={self.prefix}",
             "--with-pmix=/usr",
             "--with-pmi",
             "--with-slurm"
@@ -57,16 +57,20 @@ class OpenMPI(Package):
 
     def install(self):
         super().install()
-        print_successful(f"Package {openmpi_pkg.pkgname}-{openmpi_pkg.pkgver} was sucefully installed in {openmpi_pkg.prefix}")
-        print_status("Now add openmpi to you PATH")
+        print_successful(f"Package {self.pkgname}-{self.pkgver} was sucefully installed in {self.prefix}")
+
+        print_status("Adding openmpi to you PATH")
 
         openmpi2path = f"""
-        * Open ~/.bashrc and add the following
-
-        ### exporting openmpi to the PATH
-        export OPENMPI_HOME={openmpi_pkg.prefix}
-        export PATH=$PATH:$OPENMPI_HOME/bin
-        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$OPENMPI_HOME/lib
+### exporting openmpi to the PATH
+export OPENMPI_HOME={self.prefix}
+export PATH=$PATH:$OPENMPI_HOME/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$OPENMPI_HOME/lib
         """
 
-        print(openmpi2path)
+        with open(os.path.expanduser("~/.bashrc"), 'a') as bashrc:
+            bashrc.write(openmpi2path)
+
+        # exporting OpenMPI to the PATH
+        openmpi_bin = os.path.join(self.prefix, "bin")
+        os.environ['PATH'] += f":{openmpi_bin}"

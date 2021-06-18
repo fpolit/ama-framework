@@ -37,9 +37,9 @@ class John(Package):
                          build_path=build_path,
                          uncompressed_dir=uncompressed_dir)
 
-        def set_prefix(self, prefix):
-            self.build_path = os.path.abspath(os.path.expanduser(prefix))
-            self.uncompressed_path = os.path.join(prefix, uncompressed_dir)
+    def set_prefix(self, prefix):
+        self.build_path = os.path.abspath(os.path.expanduser(prefix))
+        self.uncompressed_path = os.path.join(prefix, self.uncompressed_dir)
 
     def build(self):
         print_status(f"Building {self.pkgname}-{self.pkgver}")
@@ -50,7 +50,6 @@ class John(Package):
             "--enable-mpi"
         ]
 
-        #import pdb; pdb.set_trace()
         configure = "./configure " + " ".join(flags)
         Bash.exec(configure, where=os.path.join(self.uncompressed_path, "src"))
         Bash.exec("make", where=os.path.join(self.uncompressed_path, "src"))
@@ -69,14 +68,17 @@ class John(Package):
         Bash.exec("sudo cp john.conf korelogic.conf hybrid.conf dumb16.conf dumb32.conf repeats32.conf repeats16.conf dynamic.conf dynamic_flat_sse_formats.conf regex_alphabets.conf password.lst ascii.chr lm_ascii.chr /usr/share/john/", where=os.path.join(self.uncompressed_path, "run"))
         Bash.exec("sudo cp -r rules /usr/share/john/", where=os.path.join(self.uncompressed_path, "run"))
 
+
+        print_status("Adding john to you PATH")
         john2path = f"""
-        Now add john to you PATH
-
-        * Open ~/.bashrc and add the following
-
-        ### exporting john to the PATH
-        export JOHN_HOME={john_pkg.uncompressed_path}
-        export PATH=$PATH:$JOHN_HOME/run
+### exporting john to the PATH
+export JOHN_HOME={self.uncompressed_path}
+export PATH=$PATH:$JOHN_HOME/run
         """
 
-        print(john2path)
+        with open(os.path.expanduser("~/.bashrc"), 'a') as bashrc:
+            bashrc.write(john2path)
+
+        # exporting John to the PATH
+        john_bin = os.path.join(self.uncompressed_path, "run")
+        os.environ['PATH'] += f":{john_bin}"
