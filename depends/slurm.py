@@ -11,11 +11,11 @@ from sbash import Bash
 from fineprint.status import print_status, print_successful
 from fineprint.color import ColorStr
 
-from pkg import Package
+from .pkg import Package
 
 
 class Slurm(Package):
-    def __init__(self, *, pkgver, source):
+    def __init__(self, *, pkgver, source, build_path, uncompressed_dir=None):
         depends = {
             "gcc": {"CentOS": "gcc.x86_64"},
             "pmix": {"Linux": "ADD_LINK2SCRIPT"},
@@ -32,7 +32,9 @@ class Slurm(Package):
                          pkgver=pkgver,
                          source=source,
                          depends=depends,
-                         makedepends=makedepends)
+                         makedepends=makedepends,
+                         build_path = build_path,
+                         uncompressed_dir= uncompressed_dir)
 
     def build(self):
         print_status(f"Building {self.pkgname}-{self.pkgver}")
@@ -73,35 +75,12 @@ class Slurm(Package):
             'sudo install -D -m644 etc/slurmd.service    "/usr/lib/systemd/system/slurmd.service"',
             'sudo install -D -m644 etc/slurmdbd.service  "/usr/lib/systemd/system/slurmdbd.service"',
             'sudo install -d -m755 "/var/log/slurm-llnl"',
-            'sudo install -d -m755 "/var/lib/slurm-llnl"', 
+            'sudo install -d -m755 "/var/lib/slurm-llnl"',
             'sudo useradd -r -c "slurm daemon" -u 64030 -s /bin/nologin -d /var/log/slurm-llnl slurm',
             'sudo install -d -m700 "/var/spool/slurm/d"',
             'sudo install -d -m700 -o slurm -g slurm "/var/spool/slurm/ctld"'
         ]
 
         for cmd in configurations:
+            print(cmd)
             Bash.exec(cmd, where=self.uncompressed_path)
-
-
-def main():
-    parser = Package.cmd_parser()
-    args = parser.parse_args()
-    slurm_pkg = Slurm(
-        source="https://download.schedmd.com/slurm/slurm-20.11.7.tar.bz2",
-        pkgver="20.11.7"
-    )
-    slurm_pkg.prepare(compilation_path = args.compilation,
-                      avoid_download = args.no_download,
-                      avoid_uncompress = args.no_uncompress)
-
-    slurm_pkg.build()
-
-    if args.check:
-        slurm_pkg.check()
-
-    slurm_pkg.install()
-    print_successful(f"Package {slurm_pkg.pkgname}-{slurm_pkg.pkgver} was sucefully installed")
-
-
-if __name__=="__main__":
-    main()

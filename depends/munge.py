@@ -14,11 +14,11 @@ from sbash import Bash
 from fineprint.status import print_status, print_successful
 from fineprint.color import ColorStr
 
-from pkg import Package
+from .pkg import Package
 
 
 class Munge(Package):
-    def __init__(self, *, pkgver, source):
+    def __init__(self, *, pkgver, source, build_path, uncompressed_dir=None):
         depends = {
             "gcc": {"Centos": "gcc.x86_64"},
             "OpenSSL": {"Centos": "openssl-devel.x86_64"},
@@ -35,7 +35,9 @@ class Munge(Package):
                          pkgver=pkgver,
                          source=source,
                          depends=depends,
-                         makedepends=makedepends)
+                         makedepends=makedepends,
+                         build_path=build_path,
+                         uncompressed_dir=uncompressed_dir)
 
     def build(self):
         print_status(f"Building {self.pkgname}-{self.pkgver}")
@@ -74,32 +76,7 @@ class Munge(Package):
         ]
 
         for cmd in configure:
+            print(cmd)
             Bash.exec(cmd)
 
-
-
-
-def main():
-    parser = Package.cmd_parser()
-    args = parser.parse_args()
-    munge_pkg = Munge(
-        source="https://github.com/dun/munge/archive/refs/tags/munge-0.5.14.tar.gz",
-        pkgver="0.5.14"
-    )
-    munge_pkg.prepare(compilation_path = args.compilation,
-                      avoid_download = args.no_download,
-                      avoid_uncompress = args.no_uncompress)
-    #import pdb; pdb.set_trace()
-    munge_pkg.build()
-
-    if args.check:
-        munge_pkg.check()
-
-    munge_pkg.install()
-
-    print_successful(f"Package {munge_pkg.pkgname}-{munge_pkg.pkgver} was sucefully installed")
-    print_status("Now create munge key in /etc/munge using mungekey.Then initialize munge service")
-
-
-if __name__=="__main__":
-    main()
+        print_status("Now create munge key in /etc/munge using mungekey.Then initialize munge service")

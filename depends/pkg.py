@@ -14,7 +14,7 @@ from fineprint.status import print_status, print_successful, print_failure
 from fineprint.color import ColorStr
 from sbash import Bash
 
-from pkg_exceptions import UnsupportedCompression
+from .pkg_exceptions import UnsupportedCompression
 
 class Package:
 
@@ -34,13 +34,17 @@ class Package:
     package: simple installation (use inheritance for more complex installations)
     """
 
-    def __init__(self, pkgname, *, pkgver, source, depends=None, makedepends=None):
+    def __init__(self, pkgname, *, pkgver, source, depends=None, makedepends=None, build_path, uncompressed_dir=None):
         self.pkgname=pkgname
         self.pkgver=pkgver
         self.source=source # link to the source code (compressed file)
         self.depends=depends
         self.makedepends=makedepends # these packages are needed by compilations
-        self.uncompressed_path = None #path of uncompressed directory
+        self.build_path = build_path
+        if uncompressed_dir:
+            self.uncompressed_path = os.path.join(build_path, uncompressed_dir) #path of uncompressed directory
+        else:
+            self.uncompressed_path = None
 
 
     def depends_info(self):
@@ -72,59 +76,44 @@ class Package:
                 print_status(f"Install all the dependencies before install {self.pkgname}-{self.pkgver}")
                 sys.exit(1)
 
-    def prepare(self, *, compilation_path=None, avoid_download=False, avoid_uncompress=False):
+    def prepare(self, *, avoid_download=False, avoid_uncompress=False, no_confirm=False):
         """
         Download and uncompress the source code
         """
         #import pdb; pdb.set_trace()
-        self.depends_info()
+        if not no_confirm:
+            self.depends_info()
 
-        if compilation_path is not None:
-            self.compilation_path = os.path.abspath(compilation_path)
-            if not (os.path.exists(compilation_path) and os.path.isdir(compilation_path)):
-                os.mkdir(compilation_path)
+        if self.build_path is not None:
+            self.build_path = os.path.abspath(self.build_path)
+            if not (os.path.exists(self.build_path) and os.path.isdir(self.build_path)):
+                os.mkdir(self.build_path)
         else:
-            self.compilation_path = os.getcwd()
+            self.build_path = os.getcwd()
 
         if not avoid_download:
             print_status(f"Downloading {os.path.basename(self.source)}")
-            Bash.exec(f"wget {self.source}", where=self.compilation_path)
+            Bash.exec(f"wget {self.source}", where=self.build_path)
 
         ## uncompress
-        compressed_file = os.path.join(self.compilation_path, os.path.basename(self.source))
+        compressed_file = os.path.join(self.build_path, os.path.basename(self.source))
 
         if not avoid_uncompress:
             print_status(f"Uncompressing {compressed_file}")
             if zipfile.is_zipfile(compressed_file): # source was compressed using zip
                 with zipfile.ZipFile(compressed_file, 'r') as zip_compressed_file:
-                    zip_compressed_file.extractall(self.compilation_path)
+                    zip_compressed_file.extractall(self.build_path)
 
             elif tarfile.is_tarfile(compressed_file): # source was compressed using tar
                 with tarfile.open(compressed_file, 'r') as tar_compressed_file:
-                    tar_compressed_file.extractall(self.compilation_path)
+                    tar_compressed_file.extractall(self.build_path)
             else:
                 raise UnsupportedCompression(["zip", "tar"])
 
-        self.uncompressed_path = os.path.join(self.compilation_path, f"{self.pkgname}-{self.pkgver}")
-        print_status(f"Setting {ColorStr('uncompressed_path').StyleBRIGHT} to: {self.uncompressed_path}")
-
-        advice = f"""
-        Look for the uncompressed directory in {self.compilation_path} directory
-        and check if its name match with {ColorStr('uncompressed_path').StyleBRIGHT} variable value,
-        otherwise reset its value
-        """
-        print_status(advice)
-
-        ansnwer = None
-        while True:
-            answer = input("Do you want to reset uncompressed_path value(y/n)? ")
-            answer = answer.lower()
-
-            if answer in ["y", "yes", "n", "no"]:
-                break
-
-        if answer in ["y", "yes"]:
-            self.uncompressed_path = input("Reset value: ")
+        if self.uncompressed_path is None:
+            self.uncompressed_path = os.path.join(self.build_path, f"{self.pkgname}-{self.pkgver}")
+            if not os.path.isdir(self.uncompressed_path):
+                raise Exception("Supply the name of the uncompressed directory")
 
         print_successful(f"Package {self.pkgname}-{self.pkgver} was prepared")
 
@@ -159,18 +148,28 @@ class Package:
         Bash.exec("sudo make install", where=self.uncompressed_path)
 
 
-    def doall(self, avoid_check=False):
+    def doall(self, *,
+              avoid_download=False, avoid_uncompress=False,
+              avoid_check=True, no_confirm=False):
         """
         Install the buildable package(build, check, and install)
         """
-        self.prepare()
-        self.build()
+        try:
+            self.prepare(avoid_download = avoid_download,
+                         avoid_uncompress = avoid_uncompress,
+                         avoid_check = avoid_check,
+                         no_confirm = no_confirm)
+            self.build()
 
-        if not avoid_check:
-            self.check()
+            if not avoid_check:
+                self.check()
 
-        self.install()
-        print_successful(f"Sucefully installation of {self.pkgname}-{self.pkgver}")
+            self.install()
+            print_successful(f"Sucefully installation of {self.pkgname}-{self.pkgver}")
+
+        except Exception as error:
+            print_failure(error)
+            print_failure(f"Failed installation of {self.pkgname}-{self.pkgver}")
 
     @staticmethod
     def cmd_parser():

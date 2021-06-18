@@ -14,7 +14,7 @@ from sbash import Bash
 from fineprint.status import print_status, print_successful
 from fineprint.color import ColorStr
 
-from pkg import Package
+from .pkg import Package
 
 
 class Pdsh(Package):
@@ -40,7 +40,7 @@ class Pdsh(Package):
 
         #import pdb; pdb.set_trace()
         Bash.exec("./bootstrap", where=self.uncompressed_path)
-        self.prefix = "/usr/local/pdsh" 
+        self.prefix = "/usr/local/pdsh"
         flags = [
             f"--prefix={self.prefix}",
             "--with-ssh"
@@ -54,43 +54,17 @@ class Pdsh(Package):
         print_status(f"Installing {self.pkgname}-{self.pkgver} in {self.prefix}")
         #import pdb; pdb.set_trace()
 
-        Bash.exec("sudo make install", where=self.uncompressed_path) 
+        Bash.exec("sudo make install", where=self.uncompressed_path)
 
+        pdsh2path = f"""
+        Now add pdsh to your PATH
 
-def main():
-    parser = Package.cmd_parser()
-    args = parser.parse_args()
-    pdsh_pkg = Pdsh(
-        source="https://github.com/chaos/pdsh/releases/download/pdsh-2.32/pdsh-2.32.tar.gz",
-        pkgver="2.32"
-    )
-    pdsh_pkg.prepare(compilation_path = args.compilation,
-                      avoid_download = args.no_download,
-                      avoid_uncompress = args.no_uncompress)
-    #import pdb; pdb.set_trace()
-    pdsh_pkg.build()
+        * Open ~/.bashrc and add the following
 
-    if args.check:
-        pdsh_pkg.check()
-
-    pdsh_pkg.install()
-
-    print_successful(f"Package {pdsh_pkg.pkgname}-{pdsh_pkg.pkgver} was sucefully installed")
-    print_status("Now add pdsh to your PATH")
-
-    _PDSH_HOME = "PDSH_HOME"
-    pdsh2path = f"""
-    
-    * Open ~/.bashrc and add the following
-
-    # Adding PDSH to the PATH
-    export PDSH_RCMD_TYPE=ssh
-    export PDSH_HOME=/usr/local/pdsh
-    export PATH=$PATH:${_PDSH_HOME}/bin
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${_PDSH_HOME}/lib
-    """
-    print(pdsh2path)
-
-
-if __name__=="__main__":
-    main()
+        # Adding PDSH to the PATH
+        export PDSH_RCMD_TYPE=ssh
+        export PDSH_HOME=/usr/local/pdsh
+        export PATH=$PATH:$PDSH_HOME/bin
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PDSH_HOME/lib
+        """
+        print(pdsh2path)

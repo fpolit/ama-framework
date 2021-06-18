@@ -14,11 +14,11 @@ from sbash import Bash
 from fineprint.status import print_status, print_successful
 from fineprint.color import ColorStr
 
-from pkg import Package
+from .pkg import Package
 
 
 class Pmix(Package):
-    def __init__(self, *, pkgver, source):
+    def __init__(self, *, pkgver, source, build_path, uncompressed_dir=None):
         depends = {
             "gcc": {"Centos": "gcc.x86_64"},
             "libevent": {"Centos": "libevent-devel.x86_64"},
@@ -35,7 +35,9 @@ class Pmix(Package):
                          pkgver=pkgver,
                          source=source,
                          depends=depends,
-                         makedepends=makedepends)
+                         makedepends=makedepends,
+                         build_path=build_path,
+                         uncompressed_dir=uncompressed_dir)
 
     def build(self):
         print_status(f"Building {self.pkgname}-{self.pkgver}")
@@ -52,28 +54,3 @@ class Pmix(Package):
         configure = "./configure " + " ".join(flags)
         Bash.exec(configure, where=self.uncompressed_path)
         Bash.exec("make", where=self.uncompressed_path)
- 
-
-def main():
-    parser = Package.cmd_parser()
-    args = parser.parse_args()
-    pmix_pkg = Pmix(
-        source="https://github.com/openpmix/openpmix/releases/download/v3.2.3/pmix-3.2.3.tar.gz",
-        pkgver="3.2.3"
-    )
-    pmix_pkg.prepare(compilation_path = args.compilation,
-                      avoid_download = args.no_download,
-                      avoid_uncompress = args.no_uncompress)
-    #import pdb; pdb.set_trace()
-    pmix_pkg.build()
-
-    if args.check:
-        pmix_pkg.check()
-
-    pmix_pkg.install()
-
-    print_successful(f"Package {pmix_pkg.pkgname}-{pmix_pkg.pkgver} was sucefully installed")
-
-
-if __name__=="__main__":
-    main()

@@ -14,11 +14,11 @@ from sbash import Bash
 from fineprint.status import print_status, print_successful
 from fineprint.color import ColorStr
 
-from pkg import Package
+from .pkg import Package
 
 
-class Openmpi(Package):
-    def __init__(self, *, pkgver, source):
+class OpenMPI(Package):
+    def __init__(self, *, pkgver, source, build_path, uncompressed_dir=None):
         depends = {
             "gcc": {"Centos": "gcc.x86_64"},
             "pmix": {"CentOS": "https://github.com/fpolit/ama-framework/blob/master/depends/cluster/pmix.py"}
@@ -33,7 +33,9 @@ class Openmpi(Package):
                          pkgver=pkgver,
                          source=source,
                          depends=depends,
-                         makedepends=makedepends)
+                         makedepends=makedepends,
+                         build_path = build_path,
+                         uncompressed_dir= uncompressed_dir)
 
     def build(self, prefix):
         self.prefix = prefix
@@ -51,43 +53,18 @@ class Openmpi(Package):
         Bash.exec(configure, where=self.uncompressed_path)
         Bash.exec("make", where=self.uncompressed_path)
 
+    def install(self):
+        super().install()
+        print_successful(f"Package {openmpi_pkg.pkgname}-{openmpi_pkg.pkgver} was sucefully installed in {openmpi_pkg.prefix}")
+        print_status("Now add openmpi to you PATH")
 
-def main():
-    parser = Package.cmd_parser()
-    parser.add_argument("--prefix", default="/usr/local/openmpi",
-                        help="Location to install openmpi")
-    args = parser.parse_args()
-    openmpi_pkg = Openmpi(
-        source="https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.gz",
-        pkgver="4.1.1"
-    )
-    openmpi_pkg.prepare(compilation_path = args.compilation,
-                        avoid_download = args.no_download,
-                        avoid_uncompress = args.no_uncompress)
-    #import pdb; pdb.set_trace()
-    openmpi_pkg.build(args.prefix)
+        openmpi2path = f"""
+        * Open ~/.bashrc and add the following
 
-    if args.check:
-        openmpi_pkg.check()
+        ### exporting openmpi to the PATH
+        export OPENMPI_HOME={openmpi_pkg.prefix}
+        export PATH=$PATH:$OPENMPI_HOME/bin
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$OPENMPI_HOME/lib
+        """
 
-    openmpi_pkg.install()
-
-    print_successful(f"Package {openmpi_pkg.pkgname}-{openmpi_pkg.pkgver} was sucefully installed in {openmpi_pkg.prefix}")
-    print_status("Now add openmpi to you PATH")
-
-    _OPENMPI_HOME = "OPENMPI_HOME"
-
-    openmpi2path = f"""
-    
-    * Open ~/.bashrc and add the following
-
-    ### exporting openmpi to the PATH
-    export OPENMPI_HOME={openmpi_pkg.prefix}
-    export PATH=$PATH:${_OPENMPI_HOME}/bin
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${_OPENMPI_HOME}/lib
-    """
-
-    print(openmpi2path)
-
-if __name__=="__main__":
-    main()
+        print(openmpi2path)
