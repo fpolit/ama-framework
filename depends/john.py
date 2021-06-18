@@ -2,7 +2,7 @@
 #
 # automatization of john installation with MPI support
 #
-# Status: 
+# Status:
 #
 # Warnings:
 # Check output of bash process and quit execution if it fails
@@ -36,6 +36,10 @@ class John(Package):
                          makedepends=makedepends,
                          build_path=build_path,
                          uncompressed_dir=uncompressed_dir)
+
+        def set_prefix(self, prefix):
+            self.build_path = os.path.abspath(os.path.expanduser(prefix))
+            self.uncompressed_path = os.path.join(prefix, uncompressed_dir)
 
     def build(self):
         print_status(f"Building {self.pkgname}-{self.pkgver}")

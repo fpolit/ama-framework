@@ -28,7 +28,7 @@ class OpenMPI(Package):
             "make": {"Centos": "make.x86_64"},
             "wget": {"Centos": "wget.x86_64"}
         }
-
+        self.prefix = "/usr/local/openmpi" # default prefix
         super().__init__("openmpi",
                          pkgver=pkgver,
                          source=source,
@@ -37,8 +37,10 @@ class OpenMPI(Package):
                          build_path = build_path,
                          uncompressed_dir= uncompressed_dir)
 
-    def build(self, prefix):
-        self.prefix = prefix
+    def set_prefix(self, prefix):
+        self.prefix = os.path.abspath(os.path.expanduser(prefix))
+
+    def build(self):
         print_status(f"Building {self.pkgname}-{self.pkgver}")
         print(ColorStr("It can take a while, so go for a coffee ...").StyleBRIGHT)
 
