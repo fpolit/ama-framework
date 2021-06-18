@@ -55,6 +55,10 @@ def install_args():
     depends_parser = parser.add_argument_group("Optional dependencies")
     depends_parser.add_argument("--enable-slurm", dest='enable_slurm', action='store_true',
                                 help="Install Slurm to perform distributed attacks")
+    depends_parser.add_argument("--disable", nargs='*',
+                                choices=['munge', 'pmix', 'slurm', 'openmpi', 'john'],
+                                default=[],
+                                help="Do not install selected packages (USE WITH CAUTION)")
 
     return parser.parse_args()
 
@@ -90,27 +94,39 @@ def install():
 
         build_path = os.path.abspath(os.path.expanduser(args.build_dir))
 
-        packages = [
-            BuildablePackage(name='munge', version='0.5.14',
-                             source='https://github.com/dun/munge/archive/refs/tags/munge-0.5.14.tar.gz',
-                             pkg=Munge, build_path=build_path, uncompressed_dir='munge-munge-0.5.14'),
-            BuildablePackage(name='pmix', version='3.2.3',
-                             source='https://github.com/openpmix/openpmix/releases/download/v3.2.3/pmix-3.2.3.tar.gz',
-                             pkg=Pmix, build_path=build_path, uncompressed_dir='pmix-3.2.3'),
-        ]
+        packages = []
+        if "munge" not in args.disable:
+            packages += [
+                BuildablePackage(name='munge', version='0.5.14',
+                                 source='https://github.com/dun/munge/archive/refs/tags/munge-0.5.14.tar.gz',
+                                 pkg=Munge, build_path=build_path, uncompressed_dir='munge-munge-0.5.14')
+            ]
 
-        if args.enable_slurm:
-            packages.append(BuildablePackage(name='slurm', version='20.11.7',
-                                             source='https://download.schedmd.com/slurm/slurm-20.11.7.tar.bz2',
-                                             pkg=Slurm, build_path=build_path, uncompressed_dir='slurm-20.11.7'))
+        if "pmix" not in args.disable:
+            packages += [
+                BuildablePackage(name='pmix', version='3.2.3',
+                                 source='https://github.com/openpmix/openpmix/releases/download/v3.2.3/pmix-3.2.3.tar.gz',
+                                 pkg=Pmix, build_path=build_path, uncompressed_dir='pmix-3.2.3')
+            ]
 
-        packages += [
-            BuildablePackage(name='openmpi', version='4.1.1',
-                             source='https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.gz',
-                             pkg=OpenMPI, build_path=build_path, uncompressed_dir='openmpi-4.1.1'),
-            BuildablePackage(name='john', version='1.9.0-Jumbo-1',
-                             source='https://github.com/openwall/john/archive/1.9.0-Jumbo-1.tar.gz',
-                             pkg=John, build_path=args.john_prefix, uncompressed_dir='john-1.9.0-Jumbo-1')
+        if args.enable_slurm and not ("slurm" in args.disable):
+            packages += [
+                BuildablePackage(name='slurm', version='20.11.7',
+                                 source='https://download.schedmd.com/slurm/slurm-20.11.7.tar.bz2',
+                                 pkg=Slurm, build_path=build_path, uncompressed_dir='slurm-20.11.7')
+            ]
+
+        if "openmpi" not in args.disable:
+            packages += [
+                BuildablePackage(name='openmpi', version='4.1.1',
+                                 source='https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.gz',
+                                 pkg=OpenMPI, build_path=build_path, uncompressed_dir='openmpi-4.1.1')
+            ]
+        if "john" not in args.disable:
+            packages += [
+                BuildablePackage(name='john', version='1.9.0-Jumbo-1',
+                                 source='https://github.com/openwall/john/archive/1.9.0-Jumbo-1.tar.gz',
+                                 pkg=John, build_path=args.john_prefix, uncompressed_dir='john-1.9.0-Jumbo-1')
         ]
 
         pretty_name_distro = distro.os_release_info()['pretty_name']
@@ -147,6 +163,14 @@ def install():
                            source = bpkg.source,
                            build_path = bpkg.build_path,
                            uncompressed_dir = bpkg.uncompressed_dir)
+
+            if bpkg.name in ["openmpi", "john"]:
+                if bpkg.name == "john":
+                    prefix = args.john_prefix
+                elif bpkg.name == "openmpi":
+                    prefix = args.openmpi_prefix
+
+                pkg.set_prefix(prefix)
 
             pkg.doall(no_confirm=True)
 
