@@ -41,6 +41,7 @@ class Package:
         self.depends=depends
         self.makedepends=makedepends # these packages are needed by compilations
         self.build_path = build_path
+        self.uncompressed_dir = uncompressed_dir
         if uncompressed_dir:
             self.uncompressed_path = os.path.join(build_path, uncompressed_dir) #path of uncompressed directory
         else:
