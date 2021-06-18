@@ -15,7 +15,8 @@ $ python3 auto_install.py -b build_depends --openmpi-prefix=OPENMPI_HOME --john-
 # The above command will create a directory called build_depends 
 #   where all dependencies will be downloaded, uncompressed and compiled
 #
-# NOTE: If you want to perform distributed attacks (in a cluster of computers), then you will add --enable-slurm flag
+# NOTE: If you want to perform distributed attacks (in a cluster of computers), 
+#       then you will add --enable-slurm flag
 #
 # OPENMPI_HOME is the path where OpenMPI will be installed (by default /usr/local/openmpi)
 # JOHN_HOME is the path where John will be installed
