@@ -83,7 +83,7 @@ def check_distro():
 
     os_name = platform.system()
     if os_name != "Linux":
-        raise Exception(f"Sorry but actually ama isn't supported by {os_name} OS")
+        raise Exception(f"Sorry but currently ama isn't supported by {os_name} OS")
 
     distro_id = distro.id()
     if distro_id not in tested_linux_distros:
