@@ -160,7 +160,7 @@ class HashcatWordlist(Attack):
                          submiting parallel tasks in a cluster using slurm
         """
 
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
         try:
             self.no_empty_required_options(local)
 

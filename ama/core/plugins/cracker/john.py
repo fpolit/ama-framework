@@ -97,7 +97,7 @@ class John(HashCracker):
 
         print(tabulate(filtered_hashes, headers=["#", "Name"]))
 
-    def hash_status(query_hash: str):
+    def hash_status(self, query_hash: str):
         """
         Check the status of query hash in john potfile
 
@@ -108,6 +108,23 @@ class John(HashCracker):
 
         return self.pattern_in_potfile(pattern, self.potfile)
 
+    # def are_all_cracked(self, hashes_file: Path):
+    #     """
+    #     Check if all hashes are cracked
+    #     return True if all hashes were cracked otherwise return False
+    #     """
+    #     #import pdb;pdb.set_trace()
+    #     cracked = True
+    #     with open(hashes_file, 'r') as hashes:
+    #         while query_hash := hashes.readline().rstrip():
+    #             hstatus = self.hash_status(query_hash)
+    #             if hstatus is None: # query_hash isn't cracked yet
+    #                 cracked = False
+    #                 break
+
+    #     return cracked
+
+
 
     # debugged - date: Jun 8 2021
     def benchmark(self, *, cores=1, threads=1, slurm=None, local:bool = True):
@@ -117,23 +134,26 @@ class John(HashCracker):
         #import pdb; pdb.set_trace()
         try:
             if self.enable:
-                if (not local) and slurm and slurm.partition:
+                if (not local) and slurm:
 
                     enviroment = (
                         f"{self.MAINNAME.upper()}={self.main_exec}",
                     )
 
+                    if slurm.config:
+                        slurm.check_partition()
+
                     parallel_job_type = slurm.parallel_job_parser()
-                    if not  parallel_job_type in ["MPI", "OMP", "MPI_OMP"]:
+                    if not  parallel_job_type in [Slurm.MPI, Slurm.OMP, Slurm.MPI_OMP]:
                         raise InvalidParallelJob(parallel_job_type)
 
                     attack_cmd = f"srun --mpi={slurm.pmix} ${self.MAINNAME.upper()} --test"
                     header_attack = f"echo -e \"\\n\\n[*] Running: {attack_cmd}\""
 
                     parallel_work = [enviroment, (header_attack, attack_cmd)]
-                    batch_script_name = slurm.gen_batch_script(parallel_work)
+                    batch_script = slurm.gen_batch_script(parallel_work)
 
-                    Bash.exec(f"sbatch {batch_script_name}")
+                    Bash.exec(f"sbatch {batch_script}")
 
                 else:
                     max_cores = psutil.cpu_count(logical=False)
@@ -183,7 +203,7 @@ class John(HashCracker):
                 Path.access(permission, hashes_file, *wordlists)
 
                 if hash_types:
-                    John.check_hash_type(hash_types)
+                    self.check_hash_type(hash_types)
 
                 if rules and rules_file:
                     Path.access(permission, rules_file)
@@ -193,13 +213,13 @@ class John(HashCracker):
                 print_status(f"Possible hashes identities: {ColorStr(hash_types).StyleBRIGHT}")
 
                 #import pdb; pdb.set_trace()
-                if (not local) and slurm and slurm.partition:
+                if (not local) and slurm:
                     enviroment = (
                         f"{self.MAINNAME.upper()}={self.main_exec}",
                     )
 
                     if slurm.config:
-                        self.check_slurm_partition(slurm.partition, slurm.config['partitions'])
+                        slurm.check_partition()
 
                     parallel_job_type = slurm.parallel_job_parser()
                     if not  parallel_job_type in [Slurm.MPI, Slurm.OMP, slurm.MPI_OMP]:
@@ -316,7 +336,7 @@ class John(HashCracker):
 
                     for hid in hash_types:
                         for wl in wordlists:
-                            all_cracked = John.are_all_hashes_cracked(hashes_file)
+                            all_cracked = self.are_all_cracked(hashes_file)
                             if  not all_cracked: # some hash isn't cracked yet
                                 attack_cmd = f"{self.main_exec} --wordlist={wl} --format={hid}"
 
@@ -338,8 +358,8 @@ class John(HashCracker):
                         if all_cracked:
                             break
 
-                    if db_status and workspace and db_credential_file:
-                        John.insert_hashes_to_db(hashes_file, workspace, db_credential_file, pretty=True)
+                    # if db_status and workspace and db_credential_file:
+                    #     John.insert_hashes_to_db(hashes_file, workspace, db_credential_file, pretty=True)
 
             except Exception as error:
                 print_failure(error)
@@ -385,19 +405,18 @@ class John(HashCracker):
                 permission = [os.R_OK]
                 Path.access(permission, hashes_file)
                 if hash_types:
-                    John.check_hash_type(hash_types)
+                    self.check_hash_type(hash_types)
 
                 print_status(f"Attacking hashes in {ColorStr(hashes_file).StyleBRIGHT} file in incremental mode")
                 print_status(f"Possible hashes identities: {ColorStr(hash_types).StyleBRIGHT}")
 
-                if (not local) and slurm and slurm.partition:
+                if (not local) and slurm:
 
                     enviroment = (
                         f"{self.MAINNAME.upper()}={self.main_exec}",
                     )
 
-                    if slurm.config is not None:
-                        self.check_slurm_partition(slurm.partition, slurm.config['partitions'])
+                    slurm.check_partition()
 
                     parallel_job_type = slurm.parallel_job_parser()
                     if not  parallel_job_type in [Slurm.MPI, Slurm.OMP]:
@@ -441,7 +460,7 @@ class John(HashCracker):
                 else:
                     #import pdb;pdb.set_trace()
                     for hash_type in hash_types:
-                        all_cracked = John.are_all_hashes_cracked(hashes_file)
+                        all_cracked = self.are_all_cracked(hashes_file)
                         if not all_cracked:
                             attack_cmd = (
                                 f"{self.main_exec} --incremental"
@@ -457,9 +476,9 @@ class John(HashCracker):
                             print_successful(f"Hashes in {ColorStr(hashes_file).StyleBRIGHT} were cracked")
                             break
 
-                    if db_status and workspace and db_credential_file:
-                        # rename insert_hashes_to_db function by insert2db
-                        John.insert_hashes_to_db(hashes_file, workspace, db_credential_file, pretty=True)
+                    # if db_status and workspace and db_credential_file:
+                    #     # rename insert_hashes_to_db function by insert2db
+                    #     John.insert_hashes_to_db(hashes_file, workspace, db_credential_file, pretty=True)
 
             except Exception as error:
                 print_failure(error)
@@ -491,18 +510,18 @@ class John(HashCracker):
                 permission = [os.R_OK]
                 Path.access(permission, hashes_file, masks_file)
                 if hash_types:
-                    John.check_hash_type(hash_types)
+                    self.check_hash_type(hash_types)
 
                 print_status(f"Attacking hashes in {ColorStr(hashes_file).StyleBRIGHT} file with {ColorStr(masks_file).StyleBRIGHT} masks file")
                 print_status(f"Possible hashes identities: {ColorStr(hash_types).StyleBRIGHT}")
 
-                if (not local) and slurm and slurm.partition:
+                if (not local) and slurm:
                     enviroment = (
                         f"{self.MAINNAME.upper()}={self.main_exec}",
                     )
 
                     if slurm.config:
-                        self.check_slurm_partition(slurm.partition, slurm.config['partitions'])
+                        slurm.check_partition()
 
                     parallel_job_type = slurm.parallel_job_parser()
                     if not  parallel_job_type in [Slurm.MPI, Slurm.OMP]:
@@ -586,13 +605,13 @@ class John(HashCracker):
                     for hash_type in hash_types:
                         with open(masks_file, 'r') as masks:
                             while mask := masks.readline().rstrip():
-                                all_cracked = John.are_all_hashes_cracked(hashes_file)
+                                all_cracked = self.are_all_cracked(hashes_file)
                                 if not all_cracked:
-                                    attack_cmd = f"{self.main_exec} --mask={mask}"
-
-                                    if hash_type:
-                                        attack_cmd += f" --format={hash_type}"
-                                    attack_cmd += f" {hashes_file}"
+                                    attack_cmd = (
+                                        f"{self.main_exec} --mask={mask}"
+                                        f" --format={hash_type}"
+                                        f" {hashes_file}"
+                                    )
 
                                     print("\n")
                                     print_status(f"Running: {ColorStr(attack_cmd).StyleBRIGHT}")
@@ -601,12 +620,12 @@ class John(HashCracker):
                                 else:
                                     break
 
-                        if all_cracked := John.are_all_hashes_cracked(hashes_file):
+                        if all_cracked := self.are_all_cracked(hashes_file):
                             print_successful(f"Hashes in {ColorStr(hashes_file).StyleBRIGHT} were cracked")
                             break
 
-                    if db_status and workspace and db_credential_file:
-                        John.insert_hashes_to_db(hashes_file, workspace, db_credential_file, pretty=True)
+                    # if db_status and workspace and db_credential_file:
+                    #     John.insert_hashes_to_db(hashes_file, workspace, db_credential_file, pretty=True)
 
             except Exception as error:
                 print_failure(error)
@@ -634,19 +653,18 @@ class John(HashCracker):
             try:
                 permission = [os.R_OK]
                 Path.access(permission, hashes_file)
-                John.check_hash_type(hash_types)
+                self.check_hash_type(hash_types)
 
-                #cmd2.Cmd.poutput(f"Attacking {hashType} hashes in {hashesFile} using single attack.")
                 print_status(f"Attacking hashes in {ColorStr(hashes_file).StyleBRIGHT} file in single attack mode")
                 print_status(f"Possible hashes identities: {ColorStr(hash_types).StyleBRIGHT}")
 
-                if (not local) and slurm and slurm.partition:
+                if (not local) and slurm:
                     enviroment = (
                         f"{self.MAINNAME.upper()}={self.main_exec}",
                     )
 
                     if slurm.config:
-                        self.check_slurm_partition(slurm.partition, slurm.config['partitions'])
+                        slurm.check_partition()
 
                     parallel_job_type = slurm.parallel_job_parser()
                     if not  parallel_job_type in [Slurm.MPI, Slurm.OMP]:
@@ -683,13 +701,13 @@ class John(HashCracker):
                 else:
                     #import pdb; pdb.set_trace()
                     for hash_type in hash_types:
-                        attack_cmd = f"{self.main_exec} --single"
-                        are_all_hashes_cracked = John.are_all_hashes_cracked(hashes_file)
-                        if  not are_all_hashes_cracked: # some hash isn't cracked yet
-                            if hash_type:
-                                attack_cmd += f" --format={hash_type}"
-
-                            attack_cmd += f" {hashes_file}"
+                        all_cracked = self.are_all_cracked(hashes_file)
+                        if  not all_cracked: # some hash isn't cracked yet
+                            attack_cmd = (
+                                f"{self.main_exec} --single"
+                                f" --format={hash_type}"
+                                f" {hashes_file}"
+                            )
 
                             print()
                             print_status(f"Running: {ColorStr(attack_cmd).StyleBRIGHT}")
@@ -698,8 +716,8 @@ class John(HashCracker):
                             print_successful(f"Hashes in {ColorStr(hashes_file).StyleBRIGHT} were cracked")
                             break
 
-                    if db_status and workspace and db_credential_file:
-                        John.insert_hashes_to_db(hashes_file, workspace, db_credential_file, pretty=True)
+                    # if db_status and workspace and db_credential_file:
+                    #     John.insert_hashes_to_db(hashes_file, workspace, db_credential_file, pretty=True)
 
             except Exception as error:
                 print_failure(error)
@@ -714,26 +732,24 @@ class John(HashCracker):
         Combine wordlist + masks file (by default, when inverse=False) in other file and
         perform a wordlist attack with that file, if inverse=True combine masks file + wordlist
         """
+        pass
+        # print_status(f"Attacking {hashType} hashes in {hashFile} file with an hybrid MFW attack.")
+        # hybridWordlist = "hybrid.txt"
 
-        print_status(f"Attacking {hashType} hashes in {hashFile} file with an hybrid MFW attack.")
-        hybridWordlist = "hybrid.txt"
+        # if Mask.isMask(masksFile): # masksFile is a simple mask
+        #     wordlist = wordlist[0]
+        #     mask = masksFile
+        #     with open(hybridWordlist, 'w') as outputFile:
+        #         Combinator.genHybridWM(wordlist, mask , outputFile, inverse=False)
+        #     print_successful(f"Combinated wordlist and mask was generated: {hybridWordlist}")
 
-        if Mask.isMask(masksFile): # masksFile is a simple mask
-            wordlist = wordlist[0]
-            mask = masksFile
-            with open(hybridWordlist, 'w') as outputFile:
-                Combinator.genHybridWM(wordlist, mask , outputFile, inverse=False)
-            print_successful(f"Combinated wordlist and mask was generated: {hybridWordlist}")
+        # else:
+        #     wordlist = wordlist[0]
+        #     Combinator.hybridWMF(wordlist  = wordlist,
+        #                          masksFile = masksFile,
+        #                          output    = hybridWordlist)
 
-        else:
-            wordlist = wordlist[0]
-            Combinator.hybridWMF(wordlist  = wordlist,
-                                 masksFile = masksFile,
-                                 output    = hybridWordlist)
-
-        JTRAttacks.wordlist(hashType = hashType,
-                            hashFile = hashFile,
-                            wordlist = hybridWordlist,
-                            hpc = hpc)
-
-
+        # JTRAttacks.wordlist(hashType = hashType,
+        #                     hashFile = hashFile,
+        #                     wordlist = hybridWordlist,
+        #                     hpc = hpc)

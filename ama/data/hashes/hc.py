@@ -261,7 +261,7 @@ hcHashes = {
         "Name": "sha512($salt.utf16le($pass))",
         "Category": "Raw Hash, Salted and/or Iterated"
     },
-    1730: {
+    1770: {
         "Name": "sha512(utf16le($pass).$salt)",
         "Category": "Raw Hash, Salted and/or Iterated"
     },
