@@ -56,24 +56,25 @@ build_requirements = {
     }
 }
 
-def install_requirements(distro_id):
+def install_requirements(distro_id, *, pkg:List[str] = None, avoid_build_requirements:bool = False):
     #import pdb; pdb.set_trace()
-    print_status("Installing build requirements")
-    for requirement_type, require in build_requirements[distro_id].items():
-        if require:
-            if requirement_type == "group":
-                if distro_id == "centos":
-                    Bash.exec(f"sudo yum -y group install {' '.join(require)}")
+    if not avoid_build_requirements:
+        print_status("Installing build requirements")
+        for requirement_type, require in build_requirements[distro_id].items():
+            if require:
+                if requirement_type == "group":
+                    if distro_id == "centos":
+                        Bash.exec(f"sudo yum -y group install {' '.join(require)}")
 
-            elif requirement_type == "package":
-                if distro_id == "centos":
-                    Bash.exec(f"sudo yum -y install {' '.join(require)}")
+                elif requirement_type == "package":
+                    if distro_id == "centos":
+                        Bash.exec(f"sudo yum -y install {' '.join(require)}")
 
-                elif distro_id in ["kali", "ubuntu"]:
-                    Bash.exec(f"sudo apt -y install {' '.join(require)}")
+                    elif distro_id in ["kali", "ubuntu"]:
+                        Bash.exec(f"sudo apt -y install {' '.join(require)}")
 
-                elif distro_id == "arch":
-                    Bash.exec(f"sudo pacman -S {' '.join(require)} --noconfirm")
+                    elif distro_id == "arch":
+                        Bash.exec(f"sudo pacman -S {' '.join(require)} --noconfirm")
 
 
     print_status("Installing package requirements")

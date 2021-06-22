@@ -11,7 +11,6 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import argparse
-from collections import namedtuple
 import distro
 from fineprint.status import print_failure, print_status, print_successful
 from fineprint.color import ColorStr
@@ -19,19 +18,15 @@ import platform
 from tabulate import tabulate
 import os
 
-# script of depends/cluster
-from depends import (
-    Munge,
-    Pmix,
-    Slurm,
-    PySlurm,
-    OpenMPI,
-    John,
-    install_requirements
-)
+# script of depends/
+from pkg import BuildablePackage
+from munge import Munge
+from pmix import Pmix
+from slurm import Slurm
+from openmpi import OpenMPI
+from john import John
+from linux_requirements import install_requirements
 
-BuildablePackage = namedtuple('BuildablePackage', ['name', 'version', 'source',
-                                                   'pkg', 'build_path', 'uncompressed_dir'])
 pkgs_names = ['munge', 'pmix', 'slurm', 'pyslurm', 'openmpi', 'john']
 tested_linux_distros = ['ubuntu', 'kali', 'arch', 'centos']
 
@@ -123,7 +118,7 @@ def install():
                                  pkg=Pmix, build_path=build_path, uncompressed_dir='pmix-3.2.3')
             ]
 
-        if args.enable_slurm and not ("slurm" in args.disable):
+        if args.enable_slurm and ("slurm" not in args.disable):
             packages += [
                 BuildablePackage(name='slurm', version='20.02.7',
                                  source='https://download.schedmd.com/slurm/slurm-20.02.7.tar.bz2',

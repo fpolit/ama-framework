@@ -5,6 +5,7 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import argparse
+from collections import namedtuple
 import os
 import sys
 import zipfile
@@ -14,7 +15,11 @@ from fineprint.status import print_status, print_successful, print_failure
 from fineprint.color import ColorStr
 from sbash import Bash
 
-from .pkg_exceptions import UnsupportedCompression
+from pkg_exceptions import UnsupportedCompression
+
+
+BuildablePackage = namedtuple('BuildablePackage', ['name', 'version', 'source',
+                                                   'pkg', 'build_path', 'uncompressed_dir'])
 
 class Package:
 
@@ -174,15 +179,18 @@ class Package:
     @staticmethod
     def cmd_parser():
         pkg_parser = argparse.ArgumentParser()
-        pkg_parser.add_argument("-c", "--compilation", type=str,
-                                help="Build directory path ")
-        pkg_parser.add_argument("--no-download", action='store_true', dest="no_download",
-                                help="Avoid download package")
-        pkg_parser.add_argument("--no-uncompress", action='store_true', dest="no_uncompress",
-                                help="Avoid uncompress package")
-        pkg_parser.add_argument("--check", action='store_true',
-                                help="Perform check of compilation")
+        pkg_parser.add_argument('-b','--build-dir', dest='build_dir', required=True,
+                        help="Directory where packages will be downloaded, uncompressed and compiled")
 
+        installation_parser = pkg_parser.add_argument_group("Customized Installation")
+        installation_parser.add_argument("--no-ospkgs", dest='no_ospkgs', action='store_true',
+                                help="Do not install OS dependecy packages")
+        installation_parser.add_argument("--only-compile", dest='only_compile', action='store_true',
+                                         help="Do not donwload and uncompress, simply compile packages")
+        installation_parser.add_argument("--avoid-download", dest='avoid_download', action='store_true',
+                                         help="Do not download package")
+        installation_parser.add_argument("--avoid-uncompress", dest='avoid_uncompress', action='store_true',
+                                         help="Do not uncompress package")
         return pkg_parser
 
 

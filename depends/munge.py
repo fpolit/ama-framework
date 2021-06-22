@@ -14,7 +14,7 @@ from sbash import Bash
 from fineprint.status import print_status, print_successful
 from fineprint.color import ColorStr
 
-from .pkg import Package
+from pkg import Package
 
 
 class Munge(Package):
