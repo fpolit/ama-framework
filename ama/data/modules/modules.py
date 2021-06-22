@@ -53,7 +53,9 @@ from ama.core.modules.auxiliary.wordlists import (
     CuppRefine,
     CuppDownload,
     CuppAlecto,
-    Cewl
+    Cewl,
+    BopscrkInteractive,
+    BopscrkCombine
 )
 
 ## auxiliary/hashes modules imports
@@ -114,7 +116,9 @@ auxiliaryWordlistModules = {
     f"{CuppRefine.MNAME}": CuppRefine,
     f"{CuppDownload.MNAME}": CuppDownload,
     f"{CuppAlecto.MNAME}": CuppAlecto,
-    f"{Cewl.MNAME}": Cewl
+    #f"{Cewl.MNAME}": Cewl
+    f"{BopscrkInteractive.MNAME}": BopscrkInteractive,
+    f"{BopscrkCombine.MNAME}": BopscrkCombine,
 }
 
 ## auxiliary/hashes modules
