@@ -1,9 +1,11 @@
 from .glue import Glue
 from .modules import (
     attackModules,
+    auxiliary_modules,
     auxiliaryWordlistModules,
     auxiliaryHashesModules,
-    auxiliaryAnalysisModules
+    auxiliaryAnalysisModules,
+    auxiliaryPasswordsModules
 )
 
 from .modules import amaModules

@@ -8,9 +8,11 @@
 import random
 from ama.data.modules import (
     attackModules,
+    auxiliary_modules,
     auxiliaryWordlistModules,
     auxiliaryHashesModules,
     auxiliaryAnalysisModules,
+    auxiliaryPasswordsModules,
     Glue,
 )
 
@@ -27,10 +29,11 @@ class Banner:
         Availables Modules:
 
             Attacks     : {len(attackModules)}
-            Auxiliaries :
+            Auxiliaries : {len(auxiliary_modules)}
                   Analysis     : {len(auxiliaryAnalysisModules)}
                   Wordlists    : {len(auxiliaryWordlistModules)}
                   Hashes       : {len(auxiliaryHashesModules)}
+                  Passwords    : {len(auxiliaryPasswordsModules)}
 
         Full Attacks (Pre Attack + Attack + Post Attack): {len(Glue.full_attacks)}
         """

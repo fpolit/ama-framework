@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# hash generator - nth
+# hash generator - hashlib
 #
 # Status:
 # Maintainer: glozanoa <glozanoa@uni.pe>
