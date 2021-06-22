@@ -29,11 +29,6 @@ from ama.data.hashes import hcHashes
 from ama.core.files import Path
 from .mask import Mask
 #from ama.core.cmdsets.db import Connection
-from .crackerException import (
-    InvalidParallelJob,
-    NoValidHashType,
-    InvalidWordlistsNumber
-)
 
 class Hashcat(HashCracker):
     """
@@ -47,9 +42,9 @@ class Hashcat(HashCracker):
 
     def __init__(self, *, hc_exec:Path=None, potfile:Path = None):
         super().__init__(name=['hashcat', 'hc'], version="v6.1.1", main_exec=hc_exec)
-        self.patfile = potfile if potfile else os.path.join(Path.home(), ".hashcat/hashcat.potfile")
+        self.potfile = potfile if potfile else os.path.join(Path.home(), ".hashcat/hashcat.potfile")
 
-    def search_hash(pattern, *, sensitive=False):
+    def search_hash(self, pattern, *, sensitive=False):
         """
         Search valid hashcat's hashes types given a pattern
         """
@@ -68,7 +63,7 @@ class Hashcat(HashCracker):
         print(tabulate(posible_hashes, headers=["#", "Name", "Description"]))
 
 
-    def hash_status(query_hash: str):
+    def hash_status(self, query_hash: str):
         """
         Check the status of query hash in hashcat potfile
 
@@ -79,13 +74,17 @@ class Hashcat(HashCracker):
         return self.pattern_in_potfile(pattern, self.potfile)
 
 
+
     # debugged (local attack)  - date Jun 13 2021
     def benchmark(self, slurm, local:bool = False):
         """
         Hashcat benchmark
         """
         #import pdb; pdb.set_trace()
-        if self.enable:
+        try:
+            if not self.enable:
+                raise Exception(f"Cracker {ColorStr(self.main_name).StyleBRIGHT} is disable")
+
             if (not local) and slurm and slurm.partition:
                 parallel_job_type = slurm.parallel_job_parser()
                 if not  parallel_job_type in ["GPU"]:
@@ -106,8 +105,9 @@ class Hashcat(HashCracker):
                 attack_cmd = f"{self.main_exec} -b"
                 print_status(f"Running: {ColorStr(attack_cmd).StyleBRIGHT}")
                 Bash.exec(attack_cmd)
-        else:
-            print_failure(f"Cracker {ColorStr(self.main_name).StyleBRIGHT} is disable")
+
+        except Exception as error:
+            print_failure(error)
 
 
     # debugged (local attack)  - date Jun 13 2021
@@ -133,7 +133,7 @@ class Hashcat(HashCracker):
                 permission = [os.R_OK]
                 Path.access(permission, hashes_file, *wordlists)
 
-                Hashcat.check_hash_type(hash_types)
+                self.check_hash_type(hash_types)
 
                 print_status(f"Attacking hashes in {ColorStr(hashes_file).StyleBRIGHT} file with {ColorStr(wordlists).StyleBRIGHT} wordlists")
 
@@ -142,14 +142,14 @@ class Hashcat(HashCracker):
                 print_status(f"Possible hashes identities: {ColorStr(hash_types_names).StyleBRIGHT}")
 
                 #import pdb; pdb.set_trace()
-                if (not local) and slurm and slurm.partition:
+                if (not local) and slurm:
 
                     enviroment = (
                         f"{self.MAINNAME.upper()}={self.main_exec}",
                     )
 
                     if slurm.config:
-                        self.check_slurm_partition(slurm.partition, slurm.config['partitions'])
+                        slurm.check_partition()
 
                     parallel_job_type = slurm.parallel_job_parser()
                     if not  parallel_job_type in [Slurm.GPU]:
@@ -189,7 +189,7 @@ class Hashcat(HashCracker):
                     #import pdb; pdb.set_trace()
                     for hid in hash_types:
                         for wl in wordlists:
-                            all_cracked = Hashcat.are_all_hashes_cracked(hashes_file)
+                            all_cracked = self.are_all_cracked(hashes_file)
                             if  not all_cracked: # some hash isn't cracked yet
                                 attack_cmd = (
                                     f"{self.main_exec}"
@@ -217,8 +217,8 @@ class Hashcat(HashCracker):
                             break
 
                     #import pdb; pdb.set_trace()
-                    if db_status and workspace and db_credential_file:
-                        Hashcat.insert_hashes_to_db(hashes_file, workspace, db_credential_file)
+                    # if db_status and workspace and db_credential_file:
+                    #     Hashcat.insert_hashes_to_db(hashes_file, workspace, db_credential_file)
 
             except Exception as error:
                 print_failure(error)

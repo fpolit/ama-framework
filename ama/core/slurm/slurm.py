@@ -372,3 +372,11 @@ class Slurm:
                             slurm_config[option] = value
 
         return slurm_config
+
+
+    def check_partition():
+        if self.config:
+            if self.partition not in self.config['partitions']:
+                raise Exception(f"Invalid partition: {partition}")
+        else:
+            print_failure("No slurm configuration was read")
