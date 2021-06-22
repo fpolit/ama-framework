@@ -7,8 +7,9 @@ Ama is a specialized environment for the password cracking process. It contains 
 * [Hashcat](https://hashcat.net/hashcat/) (Only for *hashcat* attack modules)
 * [John](https://github.com/openwall/john) (Only for *john* attack modules)
 
-```
+
 ## Ama Installation
+
 ```bash
 # I am in the root of AMA_REPO
 $ make install
@@ -19,8 +20,8 @@ $ ama init && ama
 **NOTE:**  
 * *Ama-framework* was tested in the following GNU/Linux distributions:
      * Kali
-     * Archlinux
      * Centos
+     * Archlinux
      * Ubuntu
 
 * If you want to submit attacks in a cluster of computers, you must have configured a cluster using [Slurm](https://slurm.schedmd.com/overview.html), also you must have installed *john* with *MPI* support.
