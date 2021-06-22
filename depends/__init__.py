@@ -5,4 +5,5 @@ from .pmix import Pmix
 from .slurm import Slurm
 from .openmpi import OpenMPI
 from .john import John
+from .pyslurm import PySlurm
 from .linux_requirements import install_requirements

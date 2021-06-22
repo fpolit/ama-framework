@@ -24,6 +24,7 @@ from depends import (
     Munge,
     Pmix,
     Slurm,
+    PySlurm,
     OpenMPI,
     John,
     install_requirements
@@ -31,7 +32,7 @@ from depends import (
 
 BuildablePackage = namedtuple('BuildablePackage', ['name', 'version', 'source',
                                                    'pkg', 'build_path', 'uncompressed_dir'])
-pkgs_names = ['munge', 'pmix', 'slurm', 'openmpi', 'john']
+pkgs_names = ['munge', 'pmix', 'slurm', 'pyslurm', 'openmpi', 'john']
 tested_linux_distros = ['ubuntu', 'kali', 'arch', 'centos']
 
 def install_args():
@@ -41,9 +42,9 @@ def install_args():
                         help="Directory where packages will be downloaded, uncompressed and compiled")
 
     prefix_parser = parser.add_argument_group("Location to install dependencies")
-    prefix_parser.add_argument("--openmpi-prefix", dest="openmpi_prefix", default="/usr/local/openmpi",
+    prefix_parser.add_argument("--openmpi-prefix", dest="openmpi_prefix", default="/usr/local/openmpi", metavar='/usr/local/openmpi',
                                help="Location to install OpenMPI")
-    prefix_parser.add_argument("--john-prefix", dest="john_prefix", required=True,
+    prefix_parser.add_argument("--john-prefix", dest="john_prefix", default='~/tools', metavar='~/tools',
                                help="Location to install John")
 
 
@@ -124,9 +125,12 @@ def install():
 
         if args.enable_slurm and not ("slurm" in args.disable):
             packages += [
-                BuildablePackage(name='slurm', version='20.11.7',
-                                 source='https://download.schedmd.com/slurm/slurm-20.11.7.tar.bz2',
-                                 pkg=Slurm, build_path=build_path, uncompressed_dir='slurm-20.11.7')
+                BuildablePackage(name='slurm', version='20.02.7',
+                                 source='https://download.schedmd.com/slurm/slurm-20.02.7.tar.bz2',
+                                 pkg=Slurm, build_path=build_path, uncompressed_dir='slurm-20.02.7'),
+                BuildablePackage(name='pyslurm', version='20.02.0',
+                                 source='https://github.com/PySlurm/pyslurm/archive/refs/tags/20-02-0.tar.gz',
+                                 pkg=PySlurm, build_path=build_path, uncompressed_dir='pyslurm-20-02-0')
             ]
 
         if "openmpi" not in args.disable:
