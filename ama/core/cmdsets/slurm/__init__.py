@@ -1,1 +1,1 @@
-from .pyslurm import Slurm
+from .slurm import Slurm
