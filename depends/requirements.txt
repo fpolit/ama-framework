@@ -1,5 +1,0 @@
-sbash
-fineprint
-distro
-tabulate
-cython
