@@ -53,7 +53,9 @@ from ama.core.modules.auxiliary.wordlists import (
     CuppRefine,
     CuppDownload,
     CuppAlecto,
-    Cewl
+    Cewl,
+    #BopscrkInteractive,
+    #BopscrkCombine
 )
 
 ## auxiliary/hashes modules imports
@@ -72,8 +74,15 @@ from ama.core.modules.auxiliary.analysis import (
     PackWholegen
 )
 
+## auxiliary/passwords modules imports
+from ama.core.modules.auxiliary.passwords import (
+    PasswordGenerator,
+    ShufflePassword
+)
+
+
 amaAttackAuxiliariesModules = ["preattack", "postattack"]
-amaModulesTypes = ["attack", "auxiliary", *amaAttackAuxiliariesModules]
+amaModulesTypes = ["attack", "auxiliary"]
 amaModulesSubtypes = ["analysis", "wordlists", "hashes"]
 
 # attack modules (hashes and services)
@@ -103,7 +112,7 @@ attackModules = {
 
     ## attack/services modules
     # hydra attacks
-    f"{HydraWordlist.MNAME}": HydraWordlist,
+    #f"{HydraWordlist.MNAME}": HydraWordlist,
 }
 
 ### auxiliary modules
@@ -114,7 +123,9 @@ auxiliaryWordlistModules = {
     f"{CuppRefine.MNAME}": CuppRefine,
     f"{CuppDownload.MNAME}": CuppDownload,
     f"{CuppAlecto.MNAME}": CuppAlecto,
-    f"{Cewl.MNAME}": Cewl
+    #f"{Cewl.MNAME}": Cewl
+    #f"{BopscrkInteractive.MNAME}": BopscrkInteractive,
+    #f"{BopscrkCombine.MNAME}": BopscrkCombine,
 }
 
 ## auxiliary/hashes modules
@@ -134,16 +145,15 @@ auxiliaryAnalysisModules = {
 
 }
 
+## auxiliary/passwords modules
+auxiliaryPasswordsModules = {
+    f"{PasswordGenerator.MNAME}": PasswordGenerator,
+    f"{ShufflePassword.MNAME}": ShufflePassword
+}
 
-amaModules = {
-### attack modules
-    **attackModules,
 
-### pre/post attacks modules
-    # **preAttackModules,
-    # **postAttackModules,
-
-### auxiliary modules
+## auxiliary modules
+auxiliary_modules = {
     ## auxiliary/wordlists modules
     **auxiliaryWordlistModules,
 
@@ -151,5 +161,13 @@ amaModules = {
     **auxiliaryHashesModules,
 
     ## auxiliary/analysis modules
-    **auxiliaryAnalysisModules
+    **auxiliaryAnalysisModules,
+
+    ## auxiliary/passwords modules
+    **auxiliaryPasswordsModules
+}
+
+amaModules = {
+    **attackModules,
+    **auxiliary_modules
 }

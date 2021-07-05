@@ -6,6 +6,7 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 
+import os
 from typing import List, Any
 from fineprint.status import print_failure
 from .crackerException import InvalidPartition
@@ -18,6 +19,13 @@ from math import ceil
 
 from .password_cracker import PasswordCracker
 
+from .crackerException import (
+    InvalidParallelJob,
+    NoValidHashType,
+    InvalidWordlistsNumber
+)
+
+
 
 class HashCracker(PasswordCracker):
     """
@@ -25,6 +33,7 @@ class HashCracker(PasswordCracker):
     """
     # Supported crackers
     HASH_CRACKERS = ["john", "hashcat"]
+    HASHES = []
 
     def __init__(self, name, *, version=None, main_exec=None):
         super().__init__(name,
@@ -39,19 +48,6 @@ class HashCracker(PasswordCracker):
             else:
                 bash_array += f"'{value}' "
         return bash_array
-
-    def check_slurm_partition(self, partition:str, slurm_partitions):
-        #import pdb; pdb.set_trace()
-        if slurm_partitions is not None:
-            valid_partition = False
-            for slurm_partition in slurm_partitions:
-                if partition == slurm_partition:
-                    valid_partition = True
-                    break
-            if not valid_partition:
-                raise InvalidPartition(partition, slurm_partitions.keys())
-        else:
-            print_failure("Slurm partition hasn't validate (slurm.conf=None)")
 
     # debugged - date Apr 13 2021
     def array_masks(self, masks_file:Path, ARRAY:int):
@@ -90,38 +86,55 @@ class HashCracker(PasswordCracker):
                         if k < END:
                             mask = masks.readline()
 
-    def check_hash_type(hash_types: List[Any]):
+    def check_hash_type(self, hash_types: List[Any]):
         """
         Check if there is a valid hash type in hash_types list
 
         Args:
-            hash_type (List[str]): hash types
+            hash_type (List[str or int]): hash types
 
         Raises:
             NoValidHashType: Error if there isn't a valid hash type in hash_types
         """
-
-        any_valid_hash_type = False
+        #import pdb; pdb.set_trace()
+        any_valid = False
         for hash_type in hash_types:
             if hash_type in self.HASHES:
-                any_valid_hash_type = True
+                any_valid = True
                 break
 
-        if not any_valid_hash_type:
+        if not any_valid:
             raise NoValidHashType(self, hash_types)
 
-    def search_hash_type(pattern, *, sensitive=False):
+    def hash_status(self, query_hash):
         """
-        Search valid hashes types given a pattern
+        Check status of a hash (Implement in each hash cracked)
         """
-        pass
+        return None
 
-    def pattern_in_potfile(pattern, potfile:Path):
+    def are_all_cracked(self, hashes_file: Path):
+        """
+        Check if all hashes are cracked
+        return True if all hashes were cracked otherwise return False
+        """
+        #import pdb;pdb.set_trace()
+        cracked = True
+        with open(hashes_file, 'r') as hashes:
+            while query_hash := hashes.readline().rstrip():
+                hstatus = self.hash_status(query_hash)
+                if hstatus is None: # query_hash isn't cracked yet
+                    cracked = False
+                    break
+
+        return cracked
+
+
+    def pattern_in_potfile(self, pattern, potfile:Path):
         """
         Search a supplied pattern in a porfile
 
         Return:
-        [] if there isn't a line that match the pattern or a list of matched groups (re module)
+        None if there isn't a line that match the pattern or a list of matched groups (re module)
         """
         #import pdb;pdb.set_trace()
         try:
@@ -134,53 +147,40 @@ class HashCracker(PasswordCracker):
                     if match := pattern.fullmatch(line):
                         matches.append(match)
 
+            if not matches:
+                matches = None
+
             return matches
 
         except Exception as error:
             print_failure(error)
 
-    def all_cracked(hashes_file: Path):
-        """
-        Check if all hashes are cracked
-        return True if all hashes were cracked otherwise return False
-        """
-        #import pdb;pdb.set_trace()
-        all_cracked = True
-        with open(hashes_file, 'r') as hashes:
-            while query_hash := hashes.readline().rstrip():
-                status = self.hash_status(query_hash)
-                if status is None: # query_hash isn't cracked yet
-                    all_cracked
-                    break
-
-        return all_cracked
-
     # NO DEBUGGED
-    def hashes_file_status(query_hashes_file:Path, potfile=None):
-        """
-        Check the status (broken by John or not) of hashes in query_hashes_file
-        and return the cracked and uncracked hashes
-        """
-        #import pdb; pdb.set_trace()
-        hashes_status = {'cracked': [], "uncracked": []}
+    # def hashes_file_status(query_hashes_file:Path, potfile=None):
+    #     """
+    #     Check the status (broken by John or not) of hashes in query_hashes_file
+    #     and return the cracked and uncracked hashes
+    #     """
+    #     #import pdb; pdb.set_trace()
+    #     hashes_status = {'cracked': [], "uncracked": []}
 
-        if potfile is None:
-            HOME = Path.home()
-            potfile = Path.joinpath(HOME, ".hashcat/hashcat.potfile")
+    #     if potfile is None:
+    #         HOME = Path.home()
+    #         potfile = Path.joinpath(HOME, ".hashcat/hashcat.potfile")
 
-        try:
-            permission = [os.R_OK]
-            Path.access(permission, potfile, query_hashes_file)
+    #     try:
+    #         permission = [os.R_OK]
+    #         Path.access(permission, potfile, query_hashes_file)
 
 
-            with open(query_hashes_file, 'r') as hashes_file:
-                while query_hash := hashes_file.readline().rstrip():
-                    if cracker_hash := Hashcat.hash_status(query_hash):
-                        hashes_status['cracked'].append(cracker_hash.get_loot())
-                    else: #crackedHash is uncracked
-                        hashes_status['uncracked'].append([query_hash])
+    #         with open(query_hashes_file, 'r') as hashes_file:
+    #             while query_hash := hashes_file.readline().rstrip():
+    #                 if cracker_hash := Hashcat.hash_status(query_hash):
+    #                     hashes_status['cracked'].append(cracker_hash.get_loot())
+    #                 else: #crackedHash is uncracked
+    #                     hashes_status['uncracked'].append([query_hash])
 
-            return hashes_status
+    #         return hashes_status
 
-        except Exception as error:
-            print_failure(error)
+    #     except Exception as error:
+    #         print_failure(error)

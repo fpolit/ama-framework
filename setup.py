@@ -37,7 +37,7 @@ setup(
     packages=['ama'],
     packages=find_packages(),
     package_data={
-        "ama.core.plugins.auxiliary.wordlists": ["cupp.cfg"],
+        "ama.core.plugins.auxiliary.wordlists": ["cupp.cfg", "bopscrk.cfg"],
     },
     # install_requires = [
     #     'fineprint',

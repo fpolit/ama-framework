@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 #
-# hash generator - nth
+# hash generator - hashlib
 #
 # Status:
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
-from fineprint.status import print_failure
-#from typing import List
+import hashlib
+from fineprint.status import print_failure, print_status, print_successful
 
 # module.base imports
 from ama.core.modules.base import (
@@ -15,26 +15,26 @@ from ama.core.modules.base import (
     Argument
 )
 
-# validator imports
-#from ama.core.validator import Args
-#from ama.core.files import Path
-
 import hashlib
 
 class HashGenerator(Auxiliary):
     """
 
     """
-    DESCRIPTION = "Generate hashes"
+    DESCRIPTION = "Hash Generator"
     MNAME = "auxiliary/hashes/hash_generator"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
     AUTHOR = [
-        "acher <acher@uni.pe>"
+        "abjoschevaro <acheva@uni.pe>"
     ]
 
+    _algorithms_available = list(hashlib.algorithms_available)
     FULLDESCRIPTION = (
-        """
-        Generate hashes given a word
+        f"""
+        Generate hashes for a given text.
+        Supported hash functions:
+           {' '.join(_algorithms_available[:10])}
+           {' '.join(_algorithms_available[10:])}
         """
     )
 
@@ -43,12 +43,12 @@ class HashGenerator(Auxiliary):
     ]
 
     def __init__(self, *,
-                 word: str = None):
+                 text: str = None):
 
         auxiliary_options = {
-            'word': Argument(word, True, "Word to generate a hash", value_type=str),
-            'alg': Argument(word, True, "algorithm", value_type=str),
-            'bye': Argument(False, True, "Say bye", value_type=bool),
+            'text': Argument(text, True, "Text to generate a hash", value_type=str),
+            'hfunc': Argument(None, True, "Hash function", value_type=str),
+            'output': Argument(None, False, "Output file", value_type=str)
         }
 
         init_options = {
@@ -65,16 +65,25 @@ class HashGenerator(Auxiliary):
 
     def run(self, quiet=False):
         """
+        Hash generator - auxiliary module
         """
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         try:
-            # CODE
             self.no_empty_required_options()
-            print(f"word: {self.options['word'].value}, alg: {self.options['alg'].value}")
-            print("hello abraham")
 
-            if self.options['bye'].value:
-                print("Bye Abraham")
+            print_status(f"Generating a {self.options['hfunc'].value} hash for '{self.options['text'].value}'")
+
+            hash_algorithm = hashlib.new(self.options['hfunc'].value)
+            hash_algorithm.update(bytes(self.options['text'].value, 'utf-8'))
+
+            generated_hash = hash_algorithm.hexdigest()
+            print_successful(f"Generated hash: {generated_hash}")
+
+            if self.options['output'].value:
+                with open(self.options['output'].value, 'w') as output:
+                    output.write(f"{generated_hash}\n")
+
+                print_successful(f"Hash was saved to {self.options['output'].value} file")
 
         except Exception as error:
             print_failure(error)

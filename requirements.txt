@@ -1,4 +1,5 @@
 # base packages
+distro
 # psycopg2 need of libpq-devel.x86_64 and postgresql.x86_64 centos 8 packages
 #psycopg2
 fineprint

@@ -7,6 +7,7 @@
 
 
 import argparse
+import hashlib
 
 # version import
 from ama.core.version import get_version
@@ -20,9 +21,11 @@ from ..category import CmdsetCategory as Category
 # cmd2 imports
 import cmd2
 from cmd2 import (
+    Cmd,
     CommandSet,
     with_default_category,
-    with_argparser
+    with_argparser,
+    Cmd2ArgumentParser
 )
 
 #import hashes
@@ -37,9 +40,10 @@ from ama.core.plugins.cracker import (
     Hashcat,
 )
 
+from fineprint.status import print_status, print_successful
 
 
-#@with_default_category(Category.CORE)
+@with_default_category(Category.CORE)
 class Core(CommandSet):
     """
     Core command set category
@@ -67,20 +71,18 @@ class Core(CommandSet):
 
         print(Banner.random())
 
-    hashes_parser = argparse.ArgumentParser()
+    hashtype_parser = argparse.ArgumentParser()
     password_crackers = [John.MAINNAME, Hashcat.MAINNAME]
-    hashes_parser.add_argument('-c', '--cracker', choices=password_crackers, required=True,
+    hashtype_parser.add_argument('-c', '--cracker', choices=password_crackers, required=True,
                                help="Password cracker")
 
-    hashes_parser.add_argument('-s', '--sensitive', action='store_true',
+    hashtype_parser.add_argument('-s', '--sensitive', action='store_true',
                                help="Sensitive search")
 
-    hashes_parser.add_argument('pattern',
+    hashtype_parser.add_argument('pattern',
                                help="Pattern to search")
-
-
-    @with_argparser(hashes_parser)
-    def do_hashes(self, args):
+    @with_argparser(hashtype_parser)
+    def do_hashtype(self, args):
         """
         Search by valid hashes types
         """
@@ -88,3 +90,35 @@ class Core(CommandSet):
             John.search_hash(args.pattern, sensitive=args.sensitive)
         else: # cracker == hc
             Hashcat.search_hash(args.pattern, sensitive=args.sensitive)
+
+
+
+    hashgen_parser = Cmd2ArgumentParser()
+    hashgen_parser.add_argument('text', type=str,
+                                help='Text to encrpt')
+    hashgen_parser.add_argument('-t', '--type', dest='hash_type',
+                                choices=hashlib.algorithms_available,
+                                required=True, metavar='HASH_FUNCTION',
+                                help="Hash Type")
+    hashgen_parser.add_argument('-o', '--output', default=None, completer=Cmd.path_complete,
+                                help='Output file')
+    @with_argparser(hashgen_parser)
+    def do_hashgen(self, args):
+        """
+        Hashes Generator
+        """
+
+        print_status(f"Generating a {args.hash_type} hash for '{args.text}'")
+
+        hash_algorithm = hashlib.new(args.hash_type)
+        hash_algorithm.update(bytes(args.text, 'utf-8'))
+
+        generated_hash = hash_algorithm.hexdigest()
+        print_successful(f"Generated hash: {generated_hash}")
+
+        if args.output:
+            with open(args.output, 'w') as output:
+                output.write(f"{generated_hash}\n")
+
+            print_successful(f"Hash was saved to {args.output} file")
+

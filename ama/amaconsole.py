@@ -25,6 +25,8 @@ from .core.cmdsets import CmdsetCategory as Category
 #     Loot
 # )
 
+from .core.cmdsets.slurm import Slurm as SlurmCmds
+
 from .core.cmdsets.john import (
     JohnUtilities
 )
