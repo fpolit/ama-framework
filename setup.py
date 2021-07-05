@@ -18,7 +18,7 @@ f.close()
 
 
 setup(
-    name='ama',
+    name='ama-framework',
     version=VERSION,
     description='Specialized environment for the password cracking process',
     long_description=LONG_DESCRIPTION,
@@ -34,6 +34,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9"
     ],
+    packages=['ama'],
     packages=find_packages(),
     package_data={
         "ama.core.plugins.auxiliary.wordlists": ["cupp.cfg"],
