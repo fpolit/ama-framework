@@ -49,7 +49,8 @@ setup(
         #'search-that-hash',
         'hashid',
         'cupp',
-        'pack-ama'
+        'pack-ama',
+        'hcutils'
     ],
     include_package_data=True,
     entry_points={
