@@ -34,43 +34,30 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9"
     ],
-    packages=['ama'],
     packages=find_packages(),
     package_data={
         "ama.core.plugins.auxiliary.wordlists": ["cupp.cfg", "bopscrk.cfg"],
     },
-    # install_requires = [
-    #     'fineprint',
-    #     'sbash',
-    #     'random-password-generator',
-    #     'cmd2',
-    #     'tabulate',
-    #     'varname',
-    #     'psutil',
-    #     'name-that-hash',
-    #     #'search-that-hash',
-    #     'hashid',
-    #     'cupp',
-    #     'pack-ama'
-    # ],
+   install_requires = [
+        'fineprint',
+        'sbash',
+        'random-password-generator',
+        'cmd2',
+        'tabulate',
+        'varname',
+        'psutil',
+        'name-that-hash',
+        #'search-that-hash',
+        'hashid',
+        'cupp',
+        'pack-ama',
+        'hcutils'
+    ],
     include_package_data=True,
     entry_points={
         'console_scripts':[
             'ama = ama.ama:main',
             'amadb = ama.amadb:main',
         ],
-    },
-
-    ext_modules=cythonize(
-        Extension(
-            "ama.core.plugins.hcutils.pyhcutils",
-            ["ama/core/plugins/hcutils/pyhcutils.pyx",
-             "ama/core/plugins/hcutils/libhcutils/combinator.c",
-             "ama/core/plugins/hcutils/libhcutils/combinator3.c",
-             "ama/core/plugins/hcutils/libhcutils/combipow.c"],
-             #"ama/core/plugins/hcutils/libhcutils/mli2.c"],
-            include_dirs=["ama/core/plugins/hcutils/libhcutils"],
-            compiler_directives={"language_level": 3},
-        )
-    )
+    }
 )
