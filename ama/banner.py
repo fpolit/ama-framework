@@ -39,8 +39,7 @@ class Banner:
         """
     )
     AMA_VERSION = get_version()
-    def __init__(self):
-        self.banners = (
+    BANNERS = (
             r"""
             eeeee eeeeeee eeeee
             8   8 8  8  8 8   8
@@ -55,12 +54,11 @@ class Banner:
         """
         return a random banner of ama
         """
-        amaBanner = Banner()
-        randomBanner = random.choice(amaBanner.banners)
+        random_banner = random.choice(Banner.BANNERS)
 
         return (
         f"""
-        {randomBanner}
+        {random_banner}
     {Banner.AMA_INFO}
         
         VERSION: {Banner.AMA_VERSION}
