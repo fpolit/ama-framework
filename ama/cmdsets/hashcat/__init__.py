@@ -1,0 +1,1 @@
+from .hcutils import HashcatUtils
