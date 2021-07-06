@@ -6,10 +6,11 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 
-from setuptools import setup, find_packages
-from ama.core.version import get_version
+from setuptools import setup, find_packages, Extension
+from Cython.Build import cythonize
+#from ama.core.version import get_version
 
-VERSION = get_version()
+VERSION = "1.3.0"
 
 f = open('README.md', 'r')
 LONG_DESCRIPTION = f.read()
@@ -17,7 +18,7 @@ f.close()
 
 
 setup(
-    name='ama',
+    name='ama-framework',
     version=VERSION,
     description='Specialized environment for the password cracking process',
     long_description=LONG_DESCRIPTION,
@@ -37,7 +38,7 @@ setup(
     package_data={
         "ama.core.plugins.auxiliary.wordlists": ["cupp.cfg", "bopscrk.cfg"],
     },
-    install_requires = [
+   install_requires = [
         'fineprint',
         'sbash',
         'random-password-generator',
@@ -49,7 +50,8 @@ setup(
         #'search-that-hash',
         'hashid',
         'cupp',
-        'pack-ama'
+        'pack-ama',
+        'hcutils'
     ],
     include_package_data=True,
     entry_points={
