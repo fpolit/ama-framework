@@ -6,7 +6,7 @@ install: virtualenv require
 installdev: virtualenv requiredev
 	env/bin/python3 -m pip install . --verbose --use-feature=in-tree-build
 
-clean: cleanslurm cleanbkp cleanmasks cleanstats cleanpkg
+clean: cleanslurm cleanbkp cleanmasks cleanstats cleanpkg cleanhashes
 
 cleanpkg:
 	rm -rf ama.egg-info
@@ -23,8 +23,12 @@ cleanbkp:
 cleanmasks:
 	rm -f *.hcmasks
 	rm -f *.masks
+
 cleanstats:
 	rm -f *.stats
+
+cleanhashes:
+	rm -f *.hash
 
 virtualenv:
 	python3 -m venv --prompt 'ama' env

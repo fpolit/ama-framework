@@ -13,6 +13,7 @@
 **/*.slurm
 **/*.sh
 
+ama_framework.egg-info/*
 ama.egg-info/*
 ama/test/*
 env/*

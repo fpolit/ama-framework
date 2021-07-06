@@ -5,6 +5,7 @@
 # date: Feb 18 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
+import threading
 import os
 import json
 import sys
@@ -16,7 +17,7 @@ from fineprint.status import print_failure, print_status
 
 
 # categories
-from .core.cmdsets import CmdsetCategory as Category
+from .cmdsets import CmdsetCategory as Category
 
 # cmdsets
 # from .core.cmdsets.db import (
@@ -25,13 +26,13 @@ from .core.cmdsets import CmdsetCategory as Category
 #     Loot
 # )
 
-from .core.cmdsets.slurm import Slurm as SlurmCmds
+from .cmdsets.slurm import Slurm as SlurmCmds
 
-from .core.cmdsets.john import (
-    JohnUtilities
-)
+# from .core.cmdsets.john import (
+#     JohnUtilities
+# )
 
-from .core.cmdsets.module import (
+from .cmdsets.module import (
     Search,
     Information,
     Interaction
@@ -41,23 +42,27 @@ from .core.cmdsets.core import (
     Core
 )
 
-from .core.cmdsets.hashcat import (
-    HashcatUtils
-)
+# from .core.cmdsets.hashcat import (
+#     HashcatUtils
+# )
 
 # banner
-from .core.banner import Banner
+from .banner import Banner
 
 # version
-from ama.core.version import get_version
+from ama.version import get_version
 
 # availables modules
 from ama.data.modules import amaModules
-from ama.core.files import Path
+from ama.utils.files import Path
 from ama.config import AMA_HOME
 
 # slurm
-from ama.core.slurm import Slurm
+from ama.slurm import Slurm
+
+
+# attack manager
+from ama.manager import AttackManager
 
 class Ama(Cmd):
     """
@@ -73,23 +78,26 @@ class Ama(Cmd):
     def __init__(self,
                  ama_config:Path = Path.joinpath(AMA_HOME, 'config/ama.json')):
 
-        super().__init__(include_ipy=True, allow_redirection=True)
+        super().__init__(include_ipy=True,
+                         allow_redirection=True,
+                         persistent_history_file=Path.joinpath(AMA_HOME, "log/history.dat"))
 
         #import pdb; pdb.set_trace()
-        self.debug = True
+        self.default_to_shell = True
+        self.debug = False
         self.intro = Banner.random()
         self.prompt = "ama > "
         self.continuation_prompt = "> "
         self.default_category = Category.CORE
         self.config = Ama.get_ama_configurations(ama_config)
-        self.db_conn = None #self.init_db_connection()
-        self.workspace = "default" # selected workspace
-        # ama configuration (slurm.conf path, dbcreds path, john and hashcat executable path)
+        #self.db_conn = None #self.init_db_connection()
+        #self.workspace = "default" # selected workspace
         self.modules = amaModules # format {NAME: MODULE_CLASS, ....}
         self.selectedModule = None # selected module with 'use' command (Instance of the module)
         self.filteredModules = [] # filtered modules(format: [(#, MODULE_CLASS), ...])
+        self.manager = AttackManager()
         self.gvalues = {} # global values(format {OPTION_NAME: OPTION_VALUE, ...})
-        self.slurm_config = self.init_slurm_config()
+        #self.slurm_config = self.init_slurm_config()
         #import pdb; pdb.set_trace()
 
 
@@ -137,23 +145,25 @@ class Ama(Cmd):
     #         return db_conn
 
 
-    def init_slurm_config(self):
-        #import pdb;pdb.set_trace()
-        try:
+    # def init_slurm_config(self):
+    #     #import pdb;pdb.set_trace()
+    #     try:
 
-            slurm_config_file = None
-            if self.config:
-                slurm_config_file = self.config.get("slurm_conf_file")
+    #         slurm_config_file = None
+    #         if self.config:
+    #             slurm_config_file = self.config.get("slurm_conf_file")
 
-            if slurm_config_file is None:
-                slurm_config_file = Slurm.find_slurm_config()
+    #         if slurm_config_file is None:
+    #             slurm_config_file = Slurm.find_slurm_config()
 
-            return Slurm.parser_slurm_conf(slurm_config_file)
+    #         return Slurm.parser_slurm_conf(slurm_config_file)
 
-        except Exception as error:
-            print_failure(error)
-            #print_failure("Error while parsing slurm configuration file")
+    #     except Exception as error:
+    #         print_failure(error)
+    #         #print_failure("Error while parsing slurm configuration file")
 
 def main(argv=sys.argv[1:]):
     ama = Ama()
+    attack_processor = threading.Thread(target=ama.manager.process, deamon=True)
+    attack_processor.start()
     sys.exit(ama.cmdloop())

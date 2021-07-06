@@ -13,20 +13,13 @@
 # | |- database.json (database credentials)
 # |
 # |- log
-# | |- database.log (logs relate to database bugs)
-# | |- ama.log      (logs relate to ama-framework bugs)
-# | |- modules.log  (logs relate to modules bugs)
+# | |- database.log (logs relate to database logs)
+# | |- ama.log      (logs relate to ama logs)
+# | |- history.dat  (history of commands)
 # |
 # |- modules
 # | |- attack       (directory to save custom attack modules)
 # | |- auxiliary    (directory to save custom auxiliary modules)
-# |
-# |- plugins
-# | |- auxiliary   (directory to save custom auxiliary plugins)
-# | |- cracker     (directory to save custom cracker plugins)
-# |
-# |- data
-# | |- modules.py  (python script with custom ama modules)
 # |
 # |- config
 # | |- ama.json  (ama's configuration file)
@@ -86,21 +79,21 @@ def create_ama_home(base_path: Path = USER_HOME):
     ama_logs = FilesStruct('log', base_path=BASE_PATH,
                            inside_files=['database.log',
                                          'ama.log',
-                                         'modules.log'])
+                                         'history.dat'])
 
-    ama_data = FilesStruct('data', base_path=BASE_PATH,
-                         inside_files=['modules.py'])
+    # ama_data = FilesStruct('data', base_path=BASE_PATH,
+    #                      inside_files=['modules.py'])
 
     ama_modules = FilesStruct('modules', base_path=BASE_PATH,
                               inside_dirs=['attack', 'auxiliary'])
 
-    ama_plugins = FilesStruct('plugins', base_path=BASE_PATH,
-                              inside_dirs=['auxiliary', 'cracker'])
+    # ama_plugins = FilesStruct('plugins', base_path=BASE_PATH,
+    #                           inside_dirs=['auxiliary', 'cracker'])
 
     ama_config = FilesStruct('config', base_path=BASE_PATH,
                              inside_files=['ama.json'])
 
-    ama_home.filesStructs = [ama_db, ama_logs, ama_data, ama_modules, ama_plugins, ama_config]
+    ama_home.filesStructs = [ama_db, ama_logs, ama_modules, ama_config]
     ama_home.create()
     print_successful(f"Ama home directory has been created: {ColorStr(ama_home.path).StyleBRIGHT}")
 
@@ -111,7 +104,6 @@ def init_ama_config():
     database_credentials = Path.joinpath(AMA_HOME, 'db/database.json')
     configurations = {
         'db_credentials_file': str(database_credentials),
-        'slurm_conf_file': None,
         'john': None,
         'hashcat': None
     }

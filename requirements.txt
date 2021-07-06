@@ -1,19 +1,12 @@
 # base packages
 distro
-# psycopg2 need of libpq-devel.x86_64 and postgresql.x86_64 centos 8 packages
-#psycopg2
 fineprint
 sbash
-random-password-generator
+batchgen
 cmd2
 tabulate
 varname
 psutil
-
-# hcutils
-build
-wheel
-cython
 
 # auxiliary module packages
 
@@ -32,5 +25,5 @@ cupp
 pack-ama
 #ppack-ama
 
-## auxiliary/combinator
-#mixer-ama
+## auxiliary/passwords
+random-password-generator
