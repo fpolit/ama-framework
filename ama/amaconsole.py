@@ -64,14 +64,14 @@ from ama.slurm import Slurm
 # attack manager
 from ama.manager import AttackManager
 
+# logger
+import logging
+from ama.config.logger import Logger
+
 class Ama(Cmd):
     """
     CLI App to interact with ama-framework
     """
-    # CORE_CATEGORY = Category.CORE
-    # MODULE_CATEGORY = Category.MODULE
-    # DB_CATEGORY = Category.DB
-    # SLURM_CATEGORY = Category.SLURM
 
     AMA_HOME = AMA_HOME
 
@@ -97,8 +97,15 @@ class Ama(Cmd):
         self.filteredModules = [] # filtered modules(format: [(#, MODULE_CLASS), ...])
         self.manager = AttackManager()
         self.gvalues = {} # global values(format {OPTION_NAME: OPTION_VALUE, ...})
-        #self.slurm_config = self.init_slurm_config()
-        #import pdb; pdb.set_trace()
+
+        ## settable options
+        self.logfile = Path.joinpath(AMA_HOME, "log/ama.log")
+        self.loglevel = logging.WARNING
+
+        ## logging
+        self.logger = Logger(__name__, filelog=self.logfile, level=self.loglevel,
+                             formatlog='[%(asctime)s] %(name)s - %(levelname)s - %(message)s')
+        self.logger.add_handler(handler_type=logging.FileHandler)
 
 
     @staticmethod
