@@ -13,9 +13,9 @@ from fineprint.status import (
     print_failure
 )
 
-from pathlib import PosixPath
+from pathlib import Path as Path_pathlib
 
-class Path(PosixPath):
+class Path(Path_pathlib):
     @staticmethod
     def access(permissions=[], *paths):
         """
