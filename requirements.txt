@@ -8,6 +8,7 @@ tabulate
 varname
 psutil
 argcomplete
+anytree
 
 # auxiliary module packages
 
