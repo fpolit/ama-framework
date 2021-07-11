@@ -8,14 +8,12 @@ Ama is a specialized environment for the password cracking process. It contains 
 * [John](https://github.com/openwall/john) (Only for *john* attack modules)
 
 
-## Ama Installation
-
+## Getting Starting
 ```bash
-# I am in the root of AMA_REPO
-$ make install
-$ source env/bin/activate
-$ ama init && ama
+$ pip install ama-framework
 ```
+
+![start using ama](docs/screenshots/init_ama.png)
 
 **NOTE:**  
 * *Ama-framework* was tested in the following GNU/Linux distributions:
