@@ -38,21 +38,7 @@ setup(
     package_data={
         "ama.core.plugins.auxiliary.wordlists": ["cupp.cfg", "bopscrk.cfg"],
     },
-   install_requires = [
-        'fineprint',
-        'sbash',
-        'random-password-generator',
-        'cmd2',
-        'tabulate',
-        'varname',
-        'psutil',
-        'name-that-hash',
-        #'search-that-hash',
-        'hashid',
-        'cupp',
-        'pack-ama',
-        'hcutils'
-    ],
+   install_requires = [], # read requirements.txt file
     include_package_data=True,
     entry_points={
         'console_scripts':[
