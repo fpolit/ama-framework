@@ -17,7 +17,6 @@ from ama.utils import with_argparser
 def autocomplete_setv(module:Module):
 	module_options = module.options
 
-	def setv()
 	setv_parser = argparse.ArgumentParser(prog='setv')
 	setv_parser.add_argument("option", choices=module_options.keys(),
 							 help="Module option")
@@ -43,12 +42,12 @@ def autocomplete_setv(module:Module):
 
 	argcomplete.autocomplete(setv_parser)
 
-	args = setb_parser.parse_args()
+
 
 	#import pdb; pdb.set_trace()
 
-	#@with_argparser(setv_parser)
-	#def do_setv(args=None):
-	print(f"args: {args}")
+	@with_argparser(setv_parser)
+	def do_setv(args):
+		print(f"args: {args}")
 
-	return
+	return do_setv

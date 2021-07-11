@@ -317,7 +317,7 @@ class Interaction(CommandSet):
                         subtype_name = ColorStr.ForeRED(f"{moduleSubtype}/{moduleName}")
                         self._cmd.prompt = f"ama {moduleType}({subtype_name}) > "
 						#import pdb;pdb.set_trace()
-                        self._cmd.do_setv = autocomplete_setv(self._cmd.selectedModule)
+                        #self._cmd.do_setv = autocomplete_setv(self._cmd.selectedModule)
                         break
 
                 if not selected:
@@ -433,13 +433,13 @@ class Interaction(CommandSet):
 
     #setv_parser = argparse.ArgumentParser()
     setv_parser = Cmd2ArgumentParser()
-    #setv_parser.add_argument("option", help="Option to set value")
-    #setv_parser.add_argument("value",  completer=Cmd.path_complete, help="Value of option")
-
-    # setv_parser.add_argument('-pre', '--preattack', action='store_true',
-    #                          help="Set value to pre attack module option")
-    # setv_parser.add_argument('-post', '--postattack', action='store_true',
-    #                          help="Set value to post attack module option")
+    setv_parser.add_argument("option", help="Option to set value")
+    setv_parser.add_argument("value",  completer=Cmd.path_complete, help="Value of option")
+    setv_parser.add_argument('-q', '--quiet', action='store_true', help="Set value quietly")
+    setv_parser.add_argument('-pre', '--pre-module', dest='pre_module', action='store_true',
+                                help="Set value to pre attack module option")
+    setv_parser.add_argument('-post', '--post-module', dest='post_module', action='store_true',
+                                help="Set value to post attack module option")
 
 
     #debugged - date: Feb 28 2021
@@ -455,7 +455,9 @@ class Interaction(CommandSet):
         try:
             selected_module = self._cmd.selectedModule
             if selected_module:
-                print(selected_module)
+                selected_module.setv(args.option, args.value, args.quiet,
+									 pre_module = args.pre_module,
+									 post_module = args.post_module)
             else:
                 print_failure("No module was selected")
 
@@ -527,22 +529,22 @@ class Interaction(CommandSet):
     #         print_failure("No module selected")
 
     # #debugged - data: feb 27 2021
-    # auxiliary_parser = argparse.ArgumentParser()
-    # auxiliary_parser.add_argument('-q', '--quiet', action='store_true',
-    #                               help="Run quietly")
+    auxiliary_parser = argparse.ArgumentParser()
+    auxiliary_parser.add_argument('-q', '--quiet', action='store_true',
+                                  help="Run quietly")
 
-    # @with_argparser(auxiliary_parser)
-    # def do_run(self, args):
-    #     """
-    #     Run the selected auxiliary module
-    #     """
-    #     #import pdb; pdb.set_trace()
-    #     selectedModule = self._cmd.selectedModule
-    #     if selectedModule:
-    #         if isinstance(selectedModule, Auxiliary):
-    #             print_status(f"Running {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
-    #             selectedModule.run(quiet=args.quiet)
-    #         else: # selectedModule is an instance of Attack
-    #             print_failure(f"No run method for {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
-    #     else:
-    #         print_failure("No module selected")
+    @with_argparser(auxiliary_parser)
+    def do_run(self, args):
+        """
+        Run the selected auxiliary module
+        """
+        #import pdb; pdb.set_trace()
+        selectedModule = self._cmd.selectedModule
+        if selectedModule:
+            if isinstance(selectedModule, Auxiliary):
+                print_status(f"Running {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
+                selectedModule.run(quiet=args.quiet)
+            else: # selectedModule is an instance of Attack
+                print_failure(f"No run method for {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
+        else:
+            print_failure("No module selected")

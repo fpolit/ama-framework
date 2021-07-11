@@ -60,6 +60,7 @@ class Module:
         Set an option of a module with the supplied value
         """
         try:
+			import pdb; pdb.set_trace()
             if pre_module:
                 self.pre_module.setv(option, value, quiet=True)
                 print(f"(pre module) {option} => {value}")

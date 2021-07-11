@@ -27,18 +27,20 @@ class Auxiliary(Module):
     Base class to build auxiliary modules
     """
     def __init__(self, *,
-                 mname: str, author: List[str],
+                 mname: str, authors: List[str],
                  description: str, fulldescription: str, references: List[str],
-                 auxiliary_options: dict, slurm):
+                 auxiliary_options: dict,
+				 pre_module:Module = None, post_module:Module = None):
 
         init_options = {
             'mname': mname,
-            'author': author,
+            'authors': authors,
             'description': description,
             'fulldescription': fulldescription,
             'references': references,
             'options': auxiliary_options,
-            'slurm': slurm
+			'pre_module': pre_module,
+			'post_module': post_module
         }
 
         super().__init__(**init_options)
@@ -49,7 +51,4 @@ class Auxiliary(Module):
         """
         pass
 
-    def isAuxiliaryOption(self, option):
-        if option in self.options:
-            return True
-        return False
+	execute = run

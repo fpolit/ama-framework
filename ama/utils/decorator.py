@@ -22,8 +22,13 @@ def	with_argparser(parser:argparse.ArgumentParser):
 	    do_something
 	"""
 	def wrapper(func):
-		print("was called Wrapper?")
-		pargs = parser.parse_args()
+		#print("was called Wrapper?")
+		pargs = None
+		try:
+		    pargs = parser.parse_args()
+		except Exception as error:
+			print(error)
+
 		return func(pargs)
 
 	return wrapper
