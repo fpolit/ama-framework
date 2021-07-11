@@ -34,12 +34,12 @@ class Path(Path_pathlib):
                 if (path is not None) and os.path.exists(path):
                     if not os.access(path, permission):
                         if permission == os.R_OK:
-                            cmd2.Cmd.pwarning(f"{path} haven't read permission")
+                            #cmd2.Cmd.pwarning(f"{path} haven't read permission")
                             permissionCheck = False
                             invalidPermission['read'].append(path)
 
                         elif permission == os.W_OK:
-                            cmd2.Cmd.pwarning(f"{path} haven't write permission")
+                            #cmd2.Cmd.pwarning(f"{path} haven't write permission")
                             permissionCheck = False
                             invalidPermission['write'].append(path)
 

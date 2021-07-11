@@ -6,46 +6,32 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 from tabulate import tabulate
-
 from typing import (
     List,
     Any
 )
 
-# base imports
-from .argument import Argument
+
+from ama.utils import Argument
 from .auxiliary import Auxiliary
-from ama.core.modules.base import Module
+from .module import Module
 
-# table formation imports
-from cmd2.table_creator import (
-    Column,
-    SimpleTable
-)
-
-from fineprint.status import (
-    print_failure
-)
-
-# validator
-from ama.core.validator import Args
 
 class Attack(Module):
     """
     Base class to build attack modules
     """
-    CRACKER = None
     def __init__(self, *,
                  mname: str, author: List[str],
                  description: str, fulldescription: str, references: List[str],
                  attack_options: dict, slurm,
-                 pre_attack, post_attack):
+                 pre_attack:Auxiliary = None, post_attack:Auxiliary = None):
 
         # Instance of selected pre attack class
-        self.selected_pre_attack = pre_attack if isinstance(pre_attack, Auxiliary) else None
+        self.pre_attack = pre_attack if isinstance(pre_attack, Auxiliary) else None
 
         # Instance of selected post attack class
-        self.selected_post_attack = post_attack if isinstance(post_attack, Auxiliary) else None
+        self.post_attack = post_attack if isinstance(post_attack, Auxiliary) else None
 
         pre_attack_name = pre_attack.mname if isinstance(pre_attack, Auxiliary) else None
         post_attack_name = post_attack.mname if isinstance(post_attack, Auxiliary) else None
@@ -65,7 +51,7 @@ class Attack(Module):
             'slurm': slurm
         }
 
-        self.init_options = init_options
+        #self.init_options = init_options
 
         super().__init__(**init_options)
 
@@ -81,19 +67,19 @@ class Attack(Module):
                     pre_attack_module.setv(option, value, quiet=True)
                     print(f"(preattack) {option.upper()} => {value}")
                 else:
-                    raise Exception(f"{selectedModule.MNAME} module hasn't selected a pre attack module yet")
+                    raise Exception(f"{self.MNAME} module hasn't selected a pre attack module yet")
 
             elif post_attack:
                 if post_attack_module := self.selected_post_attack:
                     post_attack_module.setv(option, value, quiet=True)
                     print(f"(postattack) {option.upper()} => {value}")
                 else:
-                    raise Exception(f"{selectedModule.MNAME} module hasn't selected a post attack module yet")
+                    raise Exception(f"{self.MNAME} module hasn't selected a post attack module yet")
             else: # set option of attack module
                 super().setv(option, value)
 
         except Exception as error:
-            print_failure(error)
+            print(error)
 
 
 
@@ -105,35 +91,21 @@ class Attack(Module):
 
     def attack(self, *args, **kwargs):
         """
-        Default method to run attack module
+        Default method to perform attack module
         """
         pass
 
-    # def get_init_options(self):
-    #     init_options = self.init_options.copy()
-    #     init_options['attack_options'] = init_options['options']
-    #     del init_options['options']
-    #     return init_options
+    def check_required_options(self, local=False):
+        if self.pre_attack:
+            self.pre_attack.check_required_options()
 
-    def no_empty_required_options(self, local=False):
-        #import pdb; pdb.set_trace()
-        required_module_options = self.required_options(local)
+        if self.post_attack:
+            self.post_attack.check_required_options()
 
-        required_pre_attack_options = {}
-        if self.selected_pre_attack:
-            required_pre_attack_options = self.selected_pre_attack.required_options(local)
+        super().check_required_options()
 
-        required_post_attack_options = {}
-        if self.selected_post_attack:
-            required_post_attack_options = self.selected_post_attack.required_options(local)
-
-        required_args = {
-            **required_module_options,
-            **required_pre_attack_options,
-            **required_post_attack_options
-        }
-
-        Args.no_empty_required_options(**required_args)
+        if not local:
+            pass # check slurm options
 
     def isAttackOption(self, option):
         if option in self.options:
@@ -190,7 +162,7 @@ class Attack(Module):
         options_header = ["Name", "Current Setting", "Required", "Description"]
 
         if only_slurm and only_module:
-            print_failure("No avaliable options. Select only one filter (only_slurm or only_module)")
+            print("No avaliable options. Select only one filter (only_slurm or only_module)")
 
         elif only_module: # show only module options (only_module is True)
             # module options

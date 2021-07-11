@@ -15,7 +15,7 @@
 ## attack/hashes modules imports
 
 # john attacks imports
-from ama.core.modules.attack.hashes import (
+from ama.modules.attack.hashes import (
     JohnBenchmark,
     JohnWordlist,
     JohnIncremental,
@@ -26,7 +26,7 @@ from ama.core.modules.attack.hashes import (
 )
 
 # hashcat attacks imports
-from ama.core.modules.attack.hashes import (
+from ama.modules.attack.hashes import (
     HashcatBenchmark,
     HashcatWordlist,
     HashcatCombination,
@@ -42,13 +42,13 @@ from ama.core.modules.attack.hashes import (
 ## attack/services modules imports
 
 #hydra attacks imports
-from ama.core.modules.attack.services import (
+from ama.modules.attack.services import (
     HydraWordlist
 )
 
 ### auxiliary modules imports
 ## auxiliary/wordlists modules imports
-from ama.core.modules.auxiliary.wordlists import (
+from ama.modules.auxiliary.wordlists import (
     CuppInteractive,
     CuppRefine,
     CuppDownload,
@@ -59,7 +59,7 @@ from ama.core.modules.auxiliary.wordlists import (
 )
 
 ## auxiliary/hashes modules imports
-from ama.core.modules.auxiliary.hashes import (
+from ama.modules.auxiliary.hashes import (
     HashesStatus,
     HashID,
     Nth as NthAuxiliary,
@@ -67,7 +67,7 @@ from ama.core.modules.auxiliary.hashes import (
 )
 
 ## auxiliary/analysis modules imports
-from ama.core.modules.auxiliary.analysis import (
+from ama.modules.auxiliary.analysis import (
     PackStatsgen,
     PackMaskgen,
     PackPolicygen as PackPolicyAuxiliary,
@@ -75,7 +75,7 @@ from ama.core.modules.auxiliary.analysis import (
 )
 
 ## auxiliary/passwords modules imports
-from ama.core.modules.auxiliary.passwords import (
+from ama.modules.auxiliary.passwords import (
     PasswordGenerator,
     ShufflePassword
 )

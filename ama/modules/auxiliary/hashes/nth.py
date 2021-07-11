@@ -18,6 +18,9 @@ from ama.core.modules.base import (
 # plugins imports
 from ama.core.plugins.auxiliary.hashes import Nth as PluginNth
 
+
+import argparse
+from cmd2 import Cmd2ArgumentParser
 # validator imports
 #from ama.core.validator import Args
 #from ama.core.files import Path

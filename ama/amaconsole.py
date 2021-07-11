@@ -26,19 +26,20 @@ from .cmdsets import CmdsetCategory as Category
 #     Loot
 # )
 
-from .cmdsets.slurm import Slurm as SlurmCmds
 
 # from .core.cmdsets.john import (
 #     JohnUtilities
 # )
 
-from .cmdsets.module import (
-    Search,
-    Information,
-    Interaction
-)
+# from .cmdsets.module import (
+#     Search,
+#     Information,
+#     Interaction,
+#     Manager
+# )
+from .cmdsets.module.manager import Manager
 
-from .core.cmdsets.core import (
+from .cmdsets.core import (
     Core
 )
 
@@ -58,11 +59,11 @@ from ama.utils.files import Path
 from ama.config import AMA_HOME
 
 # slurm
-from ama.slurm import Slurm
+#from ama.slurm import Slurm
 
 
 # attack manager
-from ama.manager import AttackManager
+from ama.manager import ProcessManager, Process
 
 # logger
 import logging
@@ -84,7 +85,7 @@ class Ama(Cmd):
 
         #import pdb; pdb.set_trace()
         self.default_to_shell = True
-        self.debug = False
+        self.debug = True
         self.intro = Banner.random()
         self.prompt = "ama > "
         self.continuation_prompt = "> "
@@ -95,12 +96,12 @@ class Ama(Cmd):
         self.modules = amaModules # format {NAME: MODULE_CLASS, ....}
         self.selectedModule = None # selected module with 'use' command (Instance of the module)
         self.filteredModules = [] # filtered modules(format: [(#, MODULE_CLASS), ...])
-        self.manager = AttackManager()
+        self.manager = ProcessManager()
         self.gvalues = {} # global values(format {OPTION_NAME: OPTION_VALUE, ...})
 
         ## settable options
         self.logfile = Path.joinpath(AMA_HOME, "log/ama.log")
-        self.loglevel = logging.WARNING
+        self.loglevel = logging.DEBUG
 
         ## logging
         self.logger = Logger(__name__, filelog=self.logfile, level=self.loglevel,
@@ -128,7 +129,7 @@ class Ama(Cmd):
             return configurations
 
         except Exception as error:
-            print_failure(error)
+            #Cmd.pexcept(error)
             print_status("Using default ama configuration")
 
 
@@ -170,7 +171,16 @@ class Ama(Cmd):
     #         #print_failure("Error while parsing slurm configuration file")
 
 def main(argv=sys.argv[1:]):
-    ama = Ama()
-    attack_processor = threading.Thread(target=ama.manager.process, deamon=True)
-    attack_processor.start()
-    sys.exit(ama.cmdloop())
+    ama = None
+    try:
+        #import pdb; pdb.set_trace()
+        ama = Ama()
+        ama.logger.info("Init Thread to process submitted modules")
+        attack_processor = threading.Thread(target=ama.manager.process, daemon=True)
+        attack_processor.start()
+        ama.logger.info("Init ama cmdloop")
+        sys.exit(ama.cmdloop())
+    except Exception as error:
+        if ama:
+            ama.logger.exception(error)
+        print(error)

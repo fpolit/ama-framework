@@ -2,7 +2,9 @@
 #
 # argument format for ama modules (attack and auxiliary) arguments
 #
-# date: Feb 25 2021
+# Status:
+#
+#
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 class Argument:
@@ -10,24 +12,24 @@ class Argument:
     Argument for ama modules
     """
     def __init__(self, value, required:bool, description:str, *, value_type=None, choices=None):
-        self.value = Argument.parse(value, value_type)
+        self.value = Argument.parse(value, value_type,choices)
         self.value_type = value_type
-        self.choices = choices
+        self.choices = choices if choices is not None else []
         self.required = required
         self.description = description
 
     def set_value(self, value):
         #import pdb; pdb.set_trace()
-        self.value = Argument.parse(value, self.value_type)
+        self.value = Argument.parse(value, self.value_type, self.choices)
 
     def get_attributes(self):
         """
-        Return attributes value, required and description in a list
+        Return attributes as a dictionary
         """
-        return [self.value, self.required, self.description]
+        return self.__dict__
 
     @staticmethod
-    def parse(value, value_type):
+    def parse(value, value_type, choices=None):
         """
         Try to parse string value to a value with value_type type
         """

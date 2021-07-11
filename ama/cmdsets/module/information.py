@@ -11,13 +11,13 @@
 import argparse
 
 # core.modules.base imports
-from ama.core.modules.base import (
+from ama.modules.base import (
     Attack,
     Auxiliary
 )
 
 # version import
-from ...version import get_version
+from ama.version import get_version
 
 # commandset categories
 from ..category import CmdsetCategory as Category

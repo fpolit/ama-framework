@@ -9,6 +9,7 @@
 class CmdsetCategory:
     CORE = "Core Commands"
     MODULE = "Module Commands"
+    MANAGER = "Manager Commands"
     DB = "Database Commands"
     SLURM = "Slurm Commands"
     HASHCAT = "Hashcat Utilities"

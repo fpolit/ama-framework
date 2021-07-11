@@ -9,6 +9,7 @@
 import os
 import sys
 import argparse
+import argcomplete
 
 from fineprint.status import (
     print_failure,
@@ -19,7 +20,7 @@ from fineprint.status import (
 from fineprint.color import ColorStr
 
 # version import
-from ama.core.version import get_version
+from ama.version import get_version
 
 # commandset categories
 from ..category import CmdsetCategory as Category
@@ -34,24 +35,24 @@ from cmd2 import (
 )
 
 # modules.base import
-from ama.core.modules.base import (
+from ama.modules.base import (
     Attack,
     Auxiliary
 )
 
 # crackers
-from ama.core.plugins.cracker import (
-    John,
-    Hashcat
-)
+# from ama.plugins.cracker import (
+#     John,
+#     Hashcat
+# )
 
 from ama.data.modules import Glue
-
+from ama.utils.autocomplete import autocomplete_setv
 # slurm import
-from ama.core.slurm import Slurm
+#from ama.core.slurm import Slurm
 
 
-from ama.core.files import Path
+from ama.utils.files import Path
 
 @with_default_category(Category.MODULE)
 class Interaction(CommandSet):
@@ -212,7 +213,7 @@ class Interaction(CommandSet):
 
     use_parser = argparse.ArgumentParser()
     use_parser.add_argument('module', help="ama module")
-    attack_helper = use_parser.add_mutually_exclusive_group(required=False)
+    attack_helper = use_parser.add_mutually_exclusive_group()
     attack_helper.add_argument('-pre', '--preattack', action='store_true',
                                help='Enable selection of preattack module')
     attack_helper.add_argument('-post', '--postattack', action='store_true',
@@ -308,7 +309,6 @@ class Interaction(CommandSet):
 
                 for module_id, moduleClass in available_modules:
                     if moduleId == module_id or moduleName == moduleClass.MNAME:
-                        import pdb;pdb.set_trace()
                         selected = True
                         self._cmd.selectedModule = moduleClass()
                         moduleType = moduleClass.MTYPE
@@ -316,7 +316,8 @@ class Interaction(CommandSet):
                         moduleName = moduleClass.NAME
                         subtype_name = ColorStr.ForeRED(f"{moduleSubtype}/{moduleName}")
                         self._cmd.prompt = f"ama {moduleType}({subtype_name}) > "
-                        self._cmd.do_setv = self._cmd.selectedModule.setv
+						#import pdb;pdb.set_trace()
+                        self._cmd.do_setv = autocomplete_setv(self._cmd.selectedModule)
                         break
 
                 if not selected:
@@ -432,14 +433,13 @@ class Interaction(CommandSet):
 
     #setv_parser = argparse.ArgumentParser()
     setv_parser = Cmd2ArgumentParser()
-    setv_parser.add_argument("option", help="Option to set value")
-    setv_parser.add_argument("value",  completer=Cmd.path_complete,
-                             help="Value of option")
+    #setv_parser.add_argument("option", help="Option to set value")
+    #setv_parser.add_argument("value",  completer=Cmd.path_complete, help="Value of option")
 
-    setv_parser.add_argument('-pre', '--preattack', action='store_true',
-                             help="Set value to pre attack module option")
-    setv_parser.add_argument('-post', '--postattack', action='store_true',
-                             help="Set value to post attack module option")
+    # setv_parser.add_argument('-pre', '--preattack', action='store_true',
+    #                          help="Set value to pre attack module option")
+    # setv_parser.add_argument('-post', '--postattack', action='store_true',
+    #                          help="Set value to post attack module option")
 
 
     #debugged - date: Feb 28 2021
@@ -449,29 +449,15 @@ class Interaction(CommandSet):
     @with_argparser(setv_parser)
     def do_setv(self, args):
         """
-        Set a value to an valid option
+        Set a value to an valid option of a module
         """
 
         try:
-            option = args.option
-            value = args.value
-
-            if selectedModule := self._cmd.selectedModule:
-                if args.preattack:
-                    if not isinstance(selectedModule, Attack):
-                        raise Exception("Auxiliary modules doesn't support pre attack modules")
-                    selectedModule.setv(option, value, pre_attack=True)
-
-                elif args.postattack:
-                    if not isinstance(selectedModule, Attack):
-                        raise Exception("Auxiliary modules doesn't support post attack modules")
-                    selectedModule.setv(option, value, post_attack=True)
-
-                else: # set option of main module
-                    selectedModule.setv(option, value)
-
+            selected_module = self._cmd.selectedModule
+            if selected_module:
+                print(selected_module)
             else:
-                raise Exception("No module selected")
+                print_failure("No module was selected")
 
         except Exception as error:
             print_failure(error)
@@ -483,80 +469,80 @@ class Interaction(CommandSet):
         self._cmd.selectedModule = None
         self._cmd.prompt = "ama > "
 
-    attack_parser = argparse.ArgumentParser()
-    attack_parser.add_argument('-l', '--local', action='store_true',
-                               help="Try to perform the attack locally")
-    attack_parser.add_argument('-q', '--quiet', action='store_true',
-                               help="Run quietly")
+    # attack_parser = argparse.ArgumentParser()
+    # attack_parser.add_argument('-l', '--local', action='store_true',
+    #                            help="Try to perform the attack locally")
+    # attack_parser.add_argument('-q', '--quiet', action='store_true',
+    #                            help="Run quietly")
 
-    #debugged - date: feb 27 2021
-    @with_argparser(attack_parser)
-    def do_attack(self, args):
-        """
-        Perform an attack with the selected module
-        """
+    # #debugged - date: feb 27 2021
+    # @with_argparser(attack_parser)
+    # def do_attack(self, args):
+    #     """
+    #     Perform an attack with the selected module
+    #     """
 
-        if selectedModule := self._cmd.selectedModule:
-            if isinstance(selectedModule, Attack):
-                pre_attack_output = None
-                if pre_attack := selectedModule.selected_pre_attack:
-                    print_status(f"Running {ColorStr(pre_attack.mname).StyleBRIGHT} preattack module")
-                    pre_attack_output = pre_attack.run(quiet=args.quiet)
+    #     if selectedModule := self._cmd.selectedModule:
+    #         if isinstance(selectedModule, Attack):
+    #             pre_attack_output = None
+    #             if pre_attack := selectedModule.selected_pre_attack:
+    #                 print_status(f"Running {ColorStr(pre_attack.mname).StyleBRIGHT} preattack module")
+    #                 pre_attack_output = pre_attack.run(quiet=args.quiet)
 
-                print_status(f"Running {ColorStr(selectedModule.mname).StyleBRIGHT} attack module")
+    #             print_status(f"Running {ColorStr(selectedModule.mname).StyleBRIGHT} attack module")
 
-                cracker_main_exec = None
-                if self._cmd.config:
-                    if selectedModule.CRACKER == John.MAINNAME:
-                        cracker_main_exec = self._cmd.config['john']
+    #             cracker_main_exec = None
+    #             if self._cmd.config:
+    #                 if selectedModule.CRACKER == John.MAINNAME:
+    #                     cracker_main_exec = self._cmd.config['john']
 
-                    elif selectedModule.CRACKER == Hashcat.MAINNAME:
-                        cracker_main_exec = self._cmd.config['hashcat']
+    #                 elif selectedModule.CRACKER == Hashcat.MAINNAME:
+    #                     cracker_main_exec = self._cmd.config['hashcat']
 
-                #import pdb;pdb.set_trace()
-                db_status = True if self._cmd.db_conn else False
+    #             #import pdb;pdb.set_trace()
+    #             db_status = True if self._cmd.db_conn else False
 
-                db_credential_file = None
-                if self._cmd.config:
-                    db_credential_file = self._cmd.config['db_credentials_file']
+    #             db_credential_file = None
+    #             if self._cmd.config:
+    #                 db_credential_file = self._cmd.config['db_credentials_file']
 
-                attack_output = selectedModule.attack(
-                    local = args.local,
-                    pre_attack_output = pre_attack_output,
-                    db_status = db_status,
-                    workspace = self._cmd.workspace,
-                    db_credential_file = db_credential_file,
-                    cracker_main_exec=cracker_main_exec,
-                    slurm_conf = self._cmd.slurm_config
-                )
+    #             attack_output = selectedModule.attack(
+    #                 local = args.local,
+    #                 pre_attack_output = pre_attack_output,
+    #                 db_status = db_status,
+    #                 workspace = self._cmd.workspace,
+    #                 db_credential_file = db_credential_file,
+    #                 cracker_main_exec=cracker_main_exec,
+    #                 slurm_conf = self._cmd.slurm_config
+    #             )
 
 
-                if post_attack := selectedModule.selected_post_attack:
-                    print_status(f"Running {ColorStr(post_attack.mname).StyleBRIGHT} posattack module")
-                    post_attack.run(quiet=args.quiet, attack_output=attack_output)
+    #             if post_attack := selectedModule.selected_post_attack:
+    #                 print_status(f"Running {ColorStr(post_attack.mname).StyleBRIGHT} posattack module")
+    #                 post_attack.run(quiet=args.quiet, attack_output=attack_output)
 
-            else: # selectedModule is an instance of Auxiliary
-                print_failure(f"No attack method for {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
-        else:
-            print_failure("No module selected")
+    #         else: # selectedModule is an instance of Auxiliary
+    #             print_failure(f"No attack method for {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
+    #     else:
+    #         print_failure("No module selected")
 
-    #debugged - data: feb 27 2021
-    auxiliary_parser = argparse.ArgumentParser()
-    auxiliary_parser.add_argument('-q', '--quiet', action='store_true',
-                                  help="Run quietly")
+    # #debugged - data: feb 27 2021
+    # auxiliary_parser = argparse.ArgumentParser()
+    # auxiliary_parser.add_argument('-q', '--quiet', action='store_true',
+    #                               help="Run quietly")
 
-    @with_argparser(auxiliary_parser)
-    def do_run(self, args):
-        """
-        Run the selected auxiliary module
-        """
-        #import pdb; pdb.set_trace()
-        selectedModule = self._cmd.selectedModule
-        if selectedModule:
-            if isinstance(selectedModule, Auxiliary):
-                print_status(f"Running {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
-                selectedModule.run(quiet=args.quiet)
-            else: # selectedModule is an instance of Attack
-                print_failure(f"No run method for {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
-        else:
-            print_failure("No module selected")
+    # @with_argparser(auxiliary_parser)
+    # def do_run(self, args):
+    #     """
+    #     Run the selected auxiliary module
+    #     """
+    #     #import pdb; pdb.set_trace()
+    #     selectedModule = self._cmd.selectedModule
+    #     if selectedModule:
+    #         if isinstance(selectedModule, Auxiliary):
+    #             print_status(f"Running {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
+    #             selectedModule.run(quiet=args.quiet)
+    #         else: # selectedModule is an instance of Attack
+    #             print_failure(f"No run method for {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
+    #     else:
+    #         print_failure("No module selected")

@@ -9,7 +9,7 @@ import re
 import os
 
 # core.files imports
-from ..files import (
+from ..utils.files import (
     Path,
     get_exec_path
 )

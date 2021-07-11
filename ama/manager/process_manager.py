@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 #
-# Script to manage attack process
+# Script to manage submitted process
 #
 # Status:
 #
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
+from typing import List
+
 from queue import Queue
 
 
-from .cracking_process import CrackingProcess, ProcessStatus
+from .process import Process, ProcessStatus
 
 
-class AttackManager:
+class ProcessManager:
     SUBMITTED_ATTACKS = 0
 
     def __init__(self):
@@ -21,9 +23,8 @@ class AttackManager:
         self.completed = [] # [CrackingProcess, ...]
 
     def submit(self, group=None, target=None, name=None, args=(), kwargs={}, depends:List[int] = []):
-        AttackManager.SUBMITTED_ATTACKS += 1
-        process_id = AttackManager.SUBMITTED_ATTACKS
-        print("[*] Submitting cracking process: {process_id}")
+        ProcessManager.SUBMITTED_ATTACKS += 1
+        process_id = ProcessManager.SUBMITTED_ATTACKS
 
         dependency_process = []
         all_found = True #True if all dependencies was found and False otherwise
@@ -48,8 +49,9 @@ class AttackManager:
                 all_found = False
                 break
 
-        cp = CrackingProcess(process_id, group, target, name, args, kwargs, dependency_process)
+        cp = Process(process_id, group, target, name, args, kwargs, dependency_process)
         if all_found: # all dependencies were found
+            print(f"[*] Submitting cracking process: {process_id}")
             self.pending.put(cp)
         else:
             print("[-] Dependencies wasn't found.")
@@ -67,7 +69,8 @@ class AttackManager:
             # check if any cracking process were processed
             updated_processing = self.processing
             for cracking_process in self.processing:
-                if cracking_process.status() == ProcessStatus.COMPLETED:
+                status = cracking_process.status() 
+                if status in [ProcessStatus.COMPLETED, ProcessStatus.FAILED]:
                     cracking_process.join()
                     updated_processing.remove(cracking_process)
                     self.completed.append(cracking_process)
@@ -75,7 +78,7 @@ class AttackManager:
             self.processing = updated_processing
 
 
-    def report(self, show_completed_process:bool = False, show_pending_process:bool = False):
+    def report(self, show_completed_process:bool = True, show_pending_process:bool = True):
         status = {'processing': []}
 
         for processing_process in self.processing:
@@ -84,11 +87,11 @@ class AttackManager:
         if show_completed_process:
             status['completed'] = []
             for completed_process in self.completed:
-                status['completed'].append(processing_process.info())
+                status['completed'].append(completed_process.info())
 
         if show_pending_process:
             status['pending'] = []
-            for completed_process in self.pending.queue:
-                status['pending'].append(processing_process.info())
+            for pending_process in self.pending.queue:
+                status['pending'].append(pending_process.info())
 
         return status

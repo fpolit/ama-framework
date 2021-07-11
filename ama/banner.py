@@ -16,7 +16,7 @@ from ama.data.modules import (
     Glue,
 )
 
-from ama.core.version import get_version
+from ama.version import get_version
 
 
 class Banner:

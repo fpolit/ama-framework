@@ -1,2 +1,3 @@
-from .attack_manager import AttackManager
-from .cracking_process import CrackingProcess, ProcessStatus
+from .process_manager import ProcessManager
+from .resource_manager import ResourceManager
+from .process import Process, ProcessStatus

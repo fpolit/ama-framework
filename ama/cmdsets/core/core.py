@@ -10,10 +10,10 @@ import argparse
 import hashlib
 
 # version import
-from ama.core.version import get_version
+from ama.version import get_version
 
 #banner import
-from ama.core.banner import Banner
+from ama.banner import Banner
 
 # commandset categories
 from ..category import CmdsetCategory as Category
@@ -35,10 +35,10 @@ from ama.data.hashes import (
 )
 
 # import crackers
-from ama.core.plugins.cracker import (
-    John,
-    Hashcat,
-)
+# from ama.plugins.cracker import (
+#     John,
+#     Hashcat,
+# )
 
 from fineprint.status import print_status, print_successful
 
@@ -71,25 +71,25 @@ class Core(CommandSet):
 
         print(Banner.random())
 
-    hashtype_parser = argparse.ArgumentParser()
-    password_crackers = [John.MAINNAME, Hashcat.MAINNAME]
-    hashtype_parser.add_argument('-c', '--cracker', choices=password_crackers, required=True,
-                               help="Password cracker")
+    # hashtype_parser = argparse.ArgumentParser()
+    # password_crackers = [John.MAINNAME, Hashcat.MAINNAME]
+    # hashtype_parser.add_argument('-c', '--cracker', choices=password_crackers, required=True,
+    #                            help="Password cracker")
 
-    hashtype_parser.add_argument('-s', '--sensitive', action='store_true',
-                               help="Sensitive search")
+    # hashtype_parser.add_argument('-s', '--sensitive', action='store_true',
+    #                            help="Sensitive search")
 
-    hashtype_parser.add_argument('pattern',
-                               help="Pattern to search")
-    @with_argparser(hashtype_parser)
-    def do_hashtype(self, args):
-        """
-        Search by valid hashes types
-        """
-        if args.cracker == John.MAINNAME:
-            John.search_hash(args.pattern, sensitive=args.sensitive)
-        else: # cracker == hc
-            Hashcat.search_hash(args.pattern, sensitive=args.sensitive)
+    # hashtype_parser.add_argument('pattern',
+    #                            help="Pattern to search")
+    # @with_argparser(hashtype_parser)
+    # def do_hashtype(self, args):
+    #     """
+    #     Search by valid hashes types
+    #     """
+    #     if args.cracker == John.MAINNAME:
+    #         John.search_hash(args.pattern, sensitive=args.sensitive)
+    #     else: # cracker == hc
+    #         Hashcat.search_hash(args.pattern, sensitive=args.sensitive)
 
 
 

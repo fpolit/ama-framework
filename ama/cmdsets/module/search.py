@@ -33,7 +33,7 @@ from ama.data.modules import (
     amaAttackAuxiliariesModules
 )
 
-from ama.core.modules.base import Attack
+from ama.modules.base import Attack
 from ama.data.modules import Glue
 
 
