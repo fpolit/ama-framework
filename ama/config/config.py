@@ -27,7 +27,7 @@
 
 import os
 import json
-from ama.core.files import Path
+from ama.utils.files import Path
 
 from fineprint.status import print_successful
 from fineprint.color import ColorStr
