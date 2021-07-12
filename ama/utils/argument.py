@@ -26,7 +26,7 @@ class Argument:
         """
         Return attributes as a dictionary
         """
-        return self.__dict__
+        return [self.value, self.required, self.description]
 
     @staticmethod
     def parse(value, value_type, choices=None):

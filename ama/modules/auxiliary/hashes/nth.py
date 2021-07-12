@@ -5,25 +5,17 @@
 # date: Mar 4 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
-import os
-from fineprint.status import print_failure
-#from typing import List
-
-# module.base imports
-from ama.core.modules.base import (
-    Auxiliary,
-    Argument
-)
-
-# plugins imports
-from ama.core.plugins.auxiliary.hashes import Nth as PluginNth
-
-
 import argparse
 from cmd2 import Cmd2ArgumentParser
-# validator imports
-#from ama.core.validator import Args
-#from ama.core.files import Path
+import os
+
+
+from ama.modules.base import Auxiliary
+from ama.plugins.auxiliary.hashes import Nth as PluginNth
+
+from ama.utils import Argument
+from ama.utils.fineprint import print_failure
+from ama.utils.validator import Args
 
 
 class Nth(Auxiliary):

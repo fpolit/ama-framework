@@ -7,12 +7,14 @@
 
 import os
 import hashlib
-from fineprint.status import print_failure, print_status, print_successful
 
-# module.base imports
-from ama.core.modules.base import (
-    Auxiliary,
-    Argument
+from ama.modules.base import Auxiliary
+
+from ama.utils import Argument
+from ama.utils.fineprint import (
+    print_failure,
+    print_status,
+    print_successful
 )
 
 import hashlib

@@ -7,24 +7,8 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
-
-from sbash import Bash
-from fineprint.status import (
-    print_failure,
-    print_status,
-    print_successful
-)
-
-
-from ama.core.plugins.auxiliary import Auxiliary
-
-# core.file imports
-from ama.core.files import Path
-
-# validator
-from ama.core.validator import Args
-
 from typing import List
+from sbash import Bash
 
 # pack-ama imports
 from pack_ama import (
@@ -33,6 +17,16 @@ from pack_ama import (
     PolicyGen,
     WholeGen
 )
+
+from ama.plugins.auxiliary import Auxiliary
+from ama.utils.fineprint import (
+    print_failure,
+    print_status,
+    print_successful
+)
+from ama.utils.validator import Args
+
+
 class Pack(Auxiliary):
     """
     Password Analysis and Cracking Kit

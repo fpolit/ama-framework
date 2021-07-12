@@ -7,15 +7,11 @@
 
 import re
 import os
-
-# core.files imports
-from ..utils.files import (
-    Path,
-    get_exec_path
-)
-
-# typing import
 from typing import List
+from pathlib import Path
+
+from ama.utils.files import get_exec_path
+
 
 
 class Plugin:

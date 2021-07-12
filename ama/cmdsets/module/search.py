@@ -34,7 +34,7 @@ from ama.data.modules import (
 )
 
 from ama.modules.base import Attack
-from ama.data.modules import Glue
+#from ama.data.modules import Glue
 
 
 @with_default_category(Category.MODULE)
@@ -48,60 +48,60 @@ class Search(CommandSet):
         super().__init__()
 
 
-    full_attack_parser = argparse.ArgumentParser()
-    full_attack_parser.add_argument('-pre', '--preattack', default=None,
-                                    help='Preattack name pattern')
-    full_attack_parser.add_argument('-a', '--attack', default=None,
-                                    help='Attack name pattern')
-    full_attack_parser.add_argument('-post', '--postattack', default=None,
-                                    help='Postattack name pattern')
+    # full_attack_parser = argparse.ArgumentParser()
+    # full_attack_parser.add_argument('-pre', '--preattack', default=None,
+    #                                 help='Preattack name pattern')
+    # full_attack_parser.add_argument('-a', '--attack', default=None,
+    #                                 help='Attack name pattern')
+    # full_attack_parser.add_argument('-post', '--postattack', default=None,
+    #                                 help='Postattack name pattern')
 
-    # full_attack_parser.add_argument('-s', '--select',
-    #                                 help='Select a full attack')
+    # # full_attack_parser.add_argument('-s', '--select',
+    # #                                 help='Select a full attack')
 
-    # full_attack_parser.add_argument('-p', '--previous', action='store_true',
-    #                                 help='Show previous search')
+    # # full_attack_parser.add_argument('-p', '--previous', action='store_true',
+    # #                                 help='Show previous search')
 
-    # full_attack_parser.add_argument('--all', dest='allFullAttacks', action='store_true',
-    #                                 help='Show all availables full attacks')
+    # # full_attack_parser.add_argument('--all', dest='allFullAttacks', action='store_true',
+    # #                                 help='Show all availables full attacks')
 
-    @with_argparser(full_attack_parser)
-    def do_fullattack(self, args):
-        """
-        Search availables full attacks
-        """
-        fullAttackId = 0
-        filtered_fullAttacks = [] #[(id, fullAttackClass), ...]
-        fullAttacksTable = []
+    # @with_argparser(full_attack_parser)
+    # def do_fullattack(self, args):
+    #     """
+    #     Search availables full attacks
+    #     """
+    #     fullAttackId = 0
+    #     filtered_fullAttacks = [] #[(id, fullAttackClass), ...]
+    #     fullAttacksTable = []
 
-        #import pdb;pdb.set_trace()
-        for fullAttack, fullAttackClass in Glue.full_attacks.items():
-            preattack_name = fullAttack.preattack.MNAME if fullAttack.preattack else None
-            attack_name = fullAttack.attack.MNAME if fullAttack.attack else None
-            postattack_name = fullAttack.postattack.MNAME if fullAttack.postattack else None
+    #     #import pdb;pdb.set_trace()
+    #     for fullAttack, fullAttackClass in Glue.full_attacks.items():
+    #         preattack_name = fullAttack.preattack.MNAME if fullAttack.preattack else None
+    #         attack_name = fullAttack.attack.MNAME if fullAttack.attack else None
+    #         postattack_name = fullAttack.postattack.MNAME if fullAttack.postattack else None
 
-            #if args.preattack or args.attack or args.postattack: # some pattern was supplied
+    #         #if args.preattack or args.attack or args.postattack: # some pattern was supplied
 
-            preattack_filter = args.preattack is None or \
-                 (preattack_name is not None and args.preattack is not None and re.search(args.preattack, preattack_name))
+    #         preattack_filter = args.preattack is None or \
+    #              (preattack_name is not None and args.preattack is not None and re.search(args.preattack, preattack_name))
 
-            attack_filter = args.attack is None or \
-                (attack_name is not None and args.attack is not None and re.search(args.attack, attack_name))
+    #         attack_filter = args.attack is None or \
+    #             (attack_name is not None and args.attack is not None and re.search(args.attack, attack_name))
 
-            postattack_filter = args.postattack is None or \
-                 (postattack_name is not None and args.postattack is not None and re.search(args.postattack, postattack_name))
+    #         postattack_filter = args.postattack is None or \
+    #              (postattack_name is not None and args.postattack is not None and re.search(args.postattack, postattack_name))
 
-            if  preattack_filter and attack_filter and  postattack_filter:
-                filtered_fullAttacks.append((fullAttackId, fullAttackClass))
-                fullAttacksTable.append((fullAttackId, preattack_name, attack_name, postattack_name))
-                fullAttackId += 1
-            # else: #no patterns was supplied
-            #     filtered_fullAttacks.append((fullAttackId, fullAttackClass))
-            #     fullAttacksTable.append((fullAttackId, preattack_name, attack_name, postattack_name))
-            #     fullAttackId += 1
+    #         if  preattack_filter and attack_filter and  postattack_filter:
+    #             filtered_fullAttacks.append((fullAttackId, fullAttackClass))
+    #             fullAttacksTable.append((fullAttackId, preattack_name, attack_name, postattack_name))
+    #             fullAttackId += 1
+    #         # else: #no patterns was supplied
+    #         #     filtered_fullAttacks.append((fullAttackId, fullAttackClass))
+    #         #     fullAttacksTable.append((fullAttackId, preattack_name, attack_name, postattack_name))
+    #         #     fullAttackId += 1
 
-        self._cmd.filteredModules = filtered_fullAttacks
-        print(tabulate(fullAttacksTable, headers=["#", "PreAttack", "Attack", "PostAttack"]))
+    #     self._cmd.filteredModules = filtered_fullAttacks
+    #     print(tabulate(fullAttacksTable, headers=["#", "PreAttack", "Attack", "PostAttack"]))
 
 
     search_parser = argparse.ArgumentParser()

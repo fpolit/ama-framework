@@ -7,14 +7,16 @@
 
 import os
 from password_generator import PasswordGenerator as RandomPasswordGenerator
-from fineprint.status import print_failure, print_status, print_successful
-from fineprint.color import ColorStr
 import string
 
-# module.base imports
-from ama.core.modules.base import (
-    Auxiliary,
-    Argument
+from ama.modules.base import Auxiliary
+
+from ama.utils import Argument
+from ama.utils.color import ColorStr
+from ama.utils.fineprint import (
+    print_failure,
+    print_status,
+    print_successful
 )
 
 class PasswordGenerator(Auxiliary):

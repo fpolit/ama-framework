@@ -5,22 +5,14 @@
 # date: Feb 20 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
-from tabulate import tabulate
 
 from typing import (
     List,
     Any
 )
 
-# base imports
-from ama.core.modules.base import Module
 
-# table formation imports
-from cmd2.table_creator import (
-    Column,
-    SimpleTable
-)
-
+from ama.modules.base import Module
 
 class Auxiliary(Module):
     """
@@ -51,4 +43,4 @@ class Auxiliary(Module):
         """
         pass
 
-	execute = run
+    execute = run

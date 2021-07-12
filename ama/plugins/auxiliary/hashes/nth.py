@@ -9,23 +9,23 @@
 import os
 from typing import List
 from sbash import Bash
-from fineprint.status import (
-    print_failure,
-    print_status,
-    print_successful
-)
-
-
-from ama.core.plugins.auxiliary import Auxiliary
-
-# core.file imports
-from ama.core.files import Path
+from pathlib import Path
 
 # name_that_hash imports
 import name_that_hash as nth
 from name_that_hash.runner import (
     api_return_hashes_as_dict
 )
+
+
+from ama.plugins.auxiliary import Auxiliary
+from ama.utils.fineprint import (
+    print_failure,
+    print_status,
+    print_successful
+)
+from ama.utils.validator import Args
+
 
 class Nth(Auxiliary):
     """

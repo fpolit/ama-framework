@@ -4,22 +4,22 @@ import logging
 from cmd2 import Cmd
 
 class Logger(logging.Logger):
-    def __init__(self, name, filelog, formatlog, level=logging.WARNING):
+    def __init__(self, name, logfile, logformat, level=logging.WARNING):
         super().__init__(name, level)
-        self.filelog = filelog
-        self.formatlog = formatlog
+        self.logfile = logfile
+        self.logformat = logformat
         self.setLevel(level)
         self.level = level
 
-    def add_handler(self, handler_type, formatlog=None, level=None, filelog:str=None):
+    def add_handler(self, handler_type, logformat=None, level=None, logfile:str=None):
         try:
             if handler_type is logging.StreamHandler:
                 handler = logging.StreamHandler()
             elif handler_type is logging.FileHandler:
-                if filelog:
-                    handler = logging.FileHandler(filelog)
+                if logfile:
+                    handler = logging.FileHandler(logfile)
                 else:
-                    handler = logging.FileHandler(self.filelog)
+                    handler = logging.FileHandler(self.logfile)
             else:
                 raise Exception("Unsupported handler type")
 
@@ -28,14 +28,15 @@ class Logger(logging.Logger):
             else:
                 handler.setLevel(self.level)
 
-            if formatlog:
-                formatter = logging.Formatter(formatlog)
+            if logformat:
+                formatter = logging.Formatter(logformat)
                 handler.setFormatter(formatter)
             else:
-                formatter = logging.Formatter(self.formatlog)
+                formatter = logging.Formatter(self.logformat)
                 handler.setFormatter(formatter)
 
             self.addHandler(handler)
+
         except Exception as error:
             print(error)
             #Cmd.pexcept(error)

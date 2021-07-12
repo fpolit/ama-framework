@@ -6,19 +6,17 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 
+from pathlib import Path
 import os
 from typing import List, Any
 from fineprint.status import print_failure
-from .crackerException import InvalidPartition
-from ama.core.files import (
-    Path,
-    line_counter
-)
-
 from math import ceil
 
-from .password_cracker import PasswordCracker
 
+from ama.utils.files import line_counter
+
+from .crackerException import InvalidPartition
+from .password_cracker import PasswordCracker
 from .crackerException import (
     InvalidParallelJob,
     NoValidHashType,

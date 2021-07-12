@@ -13,7 +13,7 @@ from ama.data.modules import (
     auxiliaryHashesModules,
     auxiliaryAnalysisModules,
     auxiliaryPasswordsModules,
-    Glue,
+    #Glue,
 )
 
 from ama.version import get_version
@@ -34,7 +34,8 @@ class Banner:
                   Wordlists    : {len(auxiliaryWordlistModules)}
                   Hashes       : {len(auxiliaryHashesModules)}
                   Passwords    : {len(auxiliaryPasswordsModules)}
-
+        """
+        """
         Full Attacks (Pre Attack + Attack + Post Attack): {len(Glue.full_attacks)}
         """
     )

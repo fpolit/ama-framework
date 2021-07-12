@@ -7,16 +7,10 @@
 
 from fineprint.status import print_failure
 
-# Cupp plugin
-from ama.core.plugins.auxiliary.wordlists import Cupp
 
-
-# Auxliary base class
-from ama.core.modules.base import (
-    Auxiliary,
-    Argument
-)
-
+from ama.plugins.auxiliary.wordlists import Cupp
+from ama.modules.base import Auxiliary
+from ama.utils import Argument
 
 # debugged - date: Mar 4 2021
 class CuppAlecto(Auxiliary):

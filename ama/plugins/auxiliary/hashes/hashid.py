@@ -11,26 +11,23 @@ import os
 import sys
 import re
 from sbash import Bash
-from fineprint.status import (
-    print_failure,
-    print_status,
-    print_successful
-)
-
-
-from ama.core.plugins.auxiliary import Auxiliary
-
-# core.file imports
-from ama.core.files import Path
-
-# validator
-from ama.core.validator import Args
+from pathlib import Path
 
 # hashid package imports
 from hashid import (
     HashID as _HashID,
     writeResult
 )
+
+from ama.plugins.auxiliary import Auxiliary
+from ama.utils.fineprint import (
+    print_failure,
+    print_status,
+    print_successful
+)
+from ama.utils.validator import Args
+
+
 
 class HashID(Auxiliary):
     """

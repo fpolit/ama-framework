@@ -1,4 +1,4 @@
-from .glue import Glue
+#from .glue import Glue
 from .modules import (
     attackModules,
     auxiliary_modules,

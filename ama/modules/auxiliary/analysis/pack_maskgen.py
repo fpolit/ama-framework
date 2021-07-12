@@ -11,13 +11,11 @@ from fineprint.status import print_failure
 from typing import List
 
 # module.base imports
-from ama.core.modules.base import (
-    Auxiliary,
-    Argument
-)
+from ama.modules.base import Auxiliary
+from ama.utils import Argument
 
 # plugin imports
-from ama.core.plugins.auxiliary.analysis import Pack
+from ama.plugins.auxiliary.analysis import Pack
 
 # exceptions imports
 from .exceptions import InvalidSortingMode

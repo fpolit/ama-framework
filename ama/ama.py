@@ -8,6 +8,7 @@
 import os
 import argparse
 # fineprint imports
+from pathlib import Path
 from fineprint.status import (
     print_failure,
     print_status
@@ -21,7 +22,6 @@ from ama.config import (
     USER_HOME)
 
 from ama.amaconsole import main as amaconsole_main
-from ama.core.files import Path
 
 def init(args):
     base_path = USER_HOME

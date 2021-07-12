@@ -5,13 +5,8 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
-
+from pathlib import Path
 from sbash import Bash
-from fineprint.status import (
-    print_failure,
-    print_status,
-    print_successful
-)
 
 import cupp
 
@@ -27,8 +22,12 @@ import cupp
 import cupp
 
 
-from ama.core.plugins.auxiliary import Auxiliary
-from ama.core.files import Path
+from ama.plugins.auxiliary import Auxiliary
+from ama.utils.fineprint import (
+    print_failure,
+    print_status,
+    print_successful
+)
 
 
 class Cupp(Auxiliary):

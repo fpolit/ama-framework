@@ -9,7 +9,7 @@
 import os
 import sys
 import argparse
-
+from pathlib import Path
 from fineprint.status import (
     print_failure,
     print_status,
@@ -45,9 +45,6 @@ from ama.modules.base import (
 #     Hashcat
 # )
 
-from ama.data.modules import Glue
-
-from ama.utils.files import Path
 
 @with_default_category(Category.MANAGER)
 class Manager(CommandSet):
@@ -65,5 +62,7 @@ class Manager(CommandSet):
 
         for status, processes_info in processes_status.items():
             print(f"{status}:\n")
-            for key, value in processes_info:
-                print(f"\t{key:<10}: {value}")
+            for process_info in processes_info:
+                for key, value in process_info.items():
+                    print(f"\t{key:<12}: {value}")
+                print()

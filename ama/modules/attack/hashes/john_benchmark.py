@@ -9,22 +9,14 @@
 import os
 from typing import Any
 import psutil
+from pathlib import Path
 
-# base  imports
-from ama.core.modules.base import (
-    Attack,
-    Argument
-)
 
-# cracker imports
-from ama.core.plugins.cracker import John
-from ama.core.files import Path
+from ama.modules.base import Attack
+from ama.plugins.cracker import John
+from ama.utils.fineprint import print_failure, print_status
+from ama.utils import Argument
 
-# slurm import
-from ama.core.slurm import Slurm
-
-# fineprint imports
-from fineprint.status import print_failure, print_status
 
 class JohnBenchmark(Attack):
     """

@@ -5,14 +5,14 @@
 #
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
+from pathlib import Path
 
 from fineprint.status import print_failure
 from ..plugin import Plugin
 from .crackerException import InvalidPartition
-from ama.core.files import (
-    Path,
-    line_counter
-)
+
+
+from ama.utils.files import line_counter
 
 from math import ceil
 

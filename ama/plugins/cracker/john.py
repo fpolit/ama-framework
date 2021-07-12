@@ -30,6 +30,7 @@ from typing import List
 #import psycopg2
 import psutil
 from math import floor
+from pathlib import Path
 
 # fineprint imports
 from fineprint.status import (
@@ -43,7 +44,7 @@ from fineprint.color import ColorStr
 import cmd2
 
 # slurm imports
-from ama.core.slurm import Slurm
+#from ama.core.slurm import Slurm
 
 # cracker imports
 from .hash_cracker import HashCracker
@@ -53,7 +54,7 @@ from .crackedHash import CrackedHash
 from ama.data.hashes import jtrHashes
 
 # core.file imports
-from ...files import Path
+from ama.utils.files import access
 
 # cracker exceptions imports
 from .crackerException import (
@@ -61,7 +62,7 @@ from .crackerException import (
     NoValidHashType
 )
 
-from ama.core.plugins import Plugin
+from ama.plugins import Plugin
 
 #from ama.core.cmdsets.db import Connection
 

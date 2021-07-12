@@ -55,12 +55,12 @@ class Module:
 
 
     def setv(self, option:str, value, quiet:bool = False,
-			 pre_module:bool=False, post_module:bool=False):
+	     pre_module:bool=False, post_module:bool=False):
         """
         Set an option of a module with the supplied value
         """
         try:
-			import pdb; pdb.set_trace()
+            #import pdb; pdb.set_trace()
             if pre_module:
                 self.pre_module.setv(option, value, quiet=True)
                 print(f"(pre module) {option} => {value}")
@@ -134,13 +134,13 @@ License : GPLv3
 
     def options2table(self, only_required=False):
         if only_required:
-            module_options = [[name.upper(), *option.get_attributes()]
+            module_options = [[name, *option.get_attributes()]
                                 for name, option in self.options.items() if option.required]
         else:
-            module_options = [[name.upper(), *option.get_attributes()]
+            module_options = [[name, *option.get_attributes()]
                                 for name, option in self.options.items()]
 
-        return tabulate(module_options, header=["Name", "Current Setting", "Required", "Description"])
+        return tabulate(module_options, headers=["Name", "Current Setting", "Required", "Description"])
 
     def get_required_options(self):
         required_options = {name: option
@@ -148,7 +148,7 @@ License : GPLv3
 
         return required_options
 
-    def has_options(self, option):
+    def has_option(self, option):
         return option in self.options
 
 
@@ -234,31 +234,3 @@ License : GPLv3
     #         else:
     #             slurm_no_empty_options = {name: argument.value
     #                                       for name,  argument in self.slurm.options.items() if argument.value is not None}
-
-    #     return {**module_no_empty_options, **slurm_no_empty_options}
-
-    # # debugged - date : Mar 1 2021
-    # def no_empty_required_options(self, local=False):
-    #     #import pdb; pdb.set_trace()
-
-    #     required_args = self.required_options()
-
-    #     Args.no_empty_required_options(**required_args)
-
-    # def isModuleOption(self, option):
-    #     if option in self.options:
-    #         return True
-    #     return False
-
-    # def isOption(self, option):
-    #     #import pdb; pdb.set_trace()
-    #     if self.isModuleOption(option) or self.isSlurmOption(option):
-    #         return True
-
-    #     return False
-
-    # def isSlurmOption(self, option):
-    #     if self.slurm:
-    #         if option in self.slurm.options:
-    #             return True
-    #     return False

@@ -8,17 +8,13 @@
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import cmd2
-from fineprint.status import print_failure
 from typing import List
 
-# module.base imports
-from ama.core.modules.base import (
-    Auxiliary,
-    Argument
-)
+from ama.modules.base import Auxiliary
+from ama.plugins.auxiliary.analysis import Pack
 
-from ama.core.plugins.auxiliary.analysis import Pack
-
+from ama.utils import Argument
+from ama.utils.fineprint import print_failure
 
 class PackStatsgen(Auxiliary):
     """

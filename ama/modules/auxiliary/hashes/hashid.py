@@ -5,23 +5,17 @@
 # date: Feb 23 2021
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
+from pathlib import Path
 import os
-from fineprint.status import print_failure
 import cmd2
 from typing import List
 
-# module.base imports
-from ama.core.modules.base import (
-    Auxiliary,
-    Argument
-)
+from ama.modules.base import Auxiliary
+from ama.plugins.auxiliary.hashes import HashID as PLuginHashID
 
-# plugins imports
-from ama.core.plugins.auxiliary.hashes import HashID as PLuginHashID
-
-# validator imports
-from ama.core.validator import Args
-from ama.core.files import Path
+from ama.utils import Argument
+from ama.utils.fineprint import print_failure
+from ama.utils.validator import Args
 
 
 class HashID(Auxiliary):
@@ -31,7 +25,7 @@ class HashID(Auxiliary):
     DESCRIPTION = "HashID - hash identifier"
     MNAME = "auxiliary/hashes/hashid"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
-    AUTHOR = [
+    AUTHORS = [
         "glozanoa <glozanoa@uni.pe>"
     ]
 
@@ -51,21 +45,21 @@ class HashID(Auxiliary):
                  extended: bool = True, hashcat: bool = True, john: bool = True):
 
         auxiliary_options = {
-            'hashes': Argument(hashes, True, "Hashes to identify (hash or hashes file)"),
-            'output': Argument(output, False, "Output File"),
-            'extended': Argument(extended, True, "List all possible hash algorithms including salted passwords"),
-            'hashcat': Argument(hashcat, True, "Show corresponding Hashcat mode in output"),
-            'john': Argument(john, True, "Show corresponding John hash format in output")
+            'HASHES': Argument(hashes, True, "Hashes to identify (hash or hashes file)"),
+            'OUTPUT': Argument(output, False, "Output File"),
+            'EXTENDED': Argument(extended, True, "List all possible hash algorithms including salted passwords"),
+            'HASHCAT': Argument(hashcat, True, "Show corresponding Hashcat mode in output"),
+            'JOHN': Argument(john, True, "Show corresponding John hash format in output"),
+            'AOUTPUT': Argument('ama-%i', True, "Ama output file")
         }
 
         init_options = {
             'mname': HashID.MNAME,
-            'author': HashID.AUTHOR,
+            'authors': HashID.AUTHORS,
             'description': HashID.DESCRIPTION,
             'fulldescription': HashID.FULLDESCRIPTION,
             'references': HashID.REFERENCES,
-            'auxiliary_options': auxiliary_options,
-            'slurm': None
+            'auxiliary_options': auxiliary_options
         }
 
         super().__init__(**init_options)
@@ -77,24 +71,24 @@ class HashID(Auxiliary):
         try:
             #import pdb; pdb.set_trace()
 
-            self.no_empty_required_options()
+            #self.no_empty_required_options()
 
 
-            if os.path.isfile(self.options['hashes'].value) and \
-               os.access(self.options['hashes'].value, os.R_OK):
-                hashes_file = open(self.options['hashes'].value, 'r')
+            if os.path.isfile(self.options['HASHES'].value) and \
+               os.access(self.options['HASHES'].value, os.R_OK):
+                hashes_file = open(self.options['HASHES'].value, 'r')
                 hashes = [query_hash.rstrip() for query_hash in hashes_file.readlines()]
                 hashes_file.close()
 
             else:
-                hashes = self.options['hashes'].value.split(',')
+                hashes = self.options['HASHES'].value.split(',')
 
             phid = PLuginHashID()
             identities = phid.identify_hashes(hashes,
-                                              hashcat = self.options['hashcat'].value,
-                                              john = self.options['john'].value,
-                                              extended = self.options['extended'].value,
-                                              output = self.options['output'].value,
+                                              hashcat = self.options['HASHCAT'].value,
+                                              john = self.options['JOHN'].value,
+                                              extended = self.options['EXTENDED'].value,
+                                              output = self.options['OUTPUT'].value,
                                               quiet= quiet)
 
             return identities

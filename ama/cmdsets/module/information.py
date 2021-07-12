@@ -84,10 +84,10 @@ class Information(CommandSet):
                              help="ama module")
     options_parser.add_argument('-r', '--required', action='store_true',
                                 help="Only show required options")
-    options_parser.add_argument('-s', '--slurm', action='store_true', dest='only_slurm',
-                                help="Show only slurm options")
-    options_parser.add_argument('-m', '--module', action='store_true', dest='only_module',
-                                help="Show only module options")
+    # options_parser.add_argument('-s', '--slurm', action='store_true', dest='only_slurm',
+    #                             help="Show only slurm options")
+    # options_parser.add_argument('-m', '--module', action='store_true', dest='only_module',
+    #                             help="Show only module options")
 
 
     @with_argparser(options_parser)
@@ -100,28 +100,13 @@ class Information(CommandSet):
 
         if module is None:
             if selectedModule := self._cmd.selectedModule:
-                print(selectedModule.available_options(required=args.required,
-                                                           only_slurm = args.only_slurm,
-                                                           only_module = args.only_module))
+                print(selectedModule.options2table(only_required=args.required))
             else:
                 print_failure("No module selected")
 
         else:
-            try:
-                module = int(module)
-                for moduleId, moduleClass in self._cmd.filteredModules:
-                    if moduleId == module:
-                        moduleInstance = moduleClass()
-                        print(moduleInstance.available_options(required=args.required,
-                                                               only_slurm = args.only_slurm,
-                                                               only_module = args.only_module))
-                        break
-
-            except ValueError: # module is a string
-                for moduleClass in self._cmd.modules.values():
-                    if module == moduleClass.MNAME:
-                        moduleInstance = moduleClass()
-                        print(moduleInstance.available_options(required=args.required,
-                                                               only_slurm = args.only_slurm,
-                                                               only_module = args.only_module))
-                        break
+            for moduleId, moduleClass in self._cmd.filteredModules:
+                if moduleId == module or moduleClass.MNAME == module:
+                    moduleInstance = moduleClass()
+                    print(moduleInstance.options2table(only_required=args.required))
+                    break

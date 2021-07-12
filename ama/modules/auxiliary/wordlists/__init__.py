@@ -6,4 +6,4 @@ from .cupp_alecto import CuppAlecto
 #from .bopscrk_interactive import BopscrkInteractive
 #from .bopscrk_combine import BopscrkCombine
 
-from .cewl import Cewl
+#from .cewl import Cewl

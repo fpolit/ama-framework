@@ -15,26 +15,26 @@
 ## attack/hashes modules imports
 
 # john attacks imports
-from ama.modules.attack.hashes import (
-    JohnBenchmark,
-    JohnWordlist,
-    JohnIncremental,
-    JohnSingle,
-    JohnMasks,
-    #JohnCombination,
-    #JohnHybrid,
-)
+# from ama.modules.attack.hashes import (
+#     JohnBenchmark,
+#     JohnWordlist,
+#     JohnIncremental,
+#     JohnSingle,
+#     JohnMasks,
+#     #JohnCombination,
+#     #JohnHybrid,
+# )
 
-# hashcat attacks imports
-from ama.modules.attack.hashes import (
-    HashcatBenchmark,
-    HashcatWordlist,
-    HashcatCombination,
-    HashcatBruteForce,
-    HashcatIncremental,
-    HashcatMasks,
-    HashcatHybrid
-)
+# # hashcat attacks imports
+# from ama.modules.attack.hashes import (
+#     HashcatBenchmark,
+#     HashcatWordlist,
+#     HashcatCombination,
+#     HashcatBruteForce,
+#     HashcatIncremental,
+#     HashcatMasks,
+#     HashcatHybrid
+# )
 
 # sth
 #from ama.core.modules.attack.hashes import STH
@@ -42,9 +42,9 @@ from ama.modules.attack.hashes import (
 ## attack/services modules imports
 
 #hydra attacks imports
-from ama.modules.attack.services import (
-    HydraWordlist
-)
+# from ama.modules.attack.services import (
+#     HydraWordlist
+# )
 
 ### auxiliary modules imports
 ## auxiliary/wordlists modules imports
@@ -53,14 +53,14 @@ from ama.modules.auxiliary.wordlists import (
     CuppRefine,
     CuppDownload,
     CuppAlecto,
-    Cewl,
+    #Cewl,
     #BopscrkInteractive,
     #BopscrkCombine
 )
 
 ## auxiliary/hashes modules imports
 from ama.modules.auxiliary.hashes import (
-    HashesStatus,
+    #HashesStatus,
     HashID,
     Nth as NthAuxiliary,
     HashGenerator
@@ -90,22 +90,22 @@ attackModules = {
     ## attack/hash modules
     # john attacks
 
-    f"{JohnBenchmark.MNAME}": JohnBenchmark,
-    f"{JohnWordlist.MNAME}": JohnWordlist,
-    f"{JohnIncremental.MNAME}": JohnIncremental,
-    f"{JohnSingle.MNAME}": JohnSingle,
-    f"{JohnMasks.MNAME}": JohnMasks,
-    #f"{JohnCombination.MNAME}": JohnCombination,
-    #f"{JohnHybrid.MNAME}": JohnHybrid,
+    # f"{JohnBenchmark.MNAME}": JohnBenchmark,
+    # f"{JohnWordlist.MNAME}": JohnWordlist,
+    # f"{JohnIncremental.MNAME}": JohnIncremental,
+    # f"{JohnSingle.MNAME}": JohnSingle,
+    # f"{JohnMasks.MNAME}": JohnMasks,
+    # #f"{JohnCombination.MNAME}": JohnCombination,
+    # #f"{JohnHybrid.MNAME}": JohnHybrid,
 
-    # hashcat attacks
-    f"{HashcatBenchmark.MNAME}": HashcatBenchmark,
-    f"{HashcatWordlist.MNAME}": HashcatWordlist,
-    f"{HashcatCombination.MNAME}": HashcatCombination,
-    f"{HashcatBruteForce.MNAME}": HashcatBruteForce,
-    f"{HashcatIncremental.MNAME}": HashcatIncremental,
-    f"{HashcatMasks.MNAME}": HashcatMasks,
-    f"{HashcatHybrid.MNAME}": HashcatHybrid,
+    # # hashcat attacks
+    # f"{HashcatBenchmark.MNAME}": HashcatBenchmark,
+    # f"{HashcatWordlist.MNAME}": HashcatWordlist,
+    # f"{HashcatCombination.MNAME}": HashcatCombination,
+    # f"{HashcatBruteForce.MNAME}": HashcatBruteForce,
+    # f"{HashcatIncremental.MNAME}": HashcatIncremental,
+    # f"{HashcatMasks.MNAME}": HashcatMasks,
+    # f"{HashcatHybrid.MNAME}": HashcatHybrid,
 
     # sth
     #f"{STH.MNAME}": STH,
@@ -130,7 +130,7 @@ auxiliaryWordlistModules = {
 
 ## auxiliary/hashes modules
 auxiliaryHashesModules = {
-    f"{HashesStatus.MNAME}": HashesStatus,
+    #f"{HashesStatus.MNAME}": HashesStatus,
     f"{HashID.MNAME}": HashID,
     f"{NthAuxiliary.MNAME}": NthAuxiliary,
     f"{HashGenerator.MNAME}": HashGenerator

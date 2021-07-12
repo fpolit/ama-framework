@@ -9,18 +9,10 @@
 import os
 import sys
 import argparse
-import argcomplete
-
-from fineprint.status import (
-    print_failure,
-    print_status,
-    print_successful
-)
-
-from fineprint.color import ColorStr
+from pathlib import Path
 
 # version import
-from ama.version import get_version
+
 
 # commandset categories
 from ..category import CmdsetCategory as Category
@@ -34,10 +26,18 @@ from cmd2 import (
     Cmd2ArgumentParser
 )
 
-# modules.base import
+
+from ama.version import get_version
 from ama.modules.base import (
     Attack,
     Auxiliary
+)
+from ama.utils.autocomplete import autocomplete_setv
+from ama.utils.color import ColorStr
+from ama.utils.fineprint import (
+    print_failure,
+    print_status,
+    print_successful
 )
 
 # crackers
@@ -46,13 +46,8 @@ from ama.modules.base import (
 #     Hashcat
 # )
 
-from ama.data.modules import Glue
-from ama.utils.autocomplete import autocomplete_setv
-# slurm import
-#from ama.core.slurm import Slurm
+#from ama.data.modules import Glue
 
-
-from ama.utils.files import Path
 
 @with_default_category(Category.MODULE)
 class Interaction(CommandSet):
@@ -322,12 +317,12 @@ class Interaction(CommandSet):
 
                 if not selected:
                     if isinstance(module, int):
-                        print_failure(f"No module available with id:  {module}")
+                        print(f"No module available with id:  {module}")
                     else: # if module is string or other type
-                        print_failure(f"No module available:  {module}")
+                        print(f"No module available:  {module}")
 
         except Exception as error:
-            print_failure(error)
+            print(error)
 
     unset_parser = argparse.ArgumentParser()
     unset_parser.add_argument('option', help='Option to unset value')
@@ -453,13 +448,12 @@ class Interaction(CommandSet):
         """
 
         try:
-            selected_module = self._cmd.selectedModule
-            if selected_module:
-                selected_module.setv(args.option, args.value, args.quiet,
-									 pre_module = args.pre_module,
-									 post_module = args.post_module)
+            if self._cmd.selectedModule:
+                self._cmd.selectedModule.setv(args.option, args.value, args.quiet,
+				              pre_module = args.pre_module,
+				              post_module = args.post_module)
             else:
-                print_failure("No module was selected")
+                print_failure("No module was selected",)
 
         except Exception as error:
             print_failure(error)
@@ -542,9 +536,10 @@ class Interaction(CommandSet):
         selectedModule = self._cmd.selectedModule
         if selectedModule:
             if isinstance(selectedModule, Auxiliary):
-                print_status(f"Running {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
-                selectedModule.run(quiet=args.quiet)
+                self._cmd.manager.submit(target=selectedModule.run, args=(args.quiet,))
             else: # selectedModule is an instance of Attack
                 print_failure(f"No run method for {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
+                if isinstance(selectedModule, Attack):
+                    print_status("Try with {ColorStr('attack').StyleBRIGHT} command")
         else:
             print_failure("No module selected")
