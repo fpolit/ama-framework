@@ -21,8 +21,8 @@ class Auxiliary(Module):
     def __init__(self, *,
                  mname: str, authors: List[str],
                  description: str, fulldescription: str, references: List[str],
-                 auxiliary_options: dict,
-				 pre_module:Module = None, post_module:Module = None):
+                 auxiliary_options: dict, exec_main_thread:bool = False,
+		 pre_module:Module = None, post_module:Module = None):
 
         init_options = {
             'mname': mname,
@@ -31,8 +31,9 @@ class Auxiliary(Module):
             'fulldescription': fulldescription,
             'references': references,
             'options': auxiliary_options,
-			'pre_module': pre_module,
-			'post_module': post_module
+	    'pre_module': pre_module,
+	    'post_module': post_module,
+            'exec_main_thread': exec_main_thread
         }
 
         super().__init__(**init_options)

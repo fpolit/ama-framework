@@ -2,7 +2,8 @@
 #
 # hash identifier - hashID
 #
-# date: Feb 23 2021
+# State: TESTED - date: Jul 13 2021
+#
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 from pathlib import Path

@@ -36,7 +36,7 @@ setup(
     ],
     packages=find_packages(),
     package_data={
-        "ama.core.plugins.auxiliary.wordlists": ["cupp.cfg", "bopscrk.cfg"],
+        "ama.plugins.auxiliary.wordlists": ["cupp.cfg", "bopscrk.cfg"],
     },
    install_requires = [], # read requirements.txt file
     include_package_data=True,

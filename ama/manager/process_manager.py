@@ -99,6 +99,22 @@ class ProcessManager:
         return process_id
 
 
+    def kill(self, kill_processes:List[int]):
+        #import pdb; pdb.set_trace()
+
+        for kill_process_id in kill_processes:
+            was_killed = False
+            for process in self.processing:
+                if process.id_process == kill_process_id:
+                    print(f"[*] Kill process {process.id_process}")
+                    process.kill()
+                    process.close()
+                    was_killed = True
+
+            if not was_killed:
+                print(f"Process {kill_process_id} was not found in PROCESSING processes")
+
+
     def process(self):
         while True:
             while not self.pending.empty():
@@ -128,7 +144,7 @@ class ProcessManager:
                     self.completed.append(cracking_process)
 
             self.processing = updated_processing
-            time.sleep(1)
+            time.sleep(0.01)
 
 
 

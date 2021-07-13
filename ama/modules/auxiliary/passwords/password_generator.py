@@ -2,7 +2,8 @@
 #
 # Strong Password generator - random-password-generator
 #
-# Status:
+# State: TESTED - date: Jul 13 2021
+#
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
@@ -26,7 +27,7 @@ class PasswordGenerator(Auxiliary):
     DESCRIPTION = "Strong Passwords Generator"
     MNAME = "auxiliary/passwords/password_generator"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
-    AUTHOR = [
+    AUTHORS = [
         "glozanoa <glozanoa@uni.pe>"
     ]
 
@@ -49,23 +50,24 @@ class PasswordGenerator(Auxiliary):
                  min_schars:int = 1):
 
         auxiliary_options = {
-            'min_length': Argument(min_length, True, "Minimum password length", value_type=int),
-            'max_length': Argument(max_length, True, "Minimum password length", value_type=int),
-            'min_uppers': Argument(min_uchars, True, "Minimum number of upper characters", value_type=int),
-            'min_lowers': Argument(min_lchars, True, "Minimum number of lower characters", value_type=int),
-            'min_digits': Argument(min_digits, True, "Minimum number of digits", value_type=int),
-            'min_specials': Argument(min_schars, True, "Minimum number of special characters", value_type=int),
-            'exclude': Argument('', False, "Characters to exclude")
+            'MIN_LENGTH': Argument(min_length, True, "Minimum password length", value_type=int),
+            'MAX_LENGTH': Argument(max_length, True, "Minimum password length", value_type=int),
+            'MIN_UPPERS': Argument(min_uchars, True, "Minimum number of upper characters", value_type=int),
+            'MIN_LOWERS': Argument(min_lchars, True, "Minimum number of lower characters", value_type=int),
+            'MIN_DIGITS': Argument(min_digits, True, "Minimum number of digits", value_type=int),
+            'MIN_SPECIALS': Argument(min_schars, True, "Minimum number of special characters", value_type=int),
+            'EXCLUDE': Argument('', False, "Characters to exclude"),
+            'JOB_NAME': Argument('passwd-gen-%j', True, "Job name"),
+            'ROUTPUT': Argument('ama-%j.out', True, "Redirection output file")
         }
 
         init_options = {
             'mname': PasswordGenerator.MNAME,
-            'author': PasswordGenerator.AUTHOR,
+            'authors': PasswordGenerator.AUTHORS,
             'description': PasswordGenerator.DESCRIPTION,
             'fulldescription': PasswordGenerator.FULLDESCRIPTION,
             'references': PasswordGenerator.REFERENCES,
-            'auxiliary_options': auxiliary_options,
-            'slurm': None
+            'auxiliary_options': auxiliary_options
         }
 
         super().__init__(**init_options)
@@ -76,16 +78,16 @@ class PasswordGenerator(Auxiliary):
         """
         #import pdb; pdb.set_trace()
         try:
-            self.no_empty_required_options()
+            #self.no_empty_required_options()
 
             password = RandomPasswordGenerator()
 
-            password.minlen = self.options['min_length'].value
-            password.maxlen = self.options['max_length'].value
-            password.minuchars = self.options['min_uppers'].value
-            password.minlchars = self.options['min_lowers'].value
-            password.minnumbers = self.options['min_digits'].value
-            password.minschars = self.options['min_specials'].value
+            password.minlen = self.options['MIN_LENGTH'].value
+            password.maxlen = self.options['MAX_LENGTH'].value
+            password.minuchars = self.options['MIN_UPPERS'].value
+            password.minlchars = self.options['MIN_LOWERS'].value
+            password.minnumbers = self.options['MIN_DIGITS'].value
+            password.minschars = self.options['MIN_SPECIALS'].value
 
 
             exclude = {
@@ -95,7 +97,7 @@ class PasswordGenerator(Auxiliary):
                 'special': ''
                 }
 
-            for char in self.options['exclude'].value:
+            for char in self.options['EXCLUDE'].value:
                 if char in string.ascii_lowercase:
                     exclude['lower'] += char
 

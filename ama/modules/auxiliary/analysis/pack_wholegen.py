@@ -3,6 +3,7 @@
 # wholegen pack - auxiliary/analysis/pack_wholegen ama module
 #
 # implementation -  date: Mar 7 2021
+# State: TESTED - date: Jul 13 2021
 #
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
@@ -28,7 +29,7 @@ class PackWholegen(Auxiliary):
     DESCRIPTION = "Analize Passwords and generate Masks"
     MNAME = "auxiliary/analysis/pack_wholegen"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
-    AUTHOR = [
+    AUTHORS = [
         "glozanoa <glozanoa@uni.pe>"
     ]
     FULLDESCRIPTION = (
@@ -55,43 +56,44 @@ class PackWholegen(Auxiliary):
                  min_time:int         = None, max_time:int       = None,
                  target_time:int     = None,
                  hiderare: int       = 0,
-                 show_masks:bool = False, quiet: bool = False,
+                 show_masks:bool = True, quiet: bool = False,
                  sorting = "optindex"):
 
         auxiliary_options = {
-            'wordlist': Argument(wordlist, True, "Wordlist to analyze", value_type=str),
-            'output': Argument(output, True, "File name to save generated masks and occurrence", value_type=str),
-            'charsets': Argument(charsets, False, "Password charset filter (e.g. loweralpha,numeric)", value_type=str),
-            'min_length': Argument(min_length, False, "Minimum password length", value_type=int),
-            'max_length': Argument(max_length, False, "Maximum password length", value_type=int),
-            'min_special': Argument(min_special, False, "Minimum number of special characters", value_type=int),
-            'min_upper': Argument(min_upper, False, "Minimum number of uppercase characters", value_type=int),
-            'min_lower': Argument(min_lower, False, "Minimum number of lowercase characters", value_type=int),
-            'min_digit': Argument(min_digit, False, "Minimum number of digit", value_type=int),
-            'max_special': Argument(max_special, False, "Maximum number of special characters", value_type=int),
-            'max_upper': Argument(max_upper, False, "Maximum number of uppercase characters", value_type=int),
-            'max_digit': Argument(max_digit, False, "Maximum number of digit", value_type=int),
-            'max_lower': Argument(max_lower, False, "Maximum number of lowercase characters", value_type=int),
-            'min_complexity': Argument(min_complexity, False, "Minimum complexity", value_type=int),
-            'max_complexity': Argument(max_complexity, False, "Maximum complexity", value_type=int),
-            'min_occurrence': Argument(min_occurrence, False, "Minimum occurrence", value_type=int),
-            'max_occurrence': Argument(max_occurrence, False, "Maximum occurrence", value_type=int),
-            'min_time': Argument(min_time, False, "Minimum mask runtime (seconds)", value_type=int),
-            'max_time': Argument(max_time, False, "Maximum mask runtime (seconds)", value_type=int),
-            'target_time': Argument(target_time, False, "Target time of all masks (seconds)", value_type=int),
-            'sorting': Argument(sorting, True, "Mask sorting (<optindex|occurrence|complexity>)", value_type=str),
-            'hiderare': Argument(hiderare, True, "Hide statistics lower than the supplied percent", value_type=int),
-            'show_masks': Argument(show_masks, True, "Show matching mask", value_type=bool),
+            'WORDLIST': Argument(wordlist, True, "Wordlist to analyze", value_type=str),
+            'OUTPUT': Argument(output, True, "File name to save generated masks and occurrence", value_type=str),
+            'CHARSETS': Argument(charsets, False, "Password charset filter (e.g. loweralpha,numeric)", value_type=str),
+            'MIN_LENGTH': Argument(min_length, False, "Minimum password length", value_type=int),
+            'MAX_LENGTH': Argument(max_length, False, "Maximum password length", value_type=int),
+            'MIN_SPECIAL': Argument(min_special, False, "Minimum number of special characters", value_type=int),
+            'MIN_UPPER': Argument(min_upper, False, "Minimum number of uppercase characters", value_type=int),
+            'MIN_LOWER': Argument(min_lower, False, "Minimum number of lowercase characters", value_type=int),
+            'MIN_DIGIT': Argument(min_digit, False, "Minimum number of digit", value_type=int),
+            'MAX_SPECIAL': Argument(max_special, False, "Maximum number of special characters", value_type=int),
+            'MAX_UPPER': Argument(max_upper, False, "Maximum number of uppercase characters", value_type=int),
+            'MAX_DIGIT': Argument(max_digit, False, "Maximum number of digit", value_type=int),
+            'MAX_LOWER': Argument(max_lower, False, "Maximum number of lowercase characters", value_type=int),
+            'MIN_COMPLEXITY': Argument(min_complexity, False, "Minimum complexity", value_type=int),
+            'MAX_COMPLEXITY': Argument(max_complexity, False, "Maximum complexity", value_type=int),
+            'MIN_OCCURRENCE': Argument(min_occurrence, False, "Minimum occurrence", value_type=int),
+            'MAX_OCCURRENCE': Argument(max_occurrence, False, "Maximum occurrence", value_type=int),
+            'MIN_TIME': Argument(min_time, False, "Minimum mask runtime (seconds)", value_type=int),
+            'MAX_TIME': Argument(max_time, False, "Maximum mask runtime (seconds)", value_type=int),
+            'TARGET_TIME': Argument(target_time, False, "Target time of all masks (seconds)", value_type=int),
+            'SORTING': Argument(sorting, True, "Mask sorting (<optindex|occurrence|complexity>)", value_type=str),
+            'HIDERARE': Argument(hiderare, True, "Hide statistics lower than the supplied percent", value_type=int),
+            'SHOW_MASKS': Argument(show_masks, True, "Show matching mask", value_type=bool),
+            'JOB_NAME': Argument('pack-wholegen-%j', True, "Job name"),
+            'ROUTPUT': Argument('ama-%j.out', True, "Redirection output file")
         }
 
         init_options = {
             'mname': PackWholegen.MNAME,
-            'author': PackWholegen.AUTHOR,
+            'authors': PackWholegen.AUTHORS,
             'description': PackWholegen.DESCRIPTION,
             'fulldescription':  PackWholegen.FULLDESCRIPTION,
             'references': PackWholegen.REFERENCES,
-            'auxiliary_options': auxiliary_options,
-            'slurm': None
+            'auxiliary_options': auxiliary_options
         }
 
         super().__init__(**init_options)
@@ -106,55 +108,56 @@ class PackWholegen(Auxiliary):
 
         try:
 
-            self.no_empty_required_options()
+            #self.no_empty_required_options()
 
-            if maskgen_sorting := self.options['sorting'].value:
+            if maskgen_sorting := self.options['SORTING'].value:
                 if maskgen_sorting not in Pack.MASKGEN_SORTING_MODES:
                     raise InvalidSortingMode(maskgen_sorting)
 
-            if self.options['charsets'].value:
-                charsets = [charset for charset in self.options['charsets'].value.split(',')]
+            if self.options['CHARSETS'].value:
+                charsets = [charset for charset in self.options['CHARSETS'].value.split(',')]
             else:
                 charsets = None
 
-            Pack.wholegen(wordlist = self.options['wordlist'].value,
-                          output = self.options['output'].value,
+            Pack.wholegen(wordlist = self.options['WORDLIST'].value,
+                          output = self.options['OUTPUT'].value,
                           charsets = charsets,
-                          minlength = self.options['min_length'].value,
-                          maxlength = self.options['max_length'].value,
-                          mindigit = self.options['min_digit'].value,
-                          maxdigit = self.options['max_digit'].value,
-                          minupper = self.options['min_upper'].value,
-                          maxupper = self.options['max_upper'].value,
-                          minlower = self.options['min_lower'].value,
-                          maxlower = self.options['max_lower'].value,
-                          minspecial = self.options['min_special'].value,
-                          maxspecial = self.options['max_special'].value,
-                          mincomplexity = self.options['min_complexity'].value,
-                          maxcomplexity = self.options['max_complexity'].value,
-                          minoccurrence = self.options['min_occurrence'].value,
-                          maxoccurrence = self.options['max_occurrence'].value,
-                          mintime = self.options['min_time'].value,
-                          maxtime = self.options['max_time'].value,
-                          target_time = self.options['target_time'].value,
-                          sorting = self.options['sorting'].value,
-                          hiderare = self.options['hiderare'].value,
-                          showmasks = self.options['show_masks'].value,
+                          minlength = self.options['MIN_LENGTH'].value,
+                          maxlength = self.options['MAX_LENGTH'].value,
+                          mindigit = self.options['MIN_DIGIT'].value,
+                          maxdigit = self.options['MAX_DIGIT'].value,
+                          minupper = self.options['MIN_UPPER'].value,
+                          maxupper = self.options['MAX_UPPER'].value,
+                          minlower = self.options['MIN_LOWER'].value,
+                          maxlower = self.options['MAX_LOWER'].value,
+                          minspecial = self.options['MIN_SPECIAL'].value,
+                          maxspecial = self.options['MAX_SPECIAL'].value,
+                          mincomplexity = self.options['MIN_COMPLEXITY'].value,
+                          maxcomplexity = self.options['MAX_COMPLEXITY'].value,
+                          minoccurrence = self.options['MIN_OCCURRENCE'].value,
+                          maxoccurrence = self.options['MAX_OCCURRENCE'].value,
+                          mintime = self.options['MIN_TIME'].value,
+                          maxtime = self.options['MAX_TIME'].value,
+                          target_time = self.options['TARGET_TIME'].value,
+                          sorting = self.options['SORTING'].value,
+                          hiderare = self.options['HIDERARE'].value,
+                          showmasks = self.options['SHOW_MASKS'].value,
                           quiet = quiet)
 
-            output = self.options['output'].value
+            output = self.options['OUTPUT'].value
             return output
 
         except Exception as error:
-            print_failure(error)
+            print(error) # print_failure
 
 
-    def setv(self, option, value):
-        #import pdb; pdb.set_trace()
-        super().setv(option, value)
+    # def setv(self, option, value):
 
-        option = option.lower()
-        # attack ->  atack
-        if option == "wordlist":
-            output_file_name = os.path.basename(value) + ".masks"
-            super().setv('output', output_file_name)
+    #     #import pdb; pdb.set_trace()
+    #     super().setv(option, value)
+
+    #     option = option.lower()
+    #     # attack ->  atack
+    #     if option == "wordlist":
+    #         output_file_name = os.path.basename(value) + ".masks"
+    #         super().setv('output', output_file_name)

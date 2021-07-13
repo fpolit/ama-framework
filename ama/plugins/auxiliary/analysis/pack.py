@@ -9,6 +9,7 @@
 import os
 from typing import List
 from sbash import Bash
+from pathlib import Path
 
 # pack-ama imports
 from pack_ama import (
@@ -55,7 +56,7 @@ class Pack(Auxiliary):
         #import pdb; pdb.set_trace()
         try:
             permission = [os.R_OK]
-            Path.access(permission, wordlist)
+            #Path.access(permission, wordlist)
 
             statsgen = StatsGen(wordlist = wordlist,
                                 output = output,
@@ -79,7 +80,7 @@ class Pack(Auxiliary):
                 print(f"[*] Generated stats were saved in {output}")
 
         except Exception as error:
-            print_failure(error)
+            print(error) # print_failure
 
 
 
@@ -96,7 +97,7 @@ class Pack(Auxiliary):
         #import pdb; pdb.set_trace()
         try:
             permission = [os.R_OK]
-            Path.access(permission, statsgen_output)
+            #Path.access(permission, statsgen_output)
 
             if not quiet:
                 print(Pack.MASKGEN_BANNER)
@@ -142,7 +143,7 @@ class Pack(Auxiliary):
                 print(f"[+] Masks were saved in {output}")
 
         except Exception as error:
-            print_failure(error)
+            print(error) # print_failure
 
 
     #debugged - date: Mar 7 2021
@@ -204,8 +205,8 @@ class Pack(Auxiliary):
         #import pdb; pdb.set_trace()
 
         try:
-            permission = [os.R_OK]
-            Path.access(permission, wordlist)
+            #permission = [os.R_OK]
+            #Path.access(permission, wordlist)
 
             whole = WholeGen(
                 wordlist = wordlist,
@@ -236,4 +237,4 @@ class Pack(Auxiliary):
 
 
         except Exception as error:
-            print_failure(error)
+            print(error) # print_failure

@@ -28,8 +28,8 @@ class Module:
     def __init__(self, *,
                  mname: str, authors: List[str],
                  description: str, fulldescription: str, references: List[str],
-                 options: dict,
-				 pre_module = None, post_module = None):
+                 options: dict, exec_main_thread = False,
+                 pre_module = None, post_module = None):
         self.mname = mname
         self.authors = authors
         self.description = description
@@ -38,6 +38,7 @@ class Module:
         self.references = references
         self.pre_module = pre_module
         self.post_module = post_module
+        self.exec_main_thread = exec_main_thread
 
     def execute(self, *args, **kwargs):
         """

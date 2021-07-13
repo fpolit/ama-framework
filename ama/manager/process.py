@@ -20,6 +20,15 @@ class ProcessStatus(Enum):
     PENDING = 4
     CLOSED = 5
 
+status2str = {
+    ProcessStatus.RUNNING: 'RUNNING',
+    ProcessStatus.COMPLETED: 'COMPLETED',
+    ProcessStatus.UNSTARTED: 'UNSTARTED',
+    ProcessStatus.FAILED: 'FAILED',
+    ProcessStatus.PENDING: 'PENDING',
+    ProcessStatus.CLOSED: 'CLOSED'
+}
+
 
 class Process(SystemProcess):
     """
@@ -93,13 +102,14 @@ class Process(SystemProcess):
         information = {
             'id': self.id_process,
             'name': self.name,
+            'depends': ', '.join(self.depends)
         }
 
         if self.start_time:
             if self.end_time:
-                information['elapse_time'] = self.end_time - self.start_time
+                information['elapsed_time'] = self.end_time - self.start_time
             else:
-                information['elapse_time'] = time.time() - self.start_time
+                information['elapsed_time'] = time.time() - self.start_time
         else:
             information['elapsed_time'] = None
 
@@ -117,12 +127,12 @@ class Process(SystemProcess):
         status = None
         try:
             status = self.status()
-            information['status'] = status
+            information['status'] = status2str[status]
         except Exception as error:
             if not quiet:
                 print(error)
 
-            information['status'] = ProcessStatus.CLOSED
+            information['status'] = 'CLOSED'
 
 
 

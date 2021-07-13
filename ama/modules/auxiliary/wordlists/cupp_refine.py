@@ -24,7 +24,7 @@ class CuppRefine(Auxiliary):
     DESCRIPTION = "Cupp - refine a wordlist"
     MNAME = "auxiliary/wordlists/cupp_refine"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
-    AUTHOR = [
+    AUTHORS = [
         "glozanoa <glozanoa@uni.pe>"
     ]
 
@@ -42,7 +42,7 @@ class CuppRefine(Auxiliary):
 
     def __init__(self, wordlist: str = None, quiet:bool = False):
         auxiliary_options = {
-            'wordlist': Argument(wordlist, True, "Wordlist to refine"),
+            'WORDLIST': Argument(wordlist, True, "Wordlist to refine"),
             #'quiet': Argument(quiet, True, "Don't print cupp's fancy banner")
         }
         init_options = {
@@ -52,7 +52,7 @@ class CuppRefine(Auxiliary):
             'fulldescription': CuppRefine.FULLDESCRIPTION,
             'references': CuppRefine.REFERENCES,
             'auxiliary_options': auxiliary_options,
-            'slurm': None
+            'exec_main_thread': True
         }
 
         super().__init__(**init_options)
@@ -64,12 +64,12 @@ class CuppRefine(Auxiliary):
         """
         #import pdb; pdb.set_trace()
         try:
-            self.no_empty_required_options()
+            #self.no_empty_required_options()
             cupp = Cupp()
-            improved_wordlist = cupp.improve_wordlist(wordlist= self.options['wordlist'].value,
+            improved_wordlist = cupp.improve_wordlist(wordlist= self.options['WORDLIST'].value,
                                                       quiet = quiet)
 
             return improved_wordlist
 
         except Exception as error:
-            print_failure(error)
+            print(error) # print_failure

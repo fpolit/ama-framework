@@ -2,7 +2,8 @@
 #
 # Strong Password generator - random-password-generator
 #
-# Status:
+# State: TESTED - date: Jul 13 2021
+#
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
@@ -28,7 +29,7 @@ class ShufflePassword(Auxiliary):
     DESCRIPTION = "Shuffle Passwords Generator"
     MNAME = "auxiliary/passwords/shuffle_password"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
-    AUTHOR = [
+    AUTHORS = [
         "glozanoa <glozanoa@uni.pe>"
     ]
 
@@ -45,18 +46,19 @@ class ShufflePassword(Auxiliary):
     def __init__(self, *, min_length:int = 8):
 
         auxiliary_options = {
-            'length': Argument(min_length, True, "Minimum password length", value_type=int),
-            'charset': Argument(None, True, "Characters to shuffle")
+            'LENGTH': Argument(min_length, True, "Minimum password length", value_type=int),
+            'CHARSET': Argument(None, True, "Characters to shuffle"),
+            'JOB_NAME': Argument('shuffle-passwd-%j', True, "Job name"),
+            'ROUTPUT': Argument('ama-%j.out', True, "Redirection output file")
         }
 
         init_options = {
             'mname': ShufflePassword.MNAME,
-            'author': ShufflePassword.AUTHOR,
+            'authors': ShufflePassword.AUTHORS,
             'description': ShufflePassword.DESCRIPTION,
             'fulldescription': ShufflePassword.FULLDESCRIPTION,
             'references': ShufflePassword.REFERENCES,
-            'auxiliary_options': auxiliary_options,
-            'slurm': None
+            'auxiliary_options': auxiliary_options
         }
 
         super().__init__(**init_options)
@@ -67,12 +69,12 @@ class ShufflePassword(Auxiliary):
         """
         #import pdb; pdb.set_trace()
         try:
-            self.no_empty_required_options()
+            #self.no_empty_required_options()
 
             password = RandomPasswordGenerator()
 
-            charset = self.options['charset'].value
-            length = self.options['length'].value
+            charset = self.options['CHARSET'].value
+            length = self.options['LENGTH'].value
             passwd = password.shuffle_password(charset, length)
 
             print_successful(f"Generated password: {ColorStr(passwd).StyleBRIGHT}")

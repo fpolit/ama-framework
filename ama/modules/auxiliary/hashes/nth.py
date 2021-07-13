@@ -2,7 +2,8 @@
 #
 # hash identifier - nth
 #
-# date: Mar 4 2021
+# State: TESTED - date: Jul 13 2021
+#
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import argparse
@@ -25,7 +26,7 @@ class Nth(Auxiliary):
     DESCRIPTION = "Nth (name-that-hash) - Hash Identifier"
     MNAME = "auxiliary/hashes/nth"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
-    AUTHOR = [
+    AUTHORS = [
         "glozanoa <glozanoa@uni.pe>"
     ]
 
@@ -47,21 +48,22 @@ class Nth(Auxiliary):
                  banner: bool = False, most_likely: bool = True):
 
         auxiliary_options = {
-            'hashes': Argument(hashes, True, "Hashes to identify (hashes[split by commas] or hashes file)"),
-            'most_likely': Argument(most_likely, True, "Show the most like hashes type"),
-            'hashcat': Argument(hashcat, True, "Show corresponding Hashcat mode"),
-            'john': Argument(john, True, "Show corresponding John hash format"),
-            'base64': Argument(base64, True, "Decodes hashes in Base64 before identification"),
+            'HASHES': Argument(hashes, True, "Hashes to identify (hashes[split by commas] or hashes file)"),
+            'MOST_LIKELY': Argument(most_likely, True, "Show the most like hashes type"),
+            'HASHCAT': Argument(hashcat, True, "Show corresponding Hashcat mode"),
+            'JOHN': Argument(john, True, "Show corresponding John hash format"),
+            'BASE64': Argument(base64, True, "Decodes hashes in Base64 before identification"),
+            'JOB_NAME': Argument('nth-%j', True, "Job name"),
+            'ROUTPUT': Argument('ama-%j.out', True, "Redirection output file")
         }
 
         init_options = {
             'mname': Nth.MNAME,
-            'author': Nth.AUTHOR,
+            'authors': Nth.AUTHORS,
             'description': Nth.DESCRIPTION,
             'fulldescription': Nth.FULLDESCRIPTION,
             'references': Nth.REFERENCES,
-            'auxiliary_options': auxiliary_options,
-            'slurm': None
+            'auxiliary_options': auxiliary_options
         }
 
         super().__init__(**init_options)
@@ -73,23 +75,23 @@ class Nth(Auxiliary):
         #import pdb; pdb.set_trace()
         try:
 
-            self.no_empty_required_options()
+            #self.no_empty_required_options()
             nth = PluginNth()
 
-            if os.path.isfile(self.options['hashes'].value) and \
-               os.access(self.options['hashes'].value, os.R_OK):
-                hashes_file = open(self.options['hashes'].value, 'r')
+            if os.path.isfile(self.options['HASHES'].value) and \
+               os.access(self.options['HASHES'].value, os.R_OK):
+                hashes_file = open(self.options['HASHES'].value, 'r')
                 hashes = [query_hash.rstrip() for query_hash in hashes_file.readlines()]
                 hashes_file.close()
 
             else: # HASHES option is a string (a simple hash)
-                hashes = self.options['hashes'].value.split(',')
+                hashes = self.options['HASHES'].value.split(',')
 
             hashes_identity = nth.hashes_identify(hashes,
-                                                  hashcat = self.options['hashcat'].value,
-                                                  john = self.options['john'].value,
-                                                  base64 = self.options['base64'].value,
-                                                  most_likely = self.options['most_likely'].value,
+                                                  hashcat = self.options['HASHCAT'].value,
+                                                  john = self.options['JOHN'].value,
+                                                  base64 = self.options['BASE64'].value,
+                                                  most_likely = self.options['MOST_LIKELY'].value,
                                                   quiet = quiet)
 
 

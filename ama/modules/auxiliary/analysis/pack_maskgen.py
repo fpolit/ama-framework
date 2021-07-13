@@ -2,7 +2,7 @@
 #
 # maskgen pack - auxiliary/analysis/pack_maskgen ama module
 #
-# implementation -  date: Mar 7 2021
+# State: TESTED - date: Jul 13 2021
 #
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
@@ -28,7 +28,7 @@ class PackMaskgen(Auxiliary):
     DESCRIPTION = "Generate Password Masks"
     MNAME = "auxiliary/analysis/pack_maskgen"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
-    AUTHOR = [
+    AUTHORS = [
         "glozanoa <glozanoa@uni.pe>"
     ]
     FULLDESCRIPTION = (
@@ -49,78 +49,79 @@ class PackMaskgen(Auxiliary):
                  min_occurrence: int = None, max_occurrence: int = None,
                  sorting:str = "optindex",
                  check_masks: List[str] = None, check_masks_file: str = None,
-                 show_masks: bool = False, quiet: bool = True):
+                 show_masks: bool = True, quiet: bool = True):
 
         auxiliary_options = {
-            'stats': Argument(statsgen_output, True, "Statsgen output file"),
-            'output': Argument(output, True, "File name to save generated masks"),
+            'STATS': Argument(statsgen_output, True, "Statsgen output file"),
+            'OUTPUT': Argument(output, True, "File name to save generated masks"),
 
             # password filters
-            'min_length': Argument(min_length, False, "Minimum password length"),
-            'max_length': Argument(max_length, False, "Maximum password length"),
-            'min_time': Argument(min_time, False, "Minimum mask runtime (seconds)"),
-            'max_time': Argument(max_time, False, "Maximum mask runtime (seconds)"),
-            'target_time': Argument(target_time, False, "Target time of all masks (seconds)"),
-            'min_complexity': Argument(min_complexity, False, "Minimum complexity"),
-            'max_complexity': Argument(max_complexity, False, "Maximum complexity"),
-            'min_occurrence': Argument(min_occurrence, False, "Minimum occurrence"),
-            'max_occurrence': Argument(max_occurrence, False, "Maximum occurrence"),
-            'sorting': Argument(sorting, True, "Mask sorting (<optindex|occurrence|complexity>)"),
-            'check_masks': Argument(check_masks, False, "Check mask coverage(e.g. ?u?l?d,?l?d?d)"),
-            'check_masks_file': Argument(check_masks_file, False, "Check mask coverage in a file"),
+            'MIN_LENGTH': Argument(min_length, False, "Minimum password length", value_type=int),
+            'MAX_LENGTH': Argument(max_length, False, "Maximum password length", value_type=int),
+            'MIN_TIME': Argument(min_time, False, "Minimum mask runtime (seconds)", value_type=int),
+            'MAX_TIME': Argument(max_time, False, "Maximum mask runtime (seconds)", value_type=int),
+            'TARGET_TIME': Argument(target_time, False, "Target time of all masks (seconds)", value_type=int),
+            'MIN_COMPLEXITY': Argument(min_complexity, False, "Minimum complexity", value_type=int),
+            'MAX_COMPLEXITY': Argument(max_complexity, False, "Maximum complexity", value_type=int),
+            'MIN_OCCURRENCE': Argument(min_occurrence, False, "Minimum occurrence", value_type=int),
+            'MAX_OCCURRENCE': Argument(max_occurrence, False, "Maximum occurrence", value_type=int),
+            'SORTING': Argument(sorting, True, "Mask sorting (<optindex|occurrence|complexity>)"),
+            'CHECK_MASKS': Argument(check_masks, False, "Check mask coverage(e.g. ?u?l?d,?l?d?d)"),
+            'CHECK_MASKS_FILE': Argument(check_masks_file, False, "Check mask coverage in a file"),
 
-            'show_masks': Argument(show_masks, True, "Show matching mask"),
+            'SHOW_MASKS': Argument(show_masks, True, "Show matching mask", value_type=bool),
+            'JOB_NAME': Argument('pack-maskgen-%j', True, "Job name"),
+            'ROUTPUT': Argument('ama-%j.out', True, "Redirection output file")
         }
 
 
         init_options = {
             'mname': PackMaskgen.MNAME,
-            'author': PackMaskgen.AUTHOR,
+            'authors': PackMaskgen.AUTHORS,
             'description': PackMaskgen.DESCRIPTION,
             'fulldescription':  PackMaskgen.FULLDESCRIPTION,
             'references': PackMaskgen.REFERENCES,
-            'auxiliary_options': auxiliary_options,
-            'slurm': None
+            'auxiliary_options': auxiliary_options
         }
 
         super().__init__(**init_options)
 
     #debugged - date: Mar 7 2021
-    def run(self, *, quiet:bool = False):
+    def run(self, quiet:bool = False):
 
         #import pdb; pdb.set_trace()
         try:
 
-            self.no_empty_required_options()
+            #self.no_empty_required_options()
 
-            if self.options['check_masks'].value:
-                checkmasks = [checkmask for checkmask in self.options['check_masks'].value.split(',')]
+            if self.options['CHECK_MASKS'].value:
+                checkmasks = [checkmask for checkmask in self.options['CHECK_MASKS'].value.split(',')]
             else:
                 checkmasks = None
 
-            if maskgen_sorting := self.options['sorting'].value:
+            if maskgen_sorting := self.options['SORTING'].value:
                 if maskgen_sorting not in Pack.MASKGEN_SORTING_MODES:
                     raise InvalidSortingMode(maskgen_sorting)
 
 
-            Pack.maskgen(statsgen_output = self.options['stats'].value,
-                         output = self.options['output'].value,
-                         min_length = self.options['min_length'].value,
-                         max_length = self.options['max_length'].value,
-                         target_time = self.options['target_time'].value,
-                         min_time = self.options['min_time'].value,
-                         max_time = self.options['max_time'].value,
-                         min_complexity = self.options['min_complexity'].value,
-                         max_complexity = self.options['max_complexity'].value,
-                         min_occurrence = self.options['min_occurrence'].value,
-                         max_occurrence = self.options['max_occurrence'].value,
-                         sorting = self.options['sorting'].value,
+            Pack.maskgen(statsgen_output = self.options['STATS'].value,
+                         output = self.options['OUTPUT'].value,
+                         min_length = self.options['MIN_LENGTH'].value,
+                         max_length = self.options['MAX_LENGTH'].value,
+                         target_time = self.options['TARGET_TIME'].value,
+                         min_time = self.options['MIN_TIME'].value,
+                         max_time = self.options['MAX_TIME'].value,
+                         min_complexity = self.options['MIN_COMPLEXITY'].value,
+                         max_complexity = self.options['MAX_COMPLEXITY'].value,
+                         min_occurrence = self.options['MIN_OCCURRENCE'].value,
+                         max_occurrence = self.options['MAX_OCCURRENCE'].value,
+                         sorting = self.options['SORTING'].value,
                          check_masks = checkmasks,
-                         check_masks_file = self.options['check_masks'].value,
-                         show_masks = self.options['show_masks'].value,
+                         check_masks_file = self.options['CHECK_MASKS'].value,
+                         show_masks = self.options['SHOW_MASKS'].value,
                          quiet = quiet)
 
-            output = self.options['output'].value
+            output = self.options['OUTPUT'].value
             return output
 
         except Exception as error:

@@ -2,7 +2,8 @@
 #
 # Cupp - interactive mode
 #
-# date: Mar 3 2021
+# State: TESTED - date: Jul 13 2021
+#
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 from fineprint.status import print_failure
@@ -12,7 +13,6 @@ from ama.plugins.auxiliary.wordlists import Cupp
 
 # Auxliary base class
 from ama.modules.base import Auxiliary
-
 from ama.utils import Argument
 
 
@@ -24,7 +24,7 @@ class CuppInteractive(Auxiliary):
     DESCRIPTION = "Cupp - Interactive mode"
     MNAME = "auxiliary/wordlists/cupp_interactive"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
-    AUTHOR = [
+    AUTHORS = [
         "glozanoa <glozanoa@uni.pe>"
     ]
     FULLDESCRIPTION = (
@@ -43,18 +43,16 @@ class CuppInteractive(Auxiliary):
         Initialization of Cupp - interactive mode
         """
 
-        auxiliary_options = {
-            #'wordlist': Argument(wordlist, True, "Name of generated wordlist")
-        }
+        auxiliary_options = {}
 
         init_options = {
             'mname': CuppInteractive.MNAME,
-            'author': CuppInteractive.AUTHOR,
+            'authors': CuppInteractive.AUTHORS,
             'description': CuppInteractive.DESCRIPTION,
             'fulldescription': CuppInteractive.FULLDESCRIPTION,
             'references': CuppInteractive.REFERENCES,
             'auxiliary_options': auxiliary_options,
-            'slurm': None
+            'exec_main_thread': True
         }
 
         super().__init__(**init_options)
@@ -66,11 +64,11 @@ class CuppInteractive(Auxiliary):
 
         #import pdb; pdb.set_trace()
         try:
-            self.no_empty_required_options()
+            #self.no_empty_required_options()
             cupp = Cupp()
             generated_wordlist = cupp.interactive(quiet = quiet)
 
             return generated_wordlist
 
         except Exception as error:
-            print_failure(error)
+            print(error) # print_failure

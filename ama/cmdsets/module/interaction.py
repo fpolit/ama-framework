@@ -10,6 +10,7 @@ import os
 import sys
 import argparse
 from pathlib import Path
+import argcomplete
 
 # version import
 
@@ -30,9 +31,10 @@ from cmd2 import (
 from ama.version import get_version
 from ama.modules.base import (
     Attack,
-    Auxiliary
+    Auxiliary,
+    Module
 )
-from ama.utils.autocomplete import autocomplete_setv
+#from ama.utils.autocomplete import autocomplete_setv
 from ama.utils.color import ColorStr
 from ama.utils.fineprint import (
     print_failure,
@@ -312,7 +314,7 @@ class Interaction(CommandSet):
                         subtype_name = ColorStr.ForeRED(f"{moduleSubtype}/{moduleName}")
                         self._cmd.prompt = f"ama {moduleType}({subtype_name}) > "
 						#import pdb;pdb.set_trace()
-                        #self._cmd.do_setv = autocomplete_setv(self._cmd.selectedModule)
+                        self._cmd.do_setv = self._module_setv(self._cmd, self._cmd.selectedModule)
                         break
 
                 if not selected:
@@ -458,6 +460,59 @@ class Interaction(CommandSet):
         except Exception as error:
             print_failure(error)
 
+    def _module_setv(self, cmd_app, selected_module: Module):
+
+        setv_parser = ArgumentParser()
+        module_options = selected_module.options.keys()
+        setv_parser.add_argument("option", choices=module_options,
+                                 help="Option to set value")
+
+		def choice_values(prefix, parsed_args):
+			choices = selected_module.options[parsed_args.option].choices
+			if choices:
+				return (choice for choice in choices if choice.startwith(prefix))
+			else:
+				return []
+
+
+		setv_parser.add_argument("value", help="Value of option").completer = choice_values
+
+        # #parsed_args = setv_parser.parse_known_args()
+        # #print(f"Parsed args: {parsed_args}")
+        # selected_option = selected_module.options[parsed_args.option]
+
+        # if selected_option.choices:
+        #     setv_parser.add_argument("value", choices=selected_module.choices,
+        #                              help="Value of option")
+        # else:
+        #     setv_parser.add_argument("value",  completer=Cmd.path_complete, help="Value of option")
+
+        # setv_parser.add_argument('-q', '--quiet', action='store_true', help="Set value quietly")
+        # setv_parser.add_argument('-pre', '--pre-module', dest='pre_module', action='store_true',
+        #                          help="Set value to pre attack module option")
+        # setv_parser.add_argument('-post', '--post-module', dest='post_module', action='store_true',
+        #                          help="Set value to post attack module option")
+
+        argcomplete.autocomplete(setv_parser)
+
+        @with_argparser(setv_parser)
+        def do_setv(cmd_app, args):
+            try:
+                if self._cmd.selectedModule:
+                    self._cmd.selectedModule.setv(args.option, args.value)
+                    #, args.quiet,
+		    #		                  pre_module = args.pre_module,
+		    #		                  post_module = args.post_module)
+                else:
+                    print("No module was selected") #print_failure
+
+            except Exception as error:
+                print(error) #print_failure
+
+
+        return do_setv
+
+
     def do_back(self, args):
         """
         Stop interaction with selected module
@@ -539,9 +594,12 @@ class Interaction(CommandSet):
         selectedModule = self._cmd.selectedModule
         if selectedModule:
             if isinstance(selectedModule, Auxiliary):
-                output = selectedModule.options['ROUTPUT'].value
-                name = selectedModule.options['JOB_NAME'].value
-                self._cmd.manager.submit(target=selectedModule.run, args=(args.quiet,), name=name,
+                if selectedModule.exec_main_thread:
+                    selectedModule.run(quiet=args.quiet)
+                else:
+                    output = selectedModule.options['ROUTPUT'].value
+                    name = selectedModule.options['JOB_NAME'].value
+                    self._cmd.manager.submit(target=selectedModule.run, args=(args.quiet,), name=name,
                                          depends=args.depends, output=output)
             else: # selectedModule is an instance of Attack
                 print_failure(f"No run method for {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")

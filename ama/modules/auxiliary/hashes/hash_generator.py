@@ -2,7 +2,8 @@
 #
 # hash generator - hashlib
 #
-# Status:
+# State: TESTED - date: Jul 13 2021
+#
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
 import os
@@ -26,7 +27,7 @@ class HashGenerator(Auxiliary):
     DESCRIPTION = "Hash Generator"
     MNAME = "auxiliary/hashes/hash_generator"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
-    AUTHOR = [
+    AUTHORS = [
         "abjoschevaro <acheva@uni.pe>"
     ]
 
@@ -48,19 +49,20 @@ class HashGenerator(Auxiliary):
                  text: str = None):
 
         auxiliary_options = {
-            'text': Argument(text, True, "Text to generate a hash", value_type=str),
-            'hfunc': Argument(None, True, "Hash function", value_type=str),
-            'output': Argument(None, False, "Output file", value_type=str)
+            'TEXT': Argument(text, True, "Text to generate a hash", value_type=str),
+            'HFUNC': Argument(None, True, "Hash function", value_type=str),
+            'OUTPUT': Argument(None, False, "Output file", value_type=str),
+            'JOB_NAME': Argument('hashgen-%j', True, "Job name"),
+            'ROUTPUT': Argument('ama-%j.out', True, "Redirection output file")
         }
 
         init_options = {
             'mname': HashGenerator.MNAME,
-            'author': HashGenerator.AUTHOR,
+            'authors': HashGenerator.AUTHORS,
             'description': HashGenerator.DESCRIPTION,
             'fulldescription': HashGenerator.FULLDESCRIPTION,
             'references': HashGenerator.REFERENCES,
-            'auxiliary_options': auxiliary_options,
-            'slurm': None
+            'auxiliary_options': auxiliary_options
         }
 
         super().__init__(**init_options)
@@ -71,21 +73,26 @@ class HashGenerator(Auxiliary):
         """
         #import pdb; pdb.set_trace()
         try:
-            self.no_empty_required_options()
+            #self.no_empty_required_options()
 
-            print_status(f"Generating a {self.options['hfunc'].value} hash for '{self.options['text'].value}'")
+            hash_func = self.options['HFUNC'].value
+            text = self.options['TEXT'].value
 
-            hash_algorithm = hashlib.new(self.options['hfunc'].value)
-            hash_algorithm.update(bytes(self.options['text'].value, 'utf-8'))
+            # print_status
+            print(f"Generating a {hash_func} hash for '{text}'")
+
+            hash_algorithm = hashlib.new(hash_func)
+            hash_algorithm.update(bytes(text, 'utf-8'))
 
             generated_hash = hash_algorithm.hexdigest()
-            print_successful(f"Generated hash: {generated_hash}")
+            print(f"Generated hash: {generated_hash}") # print_succesful
 
-            if self.options['output'].value:
-                with open(self.options['output'].value, 'w') as output:
+            output_file = self.options['OUTPUT'].value
+            if output_file:
+                with open(output_file, 'w') as output:
                     output.write(f"{generated_hash}\n")
 
-                print_successful(f"Hash was saved to {self.options['output'].value} file")
+                print(f"Hash was saved to {output_file} file") # print_succesful
 
         except Exception as error:
-            print_failure(error)
+            print(error) # print_failure
