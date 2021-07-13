@@ -64,9 +64,9 @@ class Cerbrutus(Attack):
         attack_options = {
             "HOST": Argument(host, False, "The host to connect to - in IP or VHOST/Domain Name form"),
             "SERVICE": Argument(service, False, "The service to brute force (currently implemented 'SSH')"),
-            "USERS": Argument(users, False, "Number of cores to lunch MPI job (-1: MAXIMUM CORES)"),
+            "USERS": Argument(users, False, "Either a single user, or the path to the file of users you wish to use"),
             "PASSWORDS": Argument(passwords, False, "Either a single password, or the path to the password list you wish to use"),
-            "PORT": Argument(port, False, "Number of cores to lunch MPI job (-1: MAXIMUM CORES)", value_type=int),
+            "PORT": Argument(port, False, "The port you wish to target (only required if running on a non standard port)", value_type=int),
             "THREADS": Argument(threads, False, "Number of threads to use", value_type=int),
             "QUIET": Argument(quiet, False, "Do not print banner", value_type=bool)
         }
