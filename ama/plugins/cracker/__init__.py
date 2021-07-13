@@ -11,3 +11,5 @@ from .availables import (
     get_availables_crackers,
     get_availables_hashes_crackers
 )
+
+from .cerbrutus import Cerbrutus
