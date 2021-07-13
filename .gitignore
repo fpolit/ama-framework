@@ -12,6 +12,7 @@
 **/#*#
 **/*.slurm
 **/*.sh
+**/ama-*.out
 
 ama_framework.egg-info/*
 ama.egg-info/*
