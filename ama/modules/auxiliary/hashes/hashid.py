@@ -50,7 +50,8 @@ class HashID(Auxiliary):
             'EXTENDED': Argument(extended, True, "List all possible hash algorithms including salted passwords"),
             'HASHCAT': Argument(hashcat, True, "Show corresponding Hashcat mode in output"),
             'JOHN': Argument(john, True, "Show corresponding John hash format in output"),
-            'AOUTPUT': Argument('ama-%i', True, "Ama output file")
+            'JOB_NAME': Argument('hashid-%j', True, "Job name"),
+            'ROUTPUT': Argument('ama-%j.out', True, "Redirection output file")
         }
 
         init_options = {

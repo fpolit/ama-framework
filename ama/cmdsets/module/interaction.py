@@ -527,6 +527,9 @@ class Interaction(CommandSet):
     auxiliary_parser.add_argument('-q', '--quiet', action='store_true',
                                   help="Run quietly")
 
+    auxiliary_parser.add_argument('-d', '--depends', nargs='*', default=[],
+                                  help="Process dependency")
+
     @with_argparser(auxiliary_parser)
     def do_run(self, args):
         """
@@ -536,7 +539,10 @@ class Interaction(CommandSet):
         selectedModule = self._cmd.selectedModule
         if selectedModule:
             if isinstance(selectedModule, Auxiliary):
-                self._cmd.manager.submit(target=selectedModule.run, args=(args.quiet,))
+                output = selectedModule.options['ROUTPUT'].value
+                name = selectedModule.options['JOB_NAME'].value
+                self._cmd.manager.submit(target=selectedModule.run, args=(args.quiet,), name=name,
+                                         depends=args.depends, output=output)
             else: # selectedModule is an instance of Attack
                 print_failure(f"No run method for {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
                 if isinstance(selectedModule, Attack):

@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import List
 import time
 from queue import Queue
-
+from contextlib import redirect_stdout
 
 from ama.utils.logger import Logger
 from .process import Process, ProcessStatus
@@ -38,8 +38,26 @@ class ProcessManager:
 
     def submit(self, group=None, target=None, name=None, args=(), kwargs={}, depends:List[int] = [],
                output:Path = None):
+        #import pdb; pdb.set_trace()
         ProcessManager.SUBMITTED_ATTACKS += 1
         process_id = ProcessManager.SUBMITTED_ATTACKS
+
+        if output is None:
+            output = "ama-%j.out"
+
+        # If %j was found (increment index to avoid overwrite generated files),
+        # otherwise  simply overwirte (if exists) file
+        if output.find("%j") != -1:
+            output_path = output.replace('%j', str(process_id))
+            while os.path.exists(output_path):
+                ProcessManager.SUBMITTED_ATTACKS += 1
+                process_id = ProcessManager.SUBMITTED_ATTACKS
+                output_path = output.replace('%j', str(process_id))
+
+            output = output_path
+
+        name = name.replace('%j', str(process_id))
+
 
         if self.logger:
             self.logger.info(f"Creating process {process_id}: target={target}, name={name}, args={args}, kwargs={kwargs}, depends={depends}, output={output}")
@@ -67,7 +85,7 @@ class ProcessManager:
                 all_found = False
                 break
 
-        cp = Process(process_id, group, target, name, args, kwargs, dependency_process)
+        cp = Process(process_id, group, target, name, args, kwargs, dependency_process, output=output)
         if all_found: # all dependencies were found
             print(f"[*] Submitting process: {process_id}")
             self.pending.put(cp)
@@ -78,13 +96,21 @@ class ProcessManager:
             print(f"[-] Avoid processing cracking process {process_id}")
             if self.logger:
                 self.logger.error(f"Not all dependencies were found for {process_id} process: dependencies={depends}")
+        return process_id
 
 
     def process(self):
         while True:
             while not self.pending.empty():
                 cracking_process = self.pending.get()
-                cracking_process.start()
+                output_file = cracking_process.output
+                if output_file: # redirect output to output_file
+                    with open(output_file, 'w') as outfile:
+                        with redirect_stdout(outfile):
+                            cracking_process.start()
+                else:
+                    cracking_process.start()
+
                 self.processing.append(cracking_process)
                 if self.logger:
                     self.logger.info(f"Processing process {cracking_process.id_process}")

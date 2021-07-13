@@ -27,12 +27,13 @@ class Process(SystemProcess):
     """
     def __init__(self, id_process:int,
                  group=None, target=None, name=None, args=(), kwargs={},
-                 depends:List[ProcessStatus] = [], *, daemon=None):
+                 depends:List[ProcessStatus] = [], *, daemon=None, output=None):
         super().__init__(group, target, name, args, kwargs, daemon=daemon)
         self.id_process = id_process # relative ID
         self.submit_time = time.time()
         self.start_time = None
         self.end_time = None
+        self.output = output
         self.depends = depends
 
     def status(self):
@@ -110,13 +111,12 @@ class Process(SystemProcess):
         except Exception as error: #this process was closed
             if not quiet:
                 print(error)
-            
+
             information['pid'] = None
 
         status = None
         try:
             status = self.status()
-            
             information['status'] = status
         except Exception as error:
             if not quiet:
