@@ -35,6 +35,7 @@ from ama.modules.base import (
     Module
 )
 #from ama.utils.autocomplete import autocomplete_setv
+from ama.utils.validator import Answer
 from ama.utils.color import ColorStr
 from ama.utils.fineprint import (
     print_failure,
@@ -583,6 +584,9 @@ class Interaction(CommandSet):
 
     auxiliary_parser.add_argument('-d', '--depends', nargs='*', default=[],
                                   help="Process dependency")
+    auxiliary_parser.add_argument('-m', '--main-thread', dest='main_thread',
+                                  action='store_true',
+                                  help="Run in the main thread (Interactive process)")
 
     @with_argparser(auxiliary_parser)
     def do_run(self, args):
@@ -590,11 +594,17 @@ class Interaction(CommandSet):
         Run the selected auxiliary module
         """
         #import pdb; pdb.set_trace()
-        selectedModule = self._cmd.selectedModule
-        if selectedModule:
+        try:
+            selectedModule = self._cmd.selectedModule
+            if selectedModule is None:
+                raise Exception("No module selected")
+
             if isinstance(selectedModule, Auxiliary):
-                if selectedModule.exec_main_thread:
+                if args.main_thread:
+                    if not selectedModule.exec_main_thread:
+                        print(f"[*] Default execution of {selectedModule.MNAME} module: exec_main_thread=False")
                     selectedModule.run(quiet=args.quiet)
+
                 else:
                     output = selectedModule.options['ROUTPUT'].value
                     name = selectedModule.options['JOB_NAME'].value
@@ -604,5 +614,6 @@ class Interaction(CommandSet):
                 print_failure(f"No run method for {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
                 if isinstance(selectedModule, Attack):
                     print_status("Try with {ColorStr('attack').StyleBRIGHT} command")
-        else:
-            print_failure("No module selected")
+
+        except Exception as error:
+            print(error)

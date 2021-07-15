@@ -136,7 +136,7 @@ class Ama(Cmd):
             self.logger.info(f"Ama configuration file was read: {self.ama_config}")
 
         except Exception as error:
-            self.logger.warninig(f"Error while reading ama config file: {self.ama_config}")
+            self.logger.warning(f"Error while reading ama config file: {self.ama_config}")
             self.logger.pexcept(error)
             print_status("Using default configuration")
             self.config = {}
