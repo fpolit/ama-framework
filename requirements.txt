@@ -9,6 +9,7 @@ varname
 psutil
 argcomplete
 anytree
+cython
 
 # auxiliary module packages
 
