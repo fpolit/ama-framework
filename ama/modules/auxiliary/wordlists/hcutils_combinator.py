@@ -44,14 +44,14 @@ class HcutilsCombinator(Auxiliary):
         "https://hashcat.net/wiki/doku.php?id=hashcat_utils"
     ]
 
-    def __init__(self, wordlists=None, storage_dir:str = None, processes:int = 2):
+    def __init__(self, wordlists=None, storage_dir:str = None, processes:int = 2, inverse:bool = False):
 
         if storage_dir is None:
             storage_dir = os.getcwd()
 
         auxiliary_options = {
             'WORDLISTS': Argument(wordlists, True, "Wordlists to combine (directory or list split by commas)"),
-            'EXCLUDE': Argument(None, True, "Wordlists to exclude (split by commas)"),
+            'EXCLUDE': Argument(None, False, "Wordlists to exclude (split by commas)"),
             'INVERSE': Argument(inverse, True, "Include inverse combination"),
             'STORAGE_DIR': Argument(storage_dir, True, "Directory to store generate combinations"),
             'PROCESSES': Argument(processes, True, "Number of process to perform combinations"),

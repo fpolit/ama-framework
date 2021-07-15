@@ -50,7 +50,7 @@ class HcutilsCombinator3(Auxiliary):
 
         auxiliary_options = {
             'WORDLISTS': Argument(wordlists, True, "Wordlists to combine (directory or list split by commas)"),
-            'EXCLUDE': Argument(None, True, "Wordlists to exclude (split by commas)"),
+            'EXCLUDE': Argument(None, False, "Wordlists to exclude (split by commas)"),
             'STORAGE_DIR': Argument(storage_dir, True, "Directory to store generate combinations"),
             'PROCESSES': Argument(processes, True, "Number of process to perform combinations"),
             'JOB_NAME': Argument('combinator3-%j', True, "Job name"),

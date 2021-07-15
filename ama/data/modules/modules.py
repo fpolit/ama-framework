@@ -55,7 +55,12 @@ from ama.modules.auxiliary.wordlists import (
     CuppAlecto,
     HcutilsCombinator,
     HcutilsCombinator3,
-    HcutilsCombipow
+    HcutilsCombipow,
+    HcutilsMli2,
+    HcutilsReqExclude,
+    HcutilsReqInclude,
+    HcutilsRli,
+    HcutilsSplitlen
     #Cewl,
     #BopscrkInteractive,
     #BopscrkCombine
@@ -128,7 +133,12 @@ auxiliaryWordlistModules = {
     f"{CuppAlecto.MNAME}": CuppAlecto,
     f"{HcutilsCombinator.MNAME}": HcutilsCombinator,
     f"{HcutilsCombinator3.MNAME}": HcutilsCombinator3,
-    f"{HcutilsCombipow.MNAME}": HcutilsCombipow
+    f"{HcutilsCombipow.MNAME}": HcutilsCombipow,
+    f"{HcutilsMli2.MNAME}": HcutilsMli2,
+    f"{HcutilsReqExclude.MNAME}": HcutilsReqExclude,
+    f"{HcutilsReqInclude.MNAME}": HcutilsReqInclude,
+    f"{HcutilsRli.MNAME}": HcutilsRli,
+    f"{HcutilsSplitlen.MNAME}": HcutilsSplitlen
     #f"{Cewl.MNAME}": Cewl
     #f"{BopscrkInteractive.MNAME}": BopscrkInteractive,
     #f"{BopscrkCombine.MNAME}": BopscrkCombine,

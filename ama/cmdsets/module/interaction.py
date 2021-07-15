@@ -602,7 +602,7 @@ class Interaction(CommandSet):
             if isinstance(selectedModule, Auxiliary):
                 if args.main_thread:
                     if not selectedModule.exec_main_thread:
-                        print(f"[*] Default execution of {selectedModule.MNAME} module: exec_main_thread=False")
+                        print(f"[*] Default execution mode of {selectedModule.MNAME} module: exec_main_thread=False")
                     selectedModule.run(quiet=args.quiet)
 
                 else:
