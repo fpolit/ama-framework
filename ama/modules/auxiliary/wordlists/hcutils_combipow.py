@@ -26,7 +26,7 @@ class HcutilsCombipow(Auxiliary):
     """
     Hashcat utilities - combipow
     """
-    DESCRIPTION = "Hashcat Utility - Combinator"
+    DESCRIPTION = "Hashcat Utility - Combipow"
     MNAME = "auxiliary/wordlists/hcutils_combipow"
     MTYPE, MSUBTYPE, NAME = MNAME.split("/")
     AUTHORS = [
