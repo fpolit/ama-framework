@@ -25,7 +25,7 @@ $ pip install ama-framework
 * If you want to submit attacks in a cluster of computers, you must have configured a cluster using [Slurm](https://slurm.schedmd.com/overview.html), also you must have installed *john* with *MPI* support.
 * You only need to run `ama init` just one time, then you simply have to activate the virtual environment and run `ama`.
 
-## Usage
+## Usage (REMOVE USELESS WIKI FILES AND UPDATE quickstart)
 Visit our [wiki](https://github.com/fpolit/ama-framework/wiki), there you can find useful documentation about `ama`.  
 
 
