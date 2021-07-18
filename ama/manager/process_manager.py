@@ -6,13 +6,17 @@
 #
 # Maintainer: glozanoa <glozanoa@uni.pe>
 
+import sys
+
 import os
 import logging
 from pathlib import Path
 from typing import List
 import time
 from queue import Queue
-from contextlib import redirect_stdout
+#from contextlib import redirect_stdout
+
+from ama.utils.redirect import RedirectOutput
 
 from ama.utils.logger import Logger
 from .process import Process, ProcessStatus
@@ -85,8 +89,8 @@ class ProcessManager:
                 all_found = False
                 break
 
-        cp = Process(process_id, group, target, name, args, kwargs, dependency_process, output=output)
         if all_found: # all dependencies were found
+            cp = Process(process_id, group, target, name, args, kwargs, dependency_process, output=output)
             print(f"[*] Submitting process: {process_id}")
             self.pending.put(cp)
             if self.logger:
@@ -105,7 +109,7 @@ class ProcessManager:
         for kill_process_id in kill_processes:
             was_killed = False
             for process in self.processing:
-                if process.id_process == kill_process_id:
+                if kill_process_id == process.id_process:
                     print(f"[*] Kill process {process.id_process}")
                     process.kill()
                     process.close()
@@ -121,9 +125,9 @@ class ProcessManager:
                 cracking_process = self.pending.get()
                 output_file = cracking_process.output
                 if output_file: # redirect output to output_file
-                    with open(output_file, 'w') as outfile:
-                        with redirect_stdout(outfile):
-                            cracking_process.start()
+                    with RedirectOutput(output_file):
+                        #print(f"(process function)sys.stdout: {sys.stdout}")
+                        cracking_process.start()
                 else:
                     cracking_process.start()
 

@@ -15,12 +15,13 @@
 ## attack/hashes modules imports
 
 # john attacks imports
-# from ama.modules.attack.hashes import (
-#     JohnBenchmark,
-#     JohnWordlist,
+from ama.modules.attack.hashes import (
+    #JohnBenchmark,
+    JohnWordlist,
+    JohnMasks
+)
 #     JohnIncremental,
 #     JohnSingle,
-#     JohnMasks,
 #     #JohnCombination,
 #     #JohnHybrid,
 # )
@@ -98,11 +99,11 @@ attackModules = {
     ## attack/hash modules
     # john attacks
 
-    # f"{JohnBenchmark.MNAME}": JohnBenchmark,
-    # f"{JohnWordlist.MNAME}": JohnWordlist,
+    #f"{JohnBenchmark.MNAME}": JohnBenchmark,
+    f"{JohnWordlist.MNAME}": JohnWordlist,
     # f"{JohnIncremental.MNAME}": JohnIncremental,
     # f"{JohnSingle.MNAME}": JohnSingle,
-    # f"{JohnMasks.MNAME}": JohnMasks,
+    f"{JohnMasks.MNAME}": JohnMasks,
     # #f"{JohnCombination.MNAME}": JohnCombination,
     # #f"{JohnHybrid.MNAME}": JohnHybrid,
 

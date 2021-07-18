@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
+#
+# Mask class to validate masks in mask attacks
+#
+# Status:
+#
+# Maintainer: glozanoa <glozanoa@uni.pe>
 
 from math import ceil
 from fineprint.status import print_failure
 import string
 
-# base modules import
-from .maskExceptions import InvalidMaskError
+
+from .exceptions import InvalidMaskError
 
 
 class Mask(str):
@@ -52,7 +58,7 @@ class Mask(str):
     @staticmethod
     def is_mask(mask):
         for mask_symbol in Mask._genIterMask(mask):
-            if not mask_symbol in Mask.charset:
+            if mask_symbol not in Mask.charset:
                 return False
         return True
 

@@ -115,7 +115,7 @@ License : GPLv3
  Authors:
             """
         for author in self.authors:
-            head += f"\t{author}\n"
+            head += f"{author}\n"
 
         return head
 
@@ -134,6 +134,8 @@ License : GPLv3
         return references_msg
 
     def options2table(self, only_required=False):
+        table = ""
+
         if only_required:
             module_options = [[name, *option.get_attributes()]
                                 for name, option in self.options.items() if option.required]
@@ -141,13 +143,81 @@ License : GPLv3
             module_options = [[name, *option.get_attributes()]
                                 for name, option in self.options.items()]
 
-        return tabulate(module_options, headers=["Name", "Current Setting", "Required", "Description"])
+        module_options = tabulate(module_options, headers=["Name", "Current Setting", "Required", "Description"])
 
-    def get_required_options(self):
-        required_options = {name: option
-                            for name, option in self.options.items() if option.required}
+        helper_modules ={
+            'premodule': None,
+            'postmodule': None
+        }
 
-        return required_options
+        pre_module_options = None
+        if self.pre_module:
+            pre_module_options = self.pre_module.options2table(only_required)
+            helper_modules['premodule'] = self.pre_module.MNAME
+
+        post_module_options = None
+        if self.post_module:
+            post_module_options = self.post_module.options2table(only_required)
+            helper_modules['premodule'] = self.pre_module.MNAME
+
+
+        table = f"""
+Options {self.MNAME} module:
+
+{module_options}
+        """
+
+        if self.pre_module or self.post_module:
+            helper_modules_table = tabulate(helper_modules.items(), headers=['Type', 'Module'], )
+
+
+        if pre_module_options:
+            table += f"""
+
+Options {self.pre_module.MNAME} module:
+
+{pre_module_options}
+            """
+
+
+        if post_module_options:
+            table += f"""
+
+Options {self.post_module.MNAME} module:
+
+{post_module_options}
+            """
+
+        return table
+
+
+
+    def get_options(self, only_required:bool = False):
+        options = {
+            'module': {},
+            'pre_module': {},
+            'post_module': {}
+        }
+
+        if only_required:
+            options['module'] = {name: option
+                                 for name, option in self.options.items() if option.required}
+            if self.pre_module:
+                options['pre_module'] = {name: option
+                                         for name, option in self.pre_module.options.items() if option.required}
+
+            if self.post_module:
+                options['post_module'] = {name: option
+                                          for name, option in self.post_module.options.items() if option.required}
+        else:
+            options['module'] = self.options
+            if self.pre_module:
+                options['pre_module'] = self.pre_module.options
+
+            if self.post_module:
+                options['post_module'] = self.post_module.options
+
+        return options
 
     def has_option(self, option):
         return option in self.options

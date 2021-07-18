@@ -64,150 +64,72 @@ class Interaction(CommandSet):
 
 
 
-    bkp_parser = argparse.ArgumentParser()
-    bkp_parser.add_argument('-o', '--output',
+    bkp_parser = Cmd2ArgumentParser()
+    bkp_parser.add_argument('backup', completer=Cmd.path_complete,
                             help="Backup file")
 
     bkp_parser.add_argument('-r', '--required', action='store_true',
-                                  help="Backup only required options")
+                            help="Backup only required options")
 
-    bkp_options_type = bkp_parser.add_mutually_exclusive_group()
-    bkp_options_type.add_argument('-m', '--module', dest='only_module', action='store_true',
-                            help="Backup only module options")
+    bkp_parser.add_argument('--load', action='store_true',
+                            help="Restore backup file")
 
-    bkp_options_type.add_argument('-s', '--slurm', dest='only_slurm', action='store_true',
-                            help="Backup only slurm options")
 
-    # debugged - date: Mar 13 2021
     @with_argparser(bkp_parser)
     def do_bkp(self, args):
         """
-        Save all the commands used to set options of a module
-        """
-        #import pdb; pdb.set_trace()
-        output = None
-        try:
-            if selectedModule := self._cmd.selectedModule:
-                if args.required and args.only_module:
-                    print_status(f"Performing backup of {ColorStr(selectedModule.mname).StyleBRIGHT} require module options")
-                elif (not args.required) and args.only_module:
-                    print_status(f"Performing backup of {ColorStr(selectedModule.mname).StyleBRIGHT} module options")
-
-                elif args.required and args.only_slurm:
-                    if isinstance(selectedModule, Auxiliary):
-                        raise Exception("Auxiliary modules have not slurm options")
-                    else: # selectedModule is an Attack
-                        print_status(f"Performing backup of {ColorStr(selectedModule.mname).StyleBRIGHT} required slurm options")
-
-                elif (not args.required) and args.only_slurm:
-                    if isinstance(selectedModule, Auxiliary):
-                        raise Exception("Auxiliary modules have not slurm options")
-                    else:
-                        print_status(f"Performing backup of {ColorStr(selectedModule.mname).StyleBRIGHT} slurm options")
-
-                elif args.required and not (args.only_module or  args.only_slurm):
-                    print_status(f"Performing backup of {ColorStr(selectedModule.mname).StyleBRIGHT} required options")
-                elif not (args.required or args.only_module or  args.only_slurm):
-                    print_status(f"Performing backup of {ColorStr(selectedModule.mname).StyleBRIGHT} options")
-
-                if args.output:
-                    output = open(args.output, 'w')
-                else:
-                    output = sys.stdout
-
-                no_empty_options = selectedModule.get_no_empty_options(args.required)
-
-                only_module = args.only_module
-                only_slurm  = args.only_slurm
-
-                for name, value in no_empty_options.items():
-                    if (selectedModule.isModuleOption(name) and only_module) or \
-                       (selectedModule.isSlurmOption(name) and only_slurm) or \
-                       (not only_module and not only_slurm):
-                        bkp_cmd = f"setv {name.upper()} {value}"
-                        output.write(f"{bkp_cmd}\n")
-
-                if isinstance(selectedModule, Attack):
-                    if pre_attack_module := selectedModule.selected_pre_attack:
-                        no_empty_pre_attack_options = pre_attack_module.get_no_empty_options()
-                        for name, value in no_empty_pre_attack_options.items():
-                            if (selectedModule.isModuleOption(name) and only_module) or \
-                               (selectedModule.isSlurmOption(name) and only_slurm) or \
-                               (not only_module and not only_slurm):
-                                bkp_cmd = f"setv -pre {name.upper()} {value}"
-                                output.write(f"{bkp_cmd}\n")
-
-                    if post_attack_module := selectedModule.selected_post_attack:
-                        no_empty_post_attack_options = post_attack_module.get_no_empty_options()
-                        for name, value in no_empty_post_attack_options.items():
-                            if (selectedModule.isModuleOption(name) and only_module) or \
-                               (selectedModule.isSlurmOption(name) and only_slurm) or \
-                               (not only_module and not only_slurm):
-                                bkp_cmd = f"setv -post {name.upper()} {value}"
-                                output.write(f"{bkp_cmd}\n")
-
-            else:
-                raise Exception("No module selected")
-
-        except Exception as error:
-            print_failure(error)
-
-        finally:
-            if args.output:
-                print_successful(f"Backup saved to {ColorStr(args.output).StyleBRIGHT} file")
-                output.close()
-
-
-    read_parser = argparse.ArgumentParser()
-    read_parser.add_argument('backup',
-                             help="Backup file to read")
-    @with_argparser(read_parser)
-    def do_read(self, args):
-        """
-        Read a backup file and set options of a module
+        Perform a backup of the module options to enable restore them
         """
         #import pdb; pdb.set_trace()
         try:
-            selectedModule = self._cmd.selectedModule
+            selected_module = self._cmd.selectedModule
+            if selected_module is None:
+                raise Exception("No module was selected")
 
-            if not selectedModule:
-                raise Exception("No module selected")
 
-            backup_file = Path(args.backup)
-            permission = [os.R_OK]
-            Path.access(permission, backup_file)
-
-            print_status(f"Reading {ColorStr(backup_file).StyleBRIGHT} backup file and setting {ColorStr(selectedModule.MNAME).StyleBRIGHT} options")
-
-            with open(backup_file, 'r') as backup:
-                while setv_cmd := backup.readline():
-                    setv_cmd = setv_cmd.rstrip()
-                    split_setv_cmd = setv_cmd.split(' ')
-
-                    if len(split_setv_cmd) == 4: # this options is of a pre/post attack module
-                        setv, helper, option, value = split_setv_cmd
-                        if helper in ["-pre", "--preattack"]:
-                            if isinstance(selectedModule, Attack):
-                                selectedModule.setv(option, value, pre_attack=True)
+            if args.load:
+                with open(args.backup, 'r') as backup:
+                    for line in backup:
+                        backup_line = line.split()
+                        if len(backup_line) == 3: #module option
+                            cmd, name, value = backup_line
+                            selected_module.setv(name, value)
+                        elif len(backup_line) == 4:
+                            cmd, flag, name, value = backup_line
+                            if flag in ['-pre', '--pre-module']:
+                                selected_module.setv(name, value, pre_module=True)
+                            elif flag in ['-post', '--post-module']:
+                                selected_module.setv(name, value, post_module=True)
                             else:
-                                print_failure(f"Unable to run {setv_cmd} command. Auxiliary modules have not PreAttack modules")
-
-                        elif helper in ["-post", "--postattack"]:
-                            if isinstance(selectedModule, Attack):
-                                selectedModule.setv(option, value, post_attack=True)
-                            else:
-                                print_failure(f"Unable to run {setv_cmd} command. Auxiliary modules have not PostAttack modules")
+                                print(f"Invalid flag for setv: {flag}")
                         else:
-                            print_failure("Unknown helper module")
+                            raise Exception(f"Invalid size of setv command: {backup_line}")
+            else:
+                options = selected_module.get_options(only_required=args.required)
 
-                    elif len(split_setv_cmd) == 3: # this options is of the main module
-                        setv, option, value = split_setv_cmd
-                        selectedModule.setv(option, value)
-                    else:
-                        print_failure(f"Invalid command : {setv_cmd}")
+                with open(args.backup, 'w') as output:
+                    print("[*] Backup module options")
+                    module_options = options.get('module', {})
+                    for name, option in module_options.items():
+                        if option.value is not None:
+                            output.write(f'setv {name} {option.value}\n')
+
+                    print("[*] Backup pre-module options")
+                    pre_module_options = options.get('pre_module', {})
+                    for name, option in pre_module_options.items():
+                        if option.value is not None:
+                            output.write(f'setv --pre-module {name} {option.value}\n')
+
+                    print("[*] Backup post-module options")
+                    post_module_options = options.get('post_module', {})
+                    for name, option in post_module_options.items():
+                        if option.value is not None:
+                            output.write(f'setv --post-module {name} {option.value}\n')
+
 
         except Exception as error:
-            print_failure(error)
+            print(error)
+
 
     use_parser = argparse.ArgumentParser()
     use_parser.add_argument('module', help="ama module")
@@ -315,7 +237,7 @@ class Interaction(CommandSet):
                         subtype_name = ColorStr.ForeRED(f"{moduleSubtype}/{moduleName}")
                         self._cmd.prompt = f"ama {moduleType}({subtype_name}) > "
 						#import pdb;pdb.set_trace()
-                        #self._cmd.do_setv = self._module_setv(self._cmd, self._cmd.selectedModule)
+                        #self._cmd.do_setv = self._module_setv(self._cmd.selectedModule)
                         break
 
                 if not selected:
@@ -327,106 +249,106 @@ class Interaction(CommandSet):
         except Exception as error:
             print(error)
 
-    unset_parser = argparse.ArgumentParser()
-    unset_parser.add_argument('option', help='Option to unset value')
+    # unset_parser = argparse.ArgumentParser()
+    # unset_parser.add_argument('option', help='Option to unset value')
 
-    @with_argparser(unset_parser)
-    def do_unset(self, args):
-        """
-        Unset value of an option
-        """
-        selectedModule = self._cmd.selectedModule
+    # @with_argparser(unset_parser)
+    # def do_unset(self, args):
+    #     """
+    #     Unset value of an option
+    #     """
+    #     selectedModule = self._cmd.selectedModule
 
-        if selectedModule:
-            option = args.option.lower()
-            if selectedModule.isOption(option):
-                if selectedModule.isModuleOption(option):
-                    selectedModule.options[option].value = None
-                else: #is a valid slurm option
-                    selectedModule.slurm.options[option].value = None
-                    setattr(selectedModule.slurm, option, None)
-            else:
-                print_failure(f"No {option.upper()} option in {selectedModule.mname} module")
+    #     if selectedModule:
+    #         option = args.option.lower()
+    #         if selectedModule.isOption(option):
+    #             if selectedModule.isModuleOption(option):
+    #                 selectedModule.options[option].value = None
+    #             else: #is a valid slurm option
+    #                 selectedModule.slurm.options[option].value = None
+    #                 setattr(selectedModule.slurm, option, None)
+    #         else:
+    #             print_failure(f"No {option.upper()} option in {selectedModule.mname} module")
 
-        else:
-            print_failure("No module selected")
-
-
-    unsetg_parser = argparse.ArgumentParser()
-    unsetg_parser.add_argument('option', help='Option to unset value')
-    @with_argparser(unsetg_parser)
-    def do_unsetg(self, args):
-        """
-        Unset global value of an option
-        """
-        selectedModule = self._cmd.selectedModule
-
-        if selectedModule:
-            option = args.option.lower()
-            if selectedModule.isOption(option):
-                if selectedModule.isModuleOption(option):
-                    selectedModule.options[option].value = None
-                else: #is a valid slurm option
-                    selectedModule.slurm.options[option].value = None
-                    setattr(selectedModule.slurm, option, None)
-
-                #delete option:value from global values
-                if option in self._cmd.gvalues:
-                    del self._cmd.gvalues[option]
-                else:
-                    print_status("{option.upper()} value is not a global value")
-
-            else:
-                print_failure(f"No {option.upper()} option in {selectedModule.mname} module")
-
-        else:
-            print_failure("No module selected")
+    #     else:
+    #         print_failure("No module selected")
 
 
-    setvg_parser = argparse.ArgumentParser()
-    setvg_parser.add_argument("option", help="Option to set value")
-    setvg_parser.add_argument("value", help="Value of option")
+    # unsetg_parser = argparse.ArgumentParser()
+    # unsetg_parser.add_argument('option', help='Option to unset value')
+    # @with_argparser(unsetg_parser)
+    # def do_unsetg(self, args):
+    #     """
+    #     Unset global value of an option
+    #     """
+    #     selectedModule = self._cmd.selectedModule
 
-    @with_argparser(setvg_parser)
-    def do_setvg(self, args):
-        """
-        Set globally a value to an valid option
-        """
-        #import pdb; pdb.set_trace()
+    #     if selectedModule:
+    #         option = args.option.lower()
+    #         if selectedModule.isOption(option):
+    #             if selectedModule.isModuleOption(option):
+    #                 selectedModule.options[option].value = None
+    #             else: #is a valid slurm option
+    #                 selectedModule.slurm.options[option].value = None
+    #                 setattr(selectedModule.slurm, option, None)
 
-        selectedModule = self._cmd.selectedModule
+    #             #delete option:value from global values
+    #             if option in self._cmd.gvalues:
+    #                 del self._cmd.gvalues[option]
+    #             else:
+    #                 print_status("{option.upper()} value is not a global value")
 
-        if selectedModule:
-            option = args.option.lower()
-            value = args.value
+    #         else:
+    #             print_failure(f"No {option.upper()} option in {selectedModule.mname} module")
 
-            try:
-                value = int(value)
+    #     else:
+    #         print_failure("No module selected")
 
-            except ValueError: # value is a string
-                if value in ["True", "False"]:
-                    if value == "True":
-                        value = True
-                    else:
-                        value = False
 
-            if selectedModule.isOption(option):
-                if selectedModule.isModuleOption(option): #option is a valid module option
-                    selectedModule.options[option].value = value
+    # setvg_parser = argparse.ArgumentParser()
+    # setvg_parser.add_argument("option", help="Option to set value")
+    # setvg_parser.add_argument("value", help="Value of option")
 
-                else: #option is a valid slurm option
-                    argument = selectedModule.slurm.options.get(option)
-                    argument.value = value
-                    selectedModule.slurm.options[option] = argument
-                    setattr(selectedModule.slurm, option, value)
+    # @with_argparser(setvg_parser)
+    # def do_setvg(self, args):
+    #     """
+    #     Set globally a value to an valid option
+    #     """
+    #     #import pdb; pdb.set_trace()
 
-                self._cmd.selectedModule = selectedModule
-                self._cmd.gvalues[option] = value
-            else:
-                print_failure(f"No {option.upper()} option in {selectedModule.mname} module")
+    #     selectedModule = self._cmd.selectedModule
 
-        else:
-            print_failure("No module selected")
+    #     if selectedModule:
+    #         option = args.option.lower()
+    #         value = args.value
+
+    #         try:
+    #             value = int(value)
+
+    #         except ValueError: # value is a string
+    #             if value in ["True", "False"]:
+    #                 if value == "True":
+    #                     value = True
+    #                 else:
+    #                     value = False
+
+    #         if selectedModule.isOption(option):
+    #             if selectedModule.isModuleOption(option): #option is a valid module option
+    #                 selectedModule.options[option].value = value
+
+    #             else: #option is a valid slurm option
+    #                 argument = selectedModule.slurm.options.get(option)
+    #                 argument.value = value
+    #                 selectedModule.slurm.options[option] = argument
+    #                 setattr(selectedModule.slurm, option, value)
+
+    #             self._cmd.selectedModule = selectedModule
+    #             self._cmd.gvalues[option] = value
+    #         else:
+    #             print_failure(f"No {option.upper()} option in {selectedModule.mname} module")
+
+    #     else:
+    #         print_failure("No module selected")
 
 
     #setv_parser = argparse.ArgumentParser()
@@ -452,65 +374,71 @@ class Interaction(CommandSet):
 
         try:
             if self._cmd.selectedModule:
-                self._cmd.selectedModule.setv(args.option, args.value, args.quiet,
-				              pre_module = args.pre_module,
-				              post_module = args.post_module)
+                if isinstance(self._cmd.selectedModule, Auxiliary):
+                    self._cmd.selectedModule.setv(args.option, args.value, args.quiet,
+				                  pre_module = args.pre_module,
+				                  post_module = args.post_module)
+                else:
+                    self._cmd.selectedModule.setv(args.option, args.value, args.quiet,
+				                  pre_attack = args.pre_module,
+				                  post_attack = args.post_module)
             else:
-                print_failure("No module was selected",)
+                print("No module was selected") # failure
 
         except Exception as error:
-            print_failure(error)
+            print(error) # failure
 
-    # def _module_setv(self, cmd_app, selected_module: Module):
+    def _module_setv(self, selected_module: Module):
 
-    #     setv_parser = ArgumentParser()
-    #     module_options = selected_module.options.keys()
-    #     setv_parser.add_argument("option", choices=module_options,
-    #                              help="Option to set value")
+        setv_parser = Cmd2ArgumentParser()
+        module_options = selected_module.options.keys()
+        setv_parser.add_argument("option", choices=module_options,
+                                 help="Option to set value")
 
-    #     def choice_values(prefix, parsed_args):
-    #         choices = selected_module.options[parsed_args.option].choices
-    #         if choices:
-    #             return (choice for choice in choices if choice.startwith(prefix))
-    #         else:
-    #             return []
+        # def choice_values(prefix, parsed_args):
+        #     choices = selected_module.options[parsed_args.option].choices
+        #     if choices:
+        #         return (choice for choice in choices if choice.startwith(prefix))
+        #     else:
+        #         return []
 
-    #     setv_parser.add_argument("value", help="Value of option").completer = choice_values
+        #setv_parser.add_argument("value", completer=Cmd.path_complete, help="Value of option")#.completer = choice_values
 
-    #     # #parsed_args = setv_parser.parse_known_args()
-    #     # #print(f"Parsed args: {parsed_args}")
-    #     # selected_option = selected_module.options[parsed_args.option]
+        # #parsed_args = setv_parser.parse_known_args()
+        # #print(f"Parsed args: {parsed_args}")
+        # selected_option = selected_module.options[parsed_args.option]
 
-    #     # if selected_option.choices:
-    #     #     setv_parser.add_argument("value", choices=selected_module.choices,
-    #     #                              help="Value of option")
-    #     # else:
-    #     #     setv_parser.add_argument("value",  completer=Cmd.path_complete, help="Value of option")
+        # if selected_option.choices:
+        #     setv_parser.add_argument("value", choices=selected_module.choices,
+        #                              help="Value of option")
+        # else:
 
-    #     # setv_parser.add_argument('-q', '--quiet', action='store_true', help="Set value quietly")
-    #     # setv_parser.add_argument('-pre', '--pre-module', dest='pre_module', action='store_true',
-    #     #                          help="Set value to pre attack module option")
-    #     # setv_parser.add_argument('-post', '--post-module', dest='post_module', action='store_true',
-    #     #                          help="Set value to post attack module option")
+        setv_parser.add_argument("value",  completer=Cmd.path_complete, help="Value of option")
 
-    #     argcomplete.autocomplete(setv_parser)
+        setv_parser.add_argument('-q', '--quiet', action='store_true', help="Set value quietly")
+        setv_parser.add_argument('-pre', '--pre-module', dest='pre_module', action='store_true',
+                                 help="Set value to pre attack module option")
+        setv_parser.add_argument('-post', '--post-module', dest='post_module', action='store_true',
+                                 help="Set value to post attack module option")
 
-    #     @with_argparser(setv_parser)
-    #     def do_setv(cmd_app, args):
-    #         try:
-    #             if self._cmd.selectedModule:
-    #                 self._cmd.selectedModule.setv(args.option, args.value)
-    #                 #, args.quiet,
-    #     	    #		                  pre_module = args.pre_module,
-    #     	    #		                  post_module = args.post_module)
-    #             else:
-    #                 print("No module was selected") #print_failure
+        #argcomplete.autocomplete(setv_parser)
 
-    #         except Exception as error:
-    #             print(error) #print_failure
+        @with_argparser(setv_parser)
+        def do_setv(cmd2_app:Cmd, args):
+            try:
+                if cmd2_app.selectedModule:
+                    cmd2_app.selectedModule.setv(args.option, args.value,
+                                                  args.quiet,
+        	                                  pre_module = args.pre_module,
+        			                  post_module = args.post_module)
+                else:
+                    print("No module was selected") #print_failure
+
+            except Exception as error:
+                print(error) #print_failure
 
 
-    #     return do_setv
+        return do_setv
 
 
     def do_back(self, args):
@@ -519,63 +447,80 @@ class Interaction(CommandSet):
         """
         self._cmd.selectedModule = None
         self._cmd.prompt = "ama > "
+        #self._cmd.do_setv = do_setv
 
-    # attack_parser = argparse.ArgumentParser()
-    # attack_parser.add_argument('-l', '--local', action='store_true',
-    #                            help="Try to perform the attack locally")
-    # attack_parser.add_argument('-q', '--quiet', action='store_true',
-    #                            help="Run quietly")
+    attack_parser = argparse.ArgumentParser()
+    attack_parser.add_argument('-d', '--depends', nargs='*', default=[],
+                               help="Process dependency")
+    attack_parser.add_argument('-m', '--main-thread', dest='main_thread',
+                               action='store_true',
+                               help="Run in the main thread (Interactive process)")
+    attack_parser.add_argument('-q', '--quiet', action='store_true',
+                               help="Run quietly")
 
-    # #debugged - date: feb 27 2021
-    # @with_argparser(attack_parser)
-    # def do_attack(self, args):
-    #     """
-    #     Perform an attack with the selected module
-    #     """
+    #debugged - date: feb 27 2021
+    @with_argparser(attack_parser)
+    def do_attack(self, args):
+        """
+        Perform an attack with the selected attack module
+        """
+        try:
+            #import pdb; pdb.set_trace()
+            selectedModule = self._cmd.selectedModule
+            if selectedModule is None:
+                raise Exception("No module selected")
 
-    #     if selectedModule := self._cmd.selectedModule:
-    #         if isinstance(selectedModule, Attack):
-    #             pre_attack_output = None
-    #             if pre_attack := selectedModule.selected_pre_attack:
-    #                 print_status(f"Running {ColorStr(pre_attack.mname).StyleBRIGHT} preattack module")
-    #                 pre_attack_output = pre_attack.run(quiet=args.quiet)
+            if isinstance(selectedModule, Attack):
+                if args.main_thread:
+                    if not selectedModule.exec_main_thread:
+                        print(f"[*] Default execution mode of {selectedModule.MNAME} module: exec_main_thread=False")
 
-    #             print_status(f"Running {ColorStr(selectedModule.mname).StyleBRIGHT} attack module")
+                    pre_module_output = None
+                    if selectedModule.pre_module:
+                        pre_module_output = selectedModule.pre_module.run(quiet=args.quiet)
 
-    #             cracker_main_exec = None
-    #             if self._cmd.config:
-    #                 if selectedModule.CRACKER == John.MAINNAME:
-    #                     cracker_main_exec = self._cmd.config['john']
+                    attack_output = selectedModule.attack(quiet=args.quiet, pre_attack_output = pre_module_output)
 
-    #                 elif selectedModule.CRACKER == Hashcat.MAINNAME:
-    #                     cracker_main_exec = self._cmd.config['hashcat']
+                    if selectedModule.post_module:
+                        selectedModule.post_module.run(quiet=args.quiet)
 
-    #             #import pdb;pdb.set_trace()
-    #             db_status = True if self._cmd.db_conn else False
-
-    #             db_credential_file = None
-    #             if self._cmd.config:
-    #                 db_credential_file = self._cmd.config['db_credentials_file']
-
-    #             attack_output = selectedModule.attack(
-    #                 local = args.local,
-    #                 pre_attack_output = pre_attack_output,
-    #                 db_status = db_status,
-    #                 workspace = self._cmd.workspace,
-    #                 db_credential_file = db_credential_file,
-    #                 cracker_main_exec=cracker_main_exec,
-    #                 slurm_conf = self._cmd.slurm_config
-    #             )
+                else:
+                    pre_attack_id = None
+                    if selectedModule.pre_module:
+                        pre_attack_output = selectedModule.pre_module.options['ROUTPUT'].value
+                        pre_attack_name = selectedModule.pre_module.options['JOB_NAME'].value
+                        pre_attack_id = self._cmd.manager.submit(target=selectedModule.pre_module.run,
+                                                                 args=(args.quiet,), name=pre_attack_name,
+                                                                 depends=args.depends, output=pre_attack_output)
 
 
-    #             if post_attack := selectedModule.selected_post_attack:
-    #                 print_status(f"Running {ColorStr(post_attack.mname).StyleBRIGHT} posattack module")
-    #                 post_attack.run(quiet=args.quiet, attack_output=attack_output)
+                    attack_depends = []
+                    if pre_attack_id:
+                        attack_depends += [pre_attack_id]
 
-    #         else: # selectedModule is an instance of Auxiliary
-    #             print_failure(f"No attack method for {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
-    #     else:
-    #         print_failure("No module selected")
+                    attack_output = selectedModule.options['ROUTPUT'].value
+                    attack_name = selectedModule.options['JOB_NAME'].value
+                    attack_id = self._cmd.manager.submit(target=selectedModule.attack,
+                                                         args=(args.quiet,), name=attack_name,
+                                                         depends=attack_depends, output=attack_output)
+
+
+                    if selectedModule.post_module:
+                        post_attack_output = selectedModule.post_module.options['ROUTPUT'].value
+                        post_attack_name = selectedModule.post_module.options['JOB_NAME'].value
+                        self._cmd.manager.submit(target=selectedModule.post_module.run,
+                                                 args=(args.quiet,), name=post_attack_name,
+                                                 depends=[attack_id], output=post_attack_output)
+
+
+            else: # selectedModule is an instance of Attack
+                print_failure(f"No attack method for {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
+                if isinstance(selectedModule, Auxiliary):
+                    print_status(f"Try with {ColorStr('run').StyleBRIGHT} command")
+
+        except Exception as error:
+            print(error)
+
 
     # #debugged - data: feb 27 2021
     auxiliary_parser = argparse.ArgumentParser()
@@ -613,7 +558,7 @@ class Interaction(CommandSet):
             else: # selectedModule is an instance of Attack
                 print_failure(f"No run method for {ColorStr(selectedModule.MNAME).StyleBRIGHT} module")
                 if isinstance(selectedModule, Attack):
-                    print_status("Try with {ColorStr('attack').StyleBRIGHT} command")
+                    print_status(f"Try with {ColorStr('attack').StyleBRIGHT} command")
 
         except Exception as error:
             print(error)

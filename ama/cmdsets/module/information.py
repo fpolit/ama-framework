@@ -57,7 +57,7 @@ class Information(CommandSet):
 
         if module is None:
             if selectedModule := self._cmd.selectedModule:
-                print(selectedModule.info())
+                print(selectedModule.get_info())
                 #cmd2.Cmd.poutput(moduleInstance.infoMsg())
             else:
                 print_failure("No module selected")
@@ -68,14 +68,14 @@ class Information(CommandSet):
                 for moduleId, moduleClass in self._cmd.filteredModules:
                     if moduleId == module:
                         moduleInstance = moduleClass()
-                        print(moduleInstance.info())
+                        print(moduleInstance.get_info())
                         break
 
             except ValueError: # module is a string
                 for moduleClass in self._cmd.modules.values():
                     if module == moduleClass.MNAME:
                         moduleInstance = moduleClass()
-                        print(moduleInstance.info())
+                        print(moduleInstance.get_info())
                         break
 
 
@@ -84,11 +84,6 @@ class Information(CommandSet):
                              help="ama module")
     options_parser.add_argument('-r', '--required', action='store_true',
                                 help="Only show required options")
-    # options_parser.add_argument('-s', '--slurm', action='store_true', dest='only_slurm',
-    #                             help="Show only slurm options")
-    # options_parser.add_argument('-m', '--module', action='store_true', dest='only_module',
-    #                             help="Show only module options")
-
 
     @with_argparser(options_parser)
     def do_options(self, args):
