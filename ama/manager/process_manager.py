@@ -104,7 +104,7 @@ class ProcessManager:
 
 
     def kill(self, kill_processes:List[int]):
-        #import pdb; pdb.set_trace()
+        import pdb; pdb.set_trace()
 
         for kill_process_id in kill_processes:
             was_killed = False

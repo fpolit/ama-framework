@@ -18,11 +18,11 @@
 from ama.modules.attack.hashes import (
     #JohnBenchmark,
     JohnWordlist,
-    JohnMasks
+    JohnMasks,
+    JohnCombination
 )
 #     JohnIncremental,
 #     JohnSingle,
-#     #JohnCombination,
 #     #JohnHybrid,
 # )
 
@@ -104,7 +104,7 @@ attackModules = {
     # f"{JohnIncremental.MNAME}": JohnIncremental,
     # f"{JohnSingle.MNAME}": JohnSingle,
     f"{JohnMasks.MNAME}": JohnMasks,
-    # #f"{JohnCombination.MNAME}": JohnCombination,
+    f"{JohnCombination.MNAME}": JohnCombination,
     # #f"{JohnHybrid.MNAME}": JohnHybrid,
 
     # # hashcat attacks

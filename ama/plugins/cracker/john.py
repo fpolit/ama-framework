@@ -90,6 +90,8 @@ class John(HashCracker):
 
     def cmd_gen(self, attack_mode:JohnAttack, **kwargs):
 
+        #import pdb; pdb.set_trace()
+
         if attack_mode == JohnAttack.WORDLIST:
             """
             kwargs = {'wordlists': [WLPATH, ...], 'htype':'HASH_TYPE', 'hashes_file':'HASHES_FILE'}
@@ -100,7 +102,7 @@ class John(HashCracker):
 
             if wordlists and htype and os.path.isfile(hashes_file):
                 # check htype
-                return [[self.main_exec, f'--format={htype}', '-w', wordlist, hashes_file] for wordlist in wordlists]
+                return [[self.main_exec, f'--format={htype}', '-w', str(wordlist), str(hashes_file)] for wordlist in wordlists]
             else:
                 raise Exception(f"Invalid options to generated attack command: kwargs={kwargs}")
 
@@ -116,7 +118,7 @@ class John(HashCracker):
 
             if htype and os.path.isfile(hashes_file):
                 # check htype
-                return [self.main_exec, "--single", f"--format={htype}", hashes_file]
+                return [self.main_exec, "--single", f"--format={htype}", str(hashes_file)]
             else:
                 raise Exception(f"Invalid options to generated attack command: kwargs={kwargs}")
 
@@ -132,7 +134,7 @@ class John(HashCracker):
                 if not Mask.is_mask(mask):
                     raise Exception(f"Invalid mask: {mask}")
 
-                return [self.main_exec, f"--mask={mask}", f"--format={htype}", hashes_file]
+                return [self.main_exec, f"--mask={mask}", f"--format={htype}", str(hashes_file)]
             else:
                 raise Exception(f"Invalid options to generated attack command: kwargs={kwargs}")
 
@@ -148,7 +150,7 @@ class John(HashCracker):
                 masks = MasksFile.get_masks(masks_file)
 
                 if masks:
-                    return [[self.main_exec, f"--mask={mask}", f"--format={htype}", hashes_file] for mask in masks]
+                    return [[self.main_exec, f"--mask={mask}", f"--format={htype}", str(hashes_file)] for mask in masks]
 
                 else:
                     raise Exception(f"Mask file {masks_file} hasn't any valid mask")
@@ -328,7 +330,6 @@ class John(HashCracker):
 
         #import pdb; pdb.set_trace()
 
-
         try:
 
             if not self.enable:
@@ -351,14 +352,6 @@ class John(HashCracker):
 
         except Exception as error:
             print(error) # failure
-
-
-    # def combination_attack(self,* , hashType, hashesFile, wordlists=[], slurm,
-    #                       combinedWordlist="combined.txt"):
-    #     # John.checkAttackArgs(_hashType=hashType,
-    #     #                      _hashFile=hashFile,
-    #     #                      _wordlist=wordlists)
-
 
     #     # POOR PERFORMANCE IN Combinator.wordlist (rewrite a better combinator)
     #     #Combinator.wordlist(wordlists, combinedWordlist)
